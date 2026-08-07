@@ -74,7 +74,7 @@ export const dictionary: MarketingDictionary = {
   },
   leadCapture: {
     title: 'アプリを入れる前に、もう少し知りたい方へ',
-    subtitle: 'メールアドレスをご登録いただくと、数日間にわたって四柱推命の紹介と手紙の実例、そしてご招待をお届けします。',
+    subtitle: 'メールアドレスをご登録いただくと、数日間にわたって四柱推命の紹介と手紙の実例、そしてウェルカム特典をお届けします。',
     emailPlaceholder: 'you@example.com',
     consentLabel: 'このメールを受け取る(いつでも配信停止できます)',
     submitButton: '送ってもらう',

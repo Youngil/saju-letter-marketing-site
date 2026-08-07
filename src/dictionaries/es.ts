@@ -6,7 +6,7 @@ export const dictionary: MarketingDictionary = {
   languageSwitcherLabel: 'Español',
   nav: { home: 'Inicio', blog: 'Blog', compare: 'Zodiaco vs. Saju' },
   hero: {
-    title: 'Como la astrología, pero calculado con el momento exacto en que naciste',
+    title: 'Como la astrología, pero a partir del momento exacto en que naciste',
     subtitle:
       'El saju es un sistema coreano centenario que funciona de forma parecida a la astrología occidental — pero en lugar de usar solo tu signo solar, utiliza tu fecha y hora de nacimiento completas para crear una carta mucho más detallada. Prueba una lectura gratuita de una línea abajo.',
     ctaDemo: 'Probar la demo gratis',

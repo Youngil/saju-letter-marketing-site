@@ -11,7 +11,7 @@ export const dictionary: MarketingDictionary = {
   languageSwitcherLabel: '한국어',
   nav: { home: '홈', blog: '블로그', compare: '별자리 vs 사주' },
   hero: {
-    title: '태어난 순간 그대로, 매일 아침 도착하는 짧은 편지',
+    title: '태어난 순간을 담아, 매일 아침 도착하는 짧은 편지',
     subtitle: '사주편지는 생년월일시를 바탕으로 매일 아침 짧고 감성적인 한 통의 편지를 보내드립니다. 아래에서 무료로 한 줄 미리보기를 체험해보세요.',
     ctaDemo: '무료로 체험하기',
   },
@@ -26,7 +26,7 @@ export const dictionary: MarketingDictionary = {
     zodiacTags: ['태어난 달', '12개 중 1개', '태양 기준'],
     sajuHeadline: '시간을 보는 한국 전통 시스템',
     sajuDescription: '년·월·일·시를 모두 조합해서, 훨씬 더 구체적인 나만의 출발점을 만들어요.',
-    sajuTags: ['정확한 태어난 시각', '네 개의 기둥', '나만의 고유한 조합'],
+    sajuTags: ['정확한 출생 시각', '네 개의 기둥', '나만의 고유한 조합'],
     sajuCombineCaption: '네 기둥이 합쳐져 만드는 의미',
     compareCategoryLabel: '구분',
     compareRows: [
@@ -98,7 +98,7 @@ export const dictionary: MarketingDictionary = {
     notFound: '해당 구독 정보를 찾을 수 없어요.',
   },
   footer: {
-    privacyNote: '생년월일시는 브라우저 밖으로 전송되지 않아요 — 계산된 결과만 결과 생성을 위해 전송됩니다.',
+    privacyNote: '생년월일시는 브라우저 밖으로 전송되지 않아요 — 계산된 결과만 전송됩니다.',
     googlePlayCta: 'Google Play에서 다운로드',
   },
 };
