@@ -73,21 +73,21 @@ export function DemoForm({ language, dict }: { language: MarketingLanguage; dict
 
   if (teaser) {
     return (
-      <div className="flex flex-col gap-4 rounded-2xl border border-accent/30 bg-accent/5 p-6">
-        <h3 className="text-sm font-semibold text-accent">{dict.resultTitle}</h3>
+      <div className="card-surface flex flex-col gap-4 rounded-2xl border border-accent/20 p-6 sm:p-7">
+        <h3 className="text-xs font-semibold tracking-wide text-accent uppercase">{dict.resultTitle}</h3>
         <p className="text-lg leading-relaxed">{teaser}</p>
         <a
           href={process.env.NEXT_PUBLIC_GOOGLE_PLAY_URL}
           target="_blank"
           rel="noopener noreferrer"
-          className="mt-2 rounded-full bg-accent px-6 py-3 text-center font-medium text-white transition hover:opacity-90"
+          className="mt-2 rounded-full bg-accent px-6 py-3 text-center font-medium text-white shadow-lg shadow-accent/25 transition hover:-translate-y-0.5 hover:shadow-xl hover:shadow-accent/30"
         >
           {dict.resultCta}
         </a>
         <button
           type="button"
           onClick={() => setTeaser(null)}
-          className="text-sm text-foreground/60 underline underline-offset-2"
+          className="text-sm text-foreground/60 underline underline-offset-2 hover:text-foreground"
         >
           {dict.tryAgain}
         </button>
@@ -96,9 +96,9 @@ export function DemoForm({ language, dict }: { language: MarketingLanguage; dict
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-5 rounded-2xl border border-foreground/10 bg-white/60 p-6">
+    <form onSubmit={handleSubmit} className="card-surface flex flex-col gap-5 rounded-2xl border border-foreground/10 p-6 sm:p-7">
       <div>
-        <span className="mb-1 block text-sm font-medium">{dict.dateLabel}</span>
+        <span className="mb-1.5 block text-sm font-medium">{dict.dateLabel}</span>
         <div className="flex gap-2">
           <input
             type="number"
@@ -106,7 +106,7 @@ export function DemoForm({ language, dict }: { language: MarketingLanguage; dict
             placeholder={dict.yearLabel}
             value={year}
             onChange={(e) => setYear(e.target.value)}
-            className="w-24 rounded-lg border border-foreground/20 bg-white px-3 py-2"
+            className="w-24 rounded-lg border border-foreground/15 bg-white px-3 py-2.5 transition focus-visible:border-accent"
           />
           <input
             type="number"
@@ -116,7 +116,7 @@ export function DemoForm({ language, dict }: { language: MarketingLanguage; dict
             onChange={(e) => setMonth(e.target.value)}
             min={1}
             max={12}
-            className="w-20 rounded-lg border border-foreground/20 bg-white px-3 py-2"
+            className="w-20 rounded-lg border border-foreground/15 bg-white px-3 py-2.5 transition focus-visible:border-accent"
           />
           <input
             type="number"
@@ -126,14 +126,14 @@ export function DemoForm({ language, dict }: { language: MarketingLanguage; dict
             onChange={(e) => setDay(e.target.value)}
             min={1}
             max={31}
-            className="w-20 rounded-lg border border-foreground/20 bg-white px-3 py-2"
+            className="w-20 rounded-lg border border-foreground/15 bg-white px-3 py-2.5 transition focus-visible:border-accent"
           />
         </div>
       </div>
 
       <div>
         <label className="flex items-center gap-2 text-sm text-foreground/70">
-          <input type="checkbox" checked={!timeKnown} onChange={(e) => setTimeKnown(!e.target.checked)} />
+          <input type="checkbox" checked={!timeKnown} onChange={(e) => setTimeKnown(!e.target.checked)} className="accent-accent" />
           {dict.timeUnknownLabel}
         </label>
         {timeKnown && (
@@ -146,7 +146,7 @@ export function DemoForm({ language, dict }: { language: MarketingLanguage; dict
               onChange={(e) => setHour(e.target.value)}
               min={0}
               max={23}
-              className="w-20 rounded-lg border border-foreground/20 bg-white px-3 py-2"
+              className="w-20 rounded-lg border border-foreground/15 bg-white px-3 py-2.5 transition focus-visible:border-accent"
             />
             <input
               type="number"
@@ -156,7 +156,7 @@ export function DemoForm({ language, dict }: { language: MarketingLanguage; dict
               onChange={(e) => setMinute(e.target.value)}
               min={0}
               max={59}
-              className="w-20 rounded-lg border border-foreground/20 bg-white px-3 py-2"
+              className="w-20 rounded-lg border border-foreground/15 bg-white px-3 py-2.5 transition focus-visible:border-accent"
             />
           </div>
         )}
@@ -169,7 +169,7 @@ export function DemoForm({ language, dict }: { language: MarketingLanguage; dict
       <button
         type="submit"
         disabled={isSubmitting}
-        className="rounded-full bg-accent px-6 py-3 font-medium text-white transition hover:opacity-90 disabled:opacity-50"
+        className="rounded-full bg-accent px-6 py-3 font-medium text-white shadow-lg shadow-accent/25 transition hover:-translate-y-0.5 hover:shadow-xl hover:shadow-accent/30 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
       >
         {isSubmitting ? dict.submitting : dict.submitButton}
       </button>

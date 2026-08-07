@@ -50,14 +50,14 @@ export function LeadCaptureForm({ language, dict }: { language: MarketingLanguag
 
   if (success) {
     return (
-      <div className="rounded-2xl border border-accent/30 bg-accent/5 p-6 text-center">
+      <div className="card-surface rounded-2xl border border-accent/20 p-6 text-center sm:p-7">
         <p className="font-medium text-accent">{dict.success}</p>
       </div>
     );
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-3 rounded-2xl border border-foreground/10 bg-white/60 p-6">
+    <form onSubmit={handleSubmit} className="card-surface flex flex-col gap-3 rounded-2xl border border-accent-warm/20 p-6 sm:p-7">
       <h3 className="text-lg font-semibold">{dict.title}</h3>
       <p className="text-sm text-foreground/70">{dict.subtitle}</p>
       <input
@@ -65,17 +65,17 @@ export function LeadCaptureForm({ language, dict }: { language: MarketingLanguag
         value={email}
         onChange={(e) => setEmail(e.target.value)}
         placeholder={dict.emailPlaceholder}
-        className="rounded-lg border border-foreground/20 bg-white px-3 py-2"
+        className="rounded-lg border border-foreground/15 bg-white px-3 py-2.5 transition focus-visible:border-accent"
       />
       <label className="flex items-start gap-2 text-sm text-foreground/70">
-        <input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} className="mt-1" />
+        <input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} className="mt-1 accent-accent" />
         <span>{dict.consentLabel}</span>
       </label>
       {error && <p className="text-sm text-red-600">{error}</p>}
       <button
         type="submit"
         disabled={isSubmitting}
-        className="rounded-full bg-accent px-6 py-3 font-medium text-white transition hover:opacity-90 disabled:opacity-50"
+        className="rounded-full bg-accent px-6 py-3 font-medium text-white shadow-lg shadow-accent/25 transition hover:-translate-y-0.5 hover:shadow-xl hover:shadow-accent/30 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
       >
         {isSubmitting ? dict.submitting : dict.submitButton}
       </button>

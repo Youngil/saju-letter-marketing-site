@@ -14,7 +14,7 @@ export function middleware(request: NextRequest) {
   if (hasLangPrefix) return NextResponse.next();
 
   const acceptLanguage = (request.headers.get('accept-language') ?? '').toLowerCase();
-  const detected = MARKETING_LANGUAGES.find((lang) => lang !== 'ko' && acceptLanguage.includes(lang)) ?? DEFAULT_LANGUAGE;
+  const detected = MARKETING_LANGUAGES.find((lang) => acceptLanguage.includes(lang)) ?? DEFAULT_LANGUAGE;
 
   const url = request.nextUrl.clone();
   url.pathname = `/${detected}${pathname === '/' ? '' : pathname}`;

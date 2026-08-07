@@ -41,9 +41,10 @@ export default async function LangLayout({
   return (
     <html lang={lang} className="h-full antialiased">
       <body className="min-h-full flex flex-col bg-background text-foreground">
-        <header className="border-b border-foreground/10">
+        <header className="sticky top-0 z-10 border-b border-foreground/10 bg-background/80 backdrop-blur-md">
           <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-4">
-            <Link href={`/${lang}`} className="text-lg font-semibold">
+            <Link href={`/${lang}`} className="flex items-center gap-2 text-lg font-semibold">
+              <span className="flex h-7 w-7 items-center justify-center rounded-full bg-accent text-sm text-white">四</span>
               {dict.brand}
             </Link>
             <nav className="flex items-center gap-5">
@@ -59,7 +60,8 @@ export default async function LangLayout({
         </header>
         <main className="flex-1">{children}</main>
         <footer className="border-t border-foreground/10">
-          <div className="mx-auto max-w-5xl px-4 py-8 text-sm text-foreground/60">
+          <div className="mx-auto flex max-w-5xl flex-col gap-1 px-4 py-10 text-sm text-foreground/50">
+            <span className="font-medium text-foreground/70">{dict.brand}</span>
             <p>{dict.footer.privacyNote}</p>
           </div>
         </footer>

@@ -3,16 +3,44 @@
 :root {
   --background: #fbf6ee;
   --foreground: #2b2621;
+  /* 모바일 앱 스플래시 화면과 통일한 브랜드 컬러 — 바꾸지 않는다(기존 코드 코멘트 참고). */
   --accent: #208aef;
+  /* 상업 서비스다운 톤을 위해 추가한 보조 색 — 사주/설날 계열 페이지가 이미 쓰던 amber 계열과
+     맞춰, 인포그래픽·데코 요소에서 accent(파랑)와 대비되는 따뜻한 두 번째 축으로 쓴다. */
+  --accent-warm: #b5652f;
+  --accent-warm-soft: #f3e3d3;
+  --card-shadow: 0 1px 2px rgba(43, 38, 33, 0.04), 0 8px 24px -12px rgba(43, 38, 33, 0.18);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-accent: var(--accent);
+  --color-accent-warm: var(--accent-warm);
+  --color-accent-warm-soft: var(--accent-warm-soft);
 }
 
 body {
-  background: var(--background);
+  background:
+    radial-gradient(60rem 30rem at 50% -10%, color-mix(in srgb, var(--accent) 7%, transparent), transparent),
+    var(--background);
   color: var(--foreground);
+}
+
+.card-surface {
+  background: color-mix(in srgb, white 88%, transparent);
+  box-shadow: var(--card-shadow);
+}
+
+input,
+textarea {
+  outline: none;
+}
+
+input:focus-visible,
+textarea:focus-visible,
+button:focus-visible,
+a:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
