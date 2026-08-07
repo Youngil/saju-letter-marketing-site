@@ -42,22 +42,24 @@ export default async function ComparePage({ params }: { params: Promise<{ lang: 
       <h1 className="mb-2 text-3xl font-bold">{dict.compare.title}</h1>
       <p className="mb-10 text-foreground/70">{dict.compare.subtitle}</p>
 
-      <table className="mb-4 w-full border-collapse text-left">
-        <thead>
-          <tr className="border-b border-foreground/20 text-sm text-foreground/60">
-            <th className="py-2 pr-4 font-medium">{dict.compare.zodiacColumnLabel}</th>
-            <th className="py-2 font-medium">{DATE_RANGE_HEADER[rawLang]}</th>
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((row) => (
-            <tr key={row.sign} className="border-b border-foreground/10">
-              <td className="py-2 pr-4">{row.sign}</td>
-              <td className="py-2 text-foreground/70">{row.dateRange}</td>
+      <div className="mb-4 overflow-x-auto">
+        <table className="w-full min-w-[280px] border-collapse text-left">
+          <thead>
+            <tr className="border-b border-foreground/20 text-sm text-foreground/60">
+              <th className="py-2 pr-4 font-medium">{dict.compare.zodiacColumnLabel}</th>
+              <th className="py-2 font-medium">{DATE_RANGE_HEADER[rawLang]}</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {rows.map((row) => (
+              <tr key={row.sign} className="border-b border-foreground/10">
+                <td className="py-2 pr-4">{row.sign}</td>
+                <td className="py-2 text-foreground/70">{row.dateRange}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
 
       <h2 className="mb-3 mt-12 text-xl font-semibold">{dict.compare.dayMasterSectionTitle}</h2>
       <p className="mb-4 text-foreground/70">{dict.compare.dayMasterIntro}</p>

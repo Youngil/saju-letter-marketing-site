@@ -107,8 +107,8 @@ export function AstrologyInfographic({
       {/* 요약 비교 표 — "주로 다루는 것" 행이 별자리=성격/특성, 사주=흐름/타이밍이라는, 이
           서비스가 "매일의 흐름을 짧은 편지로 전한다"는 제품 자체의 포지셔닝과도 맞아떨어지는
           실제 차이를 담는다(단정적 예측 주장이 아니라 각 시스템이 주로 다루는 주제 차이). */}
-      <div className="mt-6 overflow-hidden rounded-2xl border border-foreground/10">
-        <table className="w-full text-sm">
+      <div className="mt-6 overflow-x-auto rounded-2xl border border-foreground/10">
+        <table className="w-full min-w-[480px] text-sm">
           <thead>
             <tr className="bg-foreground/[0.03] text-xs tracking-wide text-foreground/50">
               <th className="px-4 py-3 text-left font-medium">{dict.compareCategoryLabel}</th>
@@ -152,31 +152,44 @@ export function AstrologyInfographic({
 function SajuPillarsIllustration({ pillars, caption }: { pillars: string[]; caption: string }) {
   const icons = [SunGlyph, LeafIcon, PersonIcon, CrescentMoonIcon];
   const tints = ['text-amber-600 bg-amber-50', 'text-rose-600 bg-rose-50', 'text-emerald-600 bg-emerald-50', 'text-sky-600 bg-sky-50'];
+  const sparkles = [
+    { top: '-4%', left: '4%' },
+    { top: '2%', right: '2%' },
+    { top: '28%', left: '-2%' },
+    { top: '30%', right: '-4%' },
+  ];
 
   return (
-    <div className="relative flex flex-col items-center">
+    <div className="relative flex w-full max-w-[260px] flex-col items-center">
       <svg
         viewBox="0 0 220 90"
-        className="pointer-events-none absolute -top-6 left-1/2 h-20 w-64 -translate-x-1/2 opacity-50"
+        className="pointer-events-none absolute -top-6 left-1/2 h-20 w-full -translate-x-1/2 opacity-50"
         aria-hidden="true"
       >
         <path d="M 10 90 A 100 100 0 0 1 210 90" fill="none" stroke="var(--accent-warm)" strokeWidth="1" />
         <path d="M 35 90 A 75 75 0 0 1 185 90" fill="none" stroke="var(--accent-warm)" strokeWidth="1" />
         <path d="M 60 90 A 50 50 0 0 1 160 90" fill="none" stroke="var(--accent-warm)" strokeWidth="1" />
       </svg>
+      {sparkles.map((pos, i) => (
+        <span key={i} className="pointer-events-none absolute text-accent-warm/40" style={pos} aria-hidden="true">
+          <SparkleIcon />
+        </span>
+      ))}
 
-      <div className="relative flex gap-2">
+      <div className="relative flex gap-1.5 sm:gap-2">
         {pillars.map((label, i) => {
           const Icon = icons[i];
           return (
             <div
               key={i}
-              className={`flex w-14 flex-col items-center gap-1.5 rounded-xl border border-foreground/10 bg-white px-1.5 py-3 shadow-sm sm:w-16`}
+              className="flex w-12 flex-col items-center gap-1 rounded-xl border border-foreground/10 bg-white px-1 py-2.5 shadow-sm sm:w-16 sm:gap-1.5 sm:py-3"
             >
-              <span className={`flex h-7 w-7 items-center justify-center rounded-full ${tints[i]}`}>
+              <span className={`flex h-6 w-6 items-center justify-center rounded-full sm:h-7 sm:w-7 ${tints[i]}`}>
                 <Icon />
               </span>
-              <span className="text-center text-[10px] leading-tight font-bold tracking-wide text-foreground/70 uppercase">{label}</span>
+              <span className="text-center text-[9px] leading-tight font-bold tracking-wide text-foreground/70 uppercase sm:text-[10px]">
+                {label}
+              </span>
             </div>
           );
         })}
@@ -208,7 +221,7 @@ function AstrologyOrbitIllustration() {
   ];
 
   return (
-    <div className="relative h-32 w-32">
+    <div className="relative h-32 w-32 shrink-0">
       <svg viewBox="0 0 120 120" className="h-full w-full text-accent/30" aria-hidden="true">
         {[44, 34, 24].map((r) => (
           <circle key={r} cx={60} cy={60} r={r} fill="none" stroke="currentColor" strokeWidth={1} strokeDasharray="2.5 4" />
@@ -229,6 +242,13 @@ function AstrologyOrbitIllustration() {
           })}
         </g>
       </svg>
+
+      <span className="pointer-events-none absolute top-1 right-2 text-accent/50" aria-hidden="true">
+        <SparkleIcon />
+      </span>
+      <span className="pointer-events-none absolute bottom-3 left-0 text-accent/40" aria-hidden="true">
+        <SparkleIcon />
+      </span>
 
       <PlanetBadge symbol="☽" className="-top-2 left-1/2 -translate-x-1/2" />
       <PlanetBadge symbol="♆" className="top-6 -left-3" />
@@ -259,9 +279,16 @@ function SparkleIcon() {
 
 function RingedPlanetIcon() {
   return (
-    <svg viewBox="0 0 24 24" className="h-[18px] w-[18px]" fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" aria-hidden="true">
-      <circle cx="12" cy="12" r="5" />
-      <ellipse cx="12" cy="12" rx="10" ry="3.2" transform="rotate(-20 12 12)" />
+    <svg viewBox="0 0 24 24" className="h-[18px] w-[18px]" aria-hidden="true">
+      <path
+        d="M14.5 12.2A6.2 6.2 0 1 1 7.6 3.5a7.2 7.2 0 1 0 8.5 9.2c-.5.1-1.1.1-1.6-.5Z"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={1.6}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path d="M18.5 4.5l.6 1.6 1.6.6-1.6.6-.6 1.6-.6-1.6-1.6-.6 1.6-.6.6-1.6Z" fill="currentColor" />
     </svg>
   );
 }

@@ -99,14 +99,14 @@ export function DemoForm({ language, dict }: { language: MarketingLanguage; dict
     <form onSubmit={handleSubmit} className="card-surface flex flex-col gap-5 rounded-2xl border border-foreground/10 p-6 sm:p-7">
       <div>
         <span className="mb-1.5 block text-sm font-medium">{dict.dateLabel}</span>
-        <div className="flex gap-2">
+        <div className="flex gap-1.5 sm:gap-2">
           <input
             type="number"
             inputMode="numeric"
             placeholder={dict.yearLabel}
             value={year}
             onChange={(e) => setYear(e.target.value)}
-            className="w-24 rounded-lg border border-foreground/15 bg-white px-3 py-2.5 transition focus-visible:border-accent"
+            className="w-20 min-w-0 rounded-lg border border-foreground/15 bg-white px-2 py-2.5 transition focus-visible:border-accent sm:w-24 sm:px-3"
           />
           <input
             type="number"
@@ -116,7 +116,7 @@ export function DemoForm({ language, dict }: { language: MarketingLanguage; dict
             onChange={(e) => setMonth(e.target.value)}
             min={1}
             max={12}
-            className="w-20 rounded-lg border border-foreground/15 bg-white px-3 py-2.5 transition focus-visible:border-accent"
+            className="w-16 min-w-0 rounded-lg border border-foreground/15 bg-white px-2 py-2.5 transition focus-visible:border-accent sm:w-20 sm:px-3"
           />
           <input
             type="number"
@@ -126,7 +126,7 @@ export function DemoForm({ language, dict }: { language: MarketingLanguage; dict
             onChange={(e) => setDay(e.target.value)}
             min={1}
             max={31}
-            className="w-20 rounded-lg border border-foreground/15 bg-white px-3 py-2.5 transition focus-visible:border-accent"
+            className="w-16 min-w-0 rounded-lg border border-foreground/15 bg-white px-2 py-2.5 transition focus-visible:border-accent sm:w-20 sm:px-3"
           />
         </div>
       </div>
@@ -137,7 +137,7 @@ export function DemoForm({ language, dict }: { language: MarketingLanguage; dict
           {dict.timeUnknownLabel}
         </label>
         {timeKnown && (
-          <div className="mt-2 flex gap-2">
+          <div className="mt-2 flex gap-1.5 sm:gap-2">
             <input
               type="number"
               inputMode="numeric"
@@ -146,7 +146,7 @@ export function DemoForm({ language, dict }: { language: MarketingLanguage; dict
               onChange={(e) => setHour(e.target.value)}
               min={0}
               max={23}
-              className="w-20 rounded-lg border border-foreground/15 bg-white px-3 py-2.5 transition focus-visible:border-accent"
+              className="w-16 min-w-0 rounded-lg border border-foreground/15 bg-white px-2 py-2.5 transition focus-visible:border-accent sm:w-20 sm:px-3"
             />
             <input
               type="number"
@@ -156,7 +156,7 @@ export function DemoForm({ language, dict }: { language: MarketingLanguage; dict
               onChange={(e) => setMinute(e.target.value)}
               min={0}
               max={59}
-              className="w-20 rounded-lg border border-foreground/15 bg-white px-3 py-2.5 transition focus-visible:border-accent"
+              className="w-16 min-w-0 rounded-lg border border-foreground/15 bg-white px-2 py-2.5 transition focus-visible:border-accent sm:w-20 sm:px-3"
             />
           </div>
         )}

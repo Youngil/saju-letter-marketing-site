@@ -42,12 +42,12 @@ export default async function LangLayout({
     <html lang={lang} className="h-full antialiased">
       <body className="min-h-full flex flex-col bg-background text-foreground">
         <header className="sticky top-0 z-10 border-b border-foreground/10 bg-background/80 backdrop-blur-md">
-          <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-4">
-            <Link href={`/${lang}`} className="flex items-center gap-2 text-lg font-semibold">
-              <span className="flex h-7 w-7 items-center justify-center rounded-full bg-accent text-sm text-white">四</span>
-              {dict.brand}
+          <div className="mx-auto flex max-w-5xl items-center justify-between gap-2 px-4 py-4">
+            <Link href={`/${lang}`} className="flex shrink-0 items-center gap-2 text-base font-semibold sm:text-lg">
+              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-accent text-sm text-white">四</span>
+              <span className="truncate">{dict.brand}</span>
             </Link>
-            <nav className="flex items-center gap-5">
+            <nav className="flex items-center gap-3 sm:gap-5">
               <Link href={`/${lang}/blog`} className="text-sm font-medium text-foreground/70 hover:text-foreground">
                 {dict.nav.blog}
               </Link>
