@@ -6,9 +6,15 @@ import type { ToneGroup } from '@/lib/languages';
  * 분기한다(언어별 6갈래 분기 아님). 문구는 항상 dictionary에서 온다 — 이 컴포넌트는 어떤
  * 레이아웃을 쓸지만 결정하고, 단어 선택에는 관여하지 않는다(src/lib/languages.ts 참고).
  *
- * 실제 인포그래픽은 외부 이미지/영상 에셋이 아니라 인라인 SVG/HTML로 직접 그린다 — "별자리는
- * 태어난 달 하나로 정해지는 1개 값, 사주는 년/월/일/시 네 값을 조합"이라는 dict.subtitle의
- * 핵심 메시지를 글이 아니라 그림으로도 보여주기 위함(2026-08-08, 빈 플레이스홀더였던 걸 교체).
+ * 인포그래픽은 외부 이미지/영상 에셋이 아니라 인라인 SVG/HTML로 직접 그린다(2026-08-08,
+ * 빈 플레이스홀더였던 걸 1차로 교체한 뒤, 2026-08-08 두 번째로 아이콘 배지·헤드라인·태그 필·
+ * 비교 표를 추가해 밀도를 높였다 — 사용자가 참고로 보여준 타 서비스 인포그래픽의 만듦새를
+ * 참고하되, 두 가지는 의도적으로 피했다: (1) 오행(나무/불/산/금속/물) 아이콘 — 서양 점성술
+ * 4원소와 혼동을 피하려는 §8 가드레일과 정면으로 부딪힘, (2) "Time-Based System" 같은 완전
+ * 일반화된 이름 — "Saju"/한국 전통이라는 정체성 자체가 이 서비스의 차별화 포인트라 반드시
+ * 남겨야 함. 대신 비교 표 마지막 행에 "기원: 서양 전통 vs 한국 전통"을 명시해 정체성을
+ * 분명히 하고, 태그는 오행이 아니라 실제 차이(태어난 달 1개 vs 년/월/일/시 4개 조합)를
+ * 아이콘화했다.
  * pillarLabels는 새 dict 필드를 추가하는 대신 이미 존재하는 dict.demo의 년/월/일/시 라벨을
  * 그대로 재사용한다(호출부인 page.tsx 참고).
  */
@@ -30,12 +36,19 @@ export function AstrologyInfographic({
     >
       <h2 className="mb-2 text-xl font-semibold sm:text-2xl">{dict.title}</h2>
       <p className="mb-8 max-w-2xl text-foreground/70">{dict.subtitle}</p>
-      <div className={`grid gap-6 ${isTraditionLed ? 'md:grid-cols-[1fr_1.3fr]' : 'md:grid-cols-2'}`}>
+
+      <div className={`grid gap-6 ${isTraditionLed ? 'md:grid-cols-[1fr_1.15fr]' : 'md:grid-cols-2'}`}>
         {/* 서양 별자리 — 12개 중 태어난 '달'에 해당하는 1칸만 채워진 원형 다이얼로 표현 */}
-        <div className="rounded-2xl border border-foreground/10 bg-white p-5">
-          <div className="mb-4 text-sm font-semibold text-foreground/60">{dict.zodiacLabel}</div>
+        <div className="flex flex-col rounded-2xl border border-foreground/10 bg-white p-5 sm:p-6">
+          <div className="mb-4 flex items-center gap-2">
+            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-foreground/8 text-foreground/60">
+              <MoonStarIcon />
+            </span>
+            <span className="text-sm font-semibold text-foreground/70">{dict.zodiacLabel}</span>
+          </div>
+
           <div className="flex items-center justify-center py-2">
-            <svg viewBox="0 0 120 120" className="h-32 w-32" role="img" aria-hidden="true">
+            <svg viewBox="0 0 120 120" className="h-28 w-28" role="img" aria-hidden="true">
               {Array.from({ length: 12 }).map((_, i) => {
                 const angle = (i / 12) * 2 * Math.PI - Math.PI / 2;
                 const nextAngle = ((i + 1) / 12) * 2 * Math.PI - Math.PI / 2;
@@ -67,12 +80,27 @@ export function AstrologyInfographic({
               <circle cx={60} cy={60} r={20} fill="none" stroke="currentColor" className="text-foreground/15" strokeWidth={1} />
             </svg>
           </div>
-          <p className="text-center text-xs text-foreground/50">1 / 12</p>
+
+          <h3 className="mt-3 text-base font-semibold">{dict.zodiacHeadline}</h3>
+          <p className="mt-1.5 text-sm leading-relaxed text-foreground/65">{dict.zodiacDescription}</p>
+          <div className="mt-4 flex flex-wrap gap-1.5">
+            {dict.zodiacTags.map((tag) => (
+              <span key={tag} className="rounded-full border border-foreground/15 bg-white px-2.5 py-1 text-[11px] font-medium text-foreground/60">
+                {tag}
+              </span>
+            ))}
+          </div>
         </div>
 
         {/* 사주 — 년/월/일/시 네 기둥이 각각 2칸(천간/지지)씩으로 나뉘는 모습을 시각화 */}
-        <div className="rounded-2xl border border-accent-warm/25 bg-accent-warm-soft/40 p-5">
-          <div className="mb-4 text-sm font-semibold text-accent-warm">{dict.sajuLabel}</div>
+        <div className="flex flex-col rounded-2xl border border-accent-warm/25 bg-accent-warm-soft/40 p-5 sm:p-6">
+          <div className="mb-4 flex items-center gap-2">
+            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-accent-warm/15 text-accent-warm">
+              <FourPillarsIcon />
+            </span>
+            <span className="text-sm font-semibold text-accent-warm">{dict.sajuLabel}</span>
+          </div>
+
           <div className="flex items-center justify-center gap-3 py-2">
             {pillars.map((label, i) => (
               <div key={i} className="flex flex-col items-center gap-1.5">
@@ -84,9 +112,63 @@ export function AstrologyInfographic({
               </div>
             ))}
           </div>
-          <p className="text-center text-xs text-foreground/50">4 × 2</p>
+
+          <h3 className="mt-3 text-base font-semibold">{dict.sajuHeadline}</h3>
+          <p className="mt-1.5 text-sm leading-relaxed text-foreground/65">{dict.sajuDescription}</p>
+          <div className="mt-4 flex flex-wrap gap-1.5">
+            {dict.sajuTags.map((tag) => (
+              <span
+                key={tag}
+                className="rounded-full border border-accent-warm/30 bg-white px-2.5 py-1 text-[11px] font-medium text-accent-warm"
+              >
+                {tag}
+              </span>
+            ))}
+          </div>
         </div>
       </div>
+
+      {/* 요약 비교 표 — 마지막 "기원" 행이 서양/한국 전통이라는 정체성을 명시적으로 남겨둔다. */}
+      <div className="mt-6 overflow-hidden rounded-2xl border border-foreground/10">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="bg-foreground/[0.03] text-xs tracking-wide text-foreground/50">
+              <th className="px-4 py-3 text-left font-medium">{dict.compareCategoryLabel}</th>
+              <th className="px-4 py-3 text-left font-medium">{dict.zodiacLabel}</th>
+              <th className="px-4 py-3 text-left font-medium text-accent-warm">{dict.sajuLabel}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {dict.compareRows.map((row) => (
+              <tr key={row.category} className="border-t border-foreground/10">
+                <td className="px-4 py-3 font-medium text-foreground/70">{row.category}</td>
+                <td className="px-4 py-3 text-foreground/55">{row.zodiac}</td>
+                <td className="px-4 py-3 text-foreground/85">{row.saju}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </section>
+  );
+}
+
+function MoonStarIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
+      <path d="M15.5 12.5A6.5 6.5 0 1 1 8.3 3.2a7.5 7.5 0 1 0 8.9 9.6c-.5.1-1.1.1-1.7-.3Z" />
+      <path d="M19 3.5v3M17.5 5h3" />
+    </svg>
+  );
+}
+
+function FourPillarsIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-4 w-4" fill="currentColor" aria-hidden="true">
+      <rect x="1.5" y="9" width="3.2" height="11.5" rx="1" />
+      <rect x="7" y="5.5" width="3.2" height="15" rx="1" />
+      <rect x="12.5" y="2" width="3.2" height="18.5" rx="1" />
+      <rect x="18" y="6.5" width="3.2" height="14" rx="1" />
+    </svg>
   );
 }

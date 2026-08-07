@@ -18,6 +18,15 @@ export interface MarketingDictionary {
     subtitle: string;
     zodiacLabel: string;
     sajuLabel: string;
+    zodiacHeadline: string;
+    zodiacDescription: string;
+    zodiacTags: [string, string, string];
+    sajuHeadline: string;
+    sajuDescription: string;
+    sajuTags: [string, string, string];
+    /** 비교 표 왼쪽 열 헤더(예: "Category"/"구분") — zodiac/saju 열 헤더는 위 zodiacLabel/sajuLabel을 재사용한다. */
+    compareCategoryLabel: string;
+    compareRows: { category: string; zodiac: string; saju: string }[];
   };
   demo: {
     title: string;

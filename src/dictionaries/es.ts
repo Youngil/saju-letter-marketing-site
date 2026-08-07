@@ -17,6 +17,18 @@ export const dictionary: MarketingDictionary = {
       'La astrología occidental te da un signo según tu mes de nacimiento. El saju usa cuatro pares de valores — año, mes, día y hora — para una carta única según tu momento exacto de nacimiento.',
     zodiacLabel: 'Zodiaco occidental',
     sajuLabel: 'Saju (사주)',
+    zodiacHeadline: 'Un signo, según tu mes de nacimiento',
+    zodiacDescription: 'El mismo signo para todos los que nacieron ese mes — una lectura amplia y general.',
+    zodiacTags: ['Mes de nacimiento', '1 de 12 signos', 'Basado en el sol'],
+    sajuHeadline: 'Una carta construida desde tu momento exacto',
+    sajuDescription: 'Combina el año, mes, día y hora en que naciste — un punto de partida mucho más específico.',
+    sajuTags: ['Hora exacta de nacimiento', '4 pilares', 'Combinación única'],
+    compareCategoryLabel: 'Categoría',
+    compareRows: [
+      { category: 'Datos de entrada', zodiac: 'Mes de nacimiento', saju: 'Año, mes, día, hora' },
+      { category: 'Valores combinados', zodiac: '1 (tu signo)', saju: '4 (pilares)' },
+      { category: 'Origen', zodiac: 'Tradición occidental', saju: 'Tradición coreana' },
+    ],
   },
   demo: {
     title: 'Obtén una lectura gratuita de una línea',

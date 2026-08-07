@@ -17,6 +17,18 @@ export const dictionary: MarketingDictionary = {
       '西洋占星術は生まれた月から一つの星座を導き出します。四柱推命は年・月・日・時の四つの柱を組み合わせるので、あなただけのより詳しい命式になります。',
     zodiacLabel: '西洋の星座',
     sajuLabel: '四柱推命(사주)',
+    zodiacHeadline: '生まれた「月」で決まるひとつの星座',
+    zodiacDescription: '同じ月に生まれた人は皆同じ星座 — 大きな枠で見る方法です。',
+    zodiacTags: ['生まれた月', '12種類中の1つ', '太陽基準'],
+    sajuHeadline: '生まれた瞬間そのものから作られる命式',
+    sajuDescription: '年・月・日・時をすべて組み合わせて、もっと具体的なあなただけの出発点を作ります。',
+    sajuTags: ['正確な生まれた時刻', '四つの柱', 'あなただけの組み合わせ'],
+    compareCategoryLabel: '項目',
+    compareRows: [
+      { category: '基準情報', zodiac: '生まれた月', saju: '年・月・日・時' },
+      { category: '組み合わせる数', zodiac: '1つ(星座)', saju: '4つ(柱)' },
+      { category: '起源', zodiac: '西洋の伝統', saju: '韓国の伝統' },
+    ],
   },
   demo: {
     title: '無料で一言診断',

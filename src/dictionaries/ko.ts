@@ -20,6 +20,18 @@ export const dictionary: MarketingDictionary = {
     subtitle: '별자리는 태어난 달만으로 정해지지만, 사주는 년/월/일/시 네 가지 기둥을 조합해 훨씬 세밀한 결과를 만듭니다.',
     zodiacLabel: '서양 별자리',
     sajuLabel: '사주',
+    zodiacHeadline: "태어난 '달'로 정해지는 하나의 별자리",
+    zodiacDescription: '같은 달에 태어났다면 누구나 같은 별자리예요 — 큰 틀에서 보는 방식이에요.',
+    zodiacTags: ['태어난 달', '12개 중 1개', '태양 기준'],
+    sajuHeadline: '태어난 순간 그대로 만들어지는 사주',
+    sajuDescription: '년·월·일·시를 모두 조합해서, 훨씬 더 구체적인 나만의 출발점을 만들어요.',
+    sajuTags: ['정확한 태어난 시각', '네 개의 기둥', '나만의 고유한 조합'],
+    compareCategoryLabel: '구분',
+    compareRows: [
+      { category: '기준 정보', zodiac: '태어난 달', saju: '년·월·일·시' },
+      { category: '조합되는 값', zodiac: '1개(별자리)', saju: '4개(기둥)' },
+      { category: '기원', zodiac: '서양 전통', saju: '한국 전통' },
+    ],
   },
   demo: {
     title: '무료로 한 줄 미리보기',

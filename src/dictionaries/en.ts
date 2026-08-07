@@ -17,6 +17,18 @@ export const dictionary: MarketingDictionary = {
       "Western astrology gives you one sign based on your birth month. Saju uses four pairs of values — year, month, day, and hour — for a chart that's unique to your exact birth moment.",
     zodiacLabel: 'Western zodiac',
     sajuLabel: 'Saju (사주)',
+    zodiacHeadline: 'One sign, from your birth month',
+    zodiacDescription: 'The same sign for everyone born that month — a wide, general read.',
+    zodiacTags: ['Birth month', '1 of 12 signs', 'Sun-based'],
+    sajuHeadline: 'A chart built from your exact moment',
+    sajuDescription: 'Combines the year, month, day, and hour you were born — a much more specific starting point.',
+    sajuTags: ['Exact birth time', '4 pillars', 'One-of-a-kind combination'],
+    compareCategoryLabel: 'Category',
+    compareRows: [
+      { category: 'Input', zodiac: 'Birth month', saju: 'Year, month, day, hour' },
+      { category: 'Values combined', zodiac: '1 (your sign)', saju: '4 (pillars)' },
+      { category: 'Origin', zodiac: 'Western tradition', saju: 'Korean tradition' },
+    ],
   },
   demo: {
     title: 'Get a free one-line reading',

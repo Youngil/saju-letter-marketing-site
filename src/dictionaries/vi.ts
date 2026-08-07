@@ -17,6 +17,18 @@ export const dictionary: MarketingDictionary = {
       'Chiêm tinh phương Tây cho bạn một cung dựa trên tháng sinh. Bát Tự dùng bốn trụ — năm, tháng, ngày, giờ — để tạo nên một lá số riêng biệt cho đúng thời khắc bạn chào đời.',
     zodiacLabel: 'Cung hoàng đạo phương Tây',
     sajuLabel: 'Bát Tự (사주)',
+    zodiacHeadline: 'Một cung, dựa trên tháng sinh của bạn',
+    zodiacDescription: 'Ai sinh cùng tháng cũng có chung một cung — một cách nhìn rộng và tổng quát.',
+    zodiacTags: ['Tháng sinh', '1 trong 12 cung', 'Dựa trên mặt trời'],
+    sajuHeadline: 'Một lá số được tạo từ đúng thời khắc bạn chào đời',
+    sajuDescription: 'Kết hợp năm, tháng, ngày và giờ sinh của bạn — một điểm khởi đầu cụ thể hơn nhiều.',
+    sajuTags: ['Giờ sinh chính xác', '4 trụ', 'Sự kết hợp riêng biệt'],
+    compareCategoryLabel: 'Hạng mục',
+    compareRows: [
+      { category: 'Dữ liệu đầu vào', zodiac: 'Tháng sinh', saju: 'Năm, tháng, ngày, giờ' },
+      { category: 'Số giá trị kết hợp', zodiac: '1 (cung của bạn)', saju: '4 (trụ)' },
+      { category: 'Nguồn gốc', zodiac: 'Truyền thống phương Tây', saju: 'Truyền thống Hàn Quốc' },
+    ],
   },
   demo: {
     title: 'Xem thử một dòng luận giải miễn phí',
