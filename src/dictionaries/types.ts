@@ -1,0 +1,156 @@
+/** 모든 언어 dictionary가 공유하는 형태 — 새 언어를 추가할 때 이 타입이 빠진 키를 잡아준다. */
+export interface MarketingDictionary {
+  brand: string;
+  /** 언어 스위처에 표시되는 이 언어 자신의 이름(자국어 표기). */
+  languageSwitcherLabel: string;
+  nav: {
+    home: string;
+    blog: string;
+    compare: string;
+  };
+  hero: {
+    title: string;
+    subtitle: string;
+    ctaDemo: string;
+  };
+  infographic: {
+    title: string;
+    subtitle: string;
+    zodiacLabel: string;
+    sajuLabel: string;
+  };
+  demo: {
+    title: string;
+    subtitle: string;
+    dateLabel: string;
+    yearLabel: string;
+    monthLabel: string;
+    dayLabel: string;
+    timeLabel: string;
+    timeUnknownLabel: string;
+    hourLabel: string;
+    minuteLabel: string;
+    submitButton: string;
+    submitting: string;
+    resultTitle: string;
+    resultCta: string;
+    tryAgain: string;
+    errors: {
+      date: string;
+      generic: string;
+      rateLimited: string;
+    };
+  };
+  blog: {
+    title: string;
+    subtitle: string;
+    readMore: string;
+    empty: string;
+  };
+  compare: {
+    title: string;
+    subtitle: string;
+    ogTitle: string;
+    ogDescription: string;
+    zodiacColumnLabel: string;
+    sajuColumnLabel: string;
+    dayMasterSectionTitle: string;
+    dayMasterIntro: string;
+  };
+  leadCapture: {
+    title: string;
+    subtitle: string;
+    emailPlaceholder: string;
+    consentLabel: string;
+    submitButton: string;
+    submitting: string;
+    success: string;
+    errors: {
+      email: string;
+      consent: string;
+      generic: string;
+      already: string;
+    };
+  };
+  unsubscribe: {
+    title: string;
+    loading: string;
+    success: string;
+    alreadyUnsubscribed: string;
+    notFound: string;
+  };
+  footer: {
+    privacyNote: string;
+    googlePlayCta: string;
+  };
+  /**
+   * saju-letter-newyear-campaign 이관분(2026-08-07) — ko를 제외한 5개 언어에만 존재한다(그
+   * 캠페인이 원래 ko를 지원하지 않았던 것과 같은 이유, languages.ts의 `NonKoreanLanguage` 참고).
+   * ko.ts는 이 필드를 채우지 않고, `/[lang]/lunar-new-year/*` 라우트가 `isNonKoreanLanguage`로
+   * 걸러 ko 요청 자체를 `notFound()` 처리하므로 런타임에 undefined로 접근될 일이 없다.
+   */
+  lunarNewYear?: {
+    navHome: string;
+    landing: {
+      title: string;
+      subtitle: string;
+      nameLabel: string;
+      namePlaceholder: string;
+      dateLabel: string;
+      yearLabel: string;
+      monthLabel: string;
+      dayLabel: string;
+      timeLabel: string;
+      timeUnknownLabel: string;
+      hourLabel: string;
+      minuteLabel: string;
+      memorableEventLabel: string;
+      memorableEventPlaceholder: string;
+      ageConfirmLabel: string;
+      consentPreviewNote: string;
+      submitButton: string;
+      submitting: string;
+      errors: {
+        name: string;
+        date: string;
+        memorableEvent: string;
+        age: string;
+        generic: string;
+        rateLimited: string;
+      };
+    };
+    offSeason: {
+      title: string;
+      body: string;
+      cta: string;
+    };
+    result: {
+      loading: string;
+      notFound: string;
+      shareTitle: string;
+      shareButton: string;
+      shareCopied: string;
+      emailSectionTitle: string;
+      emailSectionSubtitle: string;
+      emailPlaceholder: string;
+      consentLabel: string;
+      subscribeButton: string;
+      subscribing: string;
+      subscribed: string;
+      errors: {
+        email: string;
+        consent: string;
+        generic: string;
+        already: string;
+      };
+    };
+    unsubscribe: {
+      title: string;
+      loading: string;
+      success: string;
+      alreadyUnsubscribed: string;
+      notFound: string;
+    };
+    footerPrivacy: string;
+  };
+}

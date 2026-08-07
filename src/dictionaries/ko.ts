@@ -1,0 +1,87 @@
+import type { MarketingDictionary } from './types';
+
+/**
+ * 한국어는 이 사이트에서 마케팅 비중이 낮다(타겟은 해외 K-컬처 팬층) — 국내 PR/품질 확인용
+ * 최소 유지 언어다. 톤 2그룹 구분과 무관하게 explain-from-scratch로 둔다.
+ */
+export const dictionary: MarketingDictionary = {
+  brand: '사주편지',
+  languageSwitcherLabel: '한국어',
+  nav: { home: '홈', blog: '블로그', compare: '별자리 vs 사주' },
+  hero: {
+    title: '태어난 순간 그대로, 매일 아침 도착하는 짧은 편지',
+    subtitle: '사주편지는 생년월일시를 바탕으로 매일 아침 짧고 감성적인 한 통의 편지를 보내드립니다. 아래에서 무료로 한 줄 미리보기를 체험해보세요.',
+    ctaDemo: '무료로 체험하기',
+  },
+  infographic: {
+    title: '별자리와 사주, 무엇이 다를까요',
+    subtitle: '별자리는 태어난 달만으로 정해지지만, 사주는 년/월/일/시 네 가지 기둥을 조합해 훨씬 세밀한 결과를 만듭니다.',
+    zodiacLabel: '서양 별자리',
+    sajuLabel: '사주',
+  },
+  demo: {
+    title: '무료로 한 줄 미리보기',
+    subtitle: '가입 없이 바로 체험할 수 있어요. 생년월일을 입력하면 사주편지가 매일 아침 보내는 편지의 느낌을 바로 확인할 수 있습니다.',
+    dateLabel: '생년월일',
+    yearLabel: '년',
+    monthLabel: '월',
+    dayLabel: '일',
+    timeLabel: '태어난 시간(선택)',
+    timeUnknownLabel: '태어난 시간을 몰라요',
+    hourLabel: '시',
+    minuteLabel: '분',
+    submitButton: '결과 보기',
+    submitting: '사주를 읽는 중…',
+    resultTitle: '오늘 당신에게 건네는 한마디',
+    resultCta: '이런 편지를 매일 아침 받아보세요 — 무료로 시작',
+    tryAgain: '다른 날짜로 다시 보기',
+    errors: {
+      date: '올바른 생년월일을 입력해주세요.',
+      generic: '문제가 발생했어요. 잠시 후 다시 시도해주세요.',
+      rateLimited: '이미 여러 번 시도하셨어요. 잠시 후 다시 시도해주세요.',
+    },
+  },
+  blog: {
+    title: '사주편지 블로그',
+    subtitle: '사주와 한국의 전통, 그리고 별자리와의 비교에 대한 짧은 글들을 전해드려요.',
+    readMore: '더 보기',
+    empty: '아직 등록된 글이 없어요. 곧 찾아올게요.',
+  },
+  compare: {
+    title: '별자리와 사주, 나란히 비교해보기',
+    subtitle: '이미 별자리에 익숙하다면, 사주가 어떻게 다르게 접근하는지 살펴보세요.',
+    ogTitle: '별자리 vs 사주 — 사주편지',
+    ogDescription: '서양 12별자리와 한국식 사주를 비교해보세요.',
+    zodiacColumnLabel: '별자리',
+    sajuColumnLabel: '일간(사주)',
+    dayMasterSectionTitle: '사주의 10개 일간',
+    dayMasterIntro:
+      '별자리는 태어난 달로 정해져 12개가 있어요. 사주의 일간은 태어난 날짜 그 자체로 정해지고 10일 주기로 10개가 순환해요 — 그래서 위 별자리 표와 한 줄씩 대응되지는 않아요. 내 일간은 위 데모에서 직접 확인해보세요.',
+  },
+  leadCapture: {
+    title: '앱 설치 전에 조금 더 알아보고 싶다면',
+    subtitle: '이메일을 남겨주시면 며칠에 걸쳐 사주에 대한 짧은 소개와 실제 편지 예시, 그리고 웰컴 혜택을 보내드려요.',
+    emailPlaceholder: 'you@example.com',
+    consentLabel: '이 이메일을 받아볼게요 (언제든 수신거부 가능)',
+    submitButton: '보내주세요',
+    submitting: '등록하는 중…',
+    success: '완료됐어요! 곧 메일함을 확인해보세요.',
+    errors: {
+      email: '올바른 이메일 주소를 입력해주세요.',
+      consent: '이메일 수신에 동의해주세요.',
+      generic: '문제가 발생했어요. 다시 시도해주세요.',
+      already: '이미 등록된 이메일이에요.',
+    },
+  },
+  unsubscribe: {
+    title: '수신거부',
+    loading: '처리 중…',
+    success: '수신거부가 완료됐어요. 아쉽지만 다음에 또 만나요!',
+    alreadyUnsubscribed: '이미 수신거부된 상태예요.',
+    notFound: '해당 구독 정보를 찾을 수 없어요.',
+  },
+  footer: {
+    privacyNote: '생년월일시는 브라우저 밖으로 전송되지 않아요 — 계산된 결과만 결과 생성을 위해 전송됩니다.',
+    googlePlayCta: 'Google Play에서 다운로드',
+  },
+};

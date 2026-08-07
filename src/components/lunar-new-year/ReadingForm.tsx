@@ -1,0 +1,210 @@
+'use client';
+
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
+import type { MarketingDictionary } from '@/dictionaries/types';
+import type { NonKoreanLanguage } from '@/lib/languages';
+import { calculateSaju } from '@/lib/saju';
+import { createReading } from '@/lib/lunarNewYearApi';
+import { ApiError } from '@/lib/apiClient';
+import { Turnstile } from '@/components/Turnstile';
+
+const MEMORABLE_EVENT_MAX_LENGTH = 300;
+const CURRENT_YEAR = new Date().getFullYear();
+
+type LandingDict = NonNullable<MarketingDictionary['lunarNewYear']>['landing'];
+
+export function ReadingForm({ language, dict: t }: { language: NonKoreanLanguage; dict: LandingDict }) {
+  const router = useRouter();
+
+  const [name, setName] = useState('');
+  const [year, setYear] = useState('');
+  const [month, setMonth] = useState('');
+  const [day, setDay] = useState('');
+  const [timeKnown, setTimeKnown] = useState(false);
+  const [hour, setHour] = useState('');
+  const [minute, setMinute] = useState('0');
+  const [memorableEvent, setMemorableEvent] = useState('');
+  const [ageConfirmed, setAgeConfirmed] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState<string | undefined>(undefined);
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setError(null);
+
+    if (name.trim().length === 0) {
+      setError(t.errors.name);
+      return;
+    }
+    const yearNum = Number(year);
+    const monthNum = Number(month);
+    const dayNum = Number(day);
+    if (!Number.isInteger(yearNum) || !Number.isInteger(monthNum) || !Number.isInteger(dayNum) || yearNum < 1900 || yearNum > CURRENT_YEAR) {
+      setError(t.errors.date);
+      return;
+    }
+    if (memorableEvent.trim().length === 0 || memorableEvent.length > MEMORABLE_EVENT_MAX_LENGTH) {
+      setError(t.errors.memorableEvent);
+      return;
+    }
+    if (!ageConfirmed) {
+      setError(t.errors.age);
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const hourNum = timeKnown && hour !== '' ? Number(hour) : undefined;
+      const chart = calculateSaju({
+        year: yearNum,
+        month: monthNum,
+        day: dayNum,
+        hour: hourNum,
+        minute: hourNum !== undefined ? Number(minute) : undefined,
+      });
+
+      const result = await createReading({
+        name: name.trim(),
+        language,
+        yearPillar: chart.yearPillar,
+        monthPillar: chart.monthPillar,
+        dayPillar: chart.dayPillar,
+        hourPillar: chart.hourPillar,
+        memorableEvent: memorableEvent.trim(),
+        ageConfirmed,
+        turnstileToken,
+      });
+
+      router.push(`/${language}/lunar-new-year/r/${result.readingId}`);
+    } catch (err) {
+      if (err instanceof ApiError && err.status === 429) {
+        setError(t.errors.rateLimited);
+      } else {
+        setError(t.errors.generic);
+      }
+      setIsSubmitting(false);
+    }
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+      <div>
+        <label className="mb-1 block text-sm font-medium" htmlFor="name">
+          {t.nameLabel}
+        </label>
+        <input
+          id="name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          placeholder={t.namePlaceholder}
+          maxLength={60}
+          className="w-full rounded-lg border border-stone-300 bg-white px-3 py-2"
+        />
+      </div>
+
+      <div>
+        <span className="mb-1 block text-sm font-medium">{t.dateLabel}</span>
+        <div className="flex gap-2">
+          <input
+            type="number"
+            inputMode="numeric"
+            placeholder={t.yearLabel}
+            value={year}
+            onChange={(e) => setYear(e.target.value)}
+            className="w-24 rounded-lg border border-stone-300 bg-white px-3 py-2"
+          />
+          <input
+            type="number"
+            inputMode="numeric"
+            placeholder={t.monthLabel}
+            value={month}
+            onChange={(e) => setMonth(e.target.value)}
+            min={1}
+            max={12}
+            className="w-20 rounded-lg border border-stone-300 bg-white px-3 py-2"
+          />
+          <input
+            type="number"
+            inputMode="numeric"
+            placeholder={t.dayLabel}
+            value={day}
+            onChange={(e) => setDay(e.target.value)}
+            min={1}
+            max={31}
+            className="w-20 rounded-lg border border-stone-300 bg-white px-3 py-2"
+          />
+        </div>
+      </div>
+
+      <div>
+        <label className="flex items-center gap-2 text-sm text-stone-600">
+          <input type="checkbox" checked={!timeKnown} onChange={(e) => setTimeKnown(!e.target.checked)} />
+          {t.timeUnknownLabel}
+        </label>
+        {timeKnown && (
+          <div className="mt-2 flex gap-2">
+            <input
+              type="number"
+              inputMode="numeric"
+              placeholder={t.hourLabel}
+              value={hour}
+              onChange={(e) => setHour(e.target.value)}
+              min={0}
+              max={23}
+              className="w-20 rounded-lg border border-stone-300 bg-white px-3 py-2"
+            />
+            <input
+              type="number"
+              inputMode="numeric"
+              placeholder={t.minuteLabel}
+              value={minute}
+              onChange={(e) => setMinute(e.target.value)}
+              min={0}
+              max={59}
+              className="w-20 rounded-lg border border-stone-300 bg-white px-3 py-2"
+            />
+          </div>
+        )}
+      </div>
+
+      <div>
+        <label className="mb-1 block text-sm font-medium" htmlFor="memorableEvent">
+          {t.memorableEventLabel}
+        </label>
+        <textarea
+          id="memorableEvent"
+          value={memorableEvent}
+          onChange={(e) => setMemorableEvent(e.target.value)}
+          placeholder={t.memorableEventPlaceholder}
+          maxLength={MEMORABLE_EVENT_MAX_LENGTH}
+          rows={2}
+          className="w-full rounded-lg border border-stone-300 bg-white px-3 py-2"
+        />
+        <div className="mt-1 text-right text-xs text-stone-400">
+          {memorableEvent.length}/{MEMORABLE_EVENT_MAX_LENGTH}
+        </div>
+      </div>
+
+      <label className="flex items-start gap-2 text-sm">
+        <input type="checkbox" checked={ageConfirmed} onChange={(e) => setAgeConfirmed(e.target.checked)} className="mt-1" />
+        <span>{t.ageConfirmLabel}</span>
+      </label>
+      <p className="text-xs text-stone-400">{t.consentPreviewNote}</p>
+
+      <Turnstile onVerify={setTurnstileToken} />
+
+      {error && <p className="text-sm text-red-600">{error}</p>}
+
+      <button
+        type="submit"
+        disabled={isSubmitting}
+        className="rounded-full bg-amber-800 px-6 py-3 font-medium text-white transition hover:bg-amber-900 disabled:opacity-50"
+      >
+        {isSubmitting ? t.submitting : t.submitButton}
+      </button>
+    </form>
+  );
+}
