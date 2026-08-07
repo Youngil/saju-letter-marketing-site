@@ -14,19 +14,24 @@ export interface MarketingDictionary {
     ctaDemo: string;
   };
   infographic: {
+    /** 제목 위 작은 배지 문구(예: "Two ways to read your life") — 순수 장식용 타이포 계층. */
+    eyebrow: string;
     title: string;
     subtitle: string;
     zodiacLabel: string;
     sajuLabel: string;
+    /** 라벨 바로 아래 짧은 카테고리 태그라인(예: "A sky-based system") — 본문 설명(zodiacDescription)보다 짧고 추상적. */
     zodiacHeadline: string;
     zodiacDescription: string;
     zodiacTags: [string, string, string];
     sajuHeadline: string;
     sajuDescription: string;
     sajuTags: [string, string, string];
+    /** 네 기둥 시각화 아래 캡션(예: "Meaning through combining all four"). */
+    sajuCombineCaption: string;
     /** 비교 표 왼쪽 열 헤더(예: "Category"/"구분") — zodiac/saju 열 헤더는 위 zodiacLabel/sajuLabel을 재사용한다. */
     compareCategoryLabel: string;
-    compareRows: { category: string; zodiac: string; saju: string }[];
+    compareRows: { category: string; zodiac: string; zodiacNote?: string; saju: string; sajuNote?: string }[];
   };
   demo: {
     title: string;
