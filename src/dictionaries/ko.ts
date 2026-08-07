@@ -79,7 +79,7 @@ export const dictionary: MarketingDictionary = {
     title: '지금 등록하고 30일 무료체험 쿠폰 받기',
     subtitle: '이메일을 남겨주시면 며칠에 걸쳐 사주에 대한 짧은 소개와 실제 편지 예시를 보내드리고, 마지막 날엔 앱에서 쓸 수 있는 30일 무료체험 쿠폰(원래 7일 대신)을 드려요.',
     emailPlaceholder: 'you@example.com',
-    consentLabel: '이 이메일을 받아볼게요 (언제든 수신거부 가능)',
+    consentLabel: '이 이메일을 받고 싶어요 (언제든 수신거부 가능)',
     submitButton: '보내주세요',
     submitting: '등록하는 중…',
     success: '완료됐어요! 첫 메일이 준비되면 보내드릴게요.',
