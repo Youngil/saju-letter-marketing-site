@@ -1,8 +1,10 @@
 import type { MarketingDictionary } from './types';
 
 /**
- * 한국어는 이 사이트에서 마케팅 비중이 낮다(타겟은 해외 K-컬처 팬층) — 국내 PR/품질 확인용
- * 최소 유지 언어다. 톤 2그룹 구분과 무관하게 explain-from-scratch로 둔다.
+ * 1차 서비스 타겟 언어 4개(ko/en/ja/es) 중 하나(2026-08-07, 사용자 결정 — 원래는 해외
+ * K-컬처 팬층만 노리고 ko를 PR/QA 전용으로 뒀었지만, 국내 타겟도 포함시키기로 전환했다).
+ * 톤 그룹은 ja와 같은 lean-into-tradition — 이미 사주에 익숙한 독자에게 "사주가 뭔지"부터
+ * 설명하는 톤은 어색해서(languages.ts의 TONE_GROUP 참고).
  */
 export const dictionary: MarketingDictionary = {
   brand: '사주편지',

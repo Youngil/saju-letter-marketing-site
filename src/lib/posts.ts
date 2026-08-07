@@ -1,8 +1,9 @@
 import type { ComponentType } from 'react';
-import { NON_KOREAN_LANGUAGES, type MarketingLanguage } from './languages';
+import { LAUNCH_CONTENT_LANGUAGES, type MarketingLanguage } from './languages';
 
-/** 블로그는 SEO(검색 유입) 목적이라 ko를 제외한다 — ko는 이 사이트에서 PR/QA 전용(languages.ts 참고). */
-export const BLOG_LANGUAGES = NON_KOREAN_LANGUAGES;
+/** 블로그는 1차 출시 타겟 언어(ko/en/ja/es)에서만 연다 — pt/vi는 이 배열에 언어를 추가하고
+ * 그 언어의 content-posts/*.mdx 3편만 채우면 열린다(languages.ts의 LAUNCH_CONTENT_LANGUAGES 참고). */
+export const BLOG_LANGUAGES = LAUNCH_CONTENT_LANGUAGES;
 
 export const POST_SLUGS = ['what-is-saju', 'saju-vs-western-astrology', 'how-korean-new-year-works'] as const;
 export type PostSlug = (typeof POST_SLUGS)[number];

@@ -1,17 +1,17 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getDictionary } from '@/dictionaries';
-import { isMarketingLanguage, MARKETING_LANGUAGES, type MarketingLanguage } from '@/lib/languages';
+import { isMarketingLanguage, isLaunchContentLanguage, LAUNCH_CONTENT_LANGUAGES, type LaunchContentLanguage } from '@/lib/languages';
 import { getAllPostSummaries } from '@/lib/posts';
 
 export async function generateStaticParams() {
-  return MARKETING_LANGUAGES.map((lang) => ({ lang }));
+  return LAUNCH_CONTENT_LANGUAGES.map((lang) => ({ lang }));
 }
 
 export default async function BlogIndexPage({ params }: { params: Promise<{ lang: string }> }) {
   const { lang: rawLang } = await params;
-  if (!isMarketingLanguage(rawLang)) notFound();
-  const lang: MarketingLanguage = rawLang;
+  if (!isMarketingLanguage(rawLang) || !isLaunchContentLanguage(rawLang)) notFound();
+  const lang: LaunchContentLanguage = rawLang;
   const dict = await getDictionary(lang);
   const posts = await getAllPostSummaries(lang);
 

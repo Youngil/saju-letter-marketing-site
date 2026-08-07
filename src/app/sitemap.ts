@@ -1,5 +1,5 @@
 import type { MetadataRoute } from 'next';
-import { MARKETING_LANGUAGES } from '@/lib/languages';
+import { MARKETING_LANGUAGES, NON_KOREAN_LANGUAGES } from '@/lib/languages';
 import { BLOG_LANGUAGES, POST_SLUGS } from '@/lib/posts';
 
 const WEB_BASE_URL = process.env.NEXT_PUBLIC_WEB_BASE_URL ?? 'http://localhost:3200';
@@ -10,7 +10,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     lastModified: new Date(),
   }));
 
-  // 블로그/compare는 ko를 제외한 SEO 대상 5개 언어에만 존재한다(languages.ts, posts.ts 참고 — ko는 PR/QA 전용).
+  // 블로그/compare는 1차 출시 타겟 언어(ko/en/ja/es)에만 존재한다(languages.ts의
+  // LAUNCH_CONTENT_LANGUAGES, posts.ts의 BLOG_LANGUAGES 참고 — pt/vi는 1차 출시 이후 추가 예정).
   const blogIndexEntries = BLOG_LANGUAGES.map((lang) => ({
     url: `${WEB_BASE_URL}/${lang}/blog`,
     lastModified: new Date(),
@@ -26,8 +27,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
     lastModified: new Date(),
   }));
 
-  // 신년운세 캠페인(2026-08-07 이관)도 ko를 지원하지 않던 원래 캠페인과 같은 5개 언어만 대상이다.
-  const lunarNewYearEntries = BLOG_LANGUAGES.map((lang) => ({
+  // 신년운세 캠페인(2026-08-07 이관)은 위 1차 출시 언어 축과 무관하게, 원래 캠페인이 지원하던
+  // 5개 언어(ko 제외)를 그대로 유지한다 — languages.ts의 NON_KOREAN_LANGUAGES 참고.
+  const lunarNewYearEntries = NON_KOREAN_LANGUAGES.map((lang) => ({
     url: `${WEB_BASE_URL}/${lang}/lunar-new-year`,
     lastModified: new Date(),
   }));

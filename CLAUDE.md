@@ -20,20 +20,29 @@ saju-letter.com에는 회원가입/설치 없이 "사주가 뭔지" 보여줄 �
 블로그/compare(별자리 vs 사주) 페이지, (3) 이메일 리드 캡처 → 웰컴 드립 시퀀스 → 30일 체험 쿠폰으로
 이어지는 전환 퍼널을 제공한다.
 
-## 2. 언어 지원 — 6개 언어 + 톤 2그룹
+## 2. 언어 지원 — 6개 언어 구조 + 1차 출시 4개 언어 + 톤 2그룹
 
-`saju-letter-mobile`/`saju-letter-backend`와 동일하게 ko/en/es/pt/ja/vi 6개 언어를 지원한다
-(`src/lib/languages.ts`의 `MARKETING_LANGUAGES`). 다만 **한국어는 이 사이트에서도 PR/QA 확인용일
-뿐 실질 타겟이 아니다** — 블로그/compare 같은 SEO 콘텐츠는 ko를 제외한 5개 언어(`BLOG_LANGUAGES`,
-`src/lib/posts.ts`)에만 존재하고, ko로 그 경로에 접근하면 `notFound()`/빈 상태로 처리된다. 홈
-미니 데모·리드 폼은 6개 언어 전부에서 동작한다(PR 확인 등 낮은 빈도 트래픽까지 막을 이유는 없어서).
+`saju-letter-mobile`/`saju-letter-backend`와 동일하게 ko/en/es/pt/ja/vi 6개 언어를 구조적으로
+지원한다(`src/lib/languages.ts`의 `MARKETING_LANGUAGES`) — 홈 미니 데모·리드 캡처는 콘텐츠 제작
+비용이 없는 영역이라(데모는 실시간 AI 호출, 리드는 이메일만 받음) 6개 언어 전부 그대로 연다.
 
-**톤 2그룹(`TONE_GROUP`, en/es/pt=`explain-from-scratch`, ja/vi=`lean-into-tradition`)** — en/es/pt는
-사주를 처음 접하는 독자에게 서양 별자리에 빗대어 개념부터 설명하고, ja/vi는 이미 있는 자신의 전통
-(四柱推命, Tử Vi/Bát Tự)과의 유사성을 강조한다. **이 구분은 `saju-letter-backend`가 2026-08-05에
-확정한 "AI 생성 사주 콘텐츠는 6개 언어 전부 동일 취급(오행명/전문용어 노출 금지에 언어별 차등 없음)"
-원칙과는 다른 층이다** — 그 원칙은 AI가 매일 생성하는 개인화 리딩의 전문용어 노출을 다루고, 여기는
-사람이 쓴(또는 한 번 다듬은) 정적 마케팅 카피의 포지셔닝을 다룬다. 구현도 코드 분기가 아니라 언어별
+**다만 블로그/compare 같은 번역 콘텐츠는 1차 출시 타겟 4개 언어(ko/en/ja/es,
+`LAUNCH_CONTENT_LANGUAGES`)에서만 연다(2026-08-07, 사용자 결정)** — 포르투갈어/베트남어는 초기
+콘텐츠 제작 비용과 마케팅 포인트를 줄이기 위해 1차 출시 이후로 미뤘다. **한국어는 원래 PR/QA
+전용이었다가 이때 정식 타겟으로 전환됐다.** pt/vi로 `/blog`나 `/compare`에 접근하면 `notFound()`
+— dictionary 카피와 `compareZodiac.ts`의 데이터는 이미 pt/vi까지 다 채워져 있으므로(1차 구축
+시점에 6개 언어 전부 작성했음), 나중에 여는 건 `LAUNCH_CONTENT_LANGUAGES`에 언어를 추가하고
+`content-posts/*.pt.mdx`/`*.vi.mdx` 3편씩만 새로 쓰면 끝난다 — 라우팅/타입/컴포넌트는 이미
+이 배열 하나만 참조하도록 만들어놔서 추가로 손댈 곳이 없다.
+
+**톤 2그룹(`TONE_GROUP`, en/es=`explain-from-scratch`, ko/ja=`lean-into-tradition`, pt/vi는 보류
+상태로 값만 유지)** — en/es는 사주를 처음 접하는 독자에게 서양 별자리에 빗대어 개념부터
+설명하고, ko/ja는 이미 있는 자신의 전통(사주, 四柱推命)과의 유사성을 강조한다(한국어는 2026-08-07에
+PR/QA 전용에서 정식 타겟으로 바뀌면서 ja와 같은 그룹으로 옮겼다 — 한국 독자에게 "사주가 뭔지"부터
+설명하는 톤은 어색해서). **이 구분은 `saju-letter-backend`가 2026-08-05에 확정한 "AI 생성 사주
+콘텐츠는 6개 언어 전부 동일 취급(오행명/전문용어 노출 금지에 언어별 차등 없음)" 원칙과는 다른
+층이다** — 그 원칙은 AI가 매일 생성하는 개인화 리딩의 전문용어 노출을 다루고, 여기는 사람이
+쓴(또는 한 번 다듬은) 정적 마케팅 카피의 포지셔닝을 다룬다. 구현도 코드 분기가 아니라 언어별
 dictionary 문구 차이로 대부분 해결하고, 레이아웃 자체가 달라야 하는 홈 히어로/인포그래픽만
 `toneGroup` prop 하나로 분기한다(6개 언어별 분기가 아니라 2그룹 축 하나).
 
@@ -89,9 +98,10 @@ Cloudflare Turnstile — `NEXT_PUBLIC_TURNSTILE_SITE_KEY`가 없으면 위젯을
 - `/[lang]` — 홈(히어로 + 인포그래픽 + 미니 데모 + 리드 캡처 폼).
 - `/[lang]/blog`, `/[lang]/blog/[slug]` — MDX 블로그(`@next/mdx`, 프론트매터는 hand-rolled 파서
   대신 MDX가 원래 지원하는 `export const meta = {...}` 구문을 그대로 쓴다 — 새 의존성 없이 정적
-  타입까지 딸려온다). ko 제외 5개 언어만 대상.
+  타입까지 딸려온다). 1차 출시 타겟 4개 언어(ko/en/ja/es, `LAUNCH_CONTENT_LANGUAGES`)만 대상 —
+  pt/vi는 §2 참고.
 - `/[lang]/compare` (+`opengraph-image.tsx`) — 서양 별자리 12개 vs 사주 일간(10개, 별도 순환 축이라
-  1:1 매칭표를 만들지 않는다) 정적 비교. ko 제외 5개 언어만 대상.
+  1:1 매칭표를 만들지 않는다) 정적 비교. 블로그와 같은 4개 언어만 대상.
 - `/[lang]/unsubscribe` — 드립 수신거부 처리.
 - `/[lang]/lunar-new-year` (+`r/[id]`, +`r/[id]/opengraph-image.tsx`, +`unsubscribe`) — 신년운세
   캠페인 이관분(2026-08-07, `saju-letter-newyear-campaign`에서 옮겨옴). ko는 원래 그 캠페인이

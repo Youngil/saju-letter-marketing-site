@@ -31,10 +31,33 @@ export function isNonKoreanLanguage(lang: MarketingLanguage): lang is NonKoreanL
 }
 
 /**
- * 마케팅 카피의 톤 2그룹(사용자 확정, 2026-08-XX) — en/es/pt는 사주 개념을 처음 접하는
- * 독자에게 서양 별자리에 빗대어 처음부터 설명하고, ja/vi는 각자 이미 갖고 있는 전통
- * (四柱推命, Tử Vi/Bát Tự)과의 유사성을 강조한다. ko는 이 사이트에서 PR/QA 전용이라
- * 실질적으로 마케팅 비중이 없으므로 explain-from-scratch로 둔다.
+ * 1차 서비스 타겟 언어(2026-08-07, 사용자 결정) — 한국어/영어/일본어/스페인어 4개.
+ * 포르투갈어/베트남어는 초기 콘텐츠(블로그/compare 번역) 제작 비용과 마케팅 포인트를
+ * 줄이기 위해 1차 출시 이후로 미룬다 — 사이트 자체는 이미 6개 언어를 구조적으로 지원하므로
+ * (dictionaries/*.ts, compareZodiac.ts에 pt/vi 값도 이미 채워져 있음), 나중에 이 배열에
+ * 'pt'/'vi'를 추가하고 그 언어의 content-posts/*.mdx 3편만 채우면 바로 열린다 — 라우팅/타입/
+ * 다른 코드는 손댈 필요 없다(BLOG_LANGUAGES/compare 페이지가 전부 이 배열 하나만 참조).
+ * 홈(미니 데모)·리드 캡처는 콘텐츠 제작 비용이 없는 영역이라(데모는 실시간 AI 호출, 리드는
+ * 이메일만 받음) 이 축과 무관하게 6개 언어 전부 그대로 연다 — MARKETING_LANGUAGES 참고.
+ */
+export type LaunchContentLanguage = 'ko' | 'en' | 'ja' | 'es';
+
+export const LAUNCH_CONTENT_LANGUAGES: LaunchContentLanguage[] = ['ko', 'en', 'ja', 'es'];
+
+/** 1차 출시에서 뺀 언어 — 실제로 어디서 쓰이진 않고, "왜 빠졌는지" 코드에서 바로 보이게 하는 문서용. */
+export const DEFERRED_CONTENT_LANGUAGES: NonKoreanLanguage[] = ['pt', 'vi'];
+
+export function isLaunchContentLanguage(lang: MarketingLanguage): lang is LaunchContentLanguage {
+  return (LAUNCH_CONTENT_LANGUAGES as MarketingLanguage[]).includes(lang);
+}
+
+/**
+ * 마케팅 카피의 톤 2그룹(사용자 확정) — en/es는 사주 개념을 처음 접하는 독자에게 서양
+ * 별자리에 빗대어 처음부터 설명하고, ko/ja는 각자 이미 익숙한 전통(사주, 四柱推命)과의
+ * 유사성을 강조한다(2026-08-07: ko를 PR/QA 전용에서 정식 타겟으로 전환하면서 ja와 같은
+ * 그룹으로 옮겼다 — 한국 독자에게 "사주가 뭔지 처음부터 설명"하는 톤은 어색하기 때문).
+ * pt/vi는 1차 출시 대상이 아니지만(위 LAUNCH_CONTENT_LANGUAGES 참고) 값 자체는 그대로
+ * 유지한다 — 나중에 다시 열 때 이 결정을 다시 내릴 필요가 없게.
  *
  * 이 구분은 saju-letter-backend가 2026-08-05에 확정한 "AI 생성 사주 콘텐츠는 6개 언어
  * 전부 동일하게 취급(오행명/전문용어 노출 금지에 언어별 차등 없음)" 원칙과는 다른 층이다 —
@@ -46,7 +69,7 @@ export function isNonKoreanLanguage(lang: MarketingLanguage): lang is NonKoreanL
 export type ToneGroup = 'explain-from-scratch' | 'lean-into-tradition';
 
 export const TONE_GROUP: Record<MarketingLanguage, ToneGroup> = {
-  ko: 'explain-from-scratch',
+  ko: 'lean-into-tradition',
   en: 'explain-from-scratch',
   es: 'explain-from-scratch',
   pt: 'explain-from-scratch',

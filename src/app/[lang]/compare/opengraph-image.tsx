@@ -1,7 +1,6 @@
 import { ImageResponse } from 'next/og';
 import { getDictionary } from '@/dictionaries';
-import { isMarketingLanguage } from '@/lib/languages';
-import { isCompareLanguage } from '@/content/compareZodiac';
+import { isMarketingLanguage, isLaunchContentLanguage } from '@/lib/languages';
 
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
@@ -12,7 +11,7 @@ export const contentType = 'image/png';
  */
 export default async function Image({ params }: { params: Promise<{ lang: string }> }) {
   const { lang: rawLang } = await params;
-  const dict = await getDictionary(isMarketingLanguage(rawLang) && isCompareLanguage(rawLang) ? rawLang : 'en');
+  const dict = await getDictionary(isMarketingLanguage(rawLang) && isLaunchContentLanguage(rawLang) ? rawLang : 'en');
 
   return new ImageResponse(
     (

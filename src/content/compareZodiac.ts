@@ -1,22 +1,33 @@
-import { isNonKoreanLanguage, type NonKoreanLanguage } from '@/lib/languages';
+import type { MarketingLanguage } from '@/lib/languages';
 
 /**
  * compare 페이지 전용 정적 콘텐츠 — content-posts(MDX)와 달리 표 형태 구조화 데이터라
  * 별도 TS 데이터 파일로 둔다(backend의 angleBank.ts/toneBank.ts와 같은 "콘텐츠 뱅크" 위치).
- * ko는 이 사이트에서 PR/QA 전용이라 데이터를 채우지 않는다(languages.ts, posts.ts의
- * BLOG_LANGUAGES와 같은 이유 — compare 페이지도 이 5개 언어로만 연다).
+ * 6개 언어 전부(pt/vi 포함) 데이터를 채워둔다 — 실제로 compare 페이지가 여는 언어는
+ * languages.ts의 LAUNCH_CONTENT_LANGUAGES(1차 출시: ko/en/ja/es)뿐이지만, pt/vi도 이미
+ * 번역해뒀으니 나중에 그 배열에 추가하기만 하면 바로 열린다 — 이 파일을 다시 건드릴 필요가 없다.
  */
-export type CompareLanguage = NonKoreanLanguage;
-
-export const isCompareLanguage = isNonKoreanLanguage;
-
 export interface ZodiacRow {
   sign: string;
   /** 월/일 숫자 표기(MM/DD–MM/DD)로 통일해 언어별 월 이름 번역 없이도 바로 이해할 수 있게 했다. */
   dateRange: string;
 }
 
-export const ZODIAC_ROWS: Record<CompareLanguage, ZodiacRow[]> = {
+export const ZODIAC_ROWS: Record<MarketingLanguage, ZodiacRow[]> = {
+  ko: [
+    { sign: '양자리', dateRange: '3/21–4/19' },
+    { sign: '황소자리', dateRange: '4/20–5/20' },
+    { sign: '쌍둥이자리', dateRange: '5/21–6/20' },
+    { sign: '게자리', dateRange: '6/21–7/22' },
+    { sign: '사자자리', dateRange: '7/23–8/22' },
+    { sign: '처녀자리', dateRange: '8/23–9/22' },
+    { sign: '천칭자리', dateRange: '9/23–10/22' },
+    { sign: '전갈자리', dateRange: '10/23–11/21' },
+    { sign: '사수자리', dateRange: '11/22–12/21' },
+    { sign: '염소자리', dateRange: '12/22–1/19' },
+    { sign: '물병자리', dateRange: '1/20–2/18' },
+    { sign: '물고기자리', dateRange: '2/19–3/20' },
+  ],
   en: [
     { sign: 'Aries', dateRange: '3/21–4/19' },
     { sign: 'Taurus', dateRange: '4/20–5/20' },

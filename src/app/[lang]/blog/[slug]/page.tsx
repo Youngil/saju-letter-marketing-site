@@ -2,7 +2,7 @@ import Link from 'next/link';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { getDictionary } from '@/dictionaries';
-import { isMarketingLanguage, type MarketingLanguage } from '@/lib/languages';
+import { isMarketingLanguage, isLaunchContentLanguage, type LaunchContentLanguage } from '@/lib/languages';
 import { BLOG_LANGUAGES, getPostModule, POST_SLUGS, type PostSlug } from '@/lib/posts';
 
 export async function generateStaticParams() {
@@ -19,7 +19,7 @@ export async function generateMetadata({
   params: Promise<{ lang: string; slug: string }>;
 }): Promise<Metadata> {
   const { lang: rawLang, slug: rawSlug } = await params;
-  if (!isMarketingLanguage(rawLang) || !isPostSlug(rawSlug)) return {};
+  if (!isMarketingLanguage(rawLang) || !isLaunchContentLanguage(rawLang) || !isPostSlug(rawSlug)) return {};
   const mod = await getPostModule(rawLang, rawSlug);
   if (!mod) return {};
   return { title: mod.meta.title, description: mod.meta.description };
@@ -27,8 +27,8 @@ export async function generateMetadata({
 
 export default async function BlogPostPage({ params }: { params: Promise<{ lang: string; slug: string }> }) {
   const { lang: rawLang, slug: rawSlug } = await params;
-  if (!isMarketingLanguage(rawLang) || !isPostSlug(rawSlug)) notFound();
-  const lang: MarketingLanguage = rawLang;
+  if (!isMarketingLanguage(rawLang) || !isLaunchContentLanguage(rawLang) || !isPostSlug(rawSlug)) notFound();
+  const lang: LaunchContentLanguage = rawLang;
   const mod = await getPostModule(lang, rawSlug);
   if (!mod) notFound();
   const dict = await getDictionary(lang);

@@ -1,11 +1,13 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { getDictionary } from '@/dictionaries';
-import { isMarketingLanguage, type MarketingLanguage } from '@/lib/languages';
-import { DAY_MASTER_ROMANIZATIONS, isCompareLanguage, ZODIAC_ROWS, type CompareLanguage } from '@/content/compareZodiac';
+import { isMarketingLanguage, isLaunchContentLanguage, LAUNCH_CONTENT_LANGUAGES, type LaunchContentLanguage } from '@/lib/languages';
+import { DAY_MASTER_ROMANIZATIONS, ZODIAC_ROWS } from '@/content/compareZodiac';
 
-/** 표 헤더 하나짜리 짧은 문구라 dictionary까지 확장하지 않고 여기서만 로컬라이즈한다. */
-const DATE_RANGE_HEADER: Record<CompareLanguage, string> = {
+/** 표 헤더 하나짜리 짧은 문구라 dictionary까지 확장하지 않고 여기서만 로컬라이즈한다. pt/vi는
+ * 1차 출시 대상이 아니지만(languages.ts) 나중에 열 때 바로 쓸 수 있게 값은 남겨둔다. */
+const DATE_RANGE_HEADER: Record<LaunchContentLanguage | 'pt' | 'vi', string> = {
+  ko: '기간',
   en: 'Date range',
   es: 'Rango de fechas',
   pt: 'Período',
@@ -13,14 +15,13 @@ const DATE_RANGE_HEADER: Record<CompareLanguage, string> = {
   vi: 'Khoảng ngày',
 };
 
-/** BLOG_LANGUAGES와 같은 5개 언어(ko 제외) — ko는 이 사이트에서 PR/QA 전용이라 SEO 콘텐츠 대상이 아니다. */
 export async function generateStaticParams() {
-  return (['en', 'es', 'pt', 'ja', 'vi'] as const).map((lang) => ({ lang }));
+  return LAUNCH_CONTENT_LANGUAGES.map((lang) => ({ lang }));
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ lang: string }> }): Promise<Metadata> {
   const { lang: rawLang } = await params;
-  if (!isMarketingLanguage(rawLang) || !isCompareLanguage(rawLang)) return {};
+  if (!isMarketingLanguage(rawLang) || !isLaunchContentLanguage(rawLang)) return {};
   const dict = await getDictionary(rawLang);
   return {
     title: dict.compare.ogTitle,
@@ -31,8 +32,8 @@ export async function generateMetadata({ params }: { params: Promise<{ lang: str
 
 export default async function ComparePage({ params }: { params: Promise<{ lang: string }> }) {
   const { lang: rawLang } = await params;
-  if (!isMarketingLanguage(rawLang) || !isCompareLanguage(rawLang)) notFound();
-  const lang: MarketingLanguage = rawLang;
+  if (!isMarketingLanguage(rawLang) || !isLaunchContentLanguage(rawLang)) notFound();
+  const lang: LaunchContentLanguage = rawLang;
   const dict = await getDictionary(lang);
   const rows = ZODIAC_ROWS[rawLang];
 
