@@ -79,13 +79,14 @@ export const dictionary: MarketingDictionary = {
       "Zodiac signs are set by your birth month, so there are 12 of them. Saju's day master is set by your exact birth day instead, cycling through 10 values every 10 days — so it doesn't line up row-for-row with the zodiac table above. Try the demo to see your own day master.",
   },
   leadCapture: {
-    title: 'Want more before you install the app?',
-    subtitle: "Leave your email and we'll send a short introduction to saju over the next few days — including a longer example letter and a welcome offer.",
+    title: 'Sign up now for a 30-day trial coupon',
+    subtitle:
+      "Leave your email and we'll send a short introduction to saju over the next few days — including an example letter, and on the last day, a code for a 30-day free trial (instead of the usual 7).",
     emailPlaceholder: 'you@example.com',
     consentLabel: "I'd like to receive these emails (you can unsubscribe anytime)",
     submitButton: 'Send it to me',
     submitting: 'Signing you up…',
-    success: "You're all set! Check your inbox soon.",
+    success: "You're all set! We'll email you when your first note is ready.",
     errors: {
       email: 'Please enter a valid email address.',
       consent: 'Please check the box to receive the emails.',

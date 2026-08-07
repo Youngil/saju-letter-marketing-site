@@ -81,13 +81,14 @@ export const dictionary: MarketingDictionary = {
       'Cung hoàng đạo được xác định theo tháng sinh nên có 12 cung. Nhật chủ trong Bát Tự lại được xác định theo đúng ngày sinh của bạn, xoay vòng qua 10 giá trị mỗi 10 ngày — vì vậy nó không khớp từng hàng với bảng cung hoàng đạo phía trên. Hãy thử bản demo để xem nhật chủ của chính bạn.',
   },
   leadCapture: {
-    title: 'Muốn tìm hiểu thêm trước khi cài ứng dụng?',
-    subtitle: 'Để lại email và chúng tôi sẽ gửi một chuỗi giới thiệu ngắn về Bát Tự trong vài ngày tới — kèm một lá thư mẫu đầy đủ hơn và một ưu đãi chào mừng.',
+    title: 'Đăng ký ngay để nhận mã dùng thử miễn phí 30 ngày',
+    subtitle:
+      'Để lại email và chúng tôi sẽ gửi một chuỗi giới thiệu ngắn về Bát Tự trong vài ngày tới — kèm một lá thư mẫu, và vào ngày cuối cùng, một mã dùng thử miễn phí 30 ngày (thay vì 7 ngày như thường lệ).',
     emailPlaceholder: 'ban@example.com',
     consentLabel: 'Tôi muốn nhận các email này (có thể hủy bất cứ lúc nào)',
     submitButton: 'Gửi cho tôi',
     submitting: 'Đang đăng ký…',
-    success: 'Xong rồi! Hãy kiểm tra hộp thư của bạn sớm nhé.',
+    success: 'Xong rồi! Chúng tôi sẽ báo khi email đầu tiên sẵn sàng.',
     errors: {
       email: 'Vui lòng nhập một địa chỉ email hợp lệ.',
       consent: 'Vui lòng đánh dấu vào ô để nhận email.',

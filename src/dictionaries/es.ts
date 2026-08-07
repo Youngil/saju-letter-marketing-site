@@ -79,13 +79,14 @@ export const dictionary: MarketingDictionary = {
       'Los signos zodiacales se definen por tu mes de nacimiento, por eso hay 12. El maestro del día del saju se define por tu día exacto de nacimiento y rota entre 10 valores cada 10 días — por eso no coincide fila por fila con la tabla del zodiaco de arriba. Prueba la demo para ver tu propio maestro del día.',
   },
   leadCapture: {
-    title: '¿Quieres saber más antes de instalar la app?',
-    subtitle: 'Déjanos tu correo y te enviaremos una breve introducción al saju durante los próximos días — incluyendo una carta de ejemplo más larga y una oferta de bienvenida.',
+    title: 'Regístrate ahora y consigue un cupón de prueba de 30 días',
+    subtitle:
+      'Déjanos tu correo y te enviaremos una breve introducción al saju durante los próximos días — incluyendo una carta de ejemplo y, el último día, un código para una prueba gratuita de 30 días (en vez de los 7 habituales).',
     emailPlaceholder: 'tu@ejemplo.com',
     consentLabel: 'Quiero recibir estos correos (puedes darte de baja cuando quieras)',
     submitButton: 'Enviármelo',
     submitting: 'Registrando…',
-    success: '¡Listo! Revisa tu bandeja de entrada pronto.',
+    success: '¡Listo! Te escribiremos cuando tu primer correo esté listo.',
     errors: {
       email: 'Por favor ingresa un correo electrónico válido.',
       consent: 'Por favor marca la casilla para recibir los correos.',
