@@ -7,13 +7,18 @@ import type { ToneGroup } from '@/lib/languages';
  * 레이아웃을 쓸지만 결정하고, 단어 선택에는 관여하지 않는다(src/lib/languages.ts 참고).
  *
  * 인포그래픽은 외부 이미지/영상 에셋이 아니라 인라인 SVG/HTML로 직접 그린다. 사용자가 참고로
- * 보여준 타 서비스 인포그래픽(2차 버전, 2026-08-08)의 만듦새 — 아이콘 배지, 카드 태그라인,
- * 조합 캡션, 4행 비교 표 — 를 따라가되 두 가지는 의도적으로 다르게 했다: (1) 카드 헤더 아이콘은
- * 오행(나무/불/산/금속/물)이 아니라 격자(4개 기둥)/고리 달린 행성(천체) 같은 중립적인 도형만
- * 쓴다 — §8 가드레일("오행 명칭 노출 금지, 서양 4원소와 혼동 방지")과 부딪힐 소지를 원천
- * 차단하기 위함. (2) 참고 이미지 맨 아래의 CTA 배너("Get My Reading")와 "Trusted by Global
- * Users" 같은 신뢰 배지는 넣지 않았다 — CTA는 바로 아래 데모 섹션과 중복되고, "글로벌 유저가
- * 신뢰"는 신규 사이트에 아직 근거 없는 주장이라 뺐다.
+ * 보여준 두 번째 이미지(사주 4기둥 일러스트 + 점성술 궤도 일러스트, 2026-08-08)의 만듦새를
+ * 최대한 가깝게 재현했다 — 배경 아치선/반짝임, 기둥별 아이콘+2줄 라벨, 점선으로 중앙 매듭
+ * 아이콘에 모이는 구조(사주), 동심원 궤도+태양 글리프+행성 기호 배지(점성술). 다만 실제 이미지
+ * 파일을 자르거나 그대로 가져올 수는 없어서(이 사이트는 6개 언어 텍스트가 그림 위에 얹히므로
+ * 외부 래스터 이미지 대신 항상 인라인 SVG/HTML로 직접 그린다 — 언어가 바뀌어도 재생성 없이
+ * 그대로 재사용되고, 라벨 텍스트도 실제 번역 문자열로 나온다), 같은 구조를 코드로 새로 그렸다.
+ *
+ * 두 가지는 의도적으로 다르게 했다: (1) 참고 이미지의 4가지 기둥 아이콘(해/잎/사람/달)은
+ * 유지했다 — 오행(나무/불/산/금속/물) 5원소 매핑이 아니라 "연/월/일/시" 각각을 구분하는
+ * 중립적인 4개 아이콘이라 §8 가드레일(오행 명칭 노출 금지)과 부딪히지 않는다고 판단했다.
+ * (2) 참고 이미지 맨 아래의 CTA 배너와 "Trusted by Global Users" 신뢰 배지는 여전히 넣지
+ * 않았다 — CTA는 바로 아래 데모 섹션과 중복되고, 신뢰 배지는 신규 사이트에 근거 없는 주장이다.
  * pillarLabels는 새 dict 필드를 추가하는 대신 이미 존재하는 dict.demo의 년/월/일/시 라벨을
  * 그대로 재사용한다(호출부인 page.tsx 참고).
  */
@@ -56,39 +61,8 @@ export function AstrologyInfographic({
           </div>
           <p className="mt-3 text-sm leading-relaxed text-foreground/65">{dict.zodiacDescription}</p>
 
-          {/* 12개 중 태어난 '달'에 해당하는 1칸만 채워진 원형 다이얼로 표현 */}
-          <div className="flex items-center justify-center py-4">
-            <svg viewBox="0 0 120 120" className="h-28 w-28" role="img" aria-hidden="true">
-              {Array.from({ length: 12 }).map((_, i) => {
-                const angle = (i / 12) * 2 * Math.PI - Math.PI / 2;
-                const nextAngle = ((i + 1) / 12) * 2 * Math.PI - Math.PI / 2;
-                const outer = 52;
-                const inner = 34;
-                const cx = 60;
-                const cy = 60;
-                const isHighlighted = i === 0;
-                const path = [
-                  `M ${cx + inner * Math.cos(angle)} ${cy + inner * Math.sin(angle)}`,
-                  `L ${cx + outer * Math.cos(angle)} ${cy + outer * Math.sin(angle)}`,
-                  `A ${outer} ${outer} 0 0 1 ${cx + outer * Math.cos(nextAngle)} ${cy + outer * Math.sin(nextAngle)}`,
-                  `L ${cx + inner * Math.cos(nextAngle)} ${cy + inner * Math.sin(nextAngle)}`,
-                  `A ${inner} ${inner} 0 0 0 ${cx + inner * Math.cos(angle)} ${cy + inner * Math.sin(angle)}`,
-                  'Z',
-                ].join(' ');
-                return (
-                  <path
-                    key={i}
-                    d={path}
-                    fill={isHighlighted ? 'var(--accent)' : 'currentColor'}
-                    className={isHighlighted ? '' : 'text-foreground/10'}
-                    stroke="var(--background)"
-                    strokeWidth={1}
-                  />
-                );
-              })}
-              <circle cx={60} cy={60} r={20} fill="var(--background)" />
-              <circle cx={60} cy={60} r={20} fill="none" stroke="currentColor" className="text-foreground/15" strokeWidth={1} />
-            </svg>
+          <div className="flex items-center justify-center py-6">
+            <AstrologyOrbitIllustration />
           </div>
 
           <div className="mt-auto flex flex-wrap justify-center gap-1.5 sm:justify-start">
@@ -113,24 +87,8 @@ export function AstrologyInfographic({
           </div>
           <p className="mt-3 text-sm leading-relaxed text-foreground/65">{dict.sajuDescription}</p>
 
-          {/* 년/월/일/시 네 기둥이 각각 2칸(천간/지지)씩으로 나뉘는 모습 + 하나로 합쳐지는 캡션 */}
-          <div className="flex flex-col items-center py-4">
-            <div className="flex items-center justify-center gap-3">
-              {pillars.map((label, i) => (
-                <div key={i} className="flex flex-col items-center gap-1.5">
-                  <div className="flex h-24 w-9 flex-col overflow-hidden rounded-lg shadow-sm">
-                    <div className="flex-1" style={{ background: `color-mix(in srgb, var(--accent-warm) ${85 - i * 8}%, transparent)` }} />
-                    <div className="flex-1" style={{ background: `color-mix(in srgb, var(--accent-warm) ${45 - i * 6}%, transparent)` }} />
-                  </div>
-                  <span className="text-[11px] font-medium text-foreground/55">{label}</span>
-                </div>
-              ))}
-            </div>
-            <div className="mt-2 h-3 w-px bg-accent-warm/30" aria-hidden="true" />
-            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-accent-warm/15 text-accent-warm" aria-hidden="true">
-              <MergeIcon />
-            </span>
-            <p className="mt-1.5 text-center text-[11px] text-foreground/50">{dict.sajuCombineCaption}</p>
+          <div className="flex justify-center py-4">
+            <SajuPillarsIllustration pillars={pillars} caption={dict.sajuCombineCaption} />
           </div>
 
           <div className="mt-auto flex flex-wrap justify-center gap-1.5 sm:justify-start">
@@ -184,6 +142,113 @@ export function AstrologyInfographic({
   );
 }
 
+/**
+ * 사주 일러스트 — 년/월/일/시 네 기둥(각각 고유 아이콘+2줄 라벨) → 점선으로 중앙의 매듭
+ * 아이콘에 모이는 구조. 라벨 길이가 언어마다 크게 달라서(예: "년" vs "Year" vs "Ngày sinh"급
+ * 단어들) 연결선은 SVG로 정교하게 그리는 대신 CSS(가로 점선 + 짧은 세로선)로 단순화했다 —
+ * 텍스트가 있는 요소는 항상 일반 HTML로 두고(리플로우 가능), 순수 장식 요소만 SVG/절대 위치를
+ * 쓴다는 원칙을 지키기 위함(반응형에서 깨지기 쉬운 절대 좌표 계산을 텍스트 근처에 두지 않음).
+ */
+function SajuPillarsIllustration({ pillars, caption }: { pillars: string[]; caption: string }) {
+  const icons = [SunGlyph, LeafIcon, PersonIcon, CrescentMoonIcon];
+  const tints = ['text-amber-600 bg-amber-50', 'text-rose-600 bg-rose-50', 'text-emerald-600 bg-emerald-50', 'text-sky-600 bg-sky-50'];
+
+  return (
+    <div className="relative flex flex-col items-center">
+      <svg
+        viewBox="0 0 220 90"
+        className="pointer-events-none absolute -top-6 left-1/2 h-20 w-64 -translate-x-1/2 opacity-50"
+        aria-hidden="true"
+      >
+        <path d="M 10 90 A 100 100 0 0 1 210 90" fill="none" stroke="var(--accent-warm)" strokeWidth="1" />
+        <path d="M 35 90 A 75 75 0 0 1 185 90" fill="none" stroke="var(--accent-warm)" strokeWidth="1" />
+        <path d="M 60 90 A 50 50 0 0 1 160 90" fill="none" stroke="var(--accent-warm)" strokeWidth="1" />
+      </svg>
+
+      <div className="relative flex gap-2">
+        {pillars.map((label, i) => {
+          const Icon = icons[i];
+          return (
+            <div
+              key={i}
+              className={`flex w-14 flex-col items-center gap-1.5 rounded-xl border border-foreground/10 bg-white px-1.5 py-3 shadow-sm sm:w-16`}
+            >
+              <span className={`flex h-7 w-7 items-center justify-center rounded-full ${tints[i]}`}>
+                <Icon />
+              </span>
+              <span className="text-center text-[10px] leading-tight font-bold tracking-wide text-foreground/70 uppercase">{label}</span>
+            </div>
+          );
+        })}
+      </div>
+
+      <div className="mt-3 w-full max-w-[210px] border-t border-dashed border-accent-warm/35" aria-hidden="true" />
+      <div className="h-3 w-px bg-accent-warm/35" aria-hidden="true" />
+      <span className="flex h-9 w-9 items-center justify-center rounded-full border border-accent-warm/30 bg-white text-accent-warm shadow-sm">
+        <KnotIcon />
+      </span>
+      <p className="mt-1.5 max-w-[180px] text-center text-[11px] text-foreground/50">{caption}</p>
+    </div>
+  );
+}
+
+/**
+ * 점성술 일러스트 — 동심원 궤도(점선) + 중심 태양 글리프 + 궤도를 따라 흩뿌려진 작은 점(행성) +
+ * 모서리에 배치한 4개 배지. 배지 안 기호(☽♆♄♀)는 실제 서양 점성술/천문학 기호(유니코드)라
+ * 번역이 필요 없는 고유 표기다 — 오행 문제와 무관하게 어느 언어에서든 그대로 재사용된다.
+ */
+function AstrologyOrbitIllustration() {
+  const dots = [
+    { r: 34, deg: 20 },
+    { r: 34, deg: 200 },
+    { r: 24, deg: 100 },
+    { r: 24, deg: 280 },
+    { r: 44, deg: 150 },
+    { r: 44, deg: 330 },
+  ];
+
+  return (
+    <div className="relative h-32 w-32">
+      <svg viewBox="0 0 120 120" className="h-full w-full text-accent/30" aria-hidden="true">
+        {[44, 34, 24].map((r) => (
+          <circle key={r} cx={60} cy={60} r={r} fill="none" stroke="currentColor" strokeWidth={1} strokeDasharray="2.5 4" />
+        ))}
+        {dots.map(({ r, deg }, i) => {
+          const rad = (deg * Math.PI) / 180;
+          return <circle key={i} cx={60 + r * Math.cos(rad)} cy={60 + r * Math.sin(rad)} r={2} className="fill-accent/60" />;
+        })}
+        <g className="text-accent" transform="translate(60 60)">
+          <circle r={11} fill="var(--background)" stroke="currentColor" strokeWidth={1.4} />
+          {Array.from({ length: 8 }).map((_, i) => {
+            const rad = (i / 8) * 2 * Math.PI;
+            const x1 = 14 * Math.cos(rad);
+            const y1 = 14 * Math.sin(rad);
+            const x2 = 18 * Math.cos(rad);
+            const y2 = 18 * Math.sin(rad);
+            return <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke="currentColor" strokeWidth={1.4} strokeLinecap="round" />;
+          })}
+        </g>
+      </svg>
+
+      <PlanetBadge symbol="☽" className="-top-2 left-1/2 -translate-x-1/2" />
+      <PlanetBadge symbol="♆" className="top-6 -left-3" />
+      <PlanetBadge symbol="♄" className="-bottom-2 left-2" />
+      <PlanetBadge symbol="♀" className="-bottom-2 right-0" />
+    </div>
+  );
+}
+
+function PlanetBadge({ symbol, className }: { symbol: string; className: string }) {
+  return (
+    <span
+      className={`absolute flex h-7 w-7 items-center justify-center rounded-full border border-accent/25 bg-white text-sm text-accent shadow-sm ${className}`}
+      aria-hidden="true"
+    >
+      {symbol}
+    </span>
+  );
+}
+
 function SparkleIcon() {
   return (
     <svg viewBox="0 0 24 24" className="h-3 w-3" fill="currentColor" aria-hidden="true">
@@ -212,10 +277,53 @@ function FourGridIcon() {
   );
 }
 
-function MergeIcon() {
+function SunGlyph() {
   return (
-    <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="currentColor" aria-hidden="true">
-      <circle cx="12" cy="12" r="3.5" />
+    <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" aria-hidden="true">
+      <circle cx="12" cy="12" r="4.5" />
+      {Array.from({ length: 8 }).map((_, i) => {
+        const rad = (i / 8) * 2 * Math.PI;
+        const x1 = 12 + 8 * Math.cos(rad);
+        const y1 = 12 + 8 * Math.sin(rad);
+        const x2 = 12 + 10.5 * Math.cos(rad);
+        const y2 = 12 + 10.5 * Math.sin(rad);
+        return <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} />;
+      })}
+    </svg>
+  );
+}
+
+function LeafIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M6 18c-2-6 1-12 12-13 1 10-4 14-12 13Z" />
+      <path d="M7 17c2-3 5-6 10-9" />
+    </svg>
+  );
+}
+
+function PersonIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" aria-hidden="true">
+      <circle cx="12" cy="8" r="3.2" />
+      <path d="M5.5 20c1-4 4-6 6.5-6s5.5 2 6.5 6" />
+    </svg>
+  );
+}
+
+function CrescentMoonIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-4 w-4" fill="currentColor" aria-hidden="true">
+      <path d="M15.5 12.5A6.5 6.5 0 1 1 8.3 3.2a7.5 7.5 0 1 0 8.9 9.6c-.5.1-1.1.1-1.7-.3Z" />
+    </svg>
+  );
+}
+
+function KnotIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinejoin="round" aria-hidden="true">
+      <rect x="7" y="7" width="10" height="10" rx="1.5" transform="rotate(45 12 12)" />
+      <rect x="9.5" y="9.5" width="5" height="5" rx="1" transform="rotate(45 12 12)" />
     </svg>
   );
 }
