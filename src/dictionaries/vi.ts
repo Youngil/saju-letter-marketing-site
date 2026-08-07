@@ -1,12 +1,14 @@
 import type { MarketingDictionary } from './types';
 
-/** 톤 그룹: lean-into-tradition — Tử Vi/Bát Tự(사주)라는 이미 아는 전통과의 유사성을 강조한다. */
+/** 톤 그룹: lean-into-tradition — Bát Tự(사주)라는 이미 아는 전통과의 유사성을 강조한다.
+ * Tử Vi(자미두수)는 Bát Tự와 다른 별개의 점술 체계라 혼동을 피하기 위해 쓰지 않는다
+ * (2026-08-08, 사용자 결정 — Bát Tự로 통일). */
 export const dictionary: MarketingDictionary = {
   brand: 'Saju Letter',
   languageSwitcherLabel: 'Tiếng Việt',
   nav: { home: 'Trang chủ', blog: 'Blog', compare: 'Cung hoàng đạo vs. Bát Tự' },
   hero: {
-    title: 'Gần với Bát Tự, Tử Vi mà bạn đã quen thuộc — mỗi sáng một lá thư dành riêng cho bạn',
+    title: 'Gần với Bát Tự mà bạn đã quen thuộc — mỗi sáng một lá thư dành riêng cho bạn',
     subtitle:
       'Bát Tự (Tứ Trụ) là cách xem vận mệnh dựa trên năm, tháng, ngày, giờ sinh — nền tảng quen thuộc với văn hóa Việt Nam. Saju Letter dùng chính nguyên lý đó để gửi bạn một lá thư ngắn, ấm áp mỗi sáng. Hãy thử xem một dòng luận giải miễn phí bên dưới.',
     ctaDemo: 'Thử ngay miễn phí',
