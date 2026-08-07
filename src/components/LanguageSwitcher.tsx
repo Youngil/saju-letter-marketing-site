@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
-import { MARKETING_LANGUAGES, type MarketingLanguage } from '@/lib/languages';
+import { LAUNCH_CONTENT_LANGUAGES, type MarketingLanguage } from '@/lib/languages';
 
 const LANGUAGE_LABELS: Record<MarketingLanguage, string> = {
   ko: '한국어',
@@ -28,6 +28,12 @@ const LANGUAGE_CODES: Record<MarketingLanguage, string> = {
  * saju-letter-newyear-campaign의 LanguageSwitcher.tsx는 localStorage에 쓰고 synthetic
  * StorageEvent를 dispatch하는 방식이었다 — 이 사이트는 URL이 언어를 들고 다니므로, 그냥
  * 현재 pathname의 언어 세그먼트만 바꿔치기한 새 경로로 이동하면 된다.
+ *
+ * 드롭다운에는 MARKETING_LANGUAGES(6개) 전부가 아니라 LAUNCH_CONTENT_LANGUAGES(ko/en/ja/es)만
+ * 보여준다(2026-08-08, 사용자 결정) — pt/vi는 홈/데모/리드캡처는 이미 열려 있지만 블로그/compare
+ * 는 아직 없어서, 스위처로 노출하면 pt/vi로 바꾼 뒤 블로그/compare 내비게이션을 누르면 404가
+ * 나는 어중간한 경험이 된다. 라우트 자체는 안 건드렸으므로 직접 링크(예: 신년운세 캠페인의
+ * pt/vi 지원)는 그대로 동작한다 — 여기서는 "발견 가능성"만 숨긴다.
  */
 export function LanguageSwitcher({ current }: { current: MarketingLanguage }) {
   const pathname = usePathname();
@@ -50,7 +56,7 @@ export function LanguageSwitcher({ current }: { current: MarketingLanguage }) {
       </button>
       {open && (
         <ul className="absolute right-0 mt-2 w-36 rounded-lg border border-foreground/10 bg-background py-1 shadow-lg z-50">
-          {MARKETING_LANGUAGES.map((lang) => (
+          {LAUNCH_CONTENT_LANGUAGES.map((lang) => (
             <li key={lang}>
               <Link
                 href={pathForLanguage(lang)}

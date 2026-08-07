@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { DEFAULT_LANGUAGE, MARKETING_LANGUAGES } from '@/lib/languages';
+import { DEFAULT_LANGUAGE, LAUNCH_CONTENT_LANGUAGES, MARKETING_LANGUAGES } from '@/lib/languages';
 
 /**
  * saju-letter-newyear-campaign은 URL 세그먼트 없이 브라우저 언어 감지+localStorage만 썼다
@@ -13,8 +13,11 @@ export function middleware(request: NextRequest) {
   const hasLangPrefix = MARKETING_LANGUAGES.some((lang) => pathname === `/${lang}` || pathname.startsWith(`/${lang}/`));
   if (hasLangPrefix) return NextResponse.next();
 
+  // 자동 감지 후보는 LAUNCH_CONTENT_LANGUAGES(ko/en/ja/es)로 한정한다(2026-08-08) —
+  // LanguageSwitcher와 같은 이유(pt/vi는 블로그/compare가 아직 없어 "숨겨둔" 상태). URL에 이미
+  // /pt나 /vi가 붙은 링크(신년운세 캠페인 등)는 위 hasLangPrefix에서 이미 걸러져 영향받지 않는다.
   const acceptLanguage = (request.headers.get('accept-language') ?? '').toLowerCase();
-  const detected = MARKETING_LANGUAGES.find((lang) => acceptLanguage.includes(lang)) ?? DEFAULT_LANGUAGE;
+  const detected = LAUNCH_CONTENT_LANGUAGES.find((lang) => acceptLanguage.includes(lang)) ?? DEFAULT_LANGUAGE;
 
   const url = request.nextUrl.clone();
   url.pathname = `/${detected}${pathname === '/' ? '' : pathname}`;
