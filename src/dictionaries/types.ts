@@ -79,6 +79,10 @@ export interface MarketingDictionary {
     submitButton: string;
     submitting: string;
     success: string;
+    /** 선착순 쿠폰 잔여 인원 문구 — "{count}"를 실제 잔여 인원 숫자로 치환해서 쓴다. */
+    remainingSlots: string;
+    /** 잔여 인원이 0이 됐을 때 위 remainingSlots 대신 보여준다. */
+    soldOut: string;
     errors: {
       email: string;
       consent: string;

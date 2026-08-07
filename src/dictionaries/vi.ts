@@ -89,6 +89,8 @@ export const dictionary: MarketingDictionary = {
     submitButton: 'Gửi cho tôi',
     submitting: 'Đang đăng ký…',
     success: 'Xong rồi! Chúng tôi sẽ báo khi email đầu tiên sẵn sàng.',
+    remainingSlots: 'Chỉ còn {count} suất cho ưu đãi này',
+    soldOut: 'Ưu đãi mã dùng thử đã hết suất — bạn vẫn có thể đăng ký nhé!',
     errors: {
       email: 'Vui lòng nhập một địa chỉ email hợp lệ.',
       consent: 'Vui lòng đánh dấu vào ô để nhận email.',

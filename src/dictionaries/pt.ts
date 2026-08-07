@@ -87,6 +87,8 @@ export const dictionary: MarketingDictionary = {
     submitButton: 'Enviar para mim',
     submitting: 'Cadastrando…',
     success: 'Pronto! Vamos te avisar quando seu primeiro e-mail estiver pronto.',
+    remainingSlots: 'Restam apenas {count} vagas para esta oferta',
+    soldOut: 'Esta oferta de cupom já se esgotou — mas você ainda pode se cadastrar!',
     errors: {
       email: 'Por favor, insira um e-mail válido.',
       consent: 'Marque a caixa para receber os e-mails.',

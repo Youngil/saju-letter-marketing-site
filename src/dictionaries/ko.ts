@@ -83,6 +83,8 @@ export const dictionary: MarketingDictionary = {
     submitButton: '보내주세요',
     submitting: '등록하는 중…',
     success: '완료됐어요! 첫 메일이 준비되면 보내드릴게요.',
+    remainingSlots: '선착순 {count}명에게만 드려요',
+    soldOut: '선착순 쿠폰이 모두 소진됐어요 — 등록은 계속 받고 있어요!',
     errors: {
       email: '올바른 이메일 주소를 입력해주세요.',
       consent: '이메일 수신에 동의해주세요.',

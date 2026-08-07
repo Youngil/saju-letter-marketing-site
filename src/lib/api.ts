@@ -49,3 +49,14 @@ export function subscribeLead(input: SubscribeLeadInput): Promise<{ leadId: stri
 export function unsubscribeLead(token: string): Promise<{ status: string }> {
   return request('/marketing-site/unsubscribe', { method: 'POST', body: JSON.stringify({ token }) });
 }
+
+export interface CouponAvailability {
+  capacity: number | null;
+  issued: number;
+  remaining: number | null;
+}
+
+/** 30일 체험 쿠폰 잔여 인원 — 리드 캡처 폼이 "OO명 남음" 문구를 보여줄 때 조회한다. */
+export function getCouponAvailability(): Promise<CouponAvailability> {
+  return request('/marketing-site/coupon-availability');
+}

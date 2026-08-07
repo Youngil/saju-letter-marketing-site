@@ -1,9 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { MarketingDictionary } from '@/dictionaries/types';
 import type { MarketingLanguage } from '@/lib/languages';
-import { ApiError, subscribeLead } from '@/lib/api';
+import { ApiError, getCouponAvailability, subscribeLead } from '@/lib/api';
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -19,6 +19,22 @@ export function LeadCaptureForm({ language, dict }: { language: MarketingLanguag
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  // 선착순 잔여 인원 — 관리자 패널에서 캡을 조정할 수 있어(saju-letter-admin-panel "설정" 화면)
+  // 하드코딩하지 않고 매번 조회한다. 조회 실패해도 폼 자체는 그대로 쓸 수 있어야 하므로 조용히
+  // 무시한다(null로 남겨두면 문구 자체를 숨긴다).
+  const [remaining, setRemaining] = useState<number | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    getCouponAvailability()
+      .then((availability) => {
+        if (!cancelled) setRemaining(availability.remaining);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -60,6 +76,12 @@ export function LeadCaptureForm({ language, dict }: { language: MarketingLanguag
     <form onSubmit={handleSubmit} className="card-surface flex flex-col gap-3 rounded-2xl border border-accent-warm/20 p-6 sm:p-7">
       <h3 className="text-lg font-semibold">{dict.title}</h3>
       <p className="text-sm text-foreground/70">{dict.subtitle}</p>
+      {remaining !== null &&
+        (remaining > 0 ? (
+          <p className="text-sm font-medium text-accent-warm">{dict.remainingSlots.replace('{count}', String(remaining))}</p>
+        ) : (
+          <p className="text-sm text-foreground/60">{dict.soldOut}</p>
+        ))}
       <input
         type="email"
         value={email}

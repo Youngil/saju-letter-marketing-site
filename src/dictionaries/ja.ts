@@ -80,6 +80,8 @@ export const dictionary: MarketingDictionary = {
     submitButton: '送ってもらう',
     submitting: '登録しています…',
     success: '登録が完了しました。最初のメールが準備でき次第お届けします。',
+    remainingSlots: '先着{count}名限定の特典です',
+    soldOut: '先着クーポンは終了しました — 登録は引き続き受け付けています。',
     errors: {
       email: '有効なメールアドレスを入力してください。',
       consent: 'メール受信のチェックを入れてください。',

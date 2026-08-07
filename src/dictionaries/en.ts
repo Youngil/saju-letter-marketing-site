@@ -87,6 +87,8 @@ export const dictionary: MarketingDictionary = {
     submitButton: 'Send it to me',
     submitting: 'Signing you up…',
     success: "You're all set! We'll email you when your first note is ready.",
+    remainingSlots: 'Only {count} spots left for this offer',
+    soldOut: "This coupon offer is fully claimed — but you can still sign up!",
     errors: {
       email: 'Please enter a valid email address.',
       consent: 'Please check the box to receive the emails.',
