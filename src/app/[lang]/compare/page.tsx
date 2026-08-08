@@ -3,6 +3,12 @@ import { notFound } from 'next/navigation';
 import { getDictionary } from '@/dictionaries';
 import { isMarketingLanguage, isLaunchContentLanguage, LAUNCH_CONTENT_LANGUAGES, type LaunchContentLanguage } from '@/lib/languages';
 import { DAY_MASTER_ROMANIZATIONS, ZODIAC_ROWS } from '@/content/compareZodiac';
+import { HEAVENLY_STEMS } from '@/lib/sajuVocabulary';
+
+/** 한국어/일본어는 로마자 표기(Gap 등)만으로는 어색해서 한자를 함께 보여준다(2026-08-08,
+ * 사용자 요청) — 두 언어 모두 한자 자체는 읽을 수 있는 독자층이라 발음 표기 없이도 통한다.
+ * 그 외 언어는 로마자만으로 충분해 그대로 둔다. */
+const SHOWS_HANJA: Record<LaunchContentLanguage, boolean> = { ko: true, ja: true, en: false, es: false };
 
 /** 표 헤더 하나짜리 짧은 문구라 dictionary까지 확장하지 않고 여기서만 로컬라이즈한다. pt/vi는
  * 1차 출시 대상이 아니지만(languages.ts) 나중에 열 때 바로 쓸 수 있게 값은 남겨둔다. */
@@ -64,9 +70,9 @@ export default async function ComparePage({ params }: { params: Promise<{ lang: 
       <h2 className="mb-3 mt-12 text-xl font-semibold">{dict.compare.dayMasterSectionTitle}</h2>
       <p className="mb-4 text-foreground/70">{dict.compare.dayMasterIntro}</p>
       <ul className="flex flex-wrap gap-2">
-        {DAY_MASTER_ROMANIZATIONS.map((label) => (
+        {DAY_MASTER_ROMANIZATIONS.map((label, index) => (
           <li key={label} className="rounded-full border border-foreground/15 px-4 py-1 text-sm text-foreground/80">
-            {dict.compare.sajuColumnLabel}: {label}
+            {dict.compare.sajuColumnLabel}: {SHOWS_HANJA[lang] ? `${HEAVENLY_STEMS[index]}(${label})` : label}
           </li>
         ))}
       </ul>
