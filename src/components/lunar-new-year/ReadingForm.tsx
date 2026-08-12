@@ -59,6 +59,7 @@ export function ReadingForm({ language, dict: t }: { language: NonKoreanLanguage
     try {
       const hourNum = timeKnown && hour !== '' ? Number(hour) : undefined;
       const chart = calculateSaju({
+        calendarType: 'solar',
         year: yearNum,
         month: monthNum,
         day: dayNum,

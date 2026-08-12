@@ -105,6 +105,7 @@ export const dictionary: MarketingDictionary = {
   },
   footer: {
     privacyNote: 'Your birth date and time never leave your browser — only the calculated chart is sent to generate your reading.',
+    privacyLinkLabel: 'Privacy Policy',
     googlePlayCta: 'Get it on Google Play',
   },
   lunarNewYear: {

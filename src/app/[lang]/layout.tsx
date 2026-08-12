@@ -63,6 +63,9 @@ export default async function LangLayout({
           <div className="mx-auto flex max-w-5xl flex-col gap-1 px-4 py-10 text-sm text-foreground/50">
             <span className="font-medium text-foreground/70">{dict.brand}</span>
             <p>{dict.footer.privacyNote}</p>
+            <Link href={`/${lang}/privacy`} className="mt-2 w-fit underline hover:text-foreground/70">
+              {dict.footer.privacyLinkLabel}
+            </Link>
           </div>
         </footer>
       </body>

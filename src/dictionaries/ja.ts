@@ -98,6 +98,7 @@ export const dictionary: MarketingDictionary = {
   },
   footer: {
     privacyNote: '生年月日・時間はブラウザの外に送信されません — 計算済みの命式だけを診断のために送信します。',
+    privacyLinkLabel: 'プライバシーポリシー',
     googlePlayCta: 'Google Playで入手',
   },
   lunarNewYear: {

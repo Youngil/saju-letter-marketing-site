@@ -34,5 +34,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
     lastModified: new Date(),
   }));
 
-  return [...homeEntries, ...blogIndexEntries, ...blogPostEntries, ...compareEntries, ...lunarNewYearEntries];
+  // 개인정보처리방침(2026-08-12, saju-letter-backend에서 이관)은 법적 고지 문서라
+  // LAUNCH_CONTENT_LANGUAGES가 아니라 홈과 같은 MARKETING_LANGUAGES(6개) 전체를 대상으로 한다.
+  const privacyEntries = MARKETING_LANGUAGES.map((lang) => ({
+    url: `${WEB_BASE_URL}/${lang}/privacy`,
+    lastModified: new Date(),
+  }));
+
+  return [...homeEntries, ...blogIndexEntries, ...blogPostEntries, ...compareEntries, ...lunarNewYearEntries, ...privacyEntries];
 }

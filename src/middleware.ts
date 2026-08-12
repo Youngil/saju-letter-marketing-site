@@ -10,6 +10,20 @@ import { DEFAULT_LANGUAGE, LAUNCH_CONTENT_LANGUAGES, MARKETING_LANGUAGES } from 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
+  // apex 도메인(saju-letter.com, www 없음)은 GCP 배포(2026-08-09) 이후 DNS 자체가 없다가
+  // 2026-08-12에 이 사이트로 연결됐다 — 처음부터 이 사이트의 canonical 도메인은 www였으므로
+  // (NEXT_PUBLIC_WEB_BASE_URL, sitemap.ts/robots.ts/모든 generateMetadata가 www 기준),
+  // apex로 들어오는 요청은 콘텐츠를 그대로 서빙하지 않고 항상 www로 리다이렉트한다(중복
+  // 콘텐츠로 인한 SEO 문제 방지, 단일 canonical 유지).
+  const host = request.headers.get('host') ?? '';
+  if (host === 'saju-letter.com') {
+    const url = request.nextUrl.clone();
+    url.protocol = 'https';
+    url.hostname = 'www.saju-letter.com';
+    url.port = '';
+    return NextResponse.redirect(url, 308);
+  }
+
   const hasLangPrefix = MARKETING_LANGUAGES.some((lang) => pathname === `/${lang}` || pathname.startsWith(`/${lang}/`));
   if (hasLangPrefix) return NextResponse.next();
 

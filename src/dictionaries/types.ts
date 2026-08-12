@@ -99,6 +99,7 @@ export interface MarketingDictionary {
   };
   footer: {
     privacyNote: string;
+    privacyLinkLabel: string;
     googlePlayCta: string;
   };
   /**

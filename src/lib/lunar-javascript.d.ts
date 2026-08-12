@@ -5,9 +5,9 @@
  * 따로 선언한다).
  * https://github.com/6tail/lunar-javascript
  *
- * 이 사이트의 미니 데모도 신년운세 캠페인과 마찬가지로 양력 입력만 받는다(음력/윤달 처리는
- * 범위 밖) — 그래서 mobile/backend의 동명 파일과 달리 Lunar.fromYmd(음력 생성자)는
- * 선언하지 않는다.
+ * `Lunar.fromYmdHms`(음력 생성자)는 궁합 공유 웹페이지 이관(2026-08-12, saju.ts의 음력 입력
+ * 지원) 때 추가했다 — 그 전까지는 이 사이트의 미니 데모/신년운세 캠페인이 전부 양력 입력만
+ * 받아 필요 없었다.
  */
 declare module 'lunar-javascript' {
   export interface EightChar {
@@ -31,5 +31,9 @@ declare module 'lunar-javascript' {
 
   export const Solar: {
     fromYmdHms(year: number, month: number, day: number, hour: number, minute: number, second: number): Solar;
+  };
+
+  export const Lunar: {
+    fromYmdHms(year: number, month: number, day: number, hour: number, minute: number, second: number): Lunar;
   };
 }

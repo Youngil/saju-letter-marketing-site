@@ -131,6 +131,9 @@ Cloudflare Turnstile — `NEXT_PUBLIC_TURNSTILE_SITE_KEY`가 없으면 위젯을
   원칙을 유지할 것(개인정보처리방침 같은 법적 고지는 별개 — 여긴 순수 마케팅 카피 얘기다).
 - `/[lang]/compare` (+`opengraph-image.tsx`) — 서양 별자리 12개 vs 사주 일간(10개, 별도 순환 축이라
   1:1 매칭표를 만들지 않는다) 정적 비교. 블로그와 같은 4개 언어만 대상.
+- `/[lang]/privacy` — 개인정보처리방침(2026-08-12, `saju-letter-backend`의 `public/privacy.html`에서 이관, `src/content/privacyPolicy.ts`). 블로그/compare와 다르게 `LAUNCH_CONTENT_LANGUAGES`가 아니라 `MARKETING_LANGUAGES` 6개 전부 대상 — 법적 고지 문서라 1차 출시 언어 축과 무관해야 한다. 이관 이유: `www.saju-letter.com` 커스텀 도메인이 이 사이트에 연결되면서(§9 "왜 Next.js인가" 인접 GCP 배포 내역, `docs/setup-guide.md` 참고) 백엔드가 서빙하던 옛 `saju-letter.com/privacy`가 더 이상 그 도메인으로는 응답하지 못하게 됐는데, 이 사실이 문서에 반영되지 않아 Play Console에 "준비 완료"로 잘못 기록돼 있던 것을 발견해 바로잡았다. 콘텐츠는 문구 변경 없이 그대로 옮겼다(⚠️ 법률 전문가 검토 전 AI 초안 — `privacyPolicy.ts` 상단 주석 참고). `saju-letter-mobile`은 `src/constants/links.ts`의 `buildPrivacyPolicyUrl(language)`로 앱의 현재 언어에 맞는 링크를 설정 화면에서 연다.
+- `/[lang]/compat/[token]` (+`opengraph-image.tsx`) — 궁합 공유 웹페이지(2026-08-12, `saju-letter-backend`의 `public/compat.html`에서 이관, `src/content/compatContent.ts`/`src/lib/compatApi.ts`/`src/components/compat/CompatView.tsx`). privacy와 같은 이유로 `MARKETING_LANGUAGES` 6개 전부 대상(`generateStaticParams` 없음 — 토큰은 런타임 생성이라 `lunar-new-year/r/[id]`처럼 완전 동적 라우트). 공유 URL 자체(`saju-letter-mobile`의 `buildCompatibilityShareUrl`)는 언어 세그먼트가 없다 — `middleware.ts`의 기존 자동감지 리다이렉트가 옛 compat.js의 브라우저 언어 감지 UX를 코드 추가 없이 재현해준다. 백엔드의 `compatibilityPublicRouter`(초대 조회/제출/이벤트)는 그대로 두고 이 사이트가 `marketingSiteCors`로 cross-origin 호출한다.
+- `/.well-known/assetlinks.json`(Route Handler, 2026-08-12) — Android App Links 검증 파일. 궁합 공유 도메인이 여기로 옮겨오면서 검증 대상도 이 도메인이 됐다(`saju-letter-backend`에도 같은 파일이 남아있지만 무해함).
 - `/[lang]/unsubscribe` — 드립 수신거부 처리.
 - `/[lang]/lunar-new-year` (+`r/[id]`, +`r/[id]/opengraph-image.tsx`, +`unsubscribe`) — 신년운세
   캠페인 이관분(2026-08-07, `saju-letter-newyear-campaign`에서 옮겨옴). ko는 원래 그 캠페인이

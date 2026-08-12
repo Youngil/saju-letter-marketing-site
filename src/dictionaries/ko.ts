@@ -101,6 +101,7 @@ export const dictionary: MarketingDictionary = {
   },
   footer: {
     privacyNote: '생년월일시는 브라우저 밖으로 전송되지 않아요 — 계산된 결과만 전송됩니다.',
+    privacyLinkLabel: '개인정보처리방침',
     googlePlayCta: 'Google Play에서 다운로드',
   },
 };

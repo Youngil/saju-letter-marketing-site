@@ -105,6 +105,7 @@ export const dictionary: MarketingDictionary = {
   },
   footer: {
     privacyNote: 'Sua data e hora de nascimento nunca saem do seu navegador — apenas o mapa calculado é enviado para gerar sua leitura.',
+    privacyLinkLabel: 'Política de Privacidade',
     googlePlayCta: 'Disponível no Google Play',
   },
   lunarNewYear: {

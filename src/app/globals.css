@@ -32,6 +32,28 @@ body {
   box-shadow: var(--card-shadow);
 }
 
+/* /[lang]/privacy가 privacyPolicy.ts의 신뢰된 정적 HTML(ul/li/p/strong/a만 사용)을
+   dangerouslySetInnerHTML로 렌더링하는데, Tailwind의 preflight가 목록 스타일을 리셋해두므로
+   최소한의 서식만 되살린다(원래 privacy.css의 .content ul/li 스타일과 같은 의도). */
+.privacy-body p {
+  margin: 0 0 12px;
+}
+.privacy-body ul {
+  margin: 0 0 12px;
+  padding-left: 20px;
+  list-style: disc;
+}
+.privacy-body li {
+  margin-bottom: 6px;
+}
+.privacy-body a {
+  color: var(--accent);
+  text-decoration: underline;
+}
+.privacy-body strong {
+  font-weight: 600;
+}
+
 input,
 textarea {
   outline: none;

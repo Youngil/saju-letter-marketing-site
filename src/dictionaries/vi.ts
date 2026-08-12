@@ -107,6 +107,7 @@ export const dictionary: MarketingDictionary = {
   },
   footer: {
     privacyNote: 'Ngày và giờ sinh của bạn không rời khỏi trình duyệt — chỉ lá số đã tính toán được gửi đi để tạo luận giải.',
+    privacyLinkLabel: 'Chính sách Quyền riêng tư',
     googlePlayCta: 'Tải trên Google Play',
   },
   lunarNewYear: {

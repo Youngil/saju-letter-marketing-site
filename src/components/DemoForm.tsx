@@ -43,6 +43,7 @@ export function DemoForm({ language, dict }: { language: MarketingLanguage; dict
     try {
       const hourNum = timeKnown && hour !== '' ? Number(hour) : undefined;
       const chart = calculateSaju({
+        calendarType: 'solar',
         year: yearNum,
         month: monthNum,
         day: dayNum,
