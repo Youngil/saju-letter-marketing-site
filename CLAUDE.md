@@ -182,6 +182,26 @@ npm run build   # 프로덕션 빌드 — App Router 라우트/타입 검증 + M
   효과를 넣었다. `globals.css`에 보조 색상(`--accent-warm`, 기존 amber 계열 사주/설날 페이지와
   통일)을 추가해 인포그래픽의 사주 쪽 칸에 썼다 — 기존 `--accent`(모바일 앱 스플래시 화면과
   통일한 브랜드 컬러)는 그대로 유지했다.
+- **파비콘/앱 아이콘이 아예 없었다(2026-08-15)** — `src/app/icon.png`/`apple-icon.png` 같은 Next.js
+  아이콘 파일 규약 자체가 처음부터 없어서(`public/` 디렉터리조차 없었다) 브라우저 기본 파비콘으로
+  비어 있었다. `saju-letter-mobile`의 실제 앱 아이콘(2026-08-13, `assets/images/icon.png` — 편지봉투에서
+  하트가 그려진 카드가 나오는 디자인, 복숭아→코랄 그라데이션 배경, 1024×1024 알파 플래튼 완료본)을
+  그대로 복사해 `src/app/icon.png`/`src/app/apple-icon.png` 둘 다에 채워 넣었다 — 리사이즈 없이 원본
+  그대로(Next.js가 파일을 읽어 `<link rel="icon">`/`<link rel="apple-touch-icon">` 태그를 자동
+  생성하므로 추가 설정 불필요). `src/app/[lang]/layout.tsx`가 실질적 루트 레이아웃이라 별도
+  `app/layout.tsx`가 없지만, 아이콘 파일 규약은 레이아웃 유무와 무관하게 세그먼트 계층을 따라
+  적용되므로 `src/app/`(최상위)에 두는 것만으로 `/[lang]/...` 하위 모든 경로에 상속된다 — `npm run
+  build`로 `/icon.png`/`/apple-icon.png`가 정적 라우트로 생성되는 것을 확인했다.
+- **헤더의 브랜드 아이콘도 같은 이미지로 교체(같은 날 이어서)** — `[lang]/layout.tsx` 헤더 왼쪽 위의
+  로고 자리가 실제 아이콘이 아니라 원형 배지 안에 "四" 글자 하나만 있는 임시 표시였다. 위 파비콘과
+  같은 원본을 `public/logo-icon.png`로 별도 복사해(파비콘 전용 규약 파일인 `src/app/icon.png`를
+  직접 재사용하지 않고 분리 — 용도가 다른 자산을 같은 파일에 겹쳐 쓰지 않기 위함, `public/icon.png`로
+  이름 지으면 Next.js가 자동 생성하는 `/icon.png` 파비콘 라우트와 경로가 충돌한다) `next/image`로
+  28×28(`h-7 w-7`) 크기의 둥근 사각형(`rounded-md`)으로 렌더한다 — 아이콘 원본이 정사각형 디자인이라
+  원형(`rounded-full`)보다 사각형 쪽이 실제 앱 아이콘 룩에 더 가깝다는 판단. `alt=""`로 뒀다 — 바로
+  옆에 브랜드명 텍스트(`dict.brand`)가 있어 스크린리더가 같은 내용을 두 번 읽지 않도록 순수 장식
+  이미지로 처리했다. `npm run dev` + `curl`로 실제 렌더된 `<img>` 마크업과 최적화된 이미지 응답
+  (200, image/png)까지 확인했다.
 
 ---
 
