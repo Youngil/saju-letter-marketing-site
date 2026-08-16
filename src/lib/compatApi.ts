@@ -1,5 +1,5 @@
 import type { MarketingLanguage } from './languages';
-import type { HeavenlyStem } from './sajuVocabulary';
+import type { EarthlyBranch, HeavenlyStem } from './sajuVocabulary';
 import { ApiError, request } from './apiClient';
 
 /**
@@ -31,6 +31,17 @@ export interface SubmitGuestInviteInput {
   name: string;
   dayMaster: HeavenlyStem;
   language: MarketingLanguage;
+  /**
+   * 억부 엔진 연동 3단계(2026-08-16) — 브라우저가 이미 계산해둔 연주/월주/일지를 함께 보내면
+   * 백엔드가 이 값들로 친구 쪽 강약(强弱)을 직접 계산해 반영한다(새 입력 필드 아님, 계산된
+   * 값을 더 많이 전송하는 것뿐 — saju-letter-backend/CLAUDE.md §2 참고). 넷 다 있어야
+   * 계산되므로 전부 optional.
+   */
+  yearStem?: HeavenlyStem;
+  yearBranch?: EarthlyBranch;
+  monthStem?: HeavenlyStem;
+  monthBranch?: EarthlyBranch;
+  dayBranch?: EarthlyBranch;
 }
 
 export type SubmitGuestInviteResult =

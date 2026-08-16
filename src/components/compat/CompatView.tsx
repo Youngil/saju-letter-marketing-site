@@ -116,10 +116,9 @@ function PendingForm({
       return;
     }
 
-    let dayMaster;
+    let chart;
     try {
-      const chart = calculateSaju({ calendarType, year: yearNum, month: monthNum, day: dayNum, isLeapMonth });
-      dayMaster = chart.dayPillar.stem;
+      chart = calculateSaju({ calendarType, year: yearNum, month: monthNum, day: dayNum, isLeapMonth });
     } catch {
       setError(content.calcError);
       return;
@@ -128,7 +127,16 @@ function PendingForm({
     setError(null);
     setIsSubmitting(true);
     try {
-      const result = await submitGuestInvite(token, { name: trimmedName, dayMaster, language });
+      const result = await submitGuestInvite(token, {
+        name: trimmedName,
+        dayMaster: chart.dayPillar.stem,
+        language,
+        yearStem: chart.yearPillar.stem,
+        yearBranch: chart.yearPillar.branch,
+        monthStem: chart.monthPillar.stem,
+        monthBranch: chart.monthPillar.branch,
+        dayBranch: chart.dayPillar.branch,
+      });
       if (result.status === 'ok') {
         onSubmitted({ status: 'completed', guestName: result.guestName, reading: result.reading });
       } else if (result.status === 'expired') {
