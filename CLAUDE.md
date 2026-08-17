@@ -203,6 +203,19 @@ npm run build   # 프로덕션 빌드 — App Router 라우트/타입 검증 + M
   옆에 브랜드명 텍스트(`dict.brand`)가 있어 스크린리더가 같은 내용을 두 번 읽지 않도록 순수 장식
   이미지로 처리했다. `npm run dev` + `curl`로 실제 렌더된 `<img>` 마크업과 최적화된 이미지 응답
   (200, image/png)까지 확인했다.
+- **SSR 서버사이드 호출 vs 백엔드 레이트리밋 충돌 — 발견·수정(2026-08-17)** — 전체 프로젝트(백엔드↔마케팅
+  사이트 연동) 재점검 중 발견했다. `compat/[token]`/`lunar-new-year/r/[id]`의 `generateMetadata`/
+  `opengraph-image.tsx`/페이지 컴포넌트가 전부 `getCompatInvite`/`getReading`(`src/lib/compatApi.ts`/
+  `lunarNewYearApi.ts`)을 **Next.js 서버에서** 호출한다 — 즉 브라우저가 아니라 이 사이트의 서버가
+  백엔드에 요청을 보낸다. `saju-letter-backend`의 `PUBLIC_RATE_LIMIT`이 `req.ip` 기준이라, 실제로는
+  방문자마다 다른 IP인데도 백엔드 입장에선 전부 "이 마케팅 사이트 서버" 한 IP로 보여 분당 20건
+  한도를 모든 방문자가 나눠 쓰는 꼴이 되고 있었다 — 정확히 공유 링크가 퍼지는 순간(바이럴 트래픽)
+  이 기능의 존재 이유를 스스로 막는 구조였다. 백엔드 쪽에서 이 두 GET 라우트만 훨씬 넉넉한 한도로
+  분리했다(`saju-letter-backend/CLAUDE.md` 참고). 같은 김에 이 사이트 쪽도 `getCompatInvite`/
+  `getReading`이 404만 흡수하고 429/5xx 같은 다른 에러는 그대로 던지던 것을 — 셋 다 서버사이드에서
+  호출되므로 레이트리밋(또는 다른 일시적 backend 장애)에 걸리면 SSR 렌더/메타데이터/OG 이미지
+  생성이 그대로 크래시했다 — 어떤 `ApiError`든 조회 실패(not_found/null)로 흡수하도록 넓혀 방어를
+  이중으로 걸었다.
 
 ---
 
