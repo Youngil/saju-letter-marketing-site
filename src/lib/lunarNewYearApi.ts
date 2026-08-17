@@ -75,11 +75,16 @@ export interface ReadingView {
   hasEmailSubscription: boolean;
 }
 
+/**
+ * 404뿐 아니라 어떤 ApiError든(429 rate-limit, 5xx 등) null로 흡수한다(2026-08-17) —
+ * compatApi.ts의 getCompatInvite와 같은 이유·같은 수정. 이 함수도 generateMetadata/
+ * opengraph-image.tsx/페이지 컴포넌트 세 곳에서 서버사이드로 호출된다.
+ */
 export async function getReading(id: string): Promise<ReadingView | null> {
   try {
     return await request<ReadingView>(`/newyear-campaign/readings/${id}`);
   } catch (error) {
-    if (error instanceof ApiError && error.status === 404) return null;
+    if (error instanceof ApiError) return null;
     throw error;
   }
 }

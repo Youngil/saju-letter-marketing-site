@@ -17,12 +17,19 @@ export type InviteView =
   | { status: 'pending' }
   | { status: 'completed'; guestName: string | null; reading: CompatReading | null };
 
-/** 404를 예외로 던지는 대신 not_found 뷰로 흡수한다 — lunarNewYearApi.ts의 getReading과 같은 패턴. */
+/**
+ * 404뿐 아니라 어떤 ApiError든(429 rate-limit, 5xx 등) not_found 뷰로 흡수한다(2026-08-17) —
+ * lunarNewYearApi.ts의 getReading과 같은 패턴. 이 함수는 generateMetadata/opengraph-image.tsx/
+ * 페이지 컴포넌트 세 곳 모두에서 서버사이드로 호출되므로, 여기서 흡수하지 않으면 일시적인
+ * 429/5xx 하나가 SSR 렌더/메타데이터/OG 이미지 생성 전체를 그대로 크래시시킨다 — "초대를 못
+ * 찾음"으로 보이는 게 흰 화면보다 낫다는 판단(진짜 원인은 새로고침하면 대부분 사라지는 일시적
+ * 상태이므로, 완전히 잘못된 안내는 아니다).
+ */
 export async function getCompatInvite(token: string, language: MarketingLanguage): Promise<InviteView> {
   try {
     return await request<InviteView>(`/compatibility-invites/${encodeURIComponent(token)}?language=${encodeURIComponent(language)}`);
   } catch (error) {
-    if (error instanceof ApiError && error.status === 404) return { status: 'not_found' };
+    if (error instanceof ApiError) return { status: 'not_found' };
     throw error;
   }
 }
