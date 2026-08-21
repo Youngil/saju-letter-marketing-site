@@ -54,6 +54,7 @@ export const dictionary: MarketingDictionary = {
     tryAgain: '다른 날짜로 다시 보기',
     errors: {
       date: '올바른 생년월일을 입력해주세요.',
+      underage: '이 서비스는 만 16세 이상만 이용할 수 있어요.',
       generic: '문제가 발생했어요. 잠시 후 다시 시도해주세요.',
       rateLimited: '이미 여러 번 시도하셨어요. 잠시 후 다시 시도해주세요.',
     },
@@ -100,7 +101,7 @@ export const dictionary: MarketingDictionary = {
     notFound: '해당 구독 정보를 찾을 수 없어요.',
   },
   footer: {
-    privacyNote: '생년월일시는 브라우저 밖으로 전송되지 않아요 — 계산된 결과만 전송됩니다.',
+    privacyNote: '만 16세 확인을 위해 양력 생년월일을 서버로 보내지만 저장하지는 않아요. 사주 계산은 브라우저에서 이뤄집니다.',
     privacyLinkLabel: '개인정보처리방침',
     googlePlayCta: 'Google Play에서 다운로드',
   },

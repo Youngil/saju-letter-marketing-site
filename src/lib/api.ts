@@ -10,6 +10,10 @@ export interface DemoReadingInput {
   monthPillar?: Pillar;
   dayPillar: Pillar;
   hourPillar?: Pillar | null;
+  /** 만 16세 확인용 양력 생년월일 — 서버가 저장하지 않는다. */
+  birthYear: number;
+  birthMonth: number;
+  birthDay: number;
   turnstileToken?: string;
 }
 
@@ -17,7 +21,7 @@ export interface DemoReadingResponse {
   teaser: string;
 }
 
-/** 미니 데모 — 원본 생년월일은 절대 보내지 않고 계산된 천간/지지만 전송한다(src/lib/saju.ts 참고). */
+/** 미니 데모 — 사주 계산은 브라우저에서 하고, 만 16세 확인용 양력 년/월/일만 함께 보낸다(저장되지 않음). */
 export function getDemoReading(input: DemoReadingInput): Promise<DemoReadingResponse> {
   return request('/marketing-site/demo-readings', {
     method: 'POST',
@@ -31,6 +35,9 @@ export function getDemoReading(input: DemoReadingInput): Promise<DemoReadingResp
       dayBranch: input.dayPillar.branch,
       hourStem: input.hourPillar?.stem,
       hourBranch: input.hourPillar?.branch,
+      birthYear: input.birthYear,
+      birthMonth: input.birthMonth,
+      birthDay: input.birthDay,
       turnstileToken: input.turnstileToken,
     }),
   });
@@ -40,6 +47,7 @@ export interface SubscribeLeadInput {
   email: string;
   language: MarketingLanguage;
   consent: boolean;
+  turnstileToken?: string;
 }
 
 export function subscribeLead(input: SubscribeLeadInput): Promise<{ leadId: string }> {

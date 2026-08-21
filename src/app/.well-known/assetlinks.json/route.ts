@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+import { NextResponse } from "next/server";
 
 /**
  * Android App Links 검증용 파일(2026-08-12, saju-letter-backend/src/server.ts에서 이관) —
@@ -11,11 +11,13 @@ import { NextResponse } from 'next/server';
  */
 const ANDROID_ASSET_LINKS = [
   {
-    relation: ['delegate_permission/common.handle_all_urls'],
+    relation: ["delegate_permission/common.handle_all_urls"],
     target: {
-      namespace: 'android_app',
-      package_name: 'com.sajuletter.app',
-      sha256_cert_fingerprints: ['REPLACE_WITH_RELEASE_SIGNING_CERT_SHA256_FINGERPRINT'],
+      namespace: "android_app",
+      package_name: "com.sajuletter.app",
+      sha256_cert_fingerprints: [
+        "4A:B8:D8:D4:D6:A9:00:45:8F:56:28:60:C2:3D:70:B3:11:0B:0E:4F:F3:07:0F:82:2A:E2:26:A6:FD:5E:D1:1A",
+      ],
     },
   },
 ];

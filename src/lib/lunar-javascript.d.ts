@@ -23,10 +23,14 @@ declare module 'lunar-javascript' {
 
   export interface Lunar {
     getEightChar(): EightChar;
+    getSolar(): Solar;
   }
 
   export interface Solar {
     getLunar(): Lunar;
+    getYear(): number;
+    getMonth(): number;
+    getDay(): number;
   }
 
   export const Solar: {

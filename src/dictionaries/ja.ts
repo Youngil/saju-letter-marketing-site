@@ -51,6 +51,7 @@ export const dictionary: MarketingDictionary = {
     tryAgain: '別の生年月日で試す',
     errors: {
       date: '正しい生年月日を入力してください。',
+      underage: '本サービスは満16歳以上の方のみご利用いただけます。',
       generic: 'エラーが発生しました。しばらくしてからもう一度お試しください。',
       rateLimited: '少し間隔を空けてからもう一度お試しください。',
     },
@@ -97,7 +98,7 @@ export const dictionary: MarketingDictionary = {
     notFound: '該当する登録が見つかりませんでした。',
   },
   footer: {
-    privacyNote: '生年月日・時間はブラウザの外に送信されません — 計算済みの命式だけを診断のために送信します。',
+    privacyNote: '満16歳確認のため太陽暦の生年月日をサーバーに送りますが、保存はしません。四柱の計算はブラウザ内で行います。',
     privacyLinkLabel: 'プライバシーポリシー',
     googlePlayCta: 'Google Playで入手',
   },
@@ -127,6 +128,7 @@ export const dictionary: MarketingDictionary = {
         date: '正しい生年月日を入力してください。',
         memorableEvent: '今年の出来事を一言で入力してください(300文字まで)。',
         age: '続けるには16歳以上であることの確認が必要です。',
+        underage: '本サービスは満16歳以上の方のみご利用いただけます。',
         generic: '問題が発生しました。しばらくしてからもう一度お試しください。',
         rateLimited: '試行回数が多くなっています。しばらくしてからもう一度お試しください。',
       },

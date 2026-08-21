@@ -5,7 +5,7 @@ import { isEarthlyBranch, isHeavenlyStem, type EarthlyBranch, type HeavenlyStem 
  * saju-letter-mobile/src/domain/saju/calculateSaju.ts를 그대로 옮긴 것 — saju-letter-newyear-campaign/src/lib/saju.ts에
  * 이은 세 번째 포팅이다. 이 사이트도 사주 계산을 브라우저에서 직접 한다("이 백엔드는 계산을
  * 하지 않는다" 원칙, saju-letter-backend/CLAUDE.md §2). 백엔드로는 계산 결과(천간/지지)만
- * 전송하고, 원본 생년월일시는 절대 서버로 보내지 않는다.
+ * 전송한다. 만 16세 확인용 양력 년/월/일은 서버로 보내지만 저장하지 않는다.
  *
  * 음력 입력(calendarType: 'lunar')은 2026-08-12에 궁합 공유 웹페이지 이관과 함께 추가됐다 —
  * 원래 이 파일은 홈 미니 데모용으로 양력만 지원했지만(데모는 양력만으로 충분), 옛
@@ -55,6 +55,15 @@ function resolveLunar(input: SajuFormInput, hour: number, minute: number) {
   }
   const lunarMonth = input.isLeapMonth ? -input.month : input.month;
   return Lunar.fromYmdHms(input.year, lunarMonth, input.day, hour, minute, 0);
+}
+
+/** 음력 입력이라도 만 16세 검사용으로는 양력 생년월일 하나로 정규화한다. */
+export function resolveSolarBirthDate(input: SajuFormInput): { year: number; month: number; day: number } {
+  const timeKnown = input.hour !== undefined;
+  const hour = timeKnown ? input.hour! : UNKNOWN_TIME_PLACEHOLDER.hour;
+  const minute = timeKnown ? (input.minute ?? 0) : UNKNOWN_TIME_PLACEHOLDER.minute;
+  const solar = resolveLunar(input, hour, minute).getSolar();
+  return { year: solar.getYear(), month: solar.getMonth(), day: solar.getDay() };
 }
 
 export function calculateSaju(input: SajuFormInput): SajuChart {

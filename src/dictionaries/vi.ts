@@ -59,6 +59,7 @@ export const dictionary: MarketingDictionary = {
     tryAgain: 'Thử ngày khác',
     errors: {
       date: 'Vui lòng nhập ngày sinh hợp lệ.',
+      underage: 'Dịch vụ này chỉ dành cho người dùng từ 16 tuổi trở lên.',
       generic: 'Đã có lỗi xảy ra — vui lòng thử lại sau ít phút.',
       rateLimited: 'Bạn đã thử vài lần rồi — vui lòng đợi một chút trước khi thử lại.',
     },
@@ -106,7 +107,7 @@ export const dictionary: MarketingDictionary = {
     notFound: 'Không tìm thấy đăng ký này.',
   },
   footer: {
-    privacyNote: 'Ngày và giờ sinh của bạn không rời khỏi trình duyệt — chỉ lá số đã tính toán được gửi đi để tạo luận giải.',
+    privacyNote: 'Chúng tôi gửi ngày sinh dương lịch chỉ để xác nhận bạn từ 16 tuổi trở lên — không lưu trữ. Lá số được tính trên trình duyệt.',
     privacyLinkLabel: 'Chính sách Quyền riêng tư',
     googlePlayCta: 'Tải trên Google Play',
   },
@@ -137,6 +138,7 @@ export const dictionary: MarketingDictionary = {
         date: 'Vui lòng nhập ngày sinh hợp lệ.',
         memorableEvent: 'Vui lòng chia sẻ một dòng về năm của bạn (tối đa 300 ký tự).',
         age: 'Vui lòng xác nhận bạn từ 16 tuổi trở lên để tiếp tục.',
+        underage: 'Dịch vụ này chỉ dành cho người dùng từ 16 tuổi trở lên.',
         generic: 'Đã có lỗi xảy ra — vui lòng thử lại sau một lát.',
         rateLimited: 'Bạn đã thử vài lần rồi — vui lòng đợi một chút trước khi thử lại.',
       },

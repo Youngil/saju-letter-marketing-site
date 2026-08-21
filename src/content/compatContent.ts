@@ -36,6 +36,7 @@ export interface CompatContent {
   submitting: string;
   formError: string;
   calcError: string;
+  underageError: string;
   submitError: string;
   pairLine: (guestName: string | null) => string;
   cta: string;
@@ -66,6 +67,7 @@ export const COMPAT_CONTENT: Record<MarketingLanguage, CompatContent> = {
     submitting: '확인하는 중…',
     formError: '이름과 생년월일을 정확히 입력해주세요.',
     calcError: '입력하신 날짜를 계산할 수 없어요. 날짜를 다시 확인해주세요.',
+    underageError: '이 서비스는 만 16세 이상만 이용할 수 있어요.',
     submitError: '문제가 발생했어요. 잠시 후 다시 시도해주세요.',
     pairLine: (guestName) => `${guestName || '친구'}님과의 궁합`,
     cta: '사주편지에서 나만의 편지도 받아보기',
@@ -100,6 +102,7 @@ export const COMPAT_CONTENT: Record<MarketingLanguage, CompatContent> = {
     submitting: 'Checking…',
     formError: 'Please fill in your name and birthdate correctly.',
     calcError: "We couldn't calculate that date. Please double-check it.",
+    underageError: 'This service is only available to users aged 16 and older.',
     submitError: 'Something went wrong — please try again shortly.',
     pairLine: (guestName) => `Compatibility with ${guestName || 'you'}`,
     cta: 'Get your own daily letter from Saju Letter',
@@ -134,6 +137,7 @@ export const COMPAT_CONTENT: Record<MarketingLanguage, CompatContent> = {
     submitting: '確認中…',
     formError: 'お名前と生年月日を正しく入力してください。',
     calcError: 'その日付を計算できませんでした。もう一度ご確認ください。',
+    underageError: '本サービスは満16歳以上の方のみご利用いただけます。',
     submitError: '問題が発生しました。しばらくしてからもう一度お試しください。',
     pairLine: (guestName) => `${guestName || 'あなた'}さんとの相性`,
     cta: 'サジュレターで毎日の手紙を受け取る',
@@ -168,6 +172,7 @@ export const COMPAT_CONTENT: Record<MarketingLanguage, CompatContent> = {
     submitting: 'Verificando…',
     formError: 'Por favor completa correctamente tu nombre y fecha de nacimiento.',
     calcError: 'No pudimos calcular esa fecha. Por favor, verifícala de nuevo.',
+    underageError: 'Este servicio solo está disponible para usuarios de 16 años o más.',
     submitError: 'Algo salió mal — inténtalo de nuevo en un momento.',
     pairLine: (guestName) => `Compatibilidad con ${guestName || 'ti'}`,
     cta: 'Recibe tu propia carta diaria de Saju Letter',
@@ -202,6 +207,7 @@ export const COMPAT_CONTENT: Record<MarketingLanguage, CompatContent> = {
     submitting: 'Verificando…',
     formError: 'Preencha corretamente seu nome e data de nascimento.',
     calcError: 'Não conseguimos calcular essa data. Verifique novamente.',
+    underageError: 'Este serviço está disponível apenas para usuários com 16 anos ou mais.',
     submitError: 'Algo deu errado — tente novamente em instantes.',
     pairLine: (guestName) => `Compatibilidade com ${guestName || 'você'}`,
     cta: 'Receba sua própria carta diária do Saju Letter',
@@ -236,6 +242,7 @@ export const COMPAT_CONTENT: Record<MarketingLanguage, CompatContent> = {
     submitting: 'Đang kiểm tra…',
     formError: 'Vui lòng nhập đúng tên và ngày sinh của bạn.',
     calcError: 'Chúng tôi không thể tính toán ngày này. Vui lòng kiểm tra lại.',
+    underageError: 'Dịch vụ này chỉ dành cho người dùng từ 16 tuổi trở lên.',
     submitError: 'Đã xảy ra lỗi — vui lòng thử lại sau giây lát.',
     pairLine: (guestName) => `Mức độ hợp nhau với ${guestName || 'bạn'}`,
     cta: 'Nhận lá thư hằng ngày của riêng bạn từ Saju Letter',

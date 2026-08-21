@@ -51,6 +51,7 @@ export interface MarketingDictionary {
     tryAgain: string;
     errors: {
       date: string;
+      underage: string;
       generic: string;
       rateLimited: string;
     };
@@ -134,6 +135,7 @@ export interface MarketingDictionary {
         date: string;
         memorableEvent: string;
         age: string;
+        underage: string;
         generic: string;
         rateLimited: string;
       };

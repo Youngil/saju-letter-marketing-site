@@ -5,7 +5,10 @@ import type { MarketingLanguage } from '@/lib/languages';
 import type { CompatContent } from '@/content/compatContent';
 import type { InviteView } from '@/lib/compatApi';
 import { logCompatEvent, submitGuestInvite } from '@/lib/compatApi';
-import { calculateSaju } from '@/lib/saju';
+import { ApiError } from '@/lib/apiClient';
+import { calculateSaju, resolveSolarBirthDate } from '@/lib/saju';
+import { isOldEnough } from '@/lib/age';
+import { Turnstile } from '../Turnstile';
 
 const CURRENT_YEAR = new Date().getFullYear();
 
@@ -100,6 +103,7 @@ function PendingForm({
   const [month, setMonth] = useState('');
   const [day, setDay] = useState('');
   const [isLeapMonth, setIsLeapMonth] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState<string | undefined>(undefined);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -117,10 +121,17 @@ function PendingForm({
     }
 
     let chart;
+    let solar;
     try {
-      chart = calculateSaju({ calendarType, year: yearNum, month: monthNum, day: dayNum, isLeapMonth });
+      const input = { calendarType, year: yearNum, month: monthNum, day: dayNum, isLeapMonth };
+      chart = calculateSaju(input);
+      solar = resolveSolarBirthDate(input);
     } catch {
       setError(content.calcError);
+      return;
+    }
+    if (!isOldEnough(solar.year, solar.month, solar.day)) {
+      setError(content.underageError);
       return;
     }
 
@@ -136,6 +147,10 @@ function PendingForm({
         monthStem: chart.monthPillar.stem,
         monthBranch: chart.monthPillar.branch,
         dayBranch: chart.dayPillar.branch,
+        birthYear: solar.year,
+        birthMonth: solar.month,
+        birthDay: solar.day,
+        turnstileToken,
       });
       if (result.status === 'ok') {
         onSubmitted({ status: 'completed', guestName: result.guestName, reading: result.reading });
@@ -144,8 +159,12 @@ function PendingForm({
       } else {
         onSubmitted({ status: 'not_found' });
       }
-    } catch {
-      setError(content.submitError);
+    } catch (err) {
+      if (err instanceof ApiError && (err.reason === 'underage' || err.reason === 'birth_date_required')) {
+        setError(err.reason === 'underage' ? content.underageError : content.formError);
+      } else {
+        setError(content.submitError);
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -231,6 +250,8 @@ function PendingForm({
           {content.leapMonthLabel}
         </label>
       )}
+
+      <Turnstile onVerify={setTurnstileToken} />
 
       {error && <p className="text-sm text-red-600">{error}</p>}
 

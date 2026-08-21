@@ -57,6 +57,7 @@ export const dictionary: MarketingDictionary = {
     tryAgain: 'Probar otra fecha',
     errors: {
       date: 'Por favor ingresa una fecha de nacimiento válida.',
+      underage: 'Este servicio solo está disponible para usuarios de 16 años o más.',
       generic: 'Algo salió mal — inténtalo de nuevo en un momento.',
       rateLimited: 'Ya lo intentaste varias veces — espera un poco antes de volver a intentarlo.',
     },
@@ -104,7 +105,7 @@ export const dictionary: MarketingDictionary = {
     notFound: 'No pudimos encontrar esa suscripción.',
   },
   footer: {
-    privacyNote: 'Tu fecha y hora de nacimiento nunca salen de tu navegador — solo se envía la carta calculada para generar tu lectura.',
+    privacyNote: 'Enviamos tu fecha de nacimiento gregoriana solo para confirmar que tienes 16 años o más — no la almacenamos. Tu carta se calcula en el navegador.',
     privacyLinkLabel: 'Política de Privacidad',
     googlePlayCta: 'Disponible en Google Play',
   },
@@ -135,6 +136,7 @@ export const dictionary: MarketingDictionary = {
         date: 'Por favor, ingresa una fecha de nacimiento válida.',
         memorableEvent: 'Por favor, comparte una línea sobre tu año (hasta 300 caracteres).',
         age: 'Por favor, confirma que tienes 16 años o más para continuar.',
+        underage: 'Este servicio solo está disponible para usuarios de 16 años o más.',
         generic: 'Algo salió mal — por favor, inténtalo de nuevo en un momento.',
         rateLimited: 'Ya lo has intentado varias veces — por favor, espera un poco antes de volver a intentarlo.',
       },

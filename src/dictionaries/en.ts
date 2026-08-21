@@ -57,6 +57,7 @@ export const dictionary: MarketingDictionary = {
     tryAgain: 'Try another date',
     errors: {
       date: 'Please enter a valid date of birth.',
+      underage: 'This service is only available to users aged 16 and older.',
       generic: 'Something went wrong — please try again in a moment.',
       rateLimited: "You've tried this a few times already — please wait a bit before trying again.",
     },
@@ -104,7 +105,7 @@ export const dictionary: MarketingDictionary = {
     notFound: "We couldn't find that subscription.",
   },
   footer: {
-    privacyNote: 'Your birth date and time never leave your browser — only the calculated chart is sent to generate your reading.',
+    privacyNote: 'We send your Gregorian date of birth only to confirm you are 16 or older — we do not store it. Your chart is calculated in the browser.',
     privacyLinkLabel: 'Privacy Policy',
     googlePlayCta: 'Get it on Google Play',
   },
@@ -135,6 +136,7 @@ export const dictionary: MarketingDictionary = {
         date: 'Please enter a valid date of birth.',
         memorableEvent: 'Please share one line about your year (up to 300 characters).',
         age: 'Please confirm you are 16 or older to continue.',
+        underage: 'This service is only available to users aged 16 and older.',
         generic: 'Something went wrong — please try again in a moment.',
         rateLimited: "You've tried this a few times already — please wait a bit before trying again.",
       },

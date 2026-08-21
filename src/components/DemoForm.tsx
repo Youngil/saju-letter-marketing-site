@@ -4,15 +4,16 @@ import { useState } from 'react';
 import type { MarketingDictionary } from '@/dictionaries/types';
 import type { MarketingLanguage } from '@/lib/languages';
 import { calculateSaju } from '@/lib/saju';
+import { isOldEnough } from '@/lib/age';
 import { ApiError, getDemoReading } from '@/lib/api';
 import { Turnstile } from './Turnstile';
 
 const CURRENT_YEAR = new Date().getFullYear();
 
 /**
- * 신년운세 캠페인의 ReadingForm.tsx보다 훨씬 가볍다 — 이름/사연/나이 확인이 없다(회원가입
- * 없는 "한 줄 티저" 스펙이라 개인 서사를 다루지 않음, 법적 민감도도 낮음). 생년월일(선택:
- * 시간)만 받아서 로컬로 계산하고, 계산된 천간/지지만 백엔드로 보낸다.
+ * 신년운세 캠페인의 ReadingForm.tsx보다 가볍다 — 이름/사연은 받지 않는다(회원가입 없는
+ * "한 줄 티저" 스펙). 생년월일은 로컬에서 사주를 계산하고, 만 16세 확인용 양력 년/월/일도
+ * 서버로 보낸다(저장되지 않음).
  */
 export function DemoForm({ language, dict }: { language: MarketingLanguage; dict: MarketingDictionary['demo'] }) {
   const [year, setYear] = useState('');
@@ -38,6 +39,10 @@ export function DemoForm({ language, dict }: { language: MarketingLanguage; dict
       setError(dict.errors.date);
       return;
     }
+    if (!isOldEnough(yearNum, monthNum, dayNum)) {
+      setError(dict.errors.underage);
+      return;
+    }
 
     setIsSubmitting(true);
     try {
@@ -57,12 +62,17 @@ export function DemoForm({ language, dict }: { language: MarketingLanguage; dict
         monthPillar: chart.monthPillar,
         dayPillar: chart.dayPillar,
         hourPillar: chart.hourPillar,
+        birthYear: yearNum,
+        birthMonth: monthNum,
+        birthDay: dayNum,
         turnstileToken,
       });
 
       setTeaser(result.teaser);
     } catch (err) {
-      if (err instanceof ApiError && err.status === 429) {
+      if (err instanceof ApiError && (err.reason === 'underage' || err.reason === 'birth_date_required')) {
+        setError(err.reason === 'underage' ? dict.errors.underage : dict.errors.date);
+      } else if (err instanceof ApiError && err.status === 429) {
         setError(dict.errors.rateLimited);
       } else {
         setError(dict.errors.generic);

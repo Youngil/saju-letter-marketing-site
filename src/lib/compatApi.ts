@@ -49,6 +49,16 @@ export interface SubmitGuestInviteInput {
   monthStem?: HeavenlyStem;
   monthBranch?: EarthlyBranch;
   dayBranch?: EarthlyBranch;
+  /** 만 16세 확인용 양력 생년월일 — 서버가 저장하지 않는다. */
+  birthYear: number;
+  birthMonth: number;
+  birthDay: number;
+  /**
+   * 2026-08-21, "리드 캡처·궁합 제출에 Turnstile이 없음" 감사 대응 — 이 웹 폼은 항상 채워
+   * 보낸다. 백엔드는 토큰이 아예 없을 때만(모바일 앱의 딥링크 화면, Cloudflare 위젯을 못 쓰는
+   * 경로) 검증을 건너뛰므로 optional로 둔다.
+   */
+  turnstileToken?: string;
 }
 
 export type SubmitGuestInviteResult =

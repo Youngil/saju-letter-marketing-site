@@ -29,6 +29,10 @@ export interface CreateReadingInput {
   hourPillar?: Pillar | null;
   memorableEvent: string;
   ageConfirmed: boolean;
+  /** 만 16세 확인용 양력 생년월일 — 서버가 저장하지 않는다. 체크박스만으로는 부족하다. */
+  birthYear: number;
+  birthMonth: number;
+  birthDay: number;
   turnstileToken?: string;
 }
 
@@ -61,6 +65,9 @@ export function createReading(input: CreateReadingInput): Promise<CreateReadingR
       hourBranch: input.hourPillar?.branch,
       memorableEvent: input.memorableEvent,
       ageConfirmed: input.ageConfirmed,
+      birthYear: input.birthYear,
+      birthMonth: input.birthMonth,
+      birthDay: input.birthDay,
       turnstileToken: input.turnstileToken,
     }),
   });

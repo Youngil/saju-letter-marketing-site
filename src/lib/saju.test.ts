@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { calculateSaju } from './saju';
+import { calculateSaju, resolveSolarBirthDate } from './saju';
 
 describe('calculateSaju', () => {
   // saju-letter-mobile/src/domain/saju/calculateSaju.test.ts의 검증된 샘플 1과 동일한 값
@@ -44,6 +44,7 @@ describe('calculateSaju', () => {
       const lunarChart = calculateSaju({ calendarType: 'lunar', ...sample.lunar });
       expect(solarChart.dayPillar.stem).toBe(sample.expectedDayMaster);
       expect(lunarChart.dayPillar.stem).toBe(sample.expectedDayMaster);
+      expect(resolveSolarBirthDate({ calendarType: 'lunar', ...sample.lunar })).toEqual(sample.solar);
     });
   }
 

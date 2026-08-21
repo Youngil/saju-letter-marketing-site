@@ -60,8 +60,9 @@ dictionary 문구 차이로 대부분 해결하고, 레이아웃 자체가 달�
 
 `saju-letter-backend/CLAUDE.md` §2의 "이 백엔드는 계산을 하지 않는다" 원칙을 그대로 지킨다 —
 `src/lib/saju.ts`(`saju-letter-mobile`의 계산 모듈을 세 번째로 포팅한 것, `saju-letter-newyear-campaign`에
-이어)가 `lunar-javascript`로 브라우저에서 직접 계산하고, **원본 생년월일은 백엔드로 전송하지 않는다**
-— 계산된 천간/지지만 `POST /marketing-site/demo-readings`로 보낸다.
+이어)가 `lunar-javascript`로 브라우저에서 직접 계산하고, 계산된 천간/지지를
+`POST /marketing-site/demo-readings`로 보낸다. **만 16세 확인용 양력 년/월/일은 함께 보내지만
+서버가 저장하지는 않는다**(2026-08-20, 백엔드 `domain/age.ts`가 재검증).
 
 ## 5. 홈 미니 데모 — 세 번째 동기(non-batch) AI 호출 경로
 
@@ -115,7 +116,18 @@ dictionary 문구 차이로 대부분 해결하고, 레이아웃 자체가 달�
 Cloudflare Turnstile — `NEXT_PUBLIC_TURNSTILE_SITE_KEY`가 없으면 위젯을 렌더링하지 않는다
 (`src/components/Turnstile.tsx`, 신년운세 캠페인과 동일 컴포넌트를 그대로 복사). 백엔드 시크릿
 (`TURNSTILE_SECRET_KEY`)도 신년운세 캠페인과 공유한다 — 둘 다 공개 랜딩페이지라 사이트를 나눌
-이유가 없다는 판단.
+이유가 없다는 판단. **운영 백엔드는 시크릿이 없거나 검증 요청이 실패하면 통과시키지 않는다**
+(2026-08-20, `saju-letter-backend` `newYearCampaign/turnstile.ts`). 로컬만 시크릿이 없을 때
+토큰 없이 제출된다. 운영 마케팅 사이트에는 사이트 키를, Cloud Run에는 시크릿을 둘 다 넣어야 한다.
+
+**리드 캡처(`LeadCaptureForm.tsx`)와 궁합 초대 제출(`CompatView.tsx`의 `PendingForm`)에도
+Turnstile 위젯을 붙였다(2026-08-21)** — 데모 폼만 갖고 있던 이 컴포넌트를 그대로 재사용해
+`onVerify`로 받은 토큰을 각각 `subscribeLead`/`submitGuestInvite` 요청에 함께 실어 보낸다.
+두 라우트가 백엔드에서 이 토큰을 다루는 방식은 다르다 — leads는 이 폼을 호출하는 경로가
+마케팅 사이트뿐이라 데모/신년운세처럼 무조건 요구하지만, 궁합 초대 제출은 모바일 앱의 딥링크
+화면도 같은 API를 호출하는데(Cloudflare 위젯을 React Native에서 못 띄움) 토큰이 있을 때만
+검증한다 — 이 사이트에서 보내는 요청은 항상 토큰을 포함하므로 실질적으로는 그대로 방어된다.
+상세는 `saju-letter-backend/CLAUDE.md` 참고.
 
 ## 8. 페이지 구조
 
@@ -131,7 +143,7 @@ Cloudflare Turnstile — `NEXT_PUBLIC_TURNSTILE_SITE_KEY`가 없으면 위젯을
   원칙을 유지할 것(개인정보처리방침 같은 법적 고지는 별개 — 여긴 순수 마케팅 카피 얘기다).
 - `/[lang]/compare` (+`opengraph-image.tsx`) — 서양 별자리 12개 vs 사주 일간(10개, 별도 순환 축이라
   1:1 매칭표를 만들지 않는다) 정적 비교. 블로그와 같은 4개 언어만 대상.
-- `/[lang]/privacy` — 개인정보처리방침(2026-08-12, `saju-letter-backend`의 `public/privacy.html`에서 이관, `src/content/privacyPolicy.ts`). 블로그/compare와 다르게 `LAUNCH_CONTENT_LANGUAGES`가 아니라 `MARKETING_LANGUAGES` 6개 전부 대상 — 법적 고지 문서라 1차 출시 언어 축과 무관해야 한다. 이관 이유: `www.saju-letter.com` 커스텀 도메인이 이 사이트에 연결되면서(§9 "왜 Next.js인가" 인접 GCP 배포 내역, `docs/setup-guide.md` 참고) 백엔드가 서빙하던 옛 `saju-letter.com/privacy`가 더 이상 그 도메인으로는 응답하지 못하게 됐는데, 이 사실이 문서에 반영되지 않아 Play Console에 "준비 완료"로 잘못 기록돼 있던 것을 발견해 바로잡았다. 콘텐츠는 문구 변경 없이 그대로 옮겼다(⚠️ 법률 전문가 검토 전 AI 초안 — `privacyPolicy.ts` 상단 주석 참고). `saju-letter-mobile`은 `src/constants/links.ts`의 `buildPrivacyPolicyUrl(language)`로 앱의 현재 언어에 맞는 링크를 설정 화면에서 연다.
+- `/[lang]/privacy` — 개인정보처리방침(2026-08-12, `saju-letter-backend`의 `public/privacy.html`에서 이관, `src/content/privacyPolicy.ts`). 블로그/compare와 다르게 `LAUNCH_CONTENT_LANGUAGES`가 아니라 `MARKETING_LANGUAGES` 6개 전부 대상 — 법적 고지 문서라 1차 출시 언어 축과 무관해야 한다. 이관 이유: `www.saju-letter.com` 커스텀 도메인이 이 사이트에 연결되면서(§9 "왜 Next.js인가" 인접 GCP 배포 내역, `docs/setup-guide.md` 참고) 백엔드가 서빙하던 옛 `saju-letter.com/privacy`가 더 이상 그 도메인으로는 응답하지 못하게 됐는데, 이 사실이 문서에 반영되지 않아 Play Console에 "준비 완료"로 잘못 기록돼 있던 것을 발견해 바로잡았다. 콘텐츠는 문구 변경 없이 그대로 옮겼다(⚠️ 법률 전문가 검토 전 AI 초안 — `privacyPolicy.ts` 상단 주석 참고). `saju-letter-mobile`은 `src/constants/links.ts`의 `buildPrivacyPolicyUrl(language)`로 앱의 현재 언어에 맞는 링크를 설정 화면에서 연다. **§4(제3자 제공) AI 콘텐츠 생성 제공업체 항목이 마케팅 사이트의 홈 미니 데모·신년운세를 빠뜨리고 있었다(2026-08-21 발견·수정)** — §1은 2026-08-20 개정 때 이미 이 두 기능의 "계산된 사주 정보" 수집을 언급했지만, §4는 여전히 "편지 및 오늘의 이야기 답장"만 AI 제공업체로 전달된다고 좁게 서술돼 있었다. 둘 다 "제출 시 즉시 결과 표시" 요구사항 때문에 배치가 아닌 동기 AI 호출을 쓰므로(계산된 사주값이 매 요청마다 실제로 AI 제공업체 프롬프트에 들어감) 6개 언어 전부 §4에 포함시켰다 — 궁합 공유(초대 링크)는 사전 배치 캐시에서 고르는 구조라 게스트 제출 시점에 개인 데이터가 AI로 가지 않아 의도적으로 제외했다. 상세는 `privacyPolicy.ts` 상단 2026-08-21 개정 주석 참고.
 - `/[lang]/compat/[token]` (+`opengraph-image.tsx`) — 궁합 공유 웹페이지(2026-08-12, `saju-letter-backend`의 `public/compat.html`에서 이관, `src/content/compatContent.ts`/`src/lib/compatApi.ts`/`src/components/compat/CompatView.tsx`). privacy와 같은 이유로 `MARKETING_LANGUAGES` 6개 전부 대상(`generateStaticParams` 없음 — 토큰은 런타임 생성이라 `lunar-new-year/r/[id]`처럼 완전 동적 라우트). 공유 URL 자체(`saju-letter-mobile`의 `buildCompatibilityShareUrl`)는 언어 세그먼트가 없다 — `middleware.ts`의 기존 자동감지 리다이렉트가 옛 compat.js의 브라우저 언어 감지 UX를 코드 추가 없이 재현해준다. 백엔드의 `compatibilityPublicRouter`(초대 조회/제출/이벤트)는 그대로 두고 이 사이트가 `marketingSiteCors`로 cross-origin 호출한다.
   - **친구 쪽 폼이 억부 엔진용 연주/월주/일지까지 함께 전송(2026-08-16, `saju-letter-backend`가 진행한 "궁합 공유를 억부 엔진에 연동" 3단계 — 상세는 meta 저장소 `CLAUDE.md` §9 참고)** — 화면/입력 필드는 무수정이다. `CompatView.tsx`의 `handleSubmit`이 `calculateSaju()`가 애초에 계산해두고 버리던 `chart.yearPillar`/`chart.monthPillar`/`chart.dayPillar.branch`를 마저 꺼내 `submitGuestInvite` 요청에 함께 싣도록만 바뀌었다(`compatApi.ts`의 `SubmitGuestInviteInput`에 `yearStem`/`yearBranch`/`monthStem`/`monthBranch`/`dayBranch` 5개 optional 필드 추가) — 새 계산 로직이나 새 입력 필드는 전혀 없다.
 - `/.well-known/assetlinks.json`(Route Handler, 2026-08-12) — Android App Links 검증 파일. 궁합 공유 도메인이 여기로 옮겨오면서 검증 대상도 이 도메인이 됐다(`saju-letter-backend`에도 같은 파일이 남아있지만 무해함).

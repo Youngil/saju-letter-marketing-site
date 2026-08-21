@@ -5,6 +5,7 @@ import { useState } from 'react';
 import type { MarketingDictionary } from '@/dictionaries/types';
 import type { NonKoreanLanguage } from '@/lib/languages';
 import { calculateSaju } from '@/lib/saju';
+import { isOldEnough } from '@/lib/age';
 import { createReading } from '@/lib/lunarNewYearApi';
 import { ApiError } from '@/lib/apiClient';
 import { Turnstile } from '@/components/Turnstile';
@@ -46,6 +47,10 @@ export function ReadingForm({ language, dict: t }: { language: NonKoreanLanguage
       setError(t.errors.date);
       return;
     }
+    if (!isOldEnough(yearNum, monthNum, dayNum)) {
+      setError(t.errors.underage);
+      return;
+    }
     if (memorableEvent.trim().length === 0 || memorableEvent.length > MEMORABLE_EVENT_MAX_LENGTH) {
       setError(t.errors.memorableEvent);
       return;
@@ -76,12 +81,17 @@ export function ReadingForm({ language, dict: t }: { language: NonKoreanLanguage
         hourPillar: chart.hourPillar,
         memorableEvent: memorableEvent.trim(),
         ageConfirmed,
+        birthYear: yearNum,
+        birthMonth: monthNum,
+        birthDay: dayNum,
         turnstileToken,
       });
 
       router.push(`/${language}/lunar-new-year/r/${result.readingId}`);
     } catch (err) {
-      if (err instanceof ApiError && err.status === 429) {
+      if (err instanceof ApiError && (err.reason === 'underage' || err.reason === 'birth_date_required')) {
+        setError(err.reason === 'underage' ? t.errors.underage : t.errors.date);
+      } else if (err instanceof ApiError && err.status === 429) {
         setError(t.errors.rateLimited);
       } else {
         setError(t.errors.generic);
