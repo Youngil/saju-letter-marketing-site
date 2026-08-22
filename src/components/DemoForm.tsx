@@ -5,28 +5,28 @@ import type { MarketingDictionary } from '@/dictionaries/types';
 import type { MarketingLanguage } from '@/lib/languages';
 import { calculateSaju } from '@/lib/saju';
 import { isOldEnough } from '@/lib/age';
-import { ApiError, getDemoReading } from '@/lib/api';
+import { ApiError, getDemoReading, type DemoReadingResponse } from '@/lib/api';
 import { Turnstile } from './Turnstile';
 
 const CURRENT_YEAR = new Date().getFullYear();
 
 /**
- * 신년운세 캠페인의 ReadingForm.tsx보다 가볍다 — 이름/사연은 받지 않는다(회원가입 없는
- * "한 줄 티저" 스펙). 생년월일은 로컬에서 사주를 계산하고, 만 16세 확인용 양력 년/월/일도
- * 서버로 보낸다(저장되지 않음).
+ * 신년운세 캠페인의 ReadingForm.tsx보다 가볍다 — 이름/사연은 받지 않는다. 생년월일은 로컬에서
+ * 사주를 계산하고, 만 16세 확인용 양력 년/월/일도 서버로 보낸다(저장되지 않음). 결과는 실제
+ * 앱의 무료 티어 편지와 완전히 같은 구성(hook+interpretation+closing)이라 출생 시간은 결과에
+ * 전혀 영향을 주지 않는다(2026-08-22 개편 — 그래서 출생 시간 입력 자체를 없앴다, 예전엔
+ * hourPillar를 받았지만 그 값은 무료 티어 화면에 아예 반영되지 않는 프리미엄 전용 보너스에만
+ * 쓰이던 값이었다).
  */
 export function DemoForm({ language, dict }: { language: MarketingLanguage; dict: MarketingDictionary['demo'] }) {
   const [year, setYear] = useState('');
   const [month, setMonth] = useState('');
   const [day, setDay] = useState('');
-  const [timeKnown, setTimeKnown] = useState(false);
-  const [hour, setHour] = useState('');
-  const [minute, setMinute] = useState('0');
   const [turnstileToken, setTurnstileToken] = useState<string | undefined>(undefined);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [teaser, setTeaser] = useState<string | null>(null);
+  const [result, setResult] = useState<DemoReadingResponse | null>(null);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -46,29 +46,19 @@ export function DemoForm({ language, dict }: { language: MarketingLanguage; dict
 
     setIsSubmitting(true);
     try {
-      const hourNum = timeKnown && hour !== '' ? Number(hour) : undefined;
-      const chart = calculateSaju({
-        calendarType: 'solar',
-        year: yearNum,
-        month: monthNum,
-        day: dayNum,
-        hour: hourNum,
-        minute: hourNum !== undefined ? Number(minute) : undefined,
-      });
+      const chart = calculateSaju({ calendarType: 'solar', year: yearNum, month: monthNum, day: dayNum });
 
-      const result = await getDemoReading({
+      const reading = await getDemoReading({
         language,
-        yearPillar: chart.yearPillar,
-        monthPillar: chart.monthPillar,
         dayPillar: chart.dayPillar,
-        hourPillar: chart.hourPillar,
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
         birthYear: yearNum,
         birthMonth: monthNum,
         birthDay: dayNum,
         turnstileToken,
       });
 
-      setTeaser(result.teaser);
+      setResult(reading);
     } catch (err) {
       if (err instanceof ApiError && (err.reason === 'underage' || err.reason === 'birth_date_required')) {
         setError(err.reason === 'underage' ? dict.errors.underage : dict.errors.date);
@@ -82,11 +72,15 @@ export function DemoForm({ language, dict }: { language: MarketingLanguage; dict
     }
   }
 
-  if (teaser) {
+  if (result) {
     return (
       <div className="card-surface flex flex-col gap-4 rounded-2xl border border-accent/20 p-6 sm:p-7">
         <h3 className="text-xs font-semibold tracking-wide text-accent uppercase">{dict.resultTitle}</h3>
-        <p className="text-lg leading-relaxed">{teaser}</p>
+        <div className="flex flex-col gap-3 text-lg leading-relaxed">
+          <p className="font-medium">{result.hook}</p>
+          <p>{result.interpretation}</p>
+          <p className="text-foreground/70 italic">{result.closing}</p>
+        </div>
         <a
           href={process.env.NEXT_PUBLIC_GOOGLE_PLAY_URL}
           target="_blank"
@@ -97,7 +91,7 @@ export function DemoForm({ language, dict }: { language: MarketingLanguage; dict
         </a>
         <button
           type="button"
-          onClick={() => setTeaser(null)}
+          onClick={() => setResult(null)}
           className="text-sm text-foreground/60 underline underline-offset-2 hover:text-foreground"
         >
           {dict.tryAgain}
@@ -140,37 +134,6 @@ export function DemoForm({ language, dict }: { language: MarketingLanguage; dict
             className="w-16 min-w-0 rounded-lg border border-foreground/15 bg-white px-2 py-2.5 transition focus-visible:border-accent sm:w-20 sm:px-3"
           />
         </div>
-      </div>
-
-      <div>
-        <label className="flex items-center gap-2 text-sm text-foreground/70">
-          <input type="checkbox" checked={!timeKnown} onChange={(e) => setTimeKnown(!e.target.checked)} className="accent-accent" />
-          {dict.timeUnknownLabel}
-        </label>
-        {timeKnown && (
-          <div className="mt-2 flex gap-1.5 sm:gap-2">
-            <input
-              type="number"
-              inputMode="numeric"
-              placeholder={dict.hourLabel}
-              value={hour}
-              onChange={(e) => setHour(e.target.value)}
-              min={0}
-              max={23}
-              className="w-16 min-w-0 rounded-lg border border-foreground/15 bg-white px-2 py-2.5 transition focus-visible:border-accent sm:w-20 sm:px-3"
-            />
-            <input
-              type="number"
-              inputMode="numeric"
-              placeholder={dict.minuteLabel}
-              value={minute}
-              onChange={(e) => setMinute(e.target.value)}
-              min={0}
-              max={59}
-              className="w-16 min-w-0 rounded-lg border border-foreground/15 bg-white px-2 py-2.5 transition focus-visible:border-accent sm:w-20 sm:px-3"
-            />
-          </div>
-        )}
       </div>
 
       <Turnstile onVerify={setTurnstileToken} />

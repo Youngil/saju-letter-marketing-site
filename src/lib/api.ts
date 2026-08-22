@@ -6,10 +6,10 @@ export { ApiError } from './apiClient';
 
 export interface DemoReadingInput {
   language: MarketingLanguage;
-  yearPillar?: Pillar;
-  monthPillar?: Pillar;
   dayPillar: Pillar;
-  hourPillar?: Pillar | null;
+  /** 방문자 브라우저의 IANA 타임존 — "오늘의 일진"이 실제 무료 편지와 같도록 서버가 이 타임존
+   * 기준 로컬 캘린더 날짜로 계산한다(2026-08-22, meta CLAUDE.md §4와 동일 원칙). */
+  timezone: string;
   /** 만 16세 확인용 양력 생년월일 — 서버가 저장하지 않는다. */
   birthYear: number;
   birthMonth: number;
@@ -17,8 +17,14 @@ export interface DemoReadingInput {
   turnstileToken?: string;
 }
 
+/**
+ * 실제 무료 티어 편지(saju-letter-backend의 truncateForFreeTier)와 정확히 같은 3필드
+ * (2026-08-22 개편 — "가입하면 이런 걸 매일 받는다"를 정확히 보여주기 위해 한 줄 티저에서 변경).
+ */
 export interface DemoReadingResponse {
-  teaser: string;
+  hook: string;
+  interpretation: string;
+  closing: string;
 }
 
 /** 미니 데모 — 사주 계산은 브라우저에서 하고, 만 16세 확인용 양력 년/월/일만 함께 보낸다(저장되지 않음). */
@@ -27,14 +33,9 @@ export function getDemoReading(input: DemoReadingInput): Promise<DemoReadingResp
     method: 'POST',
     body: JSON.stringify({
       language: input.language,
-      yearStem: input.yearPillar?.stem,
-      yearBranch: input.yearPillar?.branch,
-      monthStem: input.monthPillar?.stem,
-      monthBranch: input.monthPillar?.branch,
       dayStem: input.dayPillar.stem,
       dayBranch: input.dayPillar.branch,
-      hourStem: input.hourPillar?.stem,
-      hourBranch: input.hourPillar?.branch,
+      timezone: input.timezone,
       birthYear: input.birthYear,
       birthMonth: input.birthMonth,
       birthDay: input.birthDay,
