@@ -6,7 +6,7 @@ import type { MarketingLanguage } from '@/lib/languages';
 import { calculateSaju } from '@/lib/saju';
 import { isOldEnough } from '@/lib/age';
 import { ApiError, getDemoReading, type DemoReadingResponse } from '@/lib/api';
-import { Turnstile } from './Turnstile';
+import { Turnstile, TURNSTILE_ENABLED } from './Turnstile';
 
 const CURRENT_YEAR = new Date().getFullYear();
 
@@ -41,6 +41,12 @@ export function DemoForm({ language, dict }: { language: MarketingLanguage; dict
     }
     if (!isOldEnough(yearNum, monthNum, dayNum)) {
       setError(dict.errors.underage);
+      return;
+    }
+    if (TURNSTILE_ENABLED && !turnstileToken) {
+      // 보안 위젯이 아직 토큰을 발급하기 전에 제출 버튼(또는 Enter 키)으로 넘어온 경우 — 버튼
+      // disabled 조건이 정상 동작하면 거의 발생하지 않지만, 이 요청은 서버가 어차피 403으로
+      // 거부할 게 확실하므로 API를 호출하지 않고 조용히 막는다.
       return;
     }
 
@@ -142,7 +148,7 @@ export function DemoForm({ language, dict }: { language: MarketingLanguage; dict
 
       <button
         type="submit"
-        disabled={isSubmitting}
+        disabled={isSubmitting || (TURNSTILE_ENABLED && !turnstileToken)}
         className="rounded-full bg-accent px-6 py-3 font-medium text-white shadow-lg shadow-accent/25 transition hover:-translate-y-0.5 hover:shadow-xl hover:shadow-accent/30 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
       >
         {isSubmitting ? dict.submitting : dict.submitButton}

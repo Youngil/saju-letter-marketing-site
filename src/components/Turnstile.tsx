@@ -5,6 +5,12 @@ import { useId } from 'react';
 
 const SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
 
+/**
+ * 폼이 제출 버튼을 토큰 준비 여부로 잠글지 판단하는 데 쓴다 — 사이트 키가 없는 환경(로컬 개발)
+ * 에서는 토큰이 영원히 안 생기므로, 이 값이 false일 때는 잠그면 안 된다.
+ */
+export const TURNSTILE_ENABLED = Boolean(SITE_KEY);
+
 declare global {
   interface Window {
     turnstile?: {

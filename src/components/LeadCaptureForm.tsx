@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import type { MarketingDictionary } from '@/dictionaries/types';
 import type { MarketingLanguage } from '@/lib/languages';
 import { ApiError, getCouponAvailability, subscribeLead } from '@/lib/api';
-import { Turnstile } from './Turnstile';
+import { Turnstile, TURNSTILE_ENABLED } from './Turnstile';
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -55,6 +55,7 @@ export function LeadCaptureForm({ language, dict }: { language: MarketingLanguag
       setError(dict.errors.consent);
       return;
     }
+    if (TURNSTILE_ENABLED && !turnstileToken) return;
 
     setIsSubmitting(true);
     try {
@@ -104,7 +105,7 @@ export function LeadCaptureForm({ language, dict }: { language: MarketingLanguag
       {error && <p className="text-sm text-red-600">{error}</p>}
       <button
         type="submit"
-        disabled={isSubmitting}
+        disabled={isSubmitting || (TURNSTILE_ENABLED && !turnstileToken)}
         className="rounded-full bg-accent px-6 py-3 font-medium text-white shadow-lg shadow-accent/25 transition hover:-translate-y-0.5 hover:shadow-xl hover:shadow-accent/30 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
       >
         {isSubmitting ? dict.submitting : dict.submitButton}

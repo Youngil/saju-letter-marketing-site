@@ -8,7 +8,7 @@ import { logCompatEvent, submitGuestInvite } from '@/lib/compatApi';
 import { ApiError } from '@/lib/apiClient';
 import { calculateSaju, resolveSolarBirthDate } from '@/lib/saju';
 import { isOldEnough } from '@/lib/age';
-import { Turnstile } from '../Turnstile';
+import { Turnstile, TURNSTILE_ENABLED } from '../Turnstile';
 
 const CURRENT_YEAR = new Date().getFullYear();
 
@@ -134,6 +134,7 @@ function PendingForm({
       setError(content.underageError);
       return;
     }
+    if (TURNSTILE_ENABLED && !turnstileToken) return;
 
     setError(null);
     setIsSubmitting(true);
@@ -257,7 +258,7 @@ function PendingForm({
 
       <button
         type="submit"
-        disabled={isSubmitting}
+        disabled={isSubmitting || (TURNSTILE_ENABLED && !turnstileToken)}
         className="rounded-full bg-accent px-6 py-3 font-medium text-white shadow-lg shadow-accent/25 transition hover:-translate-y-0.5 hover:shadow-xl hover:shadow-accent/30 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
       >
         {isSubmitting ? content.submitting : content.submit}
