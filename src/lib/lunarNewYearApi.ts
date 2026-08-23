@@ -100,6 +100,7 @@ export interface SubscribeInput {
   readingId: string;
   email: string;
   consent: boolean;
+  turnstileToken?: string;
 }
 
 export function subscribeForDrip(input: SubscribeInput): Promise<{ subscriptionId: string }> {
