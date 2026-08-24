@@ -8,7 +8,7 @@ import { calculateSaju } from '@/lib/saju';
 import { isOldEnough } from '@/lib/age';
 import { createReading } from '@/lib/lunarNewYearApi';
 import { ApiError } from '@/lib/apiClient';
-import { Turnstile } from '@/components/Turnstile';
+import { Turnstile, TURNSTILE_ENABLED } from '@/components/Turnstile';
 
 const MEMORABLE_EVENT_MAX_LENGTH = 300;
 const CURRENT_YEAR = new Date().getFullYear();
@@ -211,7 +211,7 @@ export function ReadingForm({ language, dict: t }: { language: NonKoreanLanguage
 
       <button
         type="submit"
-        disabled={isSubmitting}
+        disabled={isSubmitting || (TURNSTILE_ENABLED && !turnstileToken)}
         className="rounded-full bg-amber-800 px-6 py-3 font-medium text-white transition hover:bg-amber-900 disabled:opacity-50"
       >
         {isSubmitting ? t.submitting : t.submitButton}

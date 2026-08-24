@@ -135,6 +135,11 @@ Turnstile로 막혀 있었지만, 그 결과 페이지에서 임의의 제3자 �
 폼에는 검증이 전혀 없었다. `LeadCaptureForm.tsx`와 완전히 같은 패턴(사이트 키 없으면 위젯을
 렌더하지 않고 버튼도 잠그지 않음)이라 새 컴포넌트 없이 그대로 재사용했다.
 
+**`ReadingForm.tsx` 자체는 백엔드 검증은 처음부터 있었지만 제출 버튼이 `TURNSTILE_ENABLED &&
+!turnstileToken` 잠금을 안 쓰고 있었다(같은 날 별도 감사 항목)** — 위젯이 뜨기 전에 누르면
+백엔드 403을 generic 에러로만 보여줬다(보안 구멍은 아니고 UX 문제). `DemoForm`/
+`LeadCaptureForm`/`EmailSignupForm`과 같은 조건을 버튼에 추가해 통일했다.
+
 ## 8. 페이지 구조
 
 - `/[lang]` — 홈(히어로 + 인포그래픽 + 미니 데모 + 리드 캡처 폼).
