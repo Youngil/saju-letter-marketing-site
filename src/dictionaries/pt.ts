@@ -67,7 +67,7 @@ export const dictionary: MarketingDictionary = {
     subtitle: 'Leituras curtas e simples sobre saju, tradição coreana e como ela se compara ao que você já conhece.',
     readMore: 'Ler mais',
     empty: 'Ainda não há posts — volte em breve.',
-    byLabel: 'Escrito por Dain',
+    byLabel: 'Escrito por Dain (personagem fictício)',
   },
   compare: {
     title: 'Signo do zodíaco vs. saju, lado a lado',
