@@ -72,6 +72,14 @@ export interface MarketingDictionary {
     sajuColumnLabel: string;
     dayMasterSectionTitle: string;
     dayMasterIntro: string;
+    infoAmountTitle: string;
+    infoAmountBody: string;
+    hourTitle: string;
+    hourBody: string;
+    philosophyTitle: string;
+    philosophyBody: string;
+    referenceTitle: string;
+    ctaText: string;
   };
   leadCapture: {
     title: string;

@@ -79,6 +79,17 @@ export const dictionary: MarketingDictionary = {
     dayMasterSectionTitle: 'The 10 saju day masters',
     dayMasterIntro:
       "Zodiac signs are set by your birth month, so there are 12 of them. Saju's day master is set by your exact birth day instead, cycling through 10 values every 10 days — so it doesn't line up row-for-row with the zodiac table above. Try the demo to see your own day master.",
+    infoAmountTitle: 'How much information does each one use?',
+    infoAmountBody:
+      "Your Western zodiac sign is set by a single piece of information — your birth month. Born in March? You're a Pisces (or Aries) for life, one fixed value out of 12. Saju builds four separate \"pillars\" from your birth year, month, day, and hour. That means two people born on the same day — even the same month — can end up with quite different saju charts if they were born at different times. It's a much more personalized combination than a zodiac sign alone.",
+    hourTitle: 'Do I need to know my exact birth time?',
+    hourBody:
+      "The last of the four pillars — the hour pillar — is set by your birth time. It's fine if you don't know it exactly: Saju Letter is built to work with just the year, month, and day pillars, and you can always add your birth time later if you find it out.",
+    philosophyTitle: "Neither one claims to predict your future",
+    philosophyBody:
+      "Whether it's a zodiac sign or a saju chart, both are meant as a lens for reflecting on tendencies and rhythms — not a fixed prediction of what's ahead. Saju Letter's daily letters follow the same principle: never a definitive forecast, always aiming for a gentle line of encouragement.",
+    referenceTitle: 'Reference: zodiac sign & day master lookup',
+    ctaText: 'Get a free one-line preview of your own saju',
   },
   leadCapture: {
     title: 'Sign up now for a 30-day trial coupon',

@@ -5,11 +5,13 @@ export const meta = {
   date: '2026-08-07',
 };
 
+import { RitualFlowDiagram } from '@/components/blog/BlogDiagrams';
+
 If you've heard the word "saju" from a K-drama or a friend who's into Korean culture, you might be picturing something mysterious. It's actually a fairly systematic idea: saju (사주, literally "four pillars") is a reading built from the exact year, month, day, and hour you were born.
 
 ## The four pillars
 
-Each of the four pillars pairs a "heavenly stem" with an "earthly branch" — together they form a 60-value cycle, a bit like how your birthday falls on a different day of the week each year. Your day pillar is considered the core of the reading, and the other three pillars add texture around it.
+Each of the four pillars pairs a "heavenly stem" with an "earthly branch" — together they form a 60-value cycle, a bit like how your birthday falls on a different day of the week each year. Your day pillar is considered the core of the reading, and the other three pillars add texture around it. Unlike a Western zodiac sign, which is a single fixed value set by your birth month, saju combines four separate values — so it can feel like a much more personal fingerprint.
 
 ## What it's used for today
 
@@ -17,4 +19,11 @@ In Korea, checking your saju is a casual, everyday thing — closer to reading a
 
 ## How Saju Letter uses it
 
-The four pillars are worked out by a deterministic calendar algorithm, the same kind of calculation used for centuries — so the same birth date always gets the same result. From there, we turn it into a short, warm, easy-to-read message for your day. Try the demo to see a one-line example based on your own birth date.
+The four pillars are worked out by a deterministic calendar algorithm, the same kind of calculation used for centuries — so the same birth date always gets the same result. Instead of handing you a long report all at once, we turn it into one short letter delivered each morning, built from four parts:
+
+<RitualFlowDiagram
+  steps={["Today's energy", 'A plain-language read', 'A small tip', 'A closing note']}
+  caption="One short letter, every morning, in four parts"
+/>
+
+Your day pillar stays fixed, but the day you're reading it on has its own pillar too — so the letter you get tomorrow is genuinely different from today's, not a repeat of the same static profile. Try the demo to see a one-line example based on your own birth date.

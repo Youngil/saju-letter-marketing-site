@@ -4,11 +4,24 @@ export const meta = {
   date: '2026-08-07',
 };
 
+import { FixedVsChangingDiagram } from '@/components/blog/BlogDiagrams';
+
 If you know your zodiac sign, you already understand the basic idea behind saju — just with more detail layered in.
 
 ## The starting point is similar
 
 Western astrology assigns you one sign based on your birth month. Saju uses your full birth date and time — year, month, day, and hour — to build four paired values instead of one.
+
+## One fixed value vs. a combination that shifts daily
+
+Your zodiac sign is set once and never changes. Saju's four pillars are fixed at the moment you're born too — but each day also has its own pillar, and how that day's pillar meets your chart is what shifts from one day to the next. That's part of why Saju Letter is built around a new letter each morning instead of one static profile.
+
+<FixedVsChangingDiagram
+  fixedLabel="Zodiac sign"
+  fixedCaption="One fixed value, set by your birth month"
+  changingLabel="Saju"
+  changingCaption="Your four pillars meet today's own pillar, fresh each day"
+/>
 
 ## More inputs, more nuance
 
@@ -20,4 +33,4 @@ Both systems work the same way here: they're a lens for reflecting on tendencies
 
 ## Try it yourself
 
-Enter your birth date in the demo and see what a saju-based reading looks like next to what you already know from your zodiac sign.
+Enter your birth date in the demo and see what a saju-based reading looks like next to what you already know from your zodiac sign. For a side-by-side breakdown, see the [zodiac vs. saju comparison page](/en/compare).

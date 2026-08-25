@@ -79,6 +79,17 @@ export const dictionary: MarketingDictionary = {
     dayMasterSectionTitle: 'Los 10 maestros del día del saju',
     dayMasterIntro:
       'Los signos zodiacales se definen por tu mes de nacimiento, por eso hay 12. El maestro del día del saju se define por tu día exacto de nacimiento y rota entre 10 valores cada 10 días — por eso no coincide fila por fila con la tabla del zodiaco de arriba. Prueba la demo para ver tu propio maestro del día.',
+    infoAmountTitle: '¿Cuánta información usa cada sistema?',
+    infoAmountBody:
+      'Tu signo zodiacal occidental se define por un solo dato — tu mes de nacimiento. ¿Naciste en marzo? Eres Piscis (o Aries) de por vida, un valor fijo entre 12. El saju construye cuatro "pilares" separados a partir de tu año, mes, día y hora de nacimiento. Eso significa que dos personas nacidas el mismo día — incluso el mismo mes — pueden terminar con cartas de saju bastante distintas si nacieron a horas diferentes. Es una combinación mucho más personalizada que un simple signo zodiacal.',
+    hourTitle: '¿Necesito saber mi hora exacta de nacimiento?',
+    hourBody:
+      'El último de los cuatro pilares — el pilar de la hora — se define por tu hora de nacimiento. No pasa nada si no la sabes con exactitud: Saju Letter está diseñado para funcionar solo con los pilares de año, mes y día, y siempre puedes añadir tu hora de nacimiento más adelante si la descubres.',
+    philosophyTitle: 'Ninguno de los dos predice tu futuro',
+    philosophyBody:
+      'Ya sea un signo zodiacal o una carta de saju, ambos son una forma de reflexionar sobre tendencias y ritmos — no una predicción fija de lo que vendrá. Las cartas diarias de Saju Letter siguen el mismo principio: nunca un pronóstico definitivo, siempre buscando ofrecer una línea de ánimo con suavidad.',
+    referenceTitle: 'Referencia: tabla de signos zodiacales y maestros del día',
+    ctaText: 'Recibe gratis una vista previa de una línea de tu saju',
   },
   leadCapture: {
     title: 'Regístrate ahora y consigue un cupón de prueba de 30 días',

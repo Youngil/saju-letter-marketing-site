@@ -5,11 +5,13 @@ export const meta = {
   date: '2026-08-07',
 };
 
+import { RitualFlowDiagram } from '@/components/blog/BlogDiagrams';
+
 Si escuchaste la palabra "saju" en un K-drama o de boca de alguien interesado en la cultura coreana, quizás imaginas algo misterioso. En realidad es una idea bastante sistemática: el saju (사주, literalmente "cuatro pilares") es una lectura construida a partir del año, mes, día y hora exactos de tu nacimiento.
 
 ## Los cuatro pilares
 
-Cada uno de los cuatro pilares combina un "tallo celestial" con una "rama terrenal" — juntos forman un ciclo de 60 valores, algo parecido a cómo tu cumpleaños cae en un día de la semana distinto cada año. El pilar del día se considera el núcleo de la lectura, y los otros tres añaden matices alrededor.
+Cada uno de los cuatro pilares combina un "tallo celestial" con una "rama terrenal" — juntos forman un ciclo de 60 valores, algo parecido a cómo tu cumpleaños cae en un día de la semana distinto cada año. El pilar del día se considera el núcleo de la lectura, y los otros tres añaden matices alrededor. A diferencia de un signo zodiacal occidental, que es un único valor fijo determinado por tu mes de nacimiento, el saju combina cuatro valores distintos — así que puede sentirse como una huella mucho más personal.
 
 ## Para qué se usa hoy
 
@@ -17,4 +19,11 @@ En Corea, revisar tu saju es algo casual y cotidiano — más parecido a leer el
 
 ## Cómo lo usa Saju Letter
 
-Los cuatro pilares se obtienen con un algoritmo de calendario determinista, el mismo tipo de cálculo que se usa desde hace siglos — así que la misma fecha de nacimiento siempre da el mismo resultado. A partir de ahí, lo convertimos en un mensaje breve, cálido y fácil de leer para tu día. Prueba la demo para ver un ejemplo de una línea basado en tu propia fecha de nacimiento.
+Los cuatro pilares se obtienen con un algoritmo de calendario determinista, el mismo tipo de cálculo que se usa desde hace siglos — así que la misma fecha de nacimiento siempre da el mismo resultado. En lugar de entregarte un informe largo de una sola vez, lo convertimos en una carta breve que llega cada mañana, construida en cuatro partes:
+
+<RitualFlowDiagram
+  steps={['La energía de hoy', 'Una lectura sencilla', 'Un pequeño consejo', 'Una despedida']}
+  caption="Una carta breve, cada mañana, en cuatro partes"
+/>
+
+Tu pilar del día no cambia, pero el día en que la lees también tiene su propio pilar — así que la carta que recibas mañana será realmente distinta a la de hoy, no una repetición del mismo perfil fijo. Prueba la demo para ver un ejemplo de una línea basado en tu propia fecha de nacimiento.

@@ -81,6 +81,17 @@ export const dictionary: MarketingDictionary = {
     dayMasterSectionTitle: '10 nhật chủ trong Bát Tự',
     dayMasterIntro:
       'Cung hoàng đạo được xác định theo tháng sinh nên có 12 cung. Nhật chủ trong Bát Tự lại được xác định theo đúng ngày sinh của bạn, xoay vòng qua 10 giá trị mỗi 10 ngày — vì vậy nó không khớp từng hàng với bảng cung hoàng đạo phía trên. Hãy thử bản demo để xem nhật chủ của chính bạn.',
+    infoAmountTitle: 'Mỗi hệ thống sử dụng bao nhiêu thông tin?',
+    infoAmountBody:
+      'Cung hoàng đạo phương Tây của bạn được xác định chỉ bằng một thông tin duy nhất — tháng sinh. Sinh vào tháng 3? Bạn là Song Ngư (hoặc Bạch Dương) suốt đời, một giá trị cố định trong số 12. Bát Tự xây dựng bốn "trụ" riêng biệt từ năm, tháng, ngày và giờ sinh của bạn. Điều đó có nghĩa là hai người sinh cùng ngày — thậm chí cùng tháng — vẫn có thể có lá số Bát Tự khá khác nhau nếu sinh vào giờ khác nhau. Đây là một sự kết hợp cá nhân hóa hơn nhiều so với chỉ một cung hoàng đạo.',
+    hourTitle: 'Tôi có cần biết chính xác giờ sinh không?',
+    hourBody:
+      'Trụ cuối cùng trong bốn trụ — trụ giờ — được xác định theo giờ sinh của bạn. Không sao nếu bạn không biết chính xác: Saju Letter được thiết kế để hoạt động chỉ với ba trụ năm, tháng, ngày, và bạn luôn có thể bổ sung giờ sinh sau này nếu biết được.',
+    philosophyTitle: 'Cả hai đều không khẳng định chắc chắn về tương lai',
+    philosophyBody:
+      'Dù là cung hoàng đạo hay lá số Bát Tự, cả hai đều là một lăng kính để nhìn lại xu hướng và nhịp điệu — không phải một lời tiên đoán cố định về những gì sắp tới. Những lá thư hằng ngày của Saju Letter cũng theo nguyên tắc này — không bao giờ là một dự báo chắc chắn, mà luôn hướng đến một lời động viên nhẹ nhàng.',
+    referenceTitle: 'Tham khảo: bảng đối chiếu cung hoàng đạo và nhật chủ',
+    ctaText: 'Nhận miễn phí một dòng xem trước về Bát Tự của bạn',
   },
   leadCapture: {
     title: 'Đăng ký ngay để nhận mã dùng thử miễn phí 30 ngày',

@@ -79,6 +79,17 @@ export const dictionary: MarketingDictionary = {
     dayMasterSectionTitle: 'Os 10 mestres do dia do saju',
     dayMasterIntro:
       'Os signos do zodíaco são definidos pelo seu mês de nascimento, por isso existem 12. O mestre do dia do saju é definido pelo seu dia exato de nascimento e gira entre 10 valores a cada 10 dias — por isso não coincide linha a linha com a tabela do zodíaco acima. Experimente a demo para ver o seu próprio mestre do dia.',
+    infoAmountTitle: 'Quanta informação cada sistema usa?',
+    infoAmountBody:
+      'Seu signo do zodíaco ocidental é definido por um único dado — o seu mês de nascimento. Nasceu em março? Você é Peixes (ou Áries) para sempre, um valor fixo entre 12. O saju constrói quatro "pilares" separados a partir do seu ano, mês, dia e hora de nascimento. Isso significa que duas pessoas nascidas no mesmo dia — até no mesmo mês — podem ter mapas de saju bem diferentes se nasceram em horários diferentes. É uma combinação muito mais personalizada do que apenas um signo do zodíaco.',
+    hourTitle: 'Preciso saber minha hora exata de nascimento?',
+    hourBody:
+      'O último dos quatro pilares — o pilar da hora — é definido pela sua hora de nascimento. Tudo bem se você não souber com exatidão: o Saju Letter foi feito para funcionar só com os pilares de ano, mês e dia, e você pode adicionar sua hora de nascimento depois, se descobrir.',
+    philosophyTitle: 'Nenhum dos dois prevê o seu futuro',
+    philosophyBody:
+      'Seja um signo do zodíaco ou um mapa de saju, ambos servem como uma lente para refletir sobre tendências e ritmos — não uma previsão fixa do que está por vir. As cartas diárias do Saju Letter seguem o mesmo princípio: nunca um prognóstico definitivo, sempre buscando oferecer uma palavra de incentivo com leveza.',
+    referenceTitle: 'Referência: tabela de signos do zodíaco e mestres do dia',
+    ctaText: 'Receba grátis uma prévia de uma linha do seu saju',
   },
   leadCapture: {
     title: 'Cadastre-se agora e ganhe um cupom de teste de 30 dias',

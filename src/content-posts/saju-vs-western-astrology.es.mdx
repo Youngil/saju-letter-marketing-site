@@ -4,11 +4,24 @@ export const meta = {
   date: '2026-08-07',
 };
 
+import { FixedVsChangingDiagram } from '@/components/blog/BlogDiagrams';
+
 Si conoces tu signo del zodiaco, ya entiendes la idea básica detrás del saju — solo que con más detalle.
 
 ## El punto de partida es similar
 
 La astrología occidental te asigna un signo según tu mes de nacimiento. El saju usa tu fecha y hora completas de nacimiento — año, mes, día y hora — para construir cuatro pares de valores en lugar de uno solo.
+
+## Un valor fijo vs. una combinación que cambia cada día
+
+Tu signo del zodiaco se fija una vez y nunca cambia. Los cuatro pilares del saju también quedan fijos en el momento de tu nacimiento — pero cada día tiene su propio pilar, y cómo se encuentra ese pilar del día con tu carta es lo que cambia de un día a otro. Por eso Saju Letter está construido alrededor de una carta nueva cada mañana en lugar de un perfil estático único.
+
+<FixedVsChangingDiagram
+  fixedLabel="Signo zodiacal"
+  fixedCaption="Un valor fijo, definido por tu mes de nacimiento"
+  changingLabel="Saju"
+  changingCaption="Tus cuatro pilares se encuentran con el pilar de hoy, de forma distinta cada día"
+/>
 
 ## Más datos, más matices
 
@@ -20,4 +33,4 @@ Ambos sistemas funcionan igual en este punto: son una forma de reflexionar sobre
 
 ## Pruébalo tú mismo
 
-Ingresa tu fecha de nacimiento en la demo y descubre cómo luce una lectura basada en el saju junto a lo que ya sabes de tu signo zodiacal.
+Ingresa tu fecha de nacimiento en la demo y descubre cómo luce una lectura basada en el saju junto a lo que ya sabes de tu signo zodiacal. Para una comparación lado a lado, visita la [página de comparación entre zodiaco y saju](/es/compare).
