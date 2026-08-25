@@ -5,6 +5,8 @@ import '../globals.css';
 import { getDictionary } from '@/dictionaries';
 import { isMarketingLanguage, MARKETING_LANGUAGES, type MarketingLanguage } from '@/lib/languages';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
+import { WEB_BASE_URL } from '@/lib/seo';
+import { organizationJsonLd } from '@/lib/structuredData';
 import { notFound } from 'next/navigation';
 
 /**
@@ -22,6 +24,11 @@ export async function generateMetadata({ params }: { params: Promise<{ lang: str
   if (!isMarketingLanguage(lang)) return {};
   const dict = await getDictionary(lang);
   return {
+    // 상대경로 metadata(OG 이미지 등)를 절대 URL로 해석하는 기준점 — 이 사이트의 실질적인 루트
+    // 레이아웃(파일 상단 주석 참고)이라 이 파일 한 곳에서만 설정하면 전체에 적용된다.
+    metadataBase: new URL(WEB_BASE_URL),
+    // 페이지별 generateMetadata가 없는 세그먼트를 위한 폴백 기본값 — 실제로 이 값이 그대로
+    // 쓰이는 페이지가 남지 않도록 각 page.tsx에 고유 title/description을 채워가는 중이다.
     title: dict.hero.title,
     description: dict.hero.subtitle,
   };
@@ -42,6 +49,10 @@ export default async function LangLayout({
   return (
     <html lang={lang} className="h-full antialiased">
       <body className="min-h-full flex flex-col bg-background text-foreground">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd(dict.brand)) }}
+        />
         <header className="sticky top-0 z-10 border-b border-foreground/10 bg-background/80 backdrop-blur-md">
           <div className="mx-auto flex max-w-5xl items-center justify-between gap-2 px-4 py-4">
             <Link href={`/${lang}`} className="flex shrink-0 items-center gap-2 text-base font-semibold sm:text-lg">

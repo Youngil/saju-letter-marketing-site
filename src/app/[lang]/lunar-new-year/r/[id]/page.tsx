@@ -5,8 +5,7 @@ import { getDictionary } from '@/dictionaries';
 import { getReading } from '@/lib/lunarNewYearApi';
 import { EmailSignupForm } from '@/components/lunar-new-year/EmailSignupForm';
 import { ShareButton } from '@/components/lunar-new-year/ShareButton';
-
-const WEB_BASE_URL = process.env.NEXT_PUBLIC_WEB_BASE_URL ?? 'http://localhost:3200';
+import { WEB_BASE_URL, NOINDEX_ROBOTS } from '@/lib/seo';
 
 interface PageProps {
   params: Promise<{ lang: string; id: string }>;
@@ -21,11 +20,15 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   return {
     title: `${reading.content.title} — Saju Letter`,
     description: reading.content.greeting,
+    // 방문자 개인의 신년운세 결과라 검색결과 색인 대상이 아니다 — 카카오톡/트위터 공유 미리보기용
+    // OG 태그는 그대로 유지한다.
+    robots: NOINDEX_ROBOTS,
     openGraph: {
       title: reading.content.title,
       description: reading.content.greeting,
       url: `${WEB_BASE_URL}/${rawLang}/lunar-new-year/r/${id}`,
     },
+    twitter: { card: 'summary', title: reading.content.title, description: reading.content.greeting },
   };
 }
 

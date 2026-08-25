@@ -1,9 +1,32 @@
+import type { Metadata } from 'next';
 import { getDictionary } from '@/dictionaries';
-import { isMarketingLanguage, TONE_GROUP, type MarketingLanguage } from '@/lib/languages';
+import { isMarketingLanguage, MARKETING_LANGUAGES, TONE_GROUP, DEFAULT_LANGUAGE, type MarketingLanguage } from '@/lib/languages';
 import { AstrologyInfographic } from '@/components/AstrologyInfographic';
 import { DemoForm } from '@/components/DemoForm';
 import { LeadCaptureForm } from '@/components/LeadCaptureForm';
+import { WEB_BASE_URL, languageAlternates, buildSocialMetadata } from '@/lib/seo';
 import { notFound } from 'next/navigation';
+
+export async function generateMetadata({ params }: { params: Promise<{ lang: string }> }): Promise<Metadata> {
+  const { lang: rawLang } = await params;
+  if (!isMarketingLanguage(rawLang)) return {};
+  const dict = await getDictionary(rawLang);
+  const path = (lang: MarketingLanguage) => `/${lang}`;
+
+  return {
+    title: dict.hero.title,
+    description: dict.hero.subtitle,
+    alternates: {
+      canonical: `${WEB_BASE_URL}${path(rawLang)}`,
+      languages: languageAlternates(MARKETING_LANGUAGES, path, DEFAULT_LANGUAGE),
+    },
+    ...buildSocialMetadata({
+      title: dict.hero.title,
+      description: dict.hero.subtitle,
+      url: `${WEB_BASE_URL}${path(rawLang)}`,
+    }),
+  };
+}
 
 export default async function HomePage({ params }: { params: Promise<{ lang: string }> }) {
   const { lang: rawLang } = await params;

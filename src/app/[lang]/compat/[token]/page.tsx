@@ -1,11 +1,10 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { isMarketingLanguage, type MarketingLanguage } from '@/lib/languages';
+import { isMarketingLanguage, MARKETING_LANGUAGES, DEFAULT_LANGUAGE, type MarketingLanguage } from '@/lib/languages';
 import { getCompatInvite } from '@/lib/compatApi';
 import { COMPAT_CONTENT } from '@/content/compatContent';
 import { CompatView } from '@/components/compat/CompatView';
-
-const WEB_BASE_URL = process.env.NEXT_PUBLIC_WEB_BASE_URL ?? 'http://localhost:3200';
+import { WEB_BASE_URL, languageAlternates, NOINDEX_ROBOTS } from '@/lib/seo';
 
 interface PageProps {
   params: Promise<{ lang: string; token: string }>;
@@ -34,11 +33,20 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     view.status === 'completed'
       ? { title: content.og.completed.titleFor(view.guestName), description: content.og.completed.description }
       : content.og[view.status];
+  const path = (lang: MarketingLanguage) => `/${lang}/compat/${token}`;
 
   return {
     title: og.title,
     description: og.description,
-    openGraph: { title: og.title, description: og.description, url: `${WEB_BASE_URL}/${rawLang}/compat/${token}` },
+    // 유저 개인 궁합 결과 페이지라 검색결과에 노출될 이유가 없다 — 카카오톡/트위터 등 크롤러가
+    // OG 태그를 읽어 미리보기 카드를 만드는 목적(og 항목들)과는 무관하게 색인만 막는다.
+    robots: NOINDEX_ROBOTS,
+    alternates: {
+      canonical: `${WEB_BASE_URL}${path(rawLang)}`,
+      languages: languageAlternates(MARKETING_LANGUAGES, path, DEFAULT_LANGUAGE),
+    },
+    openGraph: { title: og.title, description: og.description, url: `${WEB_BASE_URL}${path(rawLang)}` },
+    twitter: { card: 'summary', title: og.title, description: og.description },
   };
 }
 

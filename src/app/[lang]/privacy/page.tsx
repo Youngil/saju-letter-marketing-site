@@ -1,7 +1,8 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { isMarketingLanguage, MARKETING_LANGUAGES, type MarketingLanguage } from '@/lib/languages';
+import { isMarketingLanguage, MARKETING_LANGUAGES, DEFAULT_LANGUAGE, type MarketingLanguage } from '@/lib/languages';
 import { PRIVACY_POLICY_CONTENT } from '@/content/privacyPolicy';
+import { WEB_BASE_URL, languageAlternates, buildSocialMetadata } from '@/lib/seo';
 
 /**
  * saju-letter-backend/public/privacy.html에서 이관(2026-08-12) — 모든 마케팅 언어(6개)에서
@@ -17,9 +18,20 @@ export async function generateMetadata({ params }: { params: Promise<{ lang: str
   const { lang } = await params;
   if (!isMarketingLanguage(lang)) return {};
   const policy = PRIVACY_POLICY_CONTENT[lang];
+  const path = (l: MarketingLanguage) => `/${l}/privacy`;
   return {
     title: policy.title,
     description: policy.intro,
+    alternates: {
+      canonical: `${WEB_BASE_URL}${path(lang)}`,
+      languages: languageAlternates(MARKETING_LANGUAGES, path, DEFAULT_LANGUAGE),
+    },
+    ...buildSocialMetadata({
+      title: policy.title,
+      description: policy.intro,
+      url: `${WEB_BASE_URL}${path(lang)}`,
+      images: [`${WEB_BASE_URL}/${lang}/opengraph-image`],
+    }),
   };
 }
 

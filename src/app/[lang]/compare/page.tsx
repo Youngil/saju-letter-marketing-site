@@ -2,9 +2,16 @@ import Link from 'next/link';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { getDictionary } from '@/dictionaries';
-import { isMarketingLanguage, isLaunchContentLanguage, LAUNCH_CONTENT_LANGUAGES, type LaunchContentLanguage } from '@/lib/languages';
+import {
+  isMarketingLanguage,
+  isLaunchContentLanguage,
+  LAUNCH_CONTENT_LANGUAGES,
+  DEFAULT_LANGUAGE,
+  type LaunchContentLanguage,
+} from '@/lib/languages';
 import { DAY_MASTER_ROMANIZATIONS, ZODIAC_ROWS } from '@/content/compareZodiac';
 import { HEAVENLY_STEMS } from '@/lib/sajuVocabulary';
+import { WEB_BASE_URL, languageAlternates } from '@/lib/seo';
 
 /** 한국어/일본어는 로마자 표기(Gap 등)만으로는 어색해서 한자를 함께 보여준다(2026-08-08,
  * 사용자 요청) — 두 언어 모두 한자 자체는 읽을 수 있는 독자층이라 발음 표기 없이도 통한다.
@@ -30,10 +37,16 @@ export async function generateMetadata({ params }: { params: Promise<{ lang: str
   const { lang: rawLang } = await params;
   if (!isMarketingLanguage(rawLang) || !isLaunchContentLanguage(rawLang)) return {};
   const dict = await getDictionary(rawLang);
+  const path = (lang: LaunchContentLanguage) => `/${lang}/compare`;
   return {
     title: dict.compare.ogTitle,
     description: dict.compare.ogDescription,
-    openGraph: { title: dict.compare.ogTitle, description: dict.compare.ogDescription },
+    alternates: {
+      canonical: `${WEB_BASE_URL}${path(rawLang)}`,
+      languages: languageAlternates(LAUNCH_CONTENT_LANGUAGES, path, DEFAULT_LANGUAGE as LaunchContentLanguage),
+    },
+    openGraph: { title: dict.compare.ogTitle, description: dict.compare.ogDescription, url: `${WEB_BASE_URL}${path(rawLang)}` },
+    twitter: { card: 'summary_large_image', title: dict.compare.ogTitle, description: dict.compare.ogDescription },
   };
 }
 

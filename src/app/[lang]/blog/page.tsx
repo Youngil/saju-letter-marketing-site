@@ -1,12 +1,44 @@
 import Image from 'next/image';
 import Link from 'next/link';
+import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { getDictionary } from '@/dictionaries';
-import { isMarketingLanguage, isLaunchContentLanguage, LAUNCH_CONTENT_LANGUAGES, type LaunchContentLanguage } from '@/lib/languages';
+import {
+  isMarketingLanguage,
+  isLaunchContentLanguage,
+  LAUNCH_CONTENT_LANGUAGES,
+  DEFAULT_LANGUAGE,
+  type LaunchContentLanguage,
+} from '@/lib/languages';
 import { getAllPostSummaries } from '@/lib/posts';
+import { WEB_BASE_URL, languageAlternates, buildSocialMetadata } from '@/lib/seo';
 
 export async function generateStaticParams() {
   return LAUNCH_CONTENT_LANGUAGES.map((lang) => ({ lang }));
+}
+
+export async function generateMetadata({ params }: { params: Promise<{ lang: string }> }): Promise<Metadata> {
+  const { lang: rawLang } = await params;
+  if (!isMarketingLanguage(rawLang) || !isLaunchContentLanguage(rawLang)) return {};
+  const dict = await getDictionary(rawLang);
+  const path = (lang: LaunchContentLanguage) => `/${lang}/blog`;
+
+  return {
+    title: dict.blog.title,
+    description: dict.blog.subtitle,
+    alternates: {
+      canonical: `${WEB_BASE_URL}${path(rawLang)}`,
+      // DEFAULT_LANGUAGE('en')는 항상 LAUNCH_CONTENT_LANGUAGES 안에 있지만, languages.ts에서
+      // 더 넓은 MarketingLanguage로 선언돼 있어 여기서만 좁혀 넘긴다.
+      languages: languageAlternates(LAUNCH_CONTENT_LANGUAGES, path, DEFAULT_LANGUAGE as LaunchContentLanguage),
+    },
+    ...buildSocialMetadata({
+      title: dict.blog.title,
+      description: dict.blog.subtitle,
+      url: `${WEB_BASE_URL}${path(rawLang)}`,
+      images: [`${WEB_BASE_URL}/${rawLang}/opengraph-image`],
+    }),
+  };
 }
 
 export default async function BlogIndexPage({ params }: { params: Promise<{ lang: string }> }) {
