@@ -64,7 +64,7 @@ export const dictionary: MarketingDictionary = {
     subtitle: '사주와 한국의 전통, 그리고 별자리와의 비교에 대한 짧은 글들을 전해드려요.',
     readMore: '더 보기',
     empty: '아직 등록된 글이 없어요. 곧 찾아올게요.',
-    byLabel: '다인(가상 캐릭터) 씀',
+    byLabel: '다인 씀',
   },
   compare: {
     title: '별자리와 사주, 나란히 비교해보기',

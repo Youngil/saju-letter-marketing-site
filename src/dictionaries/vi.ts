@@ -69,7 +69,7 @@ export const dictionary: MarketingDictionary = {
     subtitle: 'Những bài viết ngắn gọn, dễ hiểu về Bát Tự, truyền thống Hàn Quốc và cách nó liên hệ với những gì bạn đã biết.',
     readMore: 'Đọc thêm',
     empty: 'Chưa có bài viết nào — hãy quay lại sau nhé.',
-    byLabel: 'Viết bởi Dain (nhân vật hư cấu)',
+    byLabel: 'Viết bởi Dain',
   },
   compare: {
     title: 'Cung hoàng đạo và Bát Tự, đặt cạnh nhau',
