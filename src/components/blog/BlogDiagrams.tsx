@@ -86,44 +86,24 @@ export function NewYearTimelineDiagram({
   ipchunDate: string;
 }) {
   return (
-    <div className="not-prose my-8 rounded-2xl border border-foreground/10 bg-foreground/[0.02] p-6 pt-10">
-      <div className="relative mx-auto max-w-md">
-        <div className="h-px w-full bg-foreground/15" aria-hidden="true" />
-        <TimelineMarker leftPercent={22} label={lunarLabel} date={lunarDate} icon={<MoonIcon />} tint="text-foreground/60 bg-foreground/8" />
-        <TimelineMarker
-          leftPercent={68}
-          label={ipchunLabel}
-          date={ipchunDate}
-          icon={<SunIcon />}
-          tint="text-accent-warm bg-accent-warm/15"
-        />
+    <div className="not-prose my-8 rounded-2xl border border-foreground/10 bg-foreground/[0.02] p-6">
+      <div className="mx-auto flex max-w-md items-start gap-3">
+        <TimelineMarker label={lunarLabel} date={lunarDate} icon={<MoonIcon />} tint="text-foreground/60 bg-foreground/8" />
+        <div className="mt-[18px] h-px flex-1 bg-foreground/15" aria-hidden="true" />
+        <TimelineMarker label={ipchunLabel} date={ipchunDate} icon={<SunIcon />} tint="text-accent-warm bg-accent-warm/15" />
       </div>
     </div>
   );
 }
 
-function TimelineMarker({
-  leftPercent,
-  label,
-  date,
-  icon,
-  tint,
-}: {
-  leftPercent: number;
-  label: string;
-  date: string;
-  icon: React.ReactNode;
-  tint: string;
-}) {
+function TimelineMarker({ label, date, icon, tint }: { label: string; date: string; icon: React.ReactNode; tint: string }) {
   return (
-    <div className="absolute top-0 flex -translate-x-1/2 -translate-y-full flex-col items-center gap-2" style={{ left: `${leftPercent}%` }}>
-      <div className="text-center">
+    <div className="flex w-24 shrink-0 flex-col items-center gap-2 text-center sm:w-28">
+      <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${tint}`}>{icon}</span>
+      <div>
         <div className="text-xs font-semibold text-foreground/80">{label}</div>
         <div className="text-[11px] text-foreground/50">{date}</div>
       </div>
-      <span className={`flex h-9 w-9 items-center justify-center rounded-full ${tint}`}>{icon}</span>
-      <span className="h-3 w-px bg-foreground/25" aria-hidden="true" />
-      <span className="h-1.5 w-1.5 -translate-y-3 rounded-full bg-foreground/40" aria-hidden="true" />
     </div>
   );
 }
