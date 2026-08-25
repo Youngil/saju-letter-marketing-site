@@ -119,9 +119,9 @@ export const dictionary: MarketingDictionary = {
   footer: {
     privacyNote: 'We send your Gregorian date of birth only to confirm you are 16 or older — we do not store it. Your chart is calculated in the browser.',
     privacyLinkLabel: 'Privacy Policy',
-    appSectionLabel: 'Get the app',
   },
   appLinks: {
+    sectionLabel: 'Get the app',
     androidCta: 'Get it on Google Play',
     iosCta: 'Get it on the App Store',
     comingSoon: 'Coming soon',

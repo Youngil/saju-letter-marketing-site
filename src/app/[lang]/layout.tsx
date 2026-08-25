@@ -80,7 +80,7 @@ export default async function LangLayout({
               {dict.footer.privacyLinkLabel}
             </Link>
             <div className="mt-6 flex flex-col gap-2">
-              <span className="text-xs font-medium uppercase tracking-wide text-foreground/40">{dict.footer.appSectionLabel}</span>
+              <span className="text-xs font-medium uppercase tracking-wide text-foreground/40">{dict.appLinks.sectionLabel}</span>
               <AppDownloadLinks dict={dict.appLinks} />
             </div>
           </div>

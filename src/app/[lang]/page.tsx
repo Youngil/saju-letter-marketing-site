@@ -4,6 +4,7 @@ import { isMarketingLanguage, MARKETING_LANGUAGES, TONE_GROUP, DEFAULT_LANGUAGE,
 import { AstrologyInfographic } from '@/components/AstrologyInfographic';
 import { DemoForm } from '@/components/DemoForm';
 import { LeadCaptureForm } from '@/components/LeadCaptureForm';
+import { AppDownloadLinks } from '@/components/AppDownloadLinks';
 import { WEB_BASE_URL, languageAlternates, buildSocialMetadata } from '@/lib/seo';
 import { notFound } from 'next/navigation';
 
@@ -54,6 +55,10 @@ export default async function HomePage({ params }: { params: Promise<{ lang: str
         >
           {dict.hero.ctaDemo}
         </a>
+        <div className="flex flex-col items-center gap-2">
+          <span className="text-xs font-medium uppercase tracking-wide text-foreground/40">{dict.appLinks.sectionLabel}</span>
+          <AppDownloadLinks dict={dict.appLinks} />
+        </div>
       </section>
 
       <AstrologyInfographic

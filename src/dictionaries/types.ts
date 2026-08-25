@@ -110,15 +110,16 @@ export interface MarketingDictionary {
   footer: {
     privacyNote: string;
     privacyLinkLabel: string;
-    /** 안드로이드/iOS 다운로드 배지 위 작은 섹션 라벨(예: "앱 다운로드"). */
-    appSectionLabel: string;
   };
   /**
-   * 안드로이드/iOS 스토어 다운로드 CTA — footer(전 페이지 공통)와 두 전환 지점(무료 미리보기
-   * 결과, 궁합 결과)에서 재사용한다(`components/AppDownloadLinks.tsx`, 2026-08-25). 아직 어느
-   * 플랫폼도 스토어에 올라가지 않은 지금은 `comingSoon` 문구가 두 배지 모두에 함께 표시된다.
+   * 안드로이드/iOS 스토어 다운로드 CTA — 홈 히어로(첫 화면, 스크롤 없이 보임)·footer(전 페이지
+   * 공통)·두 전환 지점(무료 미리보기 결과, 궁합 결과)에서 재사용한다
+   * (`components/AppDownloadLinks.tsx`, 2026-08-25). 아직 어느 플랫폼도 스토어에 올라가지
+   * 않은 지금은 `comingSoon` 문구가 두 배지 모두에 함께 표시된다.
    */
   appLinks: {
+    /** 배지 위 작은 섹션 라벨(예: "앱 다운로드"). */
+    sectionLabel: string;
     androidCta: string;
     iosCta: string;
     comingSoon: string;

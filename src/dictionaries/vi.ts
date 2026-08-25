@@ -121,9 +121,9 @@ export const dictionary: MarketingDictionary = {
   footer: {
     privacyNote: 'Chúng tôi gửi ngày sinh dương lịch chỉ để xác nhận bạn từ 16 tuổi trở lên — không lưu trữ. Lá số được tính trên trình duyệt.',
     privacyLinkLabel: 'Chính sách Quyền riêng tư',
-    appSectionLabel: 'Tải ứng dụng',
   },
   appLinks: {
+    sectionLabel: 'Tải ứng dụng',
     androidCta: 'Tải trên Google Play',
     iosCta: 'Tải trên App Store',
     comingSoon: 'Sắp ra mắt',
