@@ -5,7 +5,6 @@ import '../globals.css';
 import { getDictionary } from '@/dictionaries';
 import { isMarketingLanguage, MARKETING_LANGUAGES, type MarketingLanguage } from '@/lib/languages';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
-import { AppDownloadLinks } from '@/components/AppDownloadLinks';
 import { WEB_BASE_URL } from '@/lib/seo';
 import { organizationJsonLd } from '@/lib/structuredData';
 import { notFound } from 'next/navigation';
@@ -79,10 +78,6 @@ export default async function LangLayout({
             <Link href={`/${lang}/privacy`} className="mt-2 w-fit underline hover:text-foreground/70">
               {dict.footer.privacyLinkLabel}
             </Link>
-            <div className="mt-6 flex flex-col gap-2">
-              <span className="text-xs font-medium uppercase tracking-wide text-foreground/40">{dict.appLinks.sectionLabel}</span>
-              <AppDownloadLinks dict={dict.appLinks} />
-            </div>
           </div>
         </footer>
       </body>
