@@ -61,6 +61,7 @@ export interface MarketingDictionary {
     subtitle: string;
     readMore: string;
     empty: string;
+    byLabel: string;
   };
   compare: {
     title: string;

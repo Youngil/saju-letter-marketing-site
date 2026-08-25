@@ -61,6 +61,7 @@ export const dictionary: MarketingDictionary = {
     subtitle: '四柱推命や韓国の占い文化について、短く読みやすい記事をお届けします。',
     readMore: '続きを読む',
     empty: 'まだ記事がありません。近日公開予定です。',
+    byLabel: '文: ダイン',
   },
   compare: {
     title: '星座と四柱推命を比べてみる',

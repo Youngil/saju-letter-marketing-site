@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getDictionary } from '@/dictionaries';
@@ -30,7 +31,12 @@ export default async function BlogIndexPage({ params }: { params: Promise<{ lang
                 {post.title}
               </Link>
               <p className="mt-2 text-foreground/70">{post.description}</p>
-              <span className="mt-3 block text-sm text-foreground/50">{post.date}</span>
+              <div className="mt-3 flex items-center gap-2 text-sm text-foreground/50">
+                <Image src="/dain-avatar.png" alt="" width={20} height={20} className="rounded-full" />
+                <span>{dict.blog.byLabel}</span>
+                <span aria-hidden="true">·</span>
+                <span>{post.date}</span>
+              </div>
               <Link href={`/${lang}/blog/${post.slug}`} className="mt-2 inline-block text-sm font-medium text-accent hover:underline">
                 {dict.blog.readMore} →
               </Link>

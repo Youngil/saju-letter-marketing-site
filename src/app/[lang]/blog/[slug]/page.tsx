@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import Link from 'next/link';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
@@ -37,7 +38,12 @@ export default async function BlogPostPage({ params }: { params: Promise<{ lang:
   return (
     <article className="mx-auto max-w-2xl px-4 py-12">
       <h1 className="mb-2 text-3xl font-bold">{meta.title}</h1>
-      <p className="mb-8 text-sm text-foreground/50">{meta.date}</p>
+      <div className="mb-8 flex items-center gap-2 text-sm text-foreground/50">
+        <Image src="/dain-avatar.png" alt="" width={24} height={24} className="rounded-full" />
+        <span>{dict.blog.byLabel}</span>
+        <span aria-hidden="true">·</span>
+        <span>{meta.date}</span>
+      </div>
       <Component />
       <Link href={`/${lang}/blog`} className="mt-8 inline-block text-accent hover:underline">
         ← {dict.blog.title}
