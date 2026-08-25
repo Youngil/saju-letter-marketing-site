@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { isMarketingLanguage, MARKETING_LANGUAGES, DEFAULT_LANGUAGE, type MarketingLanguage } from '@/lib/languages';
+import { getDictionary } from '@/dictionaries';
 import { getCompatInvite } from '@/lib/compatApi';
 import { COMPAT_CONTENT } from '@/content/compatContent';
 import { CompatView } from '@/components/compat/CompatView';
@@ -57,10 +58,11 @@ export default async function CompatPage({ params }: PageProps) {
 
   const view = await getCompatInvite(token, lang);
   const content = COMPAT_CONTENT[lang];
+  const dict = await getDictionary(lang);
 
   return (
     <div className="mx-auto max-w-lg px-4 py-12">
-      <CompatView token={token} language={lang} initialView={view} content={content} />
+      <CompatView token={token} language={lang} initialView={view} content={content} appLinksDict={dict.appLinks} />
     </div>
   );
 }

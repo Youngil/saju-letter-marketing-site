@@ -119,7 +119,12 @@ export const dictionary: MarketingDictionary = {
   footer: {
     privacyNote: 'Enviamos sua data de nascimento gregoriana só para confirmar que você tem 16 anos ou mais — não a armazenamos. Seu mapa é calculado no navegador.',
     privacyLinkLabel: 'Política de Privacidade',
-    googlePlayCta: 'Disponível no Google Play',
+    appSectionLabel: 'Baixe o app',
+  },
+  appLinks: {
+    androidCta: 'Disponível no Google Play',
+    iosCta: 'Disponível na App Store',
+    comingSoon: 'Em breve',
   },
   lunarNewYear: {
     navHome: 'Início',

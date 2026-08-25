@@ -110,7 +110,18 @@ export interface MarketingDictionary {
   footer: {
     privacyNote: string;
     privacyLinkLabel: string;
-    googlePlayCta: string;
+    /** 안드로이드/iOS 다운로드 배지 위 작은 섹션 라벨(예: "앱 다운로드"). */
+    appSectionLabel: string;
+  };
+  /**
+   * 안드로이드/iOS 스토어 다운로드 CTA — footer(전 페이지 공통)와 두 전환 지점(무료 미리보기
+   * 결과, 궁합 결과)에서 재사용한다(`components/AppDownloadLinks.tsx`, 2026-08-25). 아직 어느
+   * 플랫폼도 스토어에 올라가지 않은 지금은 `comingSoon` 문구가 두 배지 모두에 함께 표시된다.
+   */
+  appLinks: {
+    androidCta: string;
+    iosCta: string;
+    comingSoon: string;
   };
   /**
    * saju-letter-newyear-campaign 이관분(2026-08-07) — ko를 제외한 5개 언어에만 존재한다(그

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import type { MarketingLanguage } from '@/lib/languages';
+import type { MarketingDictionary } from '@/dictionaries/types';
 import type { CompatContent } from '@/content/compatContent';
 import type { InviteView } from '@/lib/compatApi';
 import { logCompatEvent, submitGuestInvite } from '@/lib/compatApi';
@@ -9,6 +10,7 @@ import { ApiError } from '@/lib/apiClient';
 import { calculateSaju, resolveSolarBirthDate } from '@/lib/saju';
 import { isOldEnough } from '@/lib/age';
 import { Turnstile, TURNSTILE_ENABLED } from '../Turnstile';
+import { AppDownloadLinks } from '../AppDownloadLinks';
 
 const CURRENT_YEAR = new Date().getFullYear();
 
@@ -23,11 +25,13 @@ export function CompatView({
   language,
   initialView,
   content,
+  appLinksDict,
 }: {
   token: string;
   language: MarketingLanguage;
   initialView: InviteView;
   content: CompatContent;
+  appLinksDict: MarketingDictionary['appLinks'];
 }) {
   const [view, setView] = useState<InviteView>(initialView);
 
@@ -48,7 +52,9 @@ export function CompatView({
     return <PendingForm token={token} language={language} content={content} onSubmitted={setView} />;
   }
 
-  return <CompletedResult content={content} guestName={view.guestName} reading={view.reading} token={token} />;
+  return (
+    <CompletedResult content={content} guestName={view.guestName} reading={view.reading} token={token} appLinksDict={appLinksDict} />
+  );
 }
 
 function CompletedResult({
@@ -56,12 +62,16 @@ function CompletedResult({
   guestName,
   reading,
   token,
+  appLinksDict,
 }: {
   content: CompatContent;
   guestName: string | null;
   reading: { title: string; body: string } | null;
   token: string;
+  appLinksDict: MarketingDictionary['appLinks'];
 }) {
+  const logInstallClick = () => logCompatEvent(token, 'install_cta_clicked', 'guest');
+
   return (
     <div className="card-surface flex flex-col gap-4 rounded-2xl border border-foreground/10 p-6 sm:p-7">
       <p className="text-sm font-medium text-accent">{content.pairLine(guestName)}</p>
@@ -73,15 +83,10 @@ function CompletedResult({
       ) : (
         <p className="text-foreground/60">{content.loading}</p>
       )}
-      <a
-        href={process.env.NEXT_PUBLIC_GOOGLE_PLAY_URL}
-        target="_blank"
-        rel="noopener noreferrer"
-        onClick={() => logCompatEvent(token, 'install_cta_clicked', 'guest')}
-        className="mt-2 rounded-full bg-accent px-6 py-3 text-center font-medium text-white shadow-lg shadow-accent/25 transition hover:-translate-y-0.5 hover:shadow-xl hover:shadow-accent/30"
-      >
-        {content.cta}
-      </a>
+      <div className="mt-2 flex flex-col items-center gap-3">
+        <p className="text-center text-sm font-medium text-foreground/70">{content.cta}</p>
+        <AppDownloadLinks dict={appLinksDict} onAndroidClick={logInstallClick} onIosClick={logInstallClick} emphasized />
+      </div>
     </div>
   );
 }

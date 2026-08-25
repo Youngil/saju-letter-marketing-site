@@ -7,6 +7,7 @@ import { calculateSaju } from '@/lib/saju';
 import { isOldEnough } from '@/lib/age';
 import { ApiError, getDemoReading, type DemoReadingResponse } from '@/lib/api';
 import { Turnstile, TURNSTILE_ENABLED } from './Turnstile';
+import { AppDownloadLinks } from './AppDownloadLinks';
 
 const CURRENT_YEAR = new Date().getFullYear();
 
@@ -18,7 +19,15 @@ const CURRENT_YEAR = new Date().getFullYear();
  * hourPillar를 받았지만 그 값은 무료 티어 화면에 아예 반영되지 않는 프리미엄 전용 보너스에만
  * 쓰이던 값이었다).
  */
-export function DemoForm({ language, dict }: { language: MarketingLanguage; dict: MarketingDictionary['demo'] }) {
+export function DemoForm({
+  language,
+  dict,
+  appLinksDict,
+}: {
+  language: MarketingLanguage;
+  dict: MarketingDictionary['demo'];
+  appLinksDict: MarketingDictionary['appLinks'];
+}) {
   const [year, setYear] = useState('');
   const [month, setMonth] = useState('');
   const [day, setDay] = useState('');
@@ -87,14 +96,10 @@ export function DemoForm({ language, dict }: { language: MarketingLanguage; dict
           <p>{result.interpretation}</p>
           <p className="text-foreground/70 italic">{result.closing}</p>
         </div>
-        <a
-          href={process.env.NEXT_PUBLIC_GOOGLE_PLAY_URL}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="mt-2 rounded-full bg-accent px-6 py-3 text-center font-medium text-white shadow-lg shadow-accent/25 transition hover:-translate-y-0.5 hover:shadow-xl hover:shadow-accent/30"
-        >
-          {dict.resultCta}
-        </a>
+        <div className="mt-2 flex flex-col items-center gap-3">
+          <p className="text-center text-sm font-medium text-foreground/70">{dict.resultCta}</p>
+          <AppDownloadLinks dict={appLinksDict} emphasized />
+        </div>
         <button
           type="button"
           onClick={() => setResult(null)}
