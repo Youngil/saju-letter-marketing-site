@@ -2,8 +2,7 @@ import Link from 'next/link';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { getDictionary } from '@/dictionaries';
-import { isMarketingLanguage, isLaunchContentLanguage, LAUNCH_CONTENT_LANGUAGES, TONE_GROUP, type LaunchContentLanguage } from '@/lib/languages';
-import { AstrologyInfographic } from '@/components/AstrologyInfographic';
+import { isMarketingLanguage, isLaunchContentLanguage, LAUNCH_CONTENT_LANGUAGES, type LaunchContentLanguage } from '@/lib/languages';
 import { DAY_MASTER_ROMANIZATIONS, ZODIAC_ROWS } from '@/content/compareZodiac';
 import { HEAVENLY_STEMS } from '@/lib/sajuVocabulary';
 
@@ -40,18 +39,18 @@ export async function generateMetadata({ params }: { params: Promise<{ lang: str
 
 /**
  * 2026-08-25 — 원래 "표 두 개 + 짧은 문단 하나"뿐이라 별자리/사주의 실제 차이를 이해하기엔
- * 내용이 얕다는 사용자 피드백으로 전면 확장했다. 홈 화면이 이미 갖고 있던 `AstrologyInfographic`
- * (인라인 SVG로 그린 두 시스템 비교 카드, 외부 이미지 에셋 없이도 시각적으로 풍부하다)을 그대로
- * 재사용해 페이지 상단에 배치하고, 아래에 세 개의 설명 섹션(정보량 차이/시주와 출생시간/단정하지
- * 않는다는 철학)을 새로 추가했다 — 기존 별자리 날짜표·일간 목록은 "참고 자료"로 이름 붙여 그
- * 아래 유지한다(완전히 대체하지 않고 보조 자료로 격을 낮춤).
+ * 내용이 얕다는 사용자 피드백으로 전면 확장했다. **처음엔 홈 화면의 `AstrologyInfographic`을
+ * 이 페이지에도 그대로 재사용했는데, 홈에서 이미 본 카드가 이 페이지에서 그대로 다시 나와
+ * 콘텐츠가 겹쳐 보인다는 후속 피드백으로 제거했다** — 홈은 짧은 시각적 티저 역할을 그대로
+ * 유지하고, 이 페이지는 홈에 없는 새로운 설명(정보량 차이/시주와 출생시간/단정하지 않는다는
+ * 철학) 3개 섹션으로 시작해 서로 다른 역할을 갖도록 다시 나눴다. 기존 별자리 날짜표·일간
+ * 목록은 "참고 자료"로 이름 붙여 그 아래 유지한다.
  */
 export default async function ComparePage({ params }: { params: Promise<{ lang: string }> }) {
   const { lang: rawLang } = await params;
   if (!isMarketingLanguage(rawLang) || !isLaunchContentLanguage(rawLang)) notFound();
   const lang: LaunchContentLanguage = rawLang;
   const dict = await getDictionary(lang);
-  const toneGroup = TONE_GROUP[lang];
   const rows = ZODIAC_ROWS[rawLang];
 
   return (
@@ -60,12 +59,6 @@ export default async function ComparePage({ params }: { params: Promise<{ lang: 
         <h1 className="mb-2 text-3xl font-bold">{dict.compare.title}</h1>
         <p className="text-foreground/70">{dict.compare.subtitle}</p>
       </div>
-
-      <AstrologyInfographic
-        dict={dict.infographic}
-        toneGroup={toneGroup}
-        pillarLabels={{ year: dict.demo.yearLabel, month: dict.demo.monthLabel, day: dict.demo.dayLabel, hour: dict.demo.hourLabel }}
-      />
 
       <div className="flex flex-col gap-10">
         <section>

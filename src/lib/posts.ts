@@ -5,7 +5,7 @@ import { LAUNCH_CONTENT_LANGUAGES, type MarketingLanguage } from './languages';
  * 그 언어의 content-posts/*.mdx 3편만 채우면 열린다(languages.ts의 LAUNCH_CONTENT_LANGUAGES 참고). */
 export const BLOG_LANGUAGES = LAUNCH_CONTENT_LANGUAGES;
 
-export const POST_SLUGS = ['what-is-saju', 'saju-vs-western-astrology', 'how-korean-new-year-works'] as const;
+export const POST_SLUGS = ['what-is-saju', 'saju-vs-western-astrology', 'how-korean-new-year-works', 'who-writes-your-letter'] as const;
 export type PostSlug = (typeof POST_SLUGS)[number];
 
 export interface PostMeta {
