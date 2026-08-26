@@ -47,5 +47,5 @@ export default async function LunarNewYearPage({ params }: { params: Promise<{ l
   const dict = await getDictionary(language);
   if (!dict.lunarNewYear) notFound();
 
-  return <LunarNewYearHome language={language} dict={dict.lunarNewYear} />;
+  return <LunarNewYearHome language={language} dict={dict.lunarNewYear} appLinksDict={dict.appLinks} />;
 }

@@ -98,7 +98,7 @@ export const COMPAT_CONTENT: Record<MarketingLanguage, CompatContent> = {
     monthLabel: 'Month',
     dayLabel: 'Day',
     leapMonthLabel: 'Leap month',
-    submit: 'See the reading',
+    submit: 'See the result',
     submitting: 'Checking…',
     formError: 'Please fill in your name and birthdate correctly.',
     calcError: "We couldn't calculate that date. Please double-check it.",
@@ -110,8 +110,8 @@ export const COMPAT_CONTENT: Record<MarketingLanguage, CompatContent> = {
       not_found: { title: 'Saju Letter — Compatibility Check', description: "This link isn't valid. Please double-check it with whoever sent it to you." },
       expired: { title: 'Saju Letter — Compatibility Check', description: 'This invite link has expired — ask your friend to send a new one.' },
       completed: {
-        titleFor: (guestName) => (guestName ? `${guestName}'s compatibility on Saju Letter` : 'A compatibility reading on Saju Letter'),
-        description: 'See how these two day masters match — a short, playful read from Saju Letter.',
+        titleFor: (guestName) => (guestName ? `${guestName}'s compatibility on Saju Letter` : 'A compatibility check on Saju Letter'),
+        description: 'See how these two day masters match — a short, playful look from Saju Letter.',
       },
       pending: {
         title: 'Saju Letter — Compatibility Check',
@@ -180,8 +180,8 @@ export const COMPAT_CONTENT: Record<MarketingLanguage, CompatContent> = {
       not_found: { title: 'Saju Letter — Prueba de compatibilidad', description: 'Este enlace no es válido. Verifícalo con quien te lo envió.' },
       expired: { title: 'Saju Letter — Prueba de compatibilidad', description: 'Este enlace de invitación ha caducado — pide a tu amigo que te envíe uno nuevo.' },
       completed: {
-        titleFor: (guestName) => (guestName ? `Compatibilidad de ${guestName} en Saju Letter` : 'Una lectura de compatibilidad en Saju Letter'),
-        description: 'Descubre cómo conectan sus días maestros — una lectura breve y divertida de Saju Letter.',
+        titleFor: (guestName) => (guestName ? `Compatibilidad de ${guestName} en Saju Letter` : 'Una prueba de compatibilidad en Saju Letter'),
+        description: 'Descubre cómo conectan sus días maestros — un vistazo breve y divertido de Saju Letter.',
       },
       pending: {
         title: 'Saju Letter — Prueba de compatibilidad',
@@ -215,8 +215,8 @@ export const COMPAT_CONTENT: Record<MarketingLanguage, CompatContent> = {
       not_found: { title: 'Saju Letter — Verificação de compatibilidade', description: 'Este link não é válido. Verifique com quem te enviou.' },
       expired: { title: 'Saju Letter — Verificação de compatibilidade', description: 'Este link de convite expirou — peça ao seu amigo para enviar um novo.' },
       completed: {
-        titleFor: (guestName) => (guestName ? `Compatibilidade de ${guestName} no Saju Letter` : 'Uma leitura de compatibilidade no Saju Letter'),
-        description: 'Veja como os dias mestres combinam — uma leitura curta e divertida do Saju Letter.',
+        titleFor: (guestName) => (guestName ? `Compatibilidade de ${guestName} no Saju Letter` : 'Uma verificação de compatibilidade no Saju Letter'),
+        description: 'Veja como os dias mestres combinam — um olhar curto e divertido do Saju Letter.',
       },
       pending: {
         title: 'Saju Letter — Verificação de compatibilidade',
@@ -251,7 +251,7 @@ export const COMPAT_CONTENT: Record<MarketingLanguage, CompatContent> = {
       expired: { title: 'Saju Letter — Kiểm tra mức độ hợp nhau', description: 'Liên kết mời này đã hết hạn — hãy nhờ bạn của bạn gửi liên kết mới.' },
       completed: {
         titleFor: (guestName) => (guestName ? `Mức độ hợp nhau của ${guestName} trên Saju Letter` : 'Một kết quả hợp nhau trên Saju Letter'),
-        description: 'Xem thiên can ngày của hai người hợp nhau ra sao — một bài đọc ngắn gọn, thú vị từ Saju Letter.',
+        description: 'Xem thiên can ngày của hai người hợp nhau ra sao — một kết quả ngắn gọn, thú vị từ Saju Letter.',
       },
       pending: {
         title: 'Saju Letter — Kiểm tra mức độ hợp nhau',

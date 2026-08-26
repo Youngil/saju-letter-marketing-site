@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 import type { MarketingDictionary } from '@/dictionaries/types';
 import type { MarketingLanguage } from '@/lib/languages';
 import { calculateSaju } from '@/lib/saju';
@@ -89,8 +90,21 @@ export function DemoForm({
 
   if (result) {
     return (
-      <div className="card-surface flex flex-col gap-4 rounded-2xl border border-accent/20 p-6 sm:p-7">
-        <h3 className="text-xs font-semibold tracking-wide text-accent uppercase">{dict.resultTitle}</h3>
+      <div className="letter-surface flex flex-col gap-4 rounded-sm p-6 sm:p-7">
+        <div className="flex items-center gap-3">
+          <Image
+            src="/dain-portrait.png"
+            alt=""
+            width={40}
+            height={40}
+            className="h-10 w-10 rounded-full border border-foreground/15 bg-[#F3EBDC] object-cover"
+          />
+          <div className="min-w-0 text-left">
+            <div className="text-sm font-semibold text-foreground">{dict.resultFromName}</div>
+            <div className="text-xs text-foreground/55">{dict.resultFromRole}</div>
+          </div>
+        </div>
+        <h3 className="text-xs font-semibold tracking-wide text-accent-warm uppercase">{dict.resultTitle}</h3>
         <div className="flex flex-col gap-3 text-lg leading-relaxed">
           <p className="font-medium">{result.hook}</p>
           <p>{result.interpretation}</p>
@@ -112,9 +126,12 @@ export function DemoForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="card-surface flex flex-col gap-5 rounded-2xl border border-foreground/10 p-6 sm:p-7">
+    <form onSubmit={handleSubmit} className="letter-surface flex flex-col gap-5 rounded-sm p-6 sm:p-7">
       <div>
         <span className="mb-1.5 block text-sm font-medium">{dict.dateLabel}</span>
+        {/* 예전엔 각 입력칸을 고정폭(w-20/w-16 등)으로 줘서 카드 폭 전체를 못 채우고 왼쪽에만
+         * 몰려 붙어 보였다(2026-08-26, 사용자가 "생년월일 입력이 좌측으로 치우쳐보인다"고 지적해
+         * 발견) — flex-1로 바꿔 세 칸이 카드 폭을 균등하게 나눠 쓰도록 고쳤다. */}
         <div className="flex gap-1.5 sm:gap-2">
           <input
             type="number"
@@ -122,7 +139,7 @@ export function DemoForm({
             placeholder={dict.yearLabel}
             value={year}
             onChange={(e) => setYear(e.target.value)}
-            className="w-20 min-w-0 rounded-lg border border-foreground/15 bg-white px-2 py-2.5 transition focus-visible:border-accent sm:w-24 sm:px-3"
+            className="min-w-0 flex-1 rounded-lg border border-foreground/15 bg-white px-2 py-2.5 transition focus-visible:border-accent-warm sm:px-3"
           />
           <input
             type="number"
@@ -132,7 +149,7 @@ export function DemoForm({
             onChange={(e) => setMonth(e.target.value)}
             min={1}
             max={12}
-            className="w-16 min-w-0 rounded-lg border border-foreground/15 bg-white px-2 py-2.5 transition focus-visible:border-accent sm:w-20 sm:px-3"
+            className="min-w-0 flex-1 rounded-lg border border-foreground/15 bg-white px-2 py-2.5 transition focus-visible:border-accent-warm sm:px-3"
           />
           <input
             type="number"
@@ -142,7 +159,7 @@ export function DemoForm({
             onChange={(e) => setDay(e.target.value)}
             min={1}
             max={31}
-            className="w-16 min-w-0 rounded-lg border border-foreground/15 bg-white px-2 py-2.5 transition focus-visible:border-accent sm:w-20 sm:px-3"
+            className="min-w-0 flex-1 rounded-lg border border-foreground/15 bg-white px-2 py-2.5 transition focus-visible:border-accent-warm sm:px-3"
           />
         </div>
       </div>
@@ -154,7 +171,7 @@ export function DemoForm({
       <button
         type="submit"
         disabled={isSubmitting || (TURNSTILE_ENABLED && !turnstileToken)}
-        className="rounded-full bg-accent px-6 py-3 font-medium text-white shadow-lg shadow-accent/25 transition hover:-translate-y-0.5 hover:shadow-xl hover:shadow-accent/30 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
+        className="rounded-full bg-accent-warm px-6 py-3 font-medium text-white transition hover:bg-accent-warm/90 disabled:pointer-events-none disabled:opacity-50"
       >
         {isSubmitting ? dict.submitting : dict.submitButton}
       </button>

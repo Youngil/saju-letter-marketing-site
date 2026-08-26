@@ -9,7 +9,15 @@ import { OffSeasonPlaceholder } from './OffSeasonPlaceholder';
 
 type LunarNewYearDict = NonNullable<MarketingDictionary['lunarNewYear']>;
 
-export function LunarNewYearHome({ language, dict: t }: { language: NonKoreanLanguage; dict: LunarNewYearDict }) {
+export function LunarNewYearHome({
+  language,
+  dict: t,
+  appLinksDict,
+}: {
+  language: NonKoreanLanguage;
+  dict: LunarNewYearDict;
+  appLinksDict: MarketingDictionary['appLinks'];
+}) {
   const [windowStatus, setWindowStatus] = useState<CampaignWindowStatus | null>(null);
 
   useEffect(() => {
@@ -37,6 +45,7 @@ export function LunarNewYearHome({ language, dict: t }: { language: NonKoreanLan
           language={language}
           nextStartsAt={windowStatus.nextStartsAt ?? { year: 2026, month: 1, day: 17 }}
           dict={t.offSeason}
+          appLinksDict={appLinksDict}
         />
       )}
 

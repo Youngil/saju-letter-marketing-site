@@ -118,6 +118,8 @@ export function ReadingForm({ language, dict: t }: { language: NonKoreanLanguage
 
       <div>
         <span className="mb-1 block text-sm font-medium">{t.dateLabel}</span>
+        {/* 고정폭(w-24/w-20)이라 카드 폭을 못 채우고 왼쪽에 몰려 붙어 보이던 것을 DemoForm.tsx/
+         * CompatView.tsx와 같은 방식(flex-1 균등 분할)으로 맞췄다(2026-08-26). */}
         <div className="flex gap-2">
           <input
             type="number"
@@ -125,7 +127,7 @@ export function ReadingForm({ language, dict: t }: { language: NonKoreanLanguage
             placeholder={t.yearLabel}
             value={year}
             onChange={(e) => setYear(e.target.value)}
-            className="w-24 rounded-lg border border-stone-300 bg-white px-3 py-2"
+            className="min-w-0 flex-1 rounded-lg border border-stone-300 bg-white px-3 py-2"
           />
           <input
             type="number"
@@ -135,7 +137,7 @@ export function ReadingForm({ language, dict: t }: { language: NonKoreanLanguage
             onChange={(e) => setMonth(e.target.value)}
             min={1}
             max={12}
-            className="w-20 rounded-lg border border-stone-300 bg-white px-3 py-2"
+            className="min-w-0 flex-1 rounded-lg border border-stone-300 bg-white px-3 py-2"
           />
           <input
             type="number"
@@ -145,7 +147,7 @@ export function ReadingForm({ language, dict: t }: { language: NonKoreanLanguage
             onChange={(e) => setDay(e.target.value)}
             min={1}
             max={31}
-            className="w-20 rounded-lg border border-stone-300 bg-white px-3 py-2"
+            className="min-w-0 flex-1 rounded-lg border border-stone-300 bg-white px-3 py-2"
           />
         </div>
       </div>

@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import type { MarketingDictionary } from '@/dictionaries/types';
 import type { MarketingLanguage } from '@/lib/languages';
-import { ApiError, getCouponAvailability, subscribeLead } from '@/lib/api';
+import { ApiError, getCouponAvailability, subscribeLead, type CouponAvailability } from '@/lib/api';
 import { Turnstile, TURNSTILE_ENABLED } from './Turnstile';
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -26,16 +26,18 @@ export function LeadCaptureForm({ language, dict }: { language: MarketingLanguag
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
-  // 선착순 잔여 인원 — 관리자 패널에서 캡을 조정할 수 있어(saju-letter-admin-panel "설정" 화면)
-  // 하드코딩하지 않고 매번 조회한다. 조회 실패해도 폼 자체는 그대로 쓸 수 있어야 하므로 조용히
-  // 무시한다(null로 남겨두면 문구 자체를 숨긴다).
-  const [remaining, setRemaining] = useState<number | null>(null);
+  // 선착순 현황(전체 캡/현재 발급 수/잔여 인원) — 관리자 패널에서 캡을 조정할 수 있어
+  // (saju-letter-admin-panel "설정" 화면) 하드코딩하지 않고 매번 조회한다. 조회 실패해도 폼
+  // 자체는 그대로 쓸 수 있어야 하므로 조용히 무시한다(null로 남겨두면 문구 자체를 숨긴다).
+  // **2026-08-26 확장** — 원래 remaining(잔여 인원)만 저장/표시했는데, "총 몇 명까지인지·현재
+  // 몇 명이 신청했는지가 안 보인다"는 사용자 지적으로 capacity/issued까지 함께 보여주도록 넓혔다.
+  const [availability, setAvailability] = useState<CouponAvailability | null>(null);
 
   useEffect(() => {
     let cancelled = false;
     getCouponAvailability()
-      .then((availability) => {
-        if (!cancelled) setRemaining(availability.remaining);
+      .then((result) => {
+        if (!cancelled) setAvailability(result);
       })
       .catch(() => {});
     return () => {
@@ -74,19 +76,26 @@ export function LeadCaptureForm({ language, dict }: { language: MarketingLanguag
 
   if (success) {
     return (
-      <div className="card-surface rounded-2xl border border-accent/20 p-6 text-center sm:p-7">
-        <p className="font-medium text-accent">{dict.success}</p>
+      <div className="letter-surface rounded-sm p-6 text-center sm:p-7">
+        <p className="font-medium text-accent-warm">{dict.success}</p>
       </div>
     );
   }
 
   return (
-    <form onSubmit={handleSubmit} className="card-surface flex flex-col gap-3 rounded-2xl border border-accent-warm/20 p-6 sm:p-7">
-      <h3 className="text-lg font-semibold">{dict.title}</h3>
+    <form onSubmit={handleSubmit} className="letter-surface flex flex-col gap-3 rounded-sm p-6 sm:p-7">
+      <h3 className="font-display text-lg font-semibold">{dict.title}</h3>
       <p className="text-sm text-foreground/70">{dict.subtitle}</p>
-      {remaining !== null &&
-        (remaining > 0 ? (
-          <p className="text-sm font-medium text-accent-warm">{dict.remainingSlots.replace('{count}', String(remaining))}</p>
+      {availability !== null &&
+        availability.capacity !== null &&
+        availability.remaining !== null &&
+        (availability.remaining > 0 ? (
+          <p className="text-sm font-medium text-accent-warm">
+            {dict.remainingSlots
+              .replace('{capacity}', String(availability.capacity))
+              .replace('{issued}', String(availability.issued))
+              .replace('{remaining}', String(availability.remaining))}
+          </p>
         ) : (
           <p className="text-sm text-foreground/60">{dict.soldOut}</p>
         ))}
@@ -95,10 +104,10 @@ export function LeadCaptureForm({ language, dict }: { language: MarketingLanguag
         value={email}
         onChange={(e) => setEmail(e.target.value)}
         placeholder={dict.emailPlaceholder}
-        className="rounded-lg border border-foreground/15 bg-white px-3 py-2.5 transition focus-visible:border-accent"
+        className="rounded-lg border border-foreground/15 bg-white px-3 py-2.5 transition focus-visible:border-accent-warm"
       />
       <label className="flex items-start gap-2 text-sm text-foreground/70">
-        <input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} className="mt-1 accent-accent" />
+        <input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} className="mt-1 accent-accent-warm" />
         <span>{dict.consentLabel}</span>
       </label>
       <Turnstile onVerify={setTurnstileToken} />
@@ -106,7 +115,7 @@ export function LeadCaptureForm({ language, dict }: { language: MarketingLanguag
       <button
         type="submit"
         disabled={isSubmitting || (TURNSTILE_ENABLED && !turnstileToken)}
-        className="rounded-full bg-accent px-6 py-3 font-medium text-white shadow-lg shadow-accent/25 transition hover:-translate-y-0.5 hover:shadow-xl hover:shadow-accent/30 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
+        className="rounded-full bg-accent-warm px-6 py-3 font-medium text-white transition hover:bg-accent-warm/90 disabled:pointer-events-none disabled:opacity-50"
       >
         {isSubmitting ? dict.submitting : dict.submitButton}
       </button>

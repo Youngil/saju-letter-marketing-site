@@ -1,4 +1,3 @@
-import Image from 'next/image';
 import Link from 'next/link';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
@@ -12,6 +11,7 @@ import {
 } from '@/lib/languages';
 import { getAllPostSummaries } from '@/lib/posts';
 import { WEB_BASE_URL, languageAlternates, buildSocialMetadata } from '@/lib/seo';
+import { BlogByline, categoryLabelFor } from '@/components/BlogByline';
 
 export async function generateStaticParams() {
   return LAUNCH_CONTENT_LANGUAGES.map((lang) => ({ lang }));
@@ -28,8 +28,6 @@ export async function generateMetadata({ params }: { params: Promise<{ lang: str
     description: dict.blog.subtitle,
     alternates: {
       canonical: `${WEB_BASE_URL}${path(rawLang)}`,
-      // DEFAULT_LANGUAGE('en')는 항상 LAUNCH_CONTENT_LANGUAGES 안에 있지만, languages.ts에서
-      // 더 넓은 MarketingLanguage로 선언돼 있어 여기서만 좁혀 넘긴다.
       languages: languageAlternates(LAUNCH_CONTENT_LANGUAGES, path, DEFAULT_LANGUAGE as LaunchContentLanguage),
     },
     ...buildSocialMetadata({
@@ -49,29 +47,38 @@ export default async function BlogIndexPage({ params }: { params: Promise<{ lang
   const posts = await getAllPostSummaries(lang);
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-12">
-      <h1 className="mb-2 text-3xl font-bold">{dict.blog.title}</h1>
-      <p className="mb-10 text-foreground/70">{dict.blog.subtitle}</p>
+    <div className="mx-auto max-w-2xl px-4 py-12">
+      <header className="mb-10">
+        <h1 className="font-display mb-2 text-3xl font-semibold">{dict.blog.title}</h1>
+        <p className="text-foreground/70">{dict.blog.subtitle}</p>
+      </header>
 
       {posts.length === 0 ? (
         <p className="text-foreground/60">{dict.blog.empty}</p>
       ) : (
-        <ul className="flex flex-col gap-8">
+        <ul className="flex flex-col gap-6">
           {posts.map((post) => (
-            <li key={post.slug} className="border-b border-foreground/10 pb-8">
-              <Link href={`/${lang}/blog/${post.slug}`} className="text-xl font-semibold hover:text-accent">
-                {post.title}
-              </Link>
-              <p className="mt-2 text-foreground/70">{post.description}</p>
-              <div className="mt-3 flex items-center gap-2 text-sm text-foreground/50">
-                <Image src="/dain-avatar.png" alt="" width={20} height={20} className="rounded-full" />
-                <span>{dict.blog.byLabel}</span>
-                <span aria-hidden="true">·</span>
-                <span>{post.date}</span>
-              </div>
-              <Link href={`/${lang}/blog/${post.slug}`} className="mt-2 inline-block text-sm font-medium text-accent hover:underline">
-                {dict.blog.readMore} →
-              </Link>
+            <li key={post.slug}>
+              <article className="letter-surface rounded-sm px-5 py-6 sm:px-7 sm:py-7">
+                <BlogByline
+                  byLabel={dict.blog.byLabel}
+                  dateIso={post.date}
+                  lang={lang}
+                  categoryLabel={categoryLabelFor(post.category, dict.blog.categories)}
+                />
+                <h2 className="font-display mt-3 text-xl font-semibold leading-snug">
+                  <Link href={`/${lang}/blog/${post.slug}`} className="hover:text-accent-warm">
+                    {post.title}
+                  </Link>
+                </h2>
+                <p className="mt-2 text-foreground/70">{post.description}</p>
+                <Link
+                  href={`/${lang}/blog/${post.slug}`}
+                  className="mt-4 inline-block text-sm font-medium text-accent-warm underline-offset-2 hover:underline"
+                >
+                  {dict.blog.readMore} →
+                </Link>
+              </article>
             </li>
           ))}
         </ul>

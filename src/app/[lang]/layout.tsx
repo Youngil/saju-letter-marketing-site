@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import type { Metadata } from 'next';
+import { Noto_Serif_JP, Noto_Serif_KR, Playfair_Display } from 'next/font/google';
 import '../globals.css';
 import { getDictionary } from '@/dictionaries';
 import { isMarketingLanguage, MARKETING_LANGUAGES, type MarketingLanguage } from '@/lib/languages';
@@ -8,6 +9,29 @@ import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { WEB_BASE_URL } from '@/lib/seo';
 import { organizationJsonLd } from '@/lib/structuredData';
 import { notFound } from 'next/navigation';
+
+/**
+ * 앱 `use-serif-font-family`와 같은 언어별 디스플레이 세리프(Phase 3).
+ * 세 폰트 모두 로드하되 CSS `html[lang]`로 실제로 쓰는 패밀리만 고른다.
+ */
+const playfair = Playfair_Display({
+  subsets: ['latin'],
+  weight: ['600', '700'],
+  variable: '--font-playfair',
+  display: 'swap',
+});
+const notoSerifKr = Noto_Serif_KR({
+  subsets: ['latin'],
+  weight: ['600', '700'],
+  variable: '--font-noto-kr',
+  display: 'swap',
+});
+const notoSerifJp = Noto_Serif_JP({
+  subsets: ['latin'],
+  weight: ['600', '700'],
+  variable: '--font-noto-ja',
+  display: 'swap',
+});
 
 /**
  * app/[lang]/layout.tsx가 이 사이트의 실질적인 루트 레이아웃이다 — Next.js App Router는
@@ -47,15 +71,18 @@ export default async function LangLayout({
   const dict = await getDictionary(lang);
 
   return (
-    <html lang={lang} className="h-full antialiased">
-      <body className="min-h-full flex flex-col bg-background text-foreground">
+    <html
+      lang={lang}
+      className={`h-full antialiased ${playfair.variable} ${notoSerifKr.variable} ${notoSerifJp.variable}`}
+    >
+      <body className="flex min-h-full flex-col bg-background text-foreground">
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd(dict.brand)) }}
         />
-        <header className="sticky top-0 z-10 border-b border-foreground/10 bg-background/80 backdrop-blur-md">
+        <header className="sticky top-0 z-10 border-b border-foreground/10 bg-background/85 backdrop-blur-md">
           <div className="mx-auto flex max-w-5xl items-center justify-between gap-2 px-4 py-4">
-            <Link href={`/${lang}`} className="flex shrink-0 items-center gap-2 text-base font-semibold sm:text-lg">
+            <Link href={`/${lang}`} className="font-display flex shrink-0 items-center gap-2 text-base font-semibold sm:text-lg">
               <Image src="/logo-icon.png" alt="" width={28} height={28} className="h-7 w-7 shrink-0 rounded-md" />
               <span className="truncate">{dict.brand}</span>
             </Link>
@@ -73,7 +100,7 @@ export default async function LangLayout({
         <main className="flex-1">{children}</main>
         <footer className="border-t border-foreground/10">
           <div className="mx-auto flex max-w-5xl flex-col gap-1 px-4 py-10 text-sm text-foreground/50">
-            <span className="font-medium text-foreground/70">{dict.brand}</span>
+            <span className="font-display font-medium text-foreground/70">{dict.brand}</span>
             <p>{dict.footer.privacyNote}</p>
             <Link href={`/${lang}/privacy`} className="mt-2 w-fit underline hover:text-foreground/70">
               {dict.footer.privacyLinkLabel}

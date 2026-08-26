@@ -12,6 +12,7 @@ import {
 import { DAY_MASTER_ROMANIZATIONS, ZODIAC_ROWS } from '@/content/compareZodiac';
 import { HEAVENLY_STEMS } from '@/lib/sajuVocabulary';
 import { WEB_BASE_URL, languageAlternates } from '@/lib/seo';
+import { CompareInfographic } from '@/components/CompareInfographic';
 
 /** 한국어/일본어는 로마자 표기(Gap 등)만으로는 어색해서 한자를 함께 보여준다(2026-08-08,
  * 사용자 요청) — 두 언어 모두 한자 자체는 읽을 수 있는 독자층이라 발음 표기 없이도 통한다.
@@ -51,13 +52,9 @@ export async function generateMetadata({ params }: { params: Promise<{ lang: str
 }
 
 /**
- * 2026-08-25 — 원래 "표 두 개 + 짧은 문단 하나"뿐이라 별자리/사주의 실제 차이를 이해하기엔
- * 내용이 얕다는 사용자 피드백으로 전면 확장했다. **처음엔 홈 화면의 `AstrologyInfographic`을
- * 이 페이지에도 그대로 재사용했는데, 홈에서 이미 본 카드가 이 페이지에서 그대로 다시 나와
- * 콘텐츠가 겹쳐 보인다는 후속 피드백으로 제거했다** — 홈은 짧은 시각적 티저 역할을 그대로
- * 유지하고, 이 페이지는 홈에 없는 새로운 설명(정보량 차이/시주와 출생시간/단정하지 않는다는
- * 철학) 3개 섹션으로 시작해 서로 다른 역할을 갖도록 다시 나눴다. 기존 별자리 날짜표·일간
- * 목록은 "참고 자료"로 이름 붙여 그 아래 유지한다.
+ * Phase 4 — 홈에서 뺀 교육을 이 페이지의 정식 자리로 둔다. 다인/편지 오프닝 → 재설계
+ * 인포그래픽(와이어 A) → 설명 3섹션 → 참고 표. 옛 AstrologyInfographic(궤도·카드 대시보드)은
+ * 폐기하고 CompareInfographic으로 대체했다.
  */
 export default async function ComparePage({ params }: { params: Promise<{ lang: string }> }) {
   const { lang: rawLang } = await params;
@@ -65,31 +62,47 @@ export default async function ComparePage({ params }: { params: Promise<{ lang: 
   const lang: LaunchContentLanguage = rawLang;
   const dict = await getDictionary(lang);
   const rows = ZODIAC_ROWS[rawLang];
+  const pillars: [string, string, string, string] = [
+    dict.demo.yearLabel,
+    dict.demo.monthLabel,
+    dict.demo.dayLabel,
+    dict.demo.hourLabel,
+  ];
 
   return (
     <div className="mx-auto flex max-w-3xl flex-col gap-14 px-4 py-12">
       <div>
-        <h1 className="mb-2 text-3xl font-bold">{dict.compare.title}</h1>
+        <h1 className="font-display mb-2 text-3xl font-semibold">{dict.compare.title}</h1>
         <p className="text-foreground/70">{dict.compare.subtitle}</p>
+        <p className="mt-4 text-foreground/70">{dict.compare.opening}</p>
       </div>
+
+      <CompareInfographic
+        caption={dict.compare.diagramCaption}
+        zodiacLabel={dict.compare.diagramZodiacLabel}
+        zodiacPoint={dict.compare.diagramZodiacPoint}
+        sajuLabel={dict.compare.diagramSajuLabel}
+        pillars={pillars}
+        closing={dict.compare.diagramClosing}
+      />
 
       <div className="flex flex-col gap-10">
         <section>
-          <h2 className="mb-2 text-xl font-semibold">{dict.compare.infoAmountTitle}</h2>
+          <h2 className="font-display mb-2 text-xl font-semibold">{dict.compare.infoAmountTitle}</h2>
           <p className="text-foreground/70">{dict.compare.infoAmountBody}</p>
         </section>
         <section>
-          <h2 className="mb-2 text-xl font-semibold">{dict.compare.hourTitle}</h2>
+          <h2 className="font-display mb-2 text-xl font-semibold">{dict.compare.hourTitle}</h2>
           <p className="text-foreground/70">{dict.compare.hourBody}</p>
         </section>
         <section>
-          <h2 className="mb-2 text-xl font-semibold">{dict.compare.philosophyTitle}</h2>
+          <h2 className="font-display mb-2 text-xl font-semibold">{dict.compare.philosophyTitle}</h2>
           <p className="text-foreground/70">{dict.compare.philosophyBody}</p>
         </section>
       </div>
 
-      <div>
-        <h2 className="mb-4 text-lg font-semibold text-foreground/80">{dict.compare.referenceTitle}</h2>
+      <div className="card-surface rounded-xl border border-foreground/10 p-6">
+        <h2 className="font-display mb-4 text-lg font-semibold text-foreground/80">{dict.compare.referenceTitle}</h2>
 
         <div className="mb-4 overflow-x-auto">
           <table className="w-full min-w-[280px] border-collapse text-left">
@@ -123,7 +136,7 @@ export default async function ComparePage({ params }: { params: Promise<{ lang: 
 
       <Link
         href={`/${lang}#demo`}
-        className="mx-auto rounded-full bg-accent px-8 py-3.5 text-center font-medium text-white shadow-lg shadow-accent/25 transition hover:-translate-y-0.5 hover:shadow-xl hover:shadow-accent/30"
+        className="mx-auto rounded-full bg-accent-warm px-8 py-3 text-center font-medium text-white transition hover:bg-accent-warm/90"
       >
         {dict.compare.ctaText}
       </Link>

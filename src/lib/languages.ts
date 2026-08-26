@@ -64,7 +64,9 @@ export function isLaunchContentLanguage(lang: MarketingLanguage): lang is Launch
  * 그 원칙은 사람마다 매일 생성되는 개인화 리딩의 전문용어 노출을 다루고, 여기는 사람이
  * 직접 쓴(또는 한 번 다듬은) 정적 마케팅 카피의 포지셔닝을 다룬다. 이 구분은 코드 분기가
  * 아니라 언어별 dictionary 문구 차이로 대부분 구현되고, 레이아웃이 실제로 달라져야 하는
- * 곳(홈 히어로/인포그래픽)만 이 축 하나로 컴포넌트를 분기한다 — 언어별로 6갈래 분기하지 않는다.
+ * 곳(인포그래픽 — 2026-08-26부터 홈이 아니라 compare 쪽)만 이 축 하나로 컴포넌트를 분기한다 —
+ * 언어별로 6갈래 분기하지 않는다. 홈 히어로는 편지 약속으로 6개 언어를 통일했다
+ * (`docs/marketing-site-realignment-2026-08-26.md` Phase 1).
  */
 export type ToneGroup = 'explain-from-scratch' | 'lean-into-tradition';
 

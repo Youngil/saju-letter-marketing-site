@@ -12,26 +12,16 @@ export interface MarketingDictionary {
     title: string;
     subtitle: string;
     ctaDemo: string;
-  };
-  infographic: {
-    /** 제목 위 작은 배지 문구(예: "Two ways to read your life") — 순수 장식용 타이포 계층. */
-    eyebrow: string;
-    title: string;
-    subtitle: string;
-    zodiacLabel: string;
-    sajuLabel: string;
-    /** 라벨 바로 아래 짧은 카테고리 태그라인(예: "A sky-based system") — 본문 설명(zodiacDescription)보다 짧고 추상적. */
-    zodiacHeadline: string;
-    zodiacDescription: string;
-    zodiacTags: [string, string, string];
-    sajuHeadline: string;
-    sajuDescription: string;
-    sajuTags: [string, string, string];
-    /** 네 기둥 시각화 아래 캡션(예: "Meaning through combining all four"). */
-    sajuCombineCaption: string;
-    /** 비교 표 왼쪽 열 헤더(예: "Category"/"구분") — zodiac/saju 열 헤더는 위 zodiacLabel/sajuLabel을 재사용한다. */
-    compareCategoryLabel: string;
-    compareRows: { category: string; zodiac: string; zodiacNote?: string; saju: string; sajuNote?: string }[];
+    /** 히어로에 보이는 다인 이름(예: "Dain" / "다인"). */
+    dainName: string;
+    /** 다인 역할 한 줄(예: "Your letter writer" / "사주편지의 편지지기"). */
+    dainRole: string;
+    /** 다인 소개 글(who-writes-your-letter)로 가는 링크 문구. 1차 출시 언어에서만 렌더. */
+    learnAboutDain: string;
+    /** 인포그래픽 제거 후 compare로 보내는 안내 문장. 1차 출시 언어에서만 렌더. */
+    compareHint: string;
+    /** compare 링크 CTA 문구. */
+    compareLink: string;
   };
   demo: {
     title: string;
@@ -47,6 +37,8 @@ export interface MarketingDictionary {
     submitButton: string;
     submitting: string;
     resultTitle: string;
+    resultFromName: string;
+    resultFromRole: string;
     resultCta: string;
     tryAgain: string;
     errors: {
@@ -62,12 +54,36 @@ export interface MarketingDictionary {
     readMore: string;
     empty: string;
     byLabel: string;
+    /** 홈 “이번 주 다인의 글” 섹션 라벨. */
+    thisWeekLabel: string;
+    /** 홈 티저 CTA. */
+    thisWeekCta: string;
+    categories: {
+      observation: string;
+      explainer: string;
+      behind: string;
+      season: string;
+    };
   };
+  /**
+   * Phase 4 `CompareInfographic`용 — 옛 홈 대시보드형 AstrologyInfographic 카피는 폐기.
+   * 기둥 라벨(년/월/일/시)은 demo.yearLabel 등을 재사용한다.
+   */
   compare: {
     title: string;
     subtitle: string;
     ogTitle: string;
     ogDescription: string;
+    /** 다인/아침 편지 맥락으로 compare를 여는 짧은 문단. */
+    opening: string;
+    /** 인포그래픽 위 작은 캡션(예: "Dain's quick look at the difference"). */
+    diagramCaption: string;
+    diagramZodiacLabel: string;
+    /** 별자리 쪽 한 줄(예: "One sun position"). */
+    diagramZodiacPoint: string;
+    diagramSajuLabel: string;
+    /** 그림 아래 결론 한 줄(매일 편지 가능 이유). */
+    diagramClosing: string;
     zodiacColumnLabel: string;
     sajuColumnLabel: string;
     dayMasterSectionTitle: string;
@@ -89,7 +105,9 @@ export interface MarketingDictionary {
     submitButton: string;
     submitting: string;
     success: string;
-    /** 선착순 쿠폰 잔여 인원 문구 — "{count}"를 실제 잔여 인원 숫자로 치환해서 쓴다. */
+    /** 선착순 쿠폰 현황 문구 — "{capacity}"(전체 캡)/"{issued}"(현재까지 발급 수)/"{remaining}"(잔여
+     * 인원) 3개 자리표시자를 실제 숫자로 치환해서 쓴다(2026-08-26, 잔여 인원만 보여주던 것에서
+     * 확장 — 총 인원/현재 신청 수도 함께 보여달라는 사용자 요청). */
     remainingSlots: string;
     /** 잔여 인원이 0이 됐을 때 위 remainingSlots 대신 보여준다. */
     soldOut: string;
@@ -179,6 +197,9 @@ export interface MarketingDictionary {
       subscribeButton: string;
       subscribing: string;
       subscribed: string;
+      /** 결과 하단 soft connect — 캠페인 Fortune 톤과 별도로 아침 편지/앱 안내. */
+      appBridgeTitle: string;
+      appBridgeBody: string;
       errors: {
         email: string;
         consent: string;

@@ -34,8 +34,8 @@ function AppLinkBadge({
         onClick={onClick}
         className={
           emphasized
-            ? 'rounded-full bg-accent px-6 py-3 text-center font-medium text-white shadow-lg shadow-accent/25 transition hover:-translate-y-0.5 hover:shadow-xl hover:shadow-accent/30'
-            : 'rounded-full border border-foreground/15 px-4 py-2 text-sm font-medium text-foreground/80 transition hover:border-accent hover:text-accent'
+            ? 'rounded-full bg-accent-warm px-6 py-3 text-center font-medium text-white transition hover:bg-accent-warm/90'
+            : 'rounded-full border border-foreground/15 px-4 py-2 text-sm font-medium text-foreground/80 transition hover:border-accent-warm hover:text-accent-warm'
         }
       >
         {label}

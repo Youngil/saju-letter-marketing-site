@@ -1,15 +1,29 @@
 @import "tailwindcss";
 
 :root {
+  /* 모바일 Colors.light.background / text 와 동일 — 종이·먹 */
   --background: #fbf6ee;
   --foreground: #2b2621;
-  /* 모바일 앱 스플래시 화면과 통일한 브랜드 컬러 — 바꾸지 않는다(기존 코드 코멘트 참고). */
-  --accent: #208aef;
-  /* 상업 서비스다운 톤을 위해 추가한 보조 색 — 사주/설날 계열 페이지가 이미 쓰던 amber 계열과
-     맞춰, 인포그래픽·데코 요소에서 accent(파랑)와 대비되는 따뜻한 두 번째 축으로 쓴다. */
+  /* 스플래시/로고 정렬용으로만 보관. UI 액센트로는 쓰지 않는다(Phase 3). */
+  --accent-splash: #208aef;
+  /* 모바일 Colors.light.accent / dainAccent 와 동일 — 편지함 UI 기본 액센트 */
+  --accent: #b5652f;
   --accent-warm: #b5652f;
   --accent-warm-soft: #f3e3d3;
-  --card-shadow: 0 1px 2px rgba(43, 38, 33, 0.04), 0 8px 24px -12px rgba(43, 38, 33, 0.18);
+  --paper: #fffdf8;
+  --ink-faint: color-mix(in srgb, var(--foreground) 12%, transparent);
+  --card-shadow: 0 1px 2px rgba(43, 38, 33, 0.04), 0 6px 18px -14px rgba(43, 38, 33, 0.14);
+  /* layout.tsx next/font 변수가 있으면 그걸, 없으면 시스템 세리프. */
+  --font-display-family: var(--font-playfair), ui-serif, Georgia, "Times New Roman", serif;
+  --font-sans-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+html[lang="ko"] {
+  --font-display-family: var(--font-noto-kr), ui-serif, "Noto Serif KR", serif;
+}
+
+html[lang="ja"] {
+  --font-display-family: var(--font-noto-ja), ui-serif, "Noto Serif JP", serif;
 }
 
 @theme inline {
@@ -18,18 +32,35 @@
   --color-accent: var(--accent);
   --color-accent-warm: var(--accent-warm);
   --color-accent-warm-soft: var(--accent-warm-soft);
+  --color-paper: var(--paper);
+  --font-display: var(--font-display-family);
+  --font-sans: var(--font-sans-family);
 }
 
 body {
+  font-family: var(--font-sans-family);
   background:
-    radial-gradient(60rem 30rem at 50% -10%, color-mix(in srgb, var(--accent) 7%, transparent), transparent),
+    radial-gradient(50rem 28rem at 50% -12%, color-mix(in srgb, var(--accent-warm) 8%, transparent), transparent),
     var(--background);
   color: var(--foreground);
 }
 
+/* 헤드라인용 세리프 — 앱 use-serif-font-family 와 같은 역할(본문은 산세리프 유지). */
+.font-display {
+  font-family: var(--font-display-family);
+}
+
+/* 교육/목록용 가벼운 면 — compare·블로그 다이어그램 등. */
 .card-surface {
   background: color-mix(in srgb, white 88%, transparent);
   box-shadow: var(--card-shadow);
+}
+
+/* 홈 데모·리드용 “한 장의 편지” 셸 — 유리 카드/강한 그림자 대신 종이 면. */
+.letter-surface {
+  background: var(--paper);
+  border: 1px solid var(--ink-faint);
+  box-shadow: 0 1px 2px rgba(43, 38, 33, 0.03);
 }
 
 /* /[lang]/privacy가 privacyPolicy.ts의 신뢰된 정적 HTML(ul/li/p/strong/a만 사용)을
@@ -47,7 +78,7 @@ body {
   margin-bottom: 6px;
 }
 .privacy-body a {
-  color: var(--accent);
+  color: var(--accent-warm);
   text-decoration: underline;
 }
 .privacy-body strong {
@@ -63,6 +94,6 @@ input:focus-visible,
 textarea:focus-visible,
 button:focus-visible,
 a:focus-visible {
-  outline: 2px solid var(--accent);
+  outline: 2px solid var(--accent-warm);
   outline-offset: 2px;
 }

@@ -1,12 +1,18 @@
-import Image from 'next/image';
 import Link from 'next/link';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { getDictionary } from '@/dictionaries';
-import { isMarketingLanguage, isLaunchContentLanguage, LAUNCH_CONTENT_LANGUAGES, DEFAULT_LANGUAGE, type LaunchContentLanguage } from '@/lib/languages';
+import {
+  isMarketingLanguage,
+  isLaunchContentLanguage,
+  LAUNCH_CONTENT_LANGUAGES,
+  DEFAULT_LANGUAGE,
+  type LaunchContentLanguage,
+} from '@/lib/languages';
 import { BLOG_LANGUAGES, getPostModule, POST_SLUGS, type PostSlug } from '@/lib/posts';
 import { WEB_BASE_URL, languageAlternates, buildSocialMetadata } from '@/lib/seo';
 import { articleJsonLd } from '@/lib/structuredData';
+import { BlogByline, categoryLabelFor } from '@/components/BlogByline';
 
 export async function generateStaticParams() {
   return BLOG_LANGUAGES.flatMap((lang) => POST_SLUGS.map((slug) => ({ lang, slug })));
@@ -69,15 +75,21 @@ export default async function BlogPostPage({ params }: { params: Promise<{ lang:
           ),
         }}
       />
-      <h1 className="mb-2 text-3xl font-bold">{meta.title}</h1>
-      <div className="mb-8 flex items-center gap-2 text-sm text-foreground/50">
-        <Image src="/dain-avatar.png" alt="" width={24} height={24} className="rounded-full" />
-        <span>{dict.blog.byLabel}</span>
-        <span aria-hidden="true">·</span>
-        <span>{meta.date}</span>
+      <div className="letter-surface rounded-sm px-5 py-8 sm:px-8 sm:py-10">
+        <BlogByline
+          byLabel={dict.blog.byLabel}
+          dateIso={meta.date}
+          lang={lang}
+          categoryLabel={categoryLabelFor(meta.category, dict.blog.categories)}
+          size="md"
+        />
+        <h1 className="font-display mt-4 text-3xl font-semibold leading-tight">{meta.title}</h1>
+        <p className="mt-3 text-lg text-foreground/65">{meta.description}</p>
+        <div className="mt-8 border-t border-foreground/10 pt-8 text-[1.05rem] leading-relaxed text-foreground/85">
+          <Component />
+        </div>
       </div>
-      <Component />
-      <Link href={`/${lang}/blog`} className="mt-8 inline-block text-accent hover:underline">
+      <Link href={`/${lang}/blog`} className="mt-8 inline-block text-accent-warm underline-offset-2 hover:underline">
         ← {dict.blog.title}
       </Link>
     </article>

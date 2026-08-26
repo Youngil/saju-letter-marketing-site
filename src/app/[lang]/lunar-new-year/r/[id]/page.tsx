@@ -5,6 +5,7 @@ import { getDictionary } from '@/dictionaries';
 import { getReading } from '@/lib/lunarNewYearApi';
 import { EmailSignupForm } from '@/components/lunar-new-year/EmailSignupForm';
 import { ShareButton } from '@/components/lunar-new-year/ShareButton';
+import { AppDownloadLinks } from '@/components/AppDownloadLinks';
 import { WEB_BASE_URL, NOINDEX_ROBOTS } from '@/lib/seo';
 
 interface PageProps {
@@ -69,6 +70,13 @@ export default async function LunarNewYearResultPage({ params }: PageProps) {
         <div className="mt-4">
           <EmailSignupForm readingId={id} dict={t} alreadySubscribed={reading.hasEmailSubscription} />
         </div>
+      </section>
+
+      {/* Phase 6 soft connect — 캠페인 본문과 분리된 아침 편지/앱 안내. 다인 초상 없음. */}
+      <section className="flex flex-col items-center gap-3 rounded-2xl border border-stone-200 bg-white p-6 text-center">
+        <h2 className="text-base font-semibold text-stone-800">{t.appBridgeTitle}</h2>
+        <p className="text-sm text-stone-600">{t.appBridgeBody}</p>
+        <AppDownloadLinks dict={dict.appLinks} />
       </section>
     </main>
   );

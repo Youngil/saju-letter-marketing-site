@@ -74,7 +74,7 @@ function CompletedResult({
 
   return (
     <div className="card-surface flex flex-col gap-4 rounded-2xl border border-foreground/10 p-6 sm:p-7">
-      <p className="text-sm font-medium text-accent">{content.pairLine(guestName)}</p>
+      <p className="text-sm font-medium text-accent-warm">{content.pairLine(guestName)}</p>
       {reading ? (
         <>
           <h1 className="text-xl font-semibold">{reading.title}</h1>
@@ -194,7 +194,7 @@ function PendingForm({
           placeholder={content.namePlaceholder}
           value={name}
           onChange={(e) => setName(e.target.value)}
-          className="w-full rounded-lg border border-foreground/15 bg-white px-3 py-2.5 transition focus-visible:border-accent"
+          className="w-full rounded-lg border border-foreground/15 bg-white px-3 py-2.5 transition focus-visible:border-accent-warm"
         />
       </div>
 
@@ -203,7 +203,7 @@ function PendingForm({
           type="button"
           aria-pressed={calendarType === 'solar'}
           onClick={() => setCalendarType('solar')}
-          className={`rounded-full border px-4 py-1.5 text-sm ${calendarType === 'solar' ? 'border-accent bg-accent text-white' : 'border-foreground/15 text-foreground/70'}`}
+          className={`rounded-full border px-4 py-1.5 text-sm ${calendarType === 'solar' ? 'border-accent-warm bg-accent-warm text-white' : 'border-foreground/15 text-foreground/70'}`}
         >
           {content.calendarSolar}
         </button>
@@ -211,12 +211,15 @@ function PendingForm({
           type="button"
           aria-pressed={calendarType === 'lunar'}
           onClick={() => setCalendarType('lunar')}
-          className={`rounded-full border px-4 py-1.5 text-sm ${calendarType === 'lunar' ? 'border-accent bg-accent text-white' : 'border-foreground/15 text-foreground/70'}`}
+          className={`rounded-full border px-4 py-1.5 text-sm ${calendarType === 'lunar' ? 'border-accent-warm bg-accent-warm text-white' : 'border-foreground/15 text-foreground/70'}`}
         >
           {content.calendarLunar}
         </button>
       </div>
 
+      {/* 예전엔 각 입력칸이 고정폭(w-20/w-16 등)이라 카드 폭 전체를 못 채우고 왼쪽에 몰려 붙어
+       * 보였다(DemoForm.tsx와 같은 패턴이 복사돼 있었음, 2026-08-26 사용자 지적으로 함께 수정) —
+       * flex-1로 바꿔 세 칸이 폭을 균등하게 나눠 쓰도록 고쳤다. */}
       <div className="flex gap-1.5 sm:gap-2">
         <input
           type="number"
@@ -226,7 +229,7 @@ function PendingForm({
           onChange={(e) => setYear(e.target.value)}
           min={1900}
           max={CURRENT_YEAR}
-          className="w-20 min-w-0 rounded-lg border border-foreground/15 bg-white px-2 py-2.5 transition focus-visible:border-accent sm:w-24 sm:px-3"
+          className="min-w-0 flex-1 rounded-lg border border-foreground/15 bg-white px-2 py-2.5 transition focus-visible:border-accent-warm sm:px-3"
         />
         <input
           type="number"
@@ -236,7 +239,7 @@ function PendingForm({
           onChange={(e) => setMonth(e.target.value)}
           min={1}
           max={12}
-          className="w-16 min-w-0 rounded-lg border border-foreground/15 bg-white px-2 py-2.5 transition focus-visible:border-accent sm:w-20 sm:px-3"
+          className="min-w-0 flex-1 rounded-lg border border-foreground/15 bg-white px-2 py-2.5 transition focus-visible:border-accent-warm sm:px-3"
         />
         <input
           type="number"
@@ -246,13 +249,13 @@ function PendingForm({
           onChange={(e) => setDay(e.target.value)}
           min={1}
           max={31}
-          className="w-16 min-w-0 rounded-lg border border-foreground/15 bg-white px-2 py-2.5 transition focus-visible:border-accent sm:w-20 sm:px-3"
+          className="min-w-0 flex-1 rounded-lg border border-foreground/15 bg-white px-2 py-2.5 transition focus-visible:border-accent-warm sm:px-3"
         />
       </div>
 
       {calendarType === 'lunar' && (
         <label className="flex items-center gap-2 text-sm text-foreground/70">
-          <input type="checkbox" checked={isLeapMonth} onChange={(e) => setIsLeapMonth(e.target.checked)} className="accent-accent" />
+          <input type="checkbox" checked={isLeapMonth} onChange={(e) => setIsLeapMonth(e.target.checked)} className="accent-accent-warm" />
           {content.leapMonthLabel}
         </label>
       )}
@@ -264,7 +267,7 @@ function PendingForm({
       <button
         type="submit"
         disabled={isSubmitting || (TURNSTILE_ENABLED && !turnstileToken)}
-        className="rounded-full bg-accent px-6 py-3 font-medium text-white shadow-lg shadow-accent/25 transition hover:-translate-y-0.5 hover:shadow-xl hover:shadow-accent/30 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
+        className="rounded-full bg-accent-warm px-6 py-3 font-medium text-white transition hover:bg-accent-warm/90 disabled:pointer-events-none disabled:opacity-50"
       >
         {isSubmitting ? content.submitting : content.submit}
       </button>

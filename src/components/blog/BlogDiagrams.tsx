@@ -11,14 +11,14 @@
 export function RitualFlowDiagram({ steps, caption }: { steps: string[]; caption: string }) {
   const icons = [SparkIcon, BookIcon, HandHeartIcon, WaveIcon];
   return (
-    <div className="not-prose my-8 rounded-2xl border border-foreground/10 bg-foreground/[0.02] p-6">
+    <div className="not-prose my-8 rounded-xl border border-foreground/10 bg-foreground/[0.02] p-6">
       <div className="flex flex-wrap items-center justify-center gap-2 sm:flex-nowrap sm:gap-1">
         {steps.map((label, i) => {
           const Icon = icons[i % icons.length];
           return (
             <div key={label} className="flex items-center gap-2">
               <div className="flex w-20 flex-col items-center gap-2 text-center sm:w-24">
-                <span className="flex h-10 w-10 items-center justify-center rounded-full bg-accent/10 text-accent">
+                <span className="flex h-10 w-10 items-center justify-center rounded-full bg-accent-warm/10 text-accent-warm">
                   <Icon />
                 </span>
                 <span className="text-xs font-medium text-foreground/70">{label}</span>
