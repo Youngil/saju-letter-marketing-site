@@ -74,6 +74,32 @@ import type { MarketingLanguage } from '@/lib/languages';
  * 이름이나 데이터가 AI 제공업체로 전달되지 않는다 — AI 호출 자체는 그 조합이 아직 캐시에 없을
  * 때 관리자가 트리거하는 배치 생성 시점에만 일어나며, 그때 넘어가는 건 특정 개인이 아니라
  * 추상화된 조합 키뿐이다.
+ *
+ * ⚠️⚠️ 2026-08-29 개정 — "이번 세션의 AI 자동 페일오버(OpenAI↔Anthropic)가 방침과 충돌하는지,
+ * 그리고 다른 불일치 여지가 있는지 재점검해달라"는 사용자 요청으로 전체 재감사. 페일오버 자체는
+ * §4가 이미 "설정에 따라 Anthropic 또는 Google로 달라질 수 있음"이라 조건부로 명시해둔 상태라
+ * 새로 고칠 필요가 없었다. 대신 이 재감사 과정에서 이전에 반영되지 않았던 진짜 불일치 2건을
+ * 찾아 고쳤다:
+ *   9. §1(수집 항목)이 궁합 공유·즉석 궁합에서 회원이 상대를 구분하려고 입력하는 메모
+ *      (`CompatibilityInvite.requesterLabel`/`DeepCompatibilityCheck.guestLabel`, 상대에게는
+ *      노출 안 됨)를 전혀 언급하지 않고 있었다 — 순수 수집 항목 누락. 6개 언어 §1에 추가했다.
+ *   10. §3/§7(암호화 범위)이 여전히 "생년월일·출생시간, 오늘의 이야기 텍스트/답장"만
+ *       AES-256으로 암호화된다고 서술하고 있었지만, `saju-letter-backend`는 2026-08-23에
+ *       암호화 범위를 4개 필드 더 확장했다(위 9번의 궁합 라벨 2종 + `NewYearCampaignReading.
+ *       memorableEvent` + `SupportInquiryMessage.text`) — 문서가 실제 보안 수준을 과소
+ *       서술하고 있었다. 6개 언어 §3/§7 모두 이 4개 필드를 추가해 실제 암호화 범위와 맞췄다.
+ * 두 항목 모두 법적 리스크보다는 "실제 운용과 문서가 어긋나 있었다"는 정확성 문제에 가깝다 —
+ * 9번은 수집 사실 자체가 안 알려진 쪽이라 10번보다 우선순위가 높다고 판단했다. effectiveDate와
+ * §10의 "최종 수정"도 6개 언어 전부 2026년 8월 29일로 갱신했다. 이 개정도 AI가 코드를 근거로
+ * 작성한 것이라 법적 충분성은 여전히 변호사 확인이 필요하다.
+ *
+ * ⚠️⚠️ 같은 재감사에서 확인했지만 이번엔 손대지 않은 항목 — 콘텐츠 품질 검증(LanguageTool,
+ * en/es/pt)이 AI가 생성한 개인화 편지(사용자가 "오늘의 이야기"에 쓴 내용을 반영한 다음날 편지
+ * 개인화 등) 텍스트를 검사한다. 운영은 2026-08-28부터 자체 호스팅 Cloud Run 인스턴스를 쓰므로
+ * (같은 GCP 프로젝트 내부 인프라) 통상적 의미의 "제3자 제공"으로 보기 어렵다고 판단해 §4에
+ * 추가하지 않았다. 다만 로컬 개발과 자체호스팅 전환 이전 기간엔 공개 LanguageTool API를 썼는데
+ * (이 시점까지 실사용자 0명이라 실질적 피해는 없었음), 향후 자체 호스팅 없이 새 언어(예:
+ * 베트남어)를 열게 되면 이 판단을 다시 검토해야 한다.
  */
 
 export const PRIVACY_CONTACT_EMAIL = 'contact@mikomaru.com';
@@ -94,7 +120,7 @@ export interface PrivacyPolicyContent {
 export const PRIVACY_POLICY_CONTENT: Record<MarketingLanguage, PrivacyPolicyContent> = {
   ko: {
     title: '개인정보처리방침',
-    effectiveDate: '시행일자: 2026년 7월 29일 (최종 수정: 2026년 8월 20일)',
+    effectiveDate: '시행일자: 2026년 7월 29일 (최종 수정: 2026년 8월 29일)',
     intro:
       '사주편지(이하 "회사" 또는 "서비스")는 이용자의 개인정보를 중요하게 생각하며, 관련 법령을 준수합니다. ' +
       '본 방침은 사주편지 앱과 saju-letter.com(마케팅 사이트, 궁합 공유·신년운세 공개 페이지, 이메일 구독 신청 ' +
@@ -105,7 +131,7 @@ export const PRIVACY_POLICY_CONTENT: Record<MarketingLanguage, PrivacyPolicyCont
         html:
           '<ul>' +
           '<li>이용자가 직접 입력하는 정보: 이름(또는 별칭), 생년월일, 성별(선택), 기기 시간대</li>' +
-          '<li>선택 입력 정보: 출생 시간("모름" 선택 가능), 이메일 주소(무료체험 어뷰징 방지 목적으로만 사용)</li>' +
+          '<li>선택 입력 정보: 출생 시간("모름" 선택 가능), 이메일 주소(무료체험 어뷰징 방지 목적으로만 사용), 궁합 공유·즉석 궁합 이용 시 상대를 구분하기 위해 입력하는 메모(상대방에게는 노출되지 않음)</li>' +
           '<li>자동으로 수집되는 정보: Firebase 인증 식별자(UID), 기기 푸시 토큰(FCM), 구독/결제 상태(RevenueCat 경유), 무료체험 남용 방지를 위한 Google Play Integrity 기기 무결성 신호, 오류·크래시 진단 정보, 공개(비로그인) 페이지 접속 시의 IP 주소(악용 방지를 위한 일시적 요청 빈도 제한 목적으로만 사용하며 장기 저장하지 않음)</li>' +
           '<li>사주 개인화 계산 결과: 온보딩 시 입력한 생년월일시를 바탕으로 계산되는 사주 전체(연주·월주·일주·시주) — 주간/월별 편지 등 개인화된 해석에 사용됩니다</li>' +
           '<li>이용자가 자유롭게 작성하는 내용: "오늘의 이야기" 기능에 입력한 텍스트(답장 생성을 위해 AI 제공업체로 전달됨), "문의하기" 기능에 입력한 제목과 내용</li>' +
@@ -129,7 +155,7 @@ export const PRIVACY_POLICY_CONTENT: Record<MarketingLanguage, PrivacyPolicyCont
         heading: '3. 개인정보의 보유 및 이용 기간',
         html:
           '<p>원칙적으로 회원 탈퇴 시(또는 삭제 요청 접수 후 지체 없이) 파기합니다.</p>' +
-          '<p>생년월일·출생시간, 그리고 "오늘의 이야기" 기능에 입력한 텍스트와 그에 대한 답장은 AES-256 방식으로 암호화해 저장하며, 계산 결과물(일간·월지·시지)은 개인 식별이 어려운 값으로 판단해 암호화 없이 저장합니다.</p>' +
+          '<p>생년월일·출생시간, "오늘의 이야기" 기능에 입력한 텍스트와 답장, 궁합 공유·즉석 궁합에서 상대를 구분하기 위해 입력한 메모, 신년운세 제출 시 자유롭게 작성한 텍스트, "문의하기" 기능에 입력한 내용은 AES-256 방식으로 암호화해 저장하며, 계산 결과물(일간·월지·시지)은 개인 식별이 어려운 값으로 판단해 암호화 없이 저장합니다.</p>' +
           '<p>관계 법령상 일정 기간 보존이 필요한 정보(예: 결제 기록)는 해당 법령이 정한 기간 동안 보존 후 파기합니다.</p>',
       },
       {
@@ -166,7 +192,7 @@ export const PRIVACY_POLICY_CONTENT: Record<MarketingLanguage, PrivacyPolicyCont
         heading: '7. 개인정보의 안전성 확보 조치',
         html:
           '<ul>' +
-          '<li>생년월일·출생시간, "오늘의 이야기" 텍스트와 답장 등 민감할 수 있는 정보는 AES-256 방식으로 암호화하여 저장</li>' +
+          '<li>생년월일·출생시간, "오늘의 이야기" 텍스트와 답장, 궁합·즉석 궁합의 메모, 신년운세 자유 작성 텍스트, 문의하기 내용 등 민감할 수 있는 정보는 AES-256 방식으로 암호화하여 저장</li>' +
           '<li>암호화 키는 별도의 키 관리 서비스(KMS)에서 관리하며 코드에 하드코딩하지 않음</li>' +
           '<li>관리자 페이지 접근에는 별도의 인증 체계 적용</li>' +
           '</ul>',
@@ -187,13 +213,13 @@ export const PRIVACY_POLICY_CONTENT: Record<MarketingLanguage, PrivacyPolicyCont
         heading: '10. 고지의 의무',
         html:
           '<p>본 방침은 2026년 7월 29일부터 적용되며, 법령·정책 또는 서비스 변경에 따라 내용이 추가·삭제·수정될 ' +
-          '수 있습니다(가장 최근 수정: 2026년 8월 20일). 변경 시 앱 공지 또는 본 페이지를 통해 고지합니다.</p>',
+          '수 있습니다(가장 최근 수정: 2026년 8월 29일). 변경 시 앱 공지 또는 본 페이지를 통해 고지합니다.</p>',
       },
     ],
   },
   en: {
     title: 'Privacy Policy',
-    effectiveDate: 'Effective date: July 29, 2026 (last updated: August 20, 2026)',
+    effectiveDate: 'Effective date: July 29, 2026 (last updated: August 29, 2026)',
     intro:
       'Saju Letter ("we", "us", or "the Service") respects your privacy and is committed to protecting your ' +
       'personal information. This Privacy Policy explains what information we collect and how we use it when ' +
@@ -205,7 +231,7 @@ export const PRIVACY_POLICY_CONTENT: Record<MarketingLanguage, PrivacyPolicyCont
         html:
           '<ul>' +
           '<li>Provided by you: name (or nickname), birth date, gender (optional), device timezone</li>' +
-          '<li>Optional: birth time (you may choose "unknown"), email address (used only to prevent free-trial abuse)</li>' +
+          '<li>Optional: birth time (you may choose "unknown"), email address (used only to prevent free-trial abuse), a note you enter in compatibility-sharing or deep compatibility to help you tell people apart (never shown to the other person)</li>' +
           '<li>Collected automatically: Firebase authentication identifier (UID), device push token (FCM), subscription/purchase status (via RevenueCat), Google Play Integrity device-integrity signals used to prevent free-trial abuse, crash/error diagnostic data, and — only on the public compatibility page — your IP address, used briefly for abuse-prevention rate limiting and not stored long-term</li>' +
           '<li>Personalization calculations: your full four-pillar saju chart (year, month, day, and hour pillars), calculated from the birth date and time you provide during onboarding — used to personalize weekly and monthly letters</li>' +
           '<li>Content you write: free text you enter in the "Today\'s Story" feature, which is sent to an AI provider to generate a personalized reply; and the subject and message you enter when contacting Support</li>' +
@@ -229,7 +255,7 @@ export const PRIVACY_POLICY_CONTENT: Record<MarketingLanguage, PrivacyPolicyCont
         heading: '3. Retention Period',
         html:
           '<p>We delete your information when you close your account (or promptly after we receive a deletion request).</p>' +
-          '<p>Your birth date and birth time, as well as the text you write in the "Today\'s Story" feature and its reply, are stored encrypted (AES-256). Calculated results (day master, month branch, hour branch) are not personally identifying on their own, so we store them without encryption.</p>' +
+          '<p>Your birth date and birth time; the text you write in the "Today\'s Story" feature and its reply; the notes you enter in compatibility-sharing or deep compatibility to tell people apart; the free text you submit for a Lunar New Year reading; and the messages you send through Support are all stored encrypted (AES-256). Calculated results (day master, month branch, hour branch) are not personally identifying on their own, so we store them without encryption.</p>' +
           '<p>Where law requires longer retention (e.g., payment records), we retain that data only for the legally required period before deletion.</p>',
       },
       {
@@ -270,7 +296,7 @@ export const PRIVACY_POLICY_CONTENT: Record<MarketingLanguage, PrivacyPolicyCont
         heading: '7. Security Measures',
         html:
           '<ul>' +
-          '<li>Sensitive information such as birth date, birth time, and your "Today\'s Story" feature text and replies is stored using AES-256 encryption</li>' +
+          '<li>Sensitive information — including birth date, birth time, "Today\'s Story" text and replies, compatibility/deep-compatibility notes, Lunar New Year free text, and Support messages — is stored using AES-256 encryption</li>' +
           '<li>Encryption keys are managed through a dedicated key management service (KMS) and are never hardcoded</li>' +
           '<li>Access to the admin panel requires separate authentication</li>' +
           '</ul>',
@@ -293,14 +319,14 @@ export const PRIVACY_POLICY_CONTENT: Record<MarketingLanguage, PrivacyPolicyCont
         heading: '10. Changes to This Policy',
         html:
           '<p>This policy is effective as of July 29, 2026, and may be updated as our practices, applicable ' +
-          'laws, or the service itself change (most recently updated: August 20, 2026). We will notify you of ' +
+          'laws, or the service itself change (most recently updated: August 29, 2026). We will notify you of ' +
           'material changes through the app or this page.</p>',
       },
     ],
   },
   ja: {
     title: 'プライバシーポリシー',
-    effectiveDate: '施行日: 2026年7月29日(最終更新: 2026年8月20日)',
+    effectiveDate: '施行日: 2026年7月29日(最終更新: 2026年8月29日)',
     intro:
       'サジュレター(以下「当社」または「本サービス」)は、利用者のプライバシーを尊重し、個人情報の保護に努めて' +
       'います。本ポリシーは、サジュレターアプリおよびsaju-letter.com(マーケティングサイト、相性シェア・旧正月' +
@@ -311,7 +337,7 @@ export const PRIVACY_POLICY_CONTENT: Record<MarketingLanguage, PrivacyPolicyCont
         html:
           '<ul>' +
           '<li>ご入力いただく情報: お名前(またはニックネーム)、生年月日、性別(任意)、端末のタイムゾーン</li>' +
-          '<li>任意項目: 出生時刻(「わからない」を選択可能)、メールアドレス(無料体験の不正利用防止のみに使用)</li>' +
+          '<li>任意項目: 出生時刻(「わからない」を選択可能)、メールアドレス(無料体験の不正利用防止のみに使用)、相性シェア・その場でわかる相性のご利用時に相手を区別するために入力するメモ(相手には表示されません)</li>' +
           '<li>自動的に収集される情報: Firebase認証ID(UID)、端末のプッシュ通知トークン(FCM)、サブスクリプション・購入状況(RevenueCat経由)、無料体験の不正利用防止のためのGoogle Play Integrity端末信頼性シグナル、エラー・クラッシュ診断情報、公開ページ(非会員向け)ご利用時のIPアドレス(不正利用防止のための一時的なリクエスト制限のみに使用し、長期保存はしません)</li>' +
           '<li>パーソナライズのための計算結果: オンボーディング時にご入力いただいた生年月日時をもとに計算される四柱全体(年柱・月柱・日柱・時柱) — 週間・月間レターの個人化された解釈に使用されます</li>' +
           '<li>ご自身で入力される内容: 「今日の物語」機能に自由に記入されたテキスト(返信生成のためAIプロバイダーに送信されます)、および「お問い合わせ」機能にご入力いただく件名と内容</li>' +
@@ -335,7 +361,7 @@ export const PRIVACY_POLICY_CONTENT: Record<MarketingLanguage, PrivacyPolicyCont
         heading: '3. 保有期間',
         html:
           '<p>原則として、退会時(または削除リクエスト受領後、遅滞なく)削除します。</p>' +
-          '<p>生年月日・出生時刻、および「今日の物語」機能に入力されたテキストとその返信は、AES-256方式で暗号化して保存し、計算結果(日干・月支・時支)は個人を特定しにくい値と判断し、暗号化せずに保存します。</p>' +
+          '<p>生年月日・出生時刻、「今日の物語」機能に入力されたテキストとその返信、相性シェア・その場でわかる相性で相手を区別するために入力したメモ、旧正月占い送信時に自由に記入したテキスト、「お問い合わせ」機能に入力された内容は、AES-256方式で暗号化して保存し、計算結果(日干・月支・時支)は個人を特定しにくい値と判断し、暗号化せずに保存します。</p>' +
           '<p>法令により一定期間の保存が義務付けられている情報(決済記録など)は、当該法令が定める期間保存した後に削除します。</p>',
       },
       {
@@ -373,7 +399,7 @@ export const PRIVACY_POLICY_CONTENT: Record<MarketingLanguage, PrivacyPolicyCont
         heading: '7. 安全管理措置',
         html:
           '<ul>' +
-          '<li>生年月日・出生時刻、「今日の物語」のテキストと返信など機微になり得る情報はAES-256方式で暗号化して保存</li>' +
+          '<li>生年月日・出生時刻、「今日の物語」のテキストと返信、相性シェア・その場でわかる相性のメモ、旧正月占いの自由記入テキスト、お問い合わせ内容など機微になり得る情報はAES-256方式で暗号化して保存</li>' +
           '<li>暗号化キーは専用の鍵管理サービス(KMS)で管理し、コードに直接記載しません</li>' +
           '<li>管理画面へのアクセスには別途認証を適用</li>' +
           '</ul>',
@@ -394,7 +420,7 @@ export const PRIVACY_POLICY_CONTENT: Record<MarketingLanguage, PrivacyPolicyCont
       {
         heading: '10. 本ポリシーの変更',
         html:
-          '<p>本ポリシーは2026年7月29日より施行します(最終更新: 2026年8月20日)。法令、方針、またはサービス内容' +
+          '<p>本ポリシーは2026年7月29日より施行します(最終更新: 2026年8月29日)。法令、方針、またはサービス内容' +
           'の変更に応じて内容を追加・削除・修正する場合があります。重要な変更がある場合は、アプリ内または本ページ' +
           'にてお知らせします。</p>',
       },
@@ -402,7 +428,7 @@ export const PRIVACY_POLICY_CONTENT: Record<MarketingLanguage, PrivacyPolicyCont
   },
   es: {
     title: 'Política de Privacidad',
-    effectiveDate: 'Fecha de vigencia: 29 de julio de 2026 (última actualización: 20 de agosto de 2026)',
+    effectiveDate: 'Fecha de vigencia: 29 de julio de 2026 (última actualización: 29 de agosto de 2026)',
     intro:
       'Saju Letter ("nosotros" o "el Servicio") respeta tu privacidad y se compromete a proteger tu información ' +
       'personal. Esta Política de Privacidad explica qué información recopilamos y cómo la usamos cuando ' +
@@ -414,7 +440,7 @@ export const PRIVACY_POLICY_CONTENT: Record<MarketingLanguage, PrivacyPolicyCont
         html:
           '<ul>' +
           '<li>Proporcionada por ti: nombre (o apodo), fecha de nacimiento, género (opcional), zona horaria del dispositivo</li>' +
-          '<li>Opcional: hora de nacimiento (puedes elegir "desconocida"), dirección de correo electrónico (usada solo para prevenir el abuso de la prueba gratuita)</li>' +
+          '<li>Opcional: hora de nacimiento (puedes elegir "desconocida"), dirección de correo electrónico (usada solo para prevenir el abuso de la prueba gratuita), una nota que ingresas en la compatibilidad compartida o la compatibilidad detallada para distinguir a las personas (nunca se muestra a la otra persona)</li>' +
           '<li>Recopilada automáticamente: identificador de autenticación de Firebase (UID), token de notificaciones push del dispositivo (FCM), estado de suscripción/compra (a través de RevenueCat), señales de integridad del dispositivo de Google Play Integrity usadas para prevenir el abuso de la prueba gratuita, datos de diagnóstico de errores/fallos, y — solo en la página pública de compatibilidad — tu dirección IP, usada brevemente para limitar la frecuencia de solicitudes y prevenir abusos, sin almacenamiento a largo plazo</li>' +
           '<li>Cálculos de personalización: tu carta astral saju completa (los cuatro pilares: año, mes, día y hora), calculada a partir de la fecha y hora de nacimiento que proporcionas durante el proceso de incorporación — usada para personalizar las cartas semanales y mensuales</li>' +
           '<li>Contenido que escribes: el texto libre que ingresas en la función "Historia de Hoy", que se envía a un proveedor de IA para generar una respuesta personalizada; y el asunto y mensaje que ingresas al contactar con Soporte</li>' +
@@ -438,7 +464,7 @@ export const PRIVACY_POLICY_CONTENT: Record<MarketingLanguage, PrivacyPolicyCont
         heading: '3. Período de retención',
         html:
           '<p>Eliminamos tu información cuando cierras tu cuenta (o poco después de recibir una solicitud de eliminación).</p>' +
-          '<p>Tu fecha y hora de nacimiento, así como el texto que escribes en la función "Historia de Hoy" y su respuesta, se almacenan cifrados (AES-256). Los resultados calculados (día maestro, rama del mes, rama de la hora) no son identificables por sí solos, por lo que los almacenamos sin cifrar.</p>' +
+          '<p>Tu fecha y hora de nacimiento; el texto que escribes en la función "Historia de Hoy" y su respuesta; las notas que ingresas en la compatibilidad compartida o la compatibilidad detallada para distinguir a las personas; el texto libre que envías para una lectura de Año Nuevo Lunar; y los mensajes que envías a Soporte se almacenan cifrados (AES-256). Los resultados calculados (día maestro, rama del mes, rama de la hora) no son identificables por sí solos, por lo que los almacenamos sin cifrar.</p>' +
           '<p>Cuando la ley exige una retención más larga (por ejemplo, registros de pago), conservamos esos datos solo durante el período legalmente requerido antes de eliminarlos.</p>',
       },
       {
@@ -480,7 +506,7 @@ export const PRIVACY_POLICY_CONTENT: Record<MarketingLanguage, PrivacyPolicyCont
         heading: '7. Medidas de seguridad',
         html:
           '<ul>' +
-          '<li>La información sensible, como la fecha y hora de nacimiento y el texto y las respuestas de la función "Historia de Hoy", se almacena usando cifrado AES-256</li>' +
+          '<li>La información sensible — incluyendo la fecha y hora de nacimiento, el texto y las respuestas de "Historia de Hoy", las notas de compatibilidad/compatibilidad detallada, el texto libre de Año Nuevo Lunar y los mensajes de Soporte — se almacena usando cifrado AES-256</li>' +
           '<li>Las claves de cifrado se gestionan mediante un servicio dedicado de gestión de claves (KMS) y nunca se codifican directamente en el código</li>' +
           '<li>El acceso al panel de administración requiere autenticación independiente</li>' +
           '</ul>',
@@ -504,14 +530,14 @@ export const PRIVACY_POLICY_CONTENT: Record<MarketingLanguage, PrivacyPolicyCont
         heading: '10. Cambios en esta política',
         html:
           '<p>Esta política entra en vigencia el 29 de julio de 2026 y puede actualizarse a medida que cambien ' +
-          'nuestras prácticas, las leyes aplicables o el propio servicio (última actualización: 20 de agosto de ' +
+          'nuestras prácticas, las leyes aplicables o el propio servicio (última actualización: 29 de agosto de ' +
           '2026). Te notificaremos sobre cambios importantes a través de la app o esta página.</p>',
       },
     ],
   },
   pt: {
     title: 'Política de Privacidade',
-    effectiveDate: 'Data de vigência: 29 de julho de 2026 (última atualização: 20 de agosto de 2026)',
+    effectiveDate: 'Data de vigência: 29 de julho de 2026 (última atualização: 29 de agosto de 2026)',
     intro:
       'O Saju Letter ("nós" ou "o Serviço") respeita sua privacidade e se compromete a proteger suas ' +
       'informações pessoais. Esta Política de Privacidade explica quais informações coletamos e como as usamos ' +
@@ -523,7 +549,7 @@ export const PRIVACY_POLICY_CONTENT: Record<MarketingLanguage, PrivacyPolicyCont
         html:
           '<ul>' +
           '<li>Fornecidas por você: nome (ou apelido), data de nascimento, gênero (opcional), fuso horário do dispositivo</li>' +
-          '<li>Opcional: horário de nascimento (você pode escolher "desconhecido"), endereço de e-mail (usado apenas para prevenir abuso do teste gratuito)</li>' +
+          '<li>Opcional: horário de nascimento (você pode escolher "desconhecido"), endereço de e-mail (usado apenas para prevenir abuso do teste gratuito), uma nota que você insere na compatibilidade compartilhada ou na compatibilidade detalhada para diferenciar as pessoas (nunca é exibida para a outra pessoa)</li>' +
           '<li>Coletadas automaticamente: identificador de autenticação do Firebase (UID), token de notificações push do dispositivo (FCM), status de assinatura/compra (via RevenueCat), sinais de integridade do dispositivo do Google Play Integrity usados para prevenir abuso do teste gratuito, dados de diagnóstico de erros/falhas e — somente na página pública de compatibilidade — seu endereço IP, usado brevemente para limitar a frequência de solicitações e prevenir abusos, sem armazenamento de longo prazo</li>' +
           '<li>Cálculos de personalização: seu mapa saju completo (os quatro pilares: ano, mês, dia e hora), calculado a partir da data e hora de nascimento que você fornece durante o processo de integração — usado para personalizar as cartas semanais e mensais</li>' +
           '<li>Conteúdo que você escreve: o texto livre inserido no recurso "História de Hoje", que é enviado a um provedor de IA para gerar uma resposta personalizada; e o assunto e a mensagem que você insere ao entrar em contato com o Suporte</li>' +
@@ -547,7 +573,7 @@ export const PRIVACY_POLICY_CONTENT: Record<MarketingLanguage, PrivacyPolicyCont
         heading: '3. Período de retenção',
         html:
           '<p>Excluímos suas informações quando você encerra sua conta (ou logo após recebermos uma solicitação de exclusão).</p>' +
-          '<p>Sua data e horário de nascimento, assim como o texto que você escreve no recurso "História de Hoje" e sua resposta, são armazenados de forma criptografada (AES-256). Os resultados calculados (dia mestre, ramo do mês, ramo da hora) não são identificáveis por si só, portanto os armazenamos sem criptografia.</p>' +
+          '<p>Sua data e horário de nascimento; o texto que você escreve no recurso "História de Hoje" e sua resposta; as notas que você insere na compatibilidade compartilhada ou na compatibilidade detalhada para diferenciar as pessoas; o texto livre que você envia para uma leitura de Ano Novo Lunar; e as mensagens que você envia ao Suporte são armazenados de forma criptografada (AES-256). Os resultados calculados (dia mestre, ramo do mês, ramo da hora) não são identificáveis por si só, portanto os armazenamos sem criptografia.</p>' +
           '<p>Quando a lei exige uma retenção mais longa (por exemplo, registros de pagamento), mantemos esses dados apenas pelo período legalmente exigido antes de excluí-los.</p>',
       },
       {
@@ -589,7 +615,7 @@ export const PRIVACY_POLICY_CONTENT: Record<MarketingLanguage, PrivacyPolicyCont
         heading: '7. Medidas de segurança',
         html:
           '<ul>' +
-          '<li>Informações sensíveis, como data e horário de nascimento e o texto e as respostas do recurso "História de Hoje", são armazenadas com criptografia AES-256</li>' +
+          '<li>Informações sensíveis — incluindo data e horário de nascimento, texto e respostas de "História de Hoje", notas de compatibilidade/compatibilidade detalhada, texto livre de Ano Novo Lunar e mensagens do Suporte — são armazenadas com criptografia AES-256</li>' +
           '<li>As chaves de criptografia são gerenciadas por um serviço dedicado de gerenciamento de chaves (KMS) e nunca ficam fixas no código</li>' +
           '<li>O acesso ao painel administrativo exige autenticação separada</li>' +
           '</ul>',
@@ -613,14 +639,14 @@ export const PRIVACY_POLICY_CONTENT: Record<MarketingLanguage, PrivacyPolicyCont
         heading: '10. Alterações nesta política',
         html:
           '<p>Esta política entra em vigor em 29 de julho de 2026 e pode ser atualizada conforme nossas ' +
-          'práticas, as leis aplicáveis ou o próprio serviço mudarem (última atualização: 20 de agosto de ' +
+          'práticas, as leis aplicáveis ou o próprio serviço mudarem (última atualização: 29 de agosto de ' +
           '2026). Notificaremos você sobre alterações relevantes por meio do aplicativo ou desta página.</p>',
       },
     ],
   },
   vi: {
     title: 'Chính sách Quyền riêng tư',
-    effectiveDate: 'Ngày hiệu lực: 29 tháng 7 năm 2026 (cập nhật lần cuối: 20 tháng 8 năm 2026)',
+    effectiveDate: 'Ngày hiệu lực: 29 tháng 7 năm 2026 (cập nhật lần cuối: 29 tháng 8 năm 2026)',
     intro:
       'Saju Letter ("chúng tôi" hoặc "Dịch vụ") tôn trọng quyền riêng tư của bạn và cam kết bảo vệ thông tin cá ' +
       'nhân của bạn. Chính sách Quyền riêng tư này giải thích thông tin nào chúng tôi thu thập và cách chúng ' +
@@ -632,7 +658,7 @@ export const PRIVACY_POLICY_CONTENT: Record<MarketingLanguage, PrivacyPolicyCont
         html:
           '<ul>' +
           '<li>Do bạn cung cấp: tên (hoặc biệt danh), ngày sinh, giới tính (không bắt buộc), múi giờ thiết bị</li>' +
-          '<li>Tùy chọn: giờ sinh (bạn có thể chọn "không rõ"), địa chỉ email (chỉ dùng để ngăn chặn lạm dụng bản dùng thử miễn phí)</li>' +
+          '<li>Tùy chọn: giờ sinh (bạn có thể chọn "không rõ"), địa chỉ email (chỉ dùng để ngăn chặn lạm dụng bản dùng thử miễn phí), ghi chú bạn nhập trong tính năng chia sẻ mức độ hợp nhau hoặc xem mức độ hợp nhau chi tiết để phân biệt mọi người (không bao giờ hiển thị cho người kia)</li>' +
           '<li>Thu thập tự động: mã định danh xác thực Firebase (UID), token thông báo đẩy của thiết bị (FCM), trạng thái đăng ký/mua hàng (qua RevenueCat), tín hiệu toàn vẹn thiết bị từ Google Play Integrity dùng để ngăn chặn lạm dụng bản dùng thử miễn phí, dữ liệu chẩn đoán lỗi/sự cố, và — chỉ trên trang hợp nhau công khai — địa chỉ IP của bạn, được dùng trong thời gian ngắn để giới hạn tần suất yêu cầu nhằm ngăn lạm dụng, không lưu trữ lâu dài</li>' +
           '<li>Kết quả tính toán cá nhân hóa: toàn bộ lá số saju của bạn (tứ trụ: năm, tháng, ngày, giờ), được tính toán từ ngày và giờ sinh bạn cung cấp trong quá trình thiết lập ban đầu — dùng để cá nhân hóa thư hằng tuần và hằng tháng</li>' +
           '<li>Nội dung bạn viết: văn bản tự do bạn nhập trong tính năng "Câu Chuyện Hôm Nay", được gửi đến nhà cung cấp AI để tạo phản hồi cá nhân hóa; và tiêu đề, nội dung bạn nhập khi liên hệ Hỗ trợ</li>' +
@@ -656,7 +682,7 @@ export const PRIVACY_POLICY_CONTENT: Record<MarketingLanguage, PrivacyPolicyCont
         heading: '3. Thời gian lưu trữ',
         html:
           '<p>Chúng tôi xóa thông tin của bạn khi bạn đóng tài khoản (hoặc ngay sau khi nhận được yêu cầu xóa).</p>' +
-          '<p>Ngày sinh và giờ sinh của bạn, cũng như văn bản bạn viết trong tính năng "Câu Chuyện Hôm Nay" và phản hồi của nó, được lưu trữ ở dạng mã hóa (AES-256). Các kết quả đã tính toán (thiên can ngày, địa chi tháng, địa chi giờ) tự thân không thể nhận dạng cá nhân, nên chúng tôi lưu trữ chúng mà không mã hóa.</p>' +
+          '<p>Ngày sinh và giờ sinh của bạn; văn bản bạn viết trong tính năng "Câu Chuyện Hôm Nay" và phản hồi của nó; ghi chú bạn nhập trong tính năng hợp nhau để phân biệt mọi người; văn bản tự do bạn gửi cho bài đọc Tết Nguyên Đán; và các tin nhắn bạn gửi cho Hỗ trợ đều được lưu trữ ở dạng mã hóa (AES-256). Các kết quả đã tính toán (thiên can ngày, địa chi tháng, địa chi giờ) tự thân không thể nhận dạng cá nhân, nên chúng tôi lưu trữ chúng mà không mã hóa.</p>' +
           '<p>Khi pháp luật yêu cầu lưu trữ lâu hơn (ví dụ: hồ sơ thanh toán), chúng tôi chỉ giữ dữ liệu đó trong thời gian pháp luật yêu cầu trước khi xóa.</p>',
       },
       {
@@ -696,7 +722,7 @@ export const PRIVACY_POLICY_CONTENT: Record<MarketingLanguage, PrivacyPolicyCont
         heading: '7. Biện pháp bảo mật',
         html:
           '<ul>' +
-          '<li>Thông tin nhạy cảm như ngày sinh, giờ sinh và văn bản, phản hồi trong tính năng "Câu Chuyện Hôm Nay" được lưu trữ bằng mã hóa AES-256</li>' +
+          '<li>Thông tin nhạy cảm — bao gồm ngày sinh, giờ sinh, văn bản và phản hồi trong "Câu Chuyện Hôm Nay", ghi chú hợp nhau, văn bản tự do của Tết Nguyên Đán và tin nhắn Hỗ trợ — được lưu trữ bằng mã hóa AES-256</li>' +
           '<li>Khóa mã hóa được quản lý thông qua dịch vụ quản lý khóa chuyên dụng (KMS) và không bao giờ được viết cứng trong mã nguồn</li>' +
           '<li>Việc truy cập trang quản trị yêu cầu xác thực riêng biệt</li>' +
           '</ul>',
@@ -719,7 +745,7 @@ export const PRIVACY_POLICY_CONTENT: Record<MarketingLanguage, PrivacyPolicyCont
         heading: '10. Thay đổi đối với chính sách này',
         html:
           '<p>Chính sách này có hiệu lực từ ngày 29 tháng 7 năm 2026 và có thể được cập nhật khi các hoạt động ' +
-          'của chúng tôi, luật hiện hành hoặc bản thân dịch vụ thay đổi (cập nhật lần cuối: 20 tháng 8 năm ' +
+          'của chúng tôi, luật hiện hành hoặc bản thân dịch vụ thay đổi (cập nhật lần cuối: 29 tháng 8 năm ' +
           '2026). Chúng tôi sẽ thông báo cho bạn về những thay đổi quan trọng thông qua ứng dụng hoặc trang này.</p>',
       },
     ],
