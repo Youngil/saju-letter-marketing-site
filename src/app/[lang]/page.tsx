@@ -9,7 +9,7 @@ import {
   type MarketingLanguage,
 } from '@/lib/languages';
 import { DemoForm } from '@/components/DemoForm';
-import { LeadCaptureForm } from '@/components/LeadCaptureForm';
+// LeadCaptureForm import는 아래 렌더링과 함께 잠시 꺼뒀다(2026-09-02) — §leadCapture 참고.
 import { AppDownloadLinks } from '@/components/AppDownloadLinks';
 import { DainHomeMark } from '@/components/DainHomeMark';
 import { BlogByline, categoryLabelFor } from '@/components/BlogByline';
@@ -118,9 +118,16 @@ export default async function HomePage({ params }: { params: Promise<{ lang: str
         </section>
       ) : null}
 
+      {/* 리드 캡처("다인의 짧은 소개 편지 받기 — 30일 체험 포함")를 잠시 화면에서 뺐다
+          (2026-09-02, 사용자 요청: "쿠폰과 코드와 관련해서 개념을 새롭게 만들어가려고 한다,
+          그동안 화면에 표시하지 않도록 처리") — 30일 체험 쿠폰 개념 자체를 재검토 중이라, 그
+          개념이 정리될 때까지 노출을 멈추는 임시 조치다. 컴포넌트(LeadCaptureForm.tsx)와
+          문구(dict.leadCapture)는 그대로 남겨뒀다 — 재개할 때 이 주석을 걷어내고 아래 줄만
+          되살리면 된다.
       <section className="mx-auto w-full max-w-md">
         <LeadCaptureForm language={lang} dict={dict.leadCapture} />
       </section>
+      */}
     </div>
   );
 }
