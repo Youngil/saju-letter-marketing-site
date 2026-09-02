@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import { isMarketingLanguage, isNonKoreanLanguage, type NonKoreanLanguage } from '@/lib/languages';
 import { getDictionary } from '@/dictionaries';
 import { getReading } from '@/lib/lunarNewYearApi';
+import { DISCLAIMER_CONTENT } from '@/content/disclaimer';
 import { EmailSignupForm } from '@/components/lunar-new-year/EmailSignupForm';
 import { ShareButton } from '@/components/lunar-new-year/ShareButton';
 import { AppDownloadLinks } from '@/components/AppDownloadLinks';
@@ -53,6 +54,7 @@ export default async function LunarNewYearResultPage({ params }: PageProps) {
         <p className="mt-3 text-stone-700">{reading.content.overview}</p>
         <p className="mt-3 text-stone-700">{reading.content.highlight}</p>
         <p className="mt-4 text-sm italic text-stone-500">{reading.content.closing}</p>
+        <p className="mt-4 text-xs text-stone-400">{DISCLAIMER_CONTENT[language].short}</p>
       </article>
 
       <div className="flex justify-center">

@@ -64,5 +64,21 @@ export default function sitemap(): MetadataRoute.Sitemap {
     alternates: { languages: languageAlternates(MARKETING_LANGUAGES, privacyPath, DEFAULT_LANGUAGE) },
   }));
 
-  return [...homeEntries, ...blogIndexEntries, ...blogPostEntries, ...compareEntries, ...lunarNewYearEntries, ...privacyEntries];
+  // 서비스 이용 안내(2026-09-02, 오락 목적 고지)도 privacy와 같은 이유로 6개 언어 전체 대상.
+  const disclaimerPath = (lang: MarketingLanguage) => `/${lang}/disclaimer`;
+  const disclaimerEntries = MARKETING_LANGUAGES.map((lang) => ({
+    url: `${WEB_BASE_URL}${disclaimerPath(lang)}`,
+    lastModified: new Date(),
+    alternates: { languages: languageAlternates(MARKETING_LANGUAGES, disclaimerPath, DEFAULT_LANGUAGE) },
+  }));
+
+  return [
+    ...homeEntries,
+    ...blogIndexEntries,
+    ...blogPostEntries,
+    ...compareEntries,
+    ...lunarNewYearEntries,
+    ...privacyEntries,
+    ...disclaimerEntries,
+  ];
 }

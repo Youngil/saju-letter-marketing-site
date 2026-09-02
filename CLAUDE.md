@@ -222,6 +222,24 @@ Turnstile로 막혀 있었지만, 그 결과 페이지에서 임의의 제3자 �
   - **푸터만으로는 첫 화면에서 안 보인다는 사용자 피드백(같은 날 이어서)** — "푸터에 있으면 초기화면에서 전혀 보이지 않는다"는 지적으로, 홈 히어로(스크롤 없이 보이는 영역, "무료로 체험하기" 버튼 바로 아래)에도 같은 `AppDownloadLinks`를 추가했다. 두 곳에서 재사용하기 위해 `footer.appSectionLabel`이었던 라벨 필드를 `appLinks.sectionLabel`로 옮겼다(footer 전용이 아니게 됐으므로) — 6개 언어 전부 이동, 값 자체는 변경 없음.
   - **푸터 배지는 완전히 제거(같은 날 이어서)** — 사용자가 "푸터에 있는 것은 삭제해도 되지 않을까요"라고 재차 물어와, 히어로(홈 전용)와 footer(전 페이지 공통) 중 어느 범위로 지울지 확인한 뒤(`AskUserQuestion`) "전 페이지 푸터에서 완전히 제거"를 선택받았다 — `[lang]/layout.tsx`의 footer에서 `AppDownloadLinks` 렌더와 import를 제거했다. 그 결과 **앱 다운로드 배지는 이제 홈 히어로와 두 전환 지점(무료 미리보기 결과·궁합 결과) 3곳에만 남고, 블로그/compare/개인정보처리방침 등 나머지 페이지에는 다운로드 안내가 없다** — 사용자가 이 트레이드오프를 명시적으로 확인한 선택이다. `dict.appLinks`(sectionLabel 포함) 자체는 이 세 곳이 여전히 쓰므로 dictionary에서는 손대지 않았다.
 - `/[lang]/privacy` — 개인정보처리방침(2026-08-12, `saju-letter-backend`의 `public/privacy.html`에서 이관, `src/content/privacyPolicy.ts`). 블로그/compare와 다르게 `LAUNCH_CONTENT_LANGUAGES`가 아니라 `MARKETING_LANGUAGES` 6개 전부 대상 — 법적 고지 문서라 1차 출시 언어 축과 무관해야 한다. 이관 이유: `www.saju-letter.com` 커스텀 도메인이 이 사이트에 연결되면서(§9 "왜 Next.js인가" 인접 GCP 배포 내역, `docs/setup-guide.md` 참고) 백엔드가 서빙하던 옛 `saju-letter.com/privacy`가 더 이상 그 도메인으로는 응답하지 못하게 됐는데, 이 사실이 문서에 반영되지 않아 Play Console에 "준비 완료"로 잘못 기록돼 있던 것을 발견해 바로잡았다. 콘텐츠는 문구 변경 없이 그대로 옮겼다(⚠️ 법률 전문가 검토 전 AI 초안 — `privacyPolicy.ts` 상단 주석 참고). `saju-letter-mobile`은 `src/constants/links.ts`의 `buildPrivacyPolicyUrl(language)`로 앱의 현재 언어에 맞는 링크를 설정 화면에서 연다. **§4(제3자 제공) AI 콘텐츠 생성 제공업체 항목이 마케팅 사이트의 홈 미니 데모·신년운세를 빠뜨리고 있었다(2026-08-21 발견·수정)** — §1은 2026-08-20 개정 때 이미 이 두 기능의 "계산된 사주 정보" 수집을 언급했지만, §4는 여전히 "편지 및 오늘의 이야기 답장"만 AI 제공업체로 전달된다고 좁게 서술돼 있었다. 둘 다 "제출 시 즉시 결과 표시" 요구사항 때문에 배치가 아닌 동기 AI 호출을 쓰므로(계산된 사주값이 매 요청마다 실제로 AI 제공업체 프롬프트에 들어감) 6개 언어 전부 §4에 포함시켰다 — 궁합 공유(초대 링크)는 사전 배치 캐시에서 고르는 구조라 게스트 제출 시점에 개인 데이터가 AI로 가지 않아 의도적으로 제외했다. 상세는 `privacyPolicy.ts` 상단 2026-08-21 개정 주석 참고.
+- `/[lang]/disclaimer` — 서비스 이용 안내(오락 목적 고지, 2026-09-02, `src/content/disclaimer.ts`).
+  사용자가 "마케팅 사이트에도 앱과 동일하게 표시해야 하지 않냐"고 지적해 신설했다 — 개인정보처리방침은
+  이미 이관돼 있었는데 이 고지는 사이트 어디에도 없었다(footer에 개인정보처리방침 링크 하나뿐).
+  `saju-letter-mobile`의 `disclaimer.{title,short,body}`(`src/i18n/locales/*.json`) 6개 언어
+  문구를 새로 번역하지 않고 그대로 포팅했다 — 같은 서비스의 오락 목적 고지가 앱과 사이트에서
+  다른 문구면 오히려 혼란을 준다. `/[lang]/privacy`와 같은 이유로 `LAUNCH_CONTENT_LANGUAGES`가
+  아니라 `MARKETING_LANGUAGES` 6개 전부 대상(`generateStaticParams`/`sitemap.ts` 모두 동일 패턴).
+  footer에 `dict.footer.disclaimerLinkLabel` 링크를 개인정보처리방침 옆에 추가했다.
+  **로그인 없이 실제로 AI 리딩을 즉시 받는 세 곳**(홈 미니 데모 `DemoForm.tsx`, 궁합 공유 결과
+  `CompatView.tsx`의 `CompletedResult`, 신년운세 결과 `lunar-new-year/r/[id]/page.tsx`)에는
+  앱이 온보딩·저널 작성 전에 `disclaimer.short`를 먼저 보여주는 것과 같은 안전장치가 전혀 없었다
+  — 이 세 곳에 `DISCLAIMER_CONTENT[language].short`를 결과 바로 아래 옅은 텍스트로 추가했다(각
+  페이지의 dictionary/content에 문구를 중복 정의하지 않고 `content/disclaimer.ts` 하나를 공유
+  출처로 삼는다). `disclaimer.short`가 `body`보다 적은 항목(투자 조언 미언급)을 나열하는 앱 쪽
+  기존 불일치는 포팅 시점에도 그대로 남아있다(meta 저장소 CLAUDE.md 참고, 축약 과정의 자연스러운
+  생략으로 판단해 앱에서도 손대지 않은 것과 같은 이유). 타입체크/테스트/프로덕션 빌드 통과 확인 +
+  로컬 dev 서버(`localhost:3200`)에서 `curl`로 `/ko/disclaimer`(제목·4개 문단·footer 링크)와
+  `/en/disclaimer` 실제 렌더링을 직접 확인했다.
 - `/[lang]/compat/[token]` (+`opengraph-image.tsx`) — 궁합 공유 웹페이지(2026-08-12, `saju-letter-backend`의 `public/compat.html`에서 이관, `src/content/compatContent.ts`/`src/lib/compatApi.ts`/`src/components/compat/CompatView.tsx`). privacy와 같은 이유로 `MARKETING_LANGUAGES` 6개 전부 대상(`generateStaticParams` 없음 — 토큰은 런타임 생성이라 `lunar-new-year/r/[id]`처럼 완전 동적 라우트). 공유 URL 자체(`saju-letter-mobile`의 `buildCompatibilityShareUrl`)는 언어 세그먼트가 없다 — `middleware.ts`의 기존 자동감지 리다이렉트가 옛 compat.js의 브라우저 언어 감지 UX를 코드 추가 없이 재현해준다. 백엔드의 `compatibilityPublicRouter`(초대 조회/제출/이벤트)는 그대로 두고 이 사이트가 `marketingSiteCors`로 cross-origin 호출한다.
   - **Phase 6 — 설치 CTA = 편지 약속, 게스트 페이지에 다인 없음(2026-08-26)** — 결과 화면 설치 CTA는
     편지 약속 문구를 유지하고, 게스트 첫 접점에 다인 초상·서사를 올리지 않는다(의도적). submit/OG

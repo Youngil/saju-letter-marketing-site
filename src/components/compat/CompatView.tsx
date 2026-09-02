@@ -7,6 +7,7 @@ import type { CompatContent } from '@/content/compatContent';
 import type { InviteView } from '@/lib/compatApi';
 import { logCompatEvent, submitGuestInvite } from '@/lib/compatApi';
 import { ApiError } from '@/lib/apiClient';
+import { DISCLAIMER_CONTENT } from '@/content/disclaimer';
 import { calculateSaju, resolveSolarBirthDate } from '@/lib/saju';
 import { isOldEnough } from '@/lib/age';
 import { Turnstile, TURNSTILE_ENABLED } from '../Turnstile';
@@ -53,7 +54,14 @@ export function CompatView({
   }
 
   return (
-    <CompletedResult content={content} guestName={view.guestName} reading={view.reading} token={token} appLinksDict={appLinksDict} />
+    <CompletedResult
+      content={content}
+      guestName={view.guestName}
+      reading={view.reading}
+      token={token}
+      language={language}
+      appLinksDict={appLinksDict}
+    />
   );
 }
 
@@ -62,12 +70,14 @@ function CompletedResult({
   guestName,
   reading,
   token,
+  language,
   appLinksDict,
 }: {
   content: CompatContent;
   guestName: string | null;
   reading: { title: string; body: string } | null;
   token: string;
+  language: MarketingLanguage;
   appLinksDict: MarketingDictionary['appLinks'];
 }) {
   const logInstallClick = () => logCompatEvent(token, 'install_cta_clicked', 'guest');
@@ -79,6 +89,7 @@ function CompletedResult({
         <>
           <h1 className="text-xl font-semibold">{reading.title}</h1>
           <p className="text-foreground/80">{reading.body}</p>
+          <p className="text-xs text-foreground/50">{DISCLAIMER_CONTENT[language].short}</p>
         </>
       ) : (
         <p className="text-foreground/60">{content.loading}</p>

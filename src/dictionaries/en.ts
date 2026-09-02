@@ -113,6 +113,7 @@ export const dictionary: MarketingDictionary = {
   footer: {
     privacyNote: 'We send your Gregorian date of birth only to confirm you are 16 or older — we do not store it. Your chart is calculated in the browser.',
     privacyLinkLabel: 'Privacy Policy',
+    disclaimerLinkLabel: 'About This Service',
   },
   appLinks: {
     sectionLabel: 'Get the app',

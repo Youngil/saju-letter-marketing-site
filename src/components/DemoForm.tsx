@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Image from 'next/image';
 import type { MarketingDictionary } from '@/dictionaries/types';
 import type { MarketingLanguage } from '@/lib/languages';
+import { DISCLAIMER_CONTENT } from '@/content/disclaimer';
 import { calculateSaju } from '@/lib/saju';
 import { isOldEnough } from '@/lib/age';
 import { ApiError, getDemoReading, type DemoReadingResponse } from '@/lib/api';
@@ -110,6 +111,7 @@ export function DemoForm({
           <p>{result.interpretation}</p>
           <p className="text-foreground/70 italic">{result.closing}</p>
         </div>
+        <p className="text-center text-xs text-foreground/50">{DISCLAIMER_CONTENT[language].short}</p>
         <div className="mt-2 flex flex-col items-center gap-3">
           <p className="text-center text-sm font-medium text-foreground/70">{dict.resultCta}</p>
           <AppDownloadLinks dict={appLinksDict} emphasized />

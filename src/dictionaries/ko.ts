@@ -119,6 +119,7 @@ export const dictionary: MarketingDictionary = {
   footer: {
     privacyNote: '만 16세 확인을 위해 양력 생년월일을 서버로 보내지만 저장하지는 않아요. 사주 계산은 브라우저에서 이뤄집니다.',
     privacyLinkLabel: '개인정보처리방침',
+    disclaimerLinkLabel: '서비스 이용 안내',
   },
   appLinks: {
     sectionLabel: '앱 다운로드',

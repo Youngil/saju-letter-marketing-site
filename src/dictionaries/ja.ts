@@ -114,6 +114,7 @@ export const dictionary: MarketingDictionary = {
   footer: {
     privacyNote: '満16歳確認のため太陽暦の生年月日をサーバーに送りますが、保存はしません。四柱の計算はブラウザ内で行います。',
     privacyLinkLabel: 'プライバシーポリシー',
+    disclaimerLinkLabel: 'サービスのご案内',
   },
   appLinks: {
     sectionLabel: 'アプリを入手',

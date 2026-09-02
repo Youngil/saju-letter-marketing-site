@@ -128,6 +128,7 @@ export interface MarketingDictionary {
   footer: {
     privacyNote: string;
     privacyLinkLabel: string;
+    disclaimerLinkLabel: string;
   };
   /**
    * 안드로이드/iOS 스토어 다운로드 CTA — 홈 히어로(첫 화면, 스크롤 없이 보임)·footer(전 페이지
