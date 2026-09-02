@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import type { MarketingLanguage } from '@/lib/languages';
 import type { MarketingDictionary } from '@/dictionaries/types';
-import type { CompatContent } from '@/content/compatContent';
+import { COMPAT_CONTENT, type CompatContent } from '@/content/compatContent';
 import type { InviteView } from '@/lib/compatApi';
 import { logCompatEvent, submitGuestInvite } from '@/lib/compatApi';
 import { ApiError } from '@/lib/apiClient';
@@ -20,20 +20,28 @@ const CURRENT_YEAR = new Date().getFullYear();
  * (2026-08-12). 서버 컴포넌트(page.tsx)가 이미 한 번 fetch한 초기 상태를 prop으로 받아
  * 첫 렌더부터 로딩 깜빡임 없이 보여준다 — 옛 페이지는 항상 "불러오는 중…"을 먼저 그렸지만
  * 이제 그럴 필요가 없다. 인터랙션(폼 제출)이 필요한 부분만 이 컴포넌트가 담당한다.
+ *
+ * `content`(COMPAT_CONTENT[language])는 서버 컴포넌트로부터 prop으로 받지 않고 이 클라이언트
+ * 컴포넌트가 직접 `COMPAT_CONTENT`를 import해 `language`(순수 문자열, 직렬화 가능)로 조회한다
+ * (2026-09-02, 사용자 리포트: "Functions cannot be passed directly to Client Components" 런타임
+ * 에러) — `CompatContent`에 함수 필드(`pairLine`, `og.completed.titleFor`)가 있어서, page.tsx가
+ * 이 객체를 통째로 prop으로 넘기면 서버→클라이언트 RSC 경계를 함수가 못 건너가 항상(상태와
+ * 무관하게) 크래시했다. `generateMetadata`(page.tsx, 완전히 서버 전용)는 이 함수들을 그 자리에서
+ * 호출해 문자열 결과만 쓰므로 그대로 둬도 문제없다 — 이 컴포넌트 트리로 prop 전달되는 경로만
+ * 문제였다.
  */
 export function CompatView({
   token,
   language,
   initialView,
-  content,
   appLinksDict,
 }: {
   token: string;
   language: MarketingLanguage;
   initialView: InviteView;
-  content: CompatContent;
   appLinksDict: MarketingDictionary['appLinks'];
 }) {
+  const content = COMPAT_CONTENT[language];
   const [view, setView] = useState<InviteView>(initialView);
 
   useEffect(() => {

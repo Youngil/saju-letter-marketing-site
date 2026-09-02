@@ -57,12 +57,11 @@ export default async function CompatPage({ params }: PageProps) {
   const lang: MarketingLanguage = rawLang;
 
   const view = await getCompatInvite(token, lang);
-  const content = COMPAT_CONTENT[lang];
   const dict = await getDictionary(lang);
 
   return (
     <div className="mx-auto max-w-lg px-4 py-12">
-      <CompatView token={token} language={lang} initialView={view} content={content} appLinksDict={dict.appLinks} />
+      <CompatView token={token} language={lang} initialView={view} appLinksDict={dict.appLinks} />
     </div>
   );
 }
