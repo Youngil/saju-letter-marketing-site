@@ -20,7 +20,7 @@ export default async function Image({ params }: { params: Promise<{ lang: string
 
   const og =
     view.status === 'completed'
-      ? { title: content.og.completed.titleFor(view.guestName), description: content.og.completed.description }
+      ? { title: content.og.completed.titleFor(view.requesterName), description: content.og.completed.description }
       : content.og[view.status];
 
   return new ImageResponse(

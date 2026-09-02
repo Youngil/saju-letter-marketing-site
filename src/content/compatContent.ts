@@ -38,12 +38,14 @@ export interface CompatContent {
   calcError: string;
   underageError: string;
   submitError: string;
-  pairLine: (guestName: string | null) => string;
+  /** 링크를 보낸 회원의 이름을 받는다(2026-09-02) — 이 화면은 항상 게스트만 보므로 "OOO님과의
+   *  궁합"의 OOO은 게스트 자신이 아니라 초대를 보낸 사람이어야 한다. */
+  pairLine: (requesterName: string | null) => string;
   cta: string;
   og: {
     not_found: CompatOgCopy;
     expired: CompatOgCopy;
-    completed: { titleFor: (guestName: string | null) => string; description: string };
+    completed: { titleFor: (requesterName: string | null) => string; description: string };
     pending: CompatOgCopy;
   };
 }
@@ -69,13 +71,13 @@ export const COMPAT_CONTENT: Record<MarketingLanguage, CompatContent> = {
     calcError: '입력하신 날짜를 계산할 수 없어요. 날짜를 다시 확인해주세요.',
     underageError: '이 서비스는 만 16세 이상만 이용할 수 있어요.',
     submitError: '문제가 발생했어요. 잠시 후 다시 시도해주세요.',
-    pairLine: (guestName) => `${guestName || '친구'}님과의 궁합`,
+    pairLine: (requesterName) => (requesterName ? `${requesterName}님과의 궁합` : '친구와의 궁합'),
     cta: '사주편지에서 나만의 편지도 받아보기',
     og: {
       not_found: { title: '사주편지 — 궁합 보기', description: '이 링크를 찾을 수 없어요. 보낸 사람에게 다시 확인해주세요.' },
       expired: { title: '사주편지 — 궁합 보기', description: '이 초대 링크는 만료됐어요. 초대를 보낸 사람에게 새 링크를 요청해주세요.' },
       completed: {
-        titleFor: (guestName) => (guestName ? `${guestName}님과의 궁합 — 사주편지` : '사주편지에서 확인한 궁합'),
+        titleFor: (requesterName) => (requesterName ? `${requesterName}님과의 궁합 — 사주편지` : '사주편지에서 확인한 궁합'),
         description: '두 사람의 일간이 어떻게 어울리는지, 짧고 유쾌한 한마디로 확인해보세요.',
       },
       pending: {
@@ -104,13 +106,13 @@ export const COMPAT_CONTENT: Record<MarketingLanguage, CompatContent> = {
     calcError: "We couldn't calculate that date. Please double-check it.",
     underageError: 'This service is only available to users aged 16 and older.',
     submitError: 'Something went wrong — please try again shortly.',
-    pairLine: (guestName) => `Compatibility with ${guestName || 'you'}`,
+    pairLine: (requesterName) => `Compatibility with ${requesterName || 'a friend'}`,
     cta: 'Get your own daily letter from Saju Letter',
     og: {
       not_found: { title: 'Saju Letter — Compatibility Check', description: "This link isn't valid. Please double-check it with whoever sent it to you." },
       expired: { title: 'Saju Letter — Compatibility Check', description: 'This invite link has expired — ask your friend to send a new one.' },
       completed: {
-        titleFor: (guestName) => (guestName ? `${guestName}'s compatibility on Saju Letter` : 'A compatibility check on Saju Letter'),
+        titleFor: (requesterName) => (requesterName ? `${requesterName}'s compatibility on Saju Letter` : 'A compatibility check on Saju Letter'),
         description: 'See how these two day masters match — a short, playful look from Saju Letter.',
       },
       pending: {
@@ -139,13 +141,13 @@ export const COMPAT_CONTENT: Record<MarketingLanguage, CompatContent> = {
     calcError: 'その日付を計算できませんでした。もう一度ご確認ください。',
     underageError: '本サービスは満16歳以上の方のみご利用いただけます。',
     submitError: '問題が発生しました。しばらくしてからもう一度お試しください。',
-    pairLine: (guestName) => `${guestName || 'あなた'}さんとの相性`,
+    pairLine: (requesterName) => (requesterName ? `${requesterName}さんとの相性` : '友達との相性'),
     cta: 'サジュレターで毎日の手紙を受け取る',
     og: {
       not_found: { title: 'サジュレター — 相性チェック', description: 'このリンクが見つかりませんでした。送ってくれた相手にご確認ください。' },
       expired: { title: 'サジュレター — 相性チェック', description: 'この招待リンクは期限切れです。招待した相手に新しいリンクをお願いしてください。' },
       completed: {
-        titleFor: (guestName) => (guestName ? `${guestName}さんとの相性 — サジュレター` : 'サジュレターでの相性診断結果'),
+        titleFor: (requesterName) => (requesterName ? `${requesterName}さんとの相性 — サジュレター` : 'サジュレターでの相性診断結果'),
         description: '二人の日干がどう響き合うか、短く楽しい一言でチェック。',
       },
       pending: {
@@ -174,13 +176,13 @@ export const COMPAT_CONTENT: Record<MarketingLanguage, CompatContent> = {
     calcError: 'No pudimos calcular esa fecha. Por favor, verifícala de nuevo.',
     underageError: 'Este servicio solo está disponible para usuarios de 16 años o más.',
     submitError: 'Algo salió mal — inténtalo de nuevo en un momento.',
-    pairLine: (guestName) => `Compatibilidad con ${guestName || 'ti'}`,
+    pairLine: (requesterName) => `Compatibilidad con ${requesterName || 'un amigo'}`,
     cta: 'Recibe tu propia carta diaria de Saju Letter',
     og: {
       not_found: { title: 'Saju Letter — Prueba de compatibilidad', description: 'Este enlace no es válido. Verifícalo con quien te lo envió.' },
       expired: { title: 'Saju Letter — Prueba de compatibilidad', description: 'Este enlace de invitación ha caducado — pide a tu amigo que te envíe uno nuevo.' },
       completed: {
-        titleFor: (guestName) => (guestName ? `Compatibilidad de ${guestName} en Saju Letter` : 'Una prueba de compatibilidad en Saju Letter'),
+        titleFor: (requesterName) => (requesterName ? `Compatibilidad de ${requesterName} en Saju Letter` : 'Una prueba de compatibilidad en Saju Letter'),
         description: 'Descubre cómo conectan sus días maestros — un vistazo breve y divertido de Saju Letter.',
       },
       pending: {
@@ -209,13 +211,13 @@ export const COMPAT_CONTENT: Record<MarketingLanguage, CompatContent> = {
     calcError: 'Não conseguimos calcular essa data. Verifique novamente.',
     underageError: 'Este serviço está disponível apenas para usuários com 16 anos ou mais.',
     submitError: 'Algo deu errado — tente novamente em instantes.',
-    pairLine: (guestName) => `Compatibilidade com ${guestName || 'você'}`,
+    pairLine: (requesterName) => `Compatibilidade com ${requesterName || 'um amigo'}`,
     cta: 'Receba sua própria carta diária do Saju Letter',
     og: {
       not_found: { title: 'Saju Letter — Verificação de compatibilidade', description: 'Este link não é válido. Verifique com quem te enviou.' },
       expired: { title: 'Saju Letter — Verificação de compatibilidade', description: 'Este link de convite expirou — peça ao seu amigo para enviar um novo.' },
       completed: {
-        titleFor: (guestName) => (guestName ? `Compatibilidade de ${guestName} no Saju Letter` : 'Uma verificação de compatibilidade no Saju Letter'),
+        titleFor: (requesterName) => (requesterName ? `Compatibilidade de ${requesterName} no Saju Letter` : 'Uma verificação de compatibilidade no Saju Letter'),
         description: 'Veja como os dias mestres combinam — um olhar curto e divertido do Saju Letter.',
       },
       pending: {
@@ -244,13 +246,13 @@ export const COMPAT_CONTENT: Record<MarketingLanguage, CompatContent> = {
     calcError: 'Chúng tôi không thể tính toán ngày này. Vui lòng kiểm tra lại.',
     underageError: 'Dịch vụ này chỉ dành cho người dùng từ 16 tuổi trở lên.',
     submitError: 'Đã xảy ra lỗi — vui lòng thử lại sau giây lát.',
-    pairLine: (guestName) => `Mức độ hợp nhau với ${guestName || 'bạn'}`,
+    pairLine: (requesterName) => `Mức độ hợp nhau với ${requesterName || 'một người bạn'}`,
     cta: 'Nhận lá thư hằng ngày của riêng bạn từ Saju Letter',
     og: {
       not_found: { title: 'Saju Letter — Kiểm tra mức độ hợp nhau', description: 'Liên kết này không hợp lệ. Vui lòng kiểm tra lại với người đã gửi cho bạn.' },
       expired: { title: 'Saju Letter — Kiểm tra mức độ hợp nhau', description: 'Liên kết mời này đã hết hạn — hãy nhờ bạn của bạn gửi liên kết mới.' },
       completed: {
-        titleFor: (guestName) => (guestName ? `Mức độ hợp nhau của ${guestName} trên Saju Letter` : 'Một kết quả hợp nhau trên Saju Letter'),
+        titleFor: (requesterName) => (requesterName ? `Mức độ hợp nhau của ${requesterName} trên Saju Letter` : 'Một kết quả hợp nhau trên Saju Letter'),
         description: 'Xem thiên can ngày của hai người hợp nhau ra sao — một kết quả ngắn gọn, thú vị từ Saju Letter.',
       },
       pending: {

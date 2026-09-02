@@ -15,7 +15,16 @@ export type InviteView =
   | { status: 'not_found' }
   | { status: 'expired' }
   | { status: 'pending' }
-  | { status: 'completed'; guestName: string | null; reading: CompatReading | null };
+  | {
+      status: 'completed';
+      guestName: string | null;
+      /** 초대를 보낸 회원의 실제 이름(2026-09-02) — 이 사이트는 항상 게스트(링크를 받은
+       *  친구)만 이 화면을 보므로, 화면 상단 "OOO님과의 궁합"은 항상 이 값을 써야 한다.
+       *  `guestName`(친구 본인이 방금 이 화면에 입력한 이름)을 그 자리에 쓰면 "내 이름과의
+       *  궁합"처럼 보이는 버그가 났었다 — saju-letter-backend/CLAUDE.md 참고. */
+      requesterName: string | null;
+      reading: CompatReading | null;
+    };
 
 /**
  * 404뿐 아니라 어떤 ApiError든(429 rate-limit, 5xx 등) not_found 뷰로 흡수한다(2026-08-17) —
@@ -62,7 +71,7 @@ export interface SubmitGuestInviteInput {
 }
 
 export type SubmitGuestInviteResult =
-  | { status: 'ok'; guestName: string | null; reading: CompatReading | null }
+  | { status: 'ok'; guestName: string | null; requesterName: string | null; reading: CompatReading | null }
   | { status: 'expired' }
   | { status: 'not_found' };
 
@@ -73,7 +82,7 @@ export type SubmitGuestInviteResult =
  */
 export async function submitGuestInvite(token: string, input: SubmitGuestInviteInput): Promise<SubmitGuestInviteResult> {
   try {
-    const result = await request<{ status: 'ok'; guestName: string | null; reading: CompatReading | null }>(
+    const result = await request<{ status: 'ok'; guestName: string | null; requesterName: string | null; reading: CompatReading | null }>(
       `/compatibility-invites/${encodeURIComponent(token)}/submit`,
       { method: 'POST', body: JSON.stringify(input) },
     );

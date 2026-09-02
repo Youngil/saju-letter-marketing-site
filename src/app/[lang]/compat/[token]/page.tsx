@@ -32,7 +32,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   const og =
     view.status === 'completed'
-      ? { title: content.og.completed.titleFor(view.guestName), description: content.og.completed.description }
+      ? { title: content.og.completed.titleFor(view.requesterName), description: content.og.completed.description }
       : content.og[view.status];
   const path = (lang: MarketingLanguage) => `/${lang}/compat/${token}`;
 

@@ -64,7 +64,7 @@ export function CompatView({
   return (
     <CompletedResult
       content={content}
-      guestName={view.guestName}
+      requesterName={view.requesterName}
       reading={view.reading}
       token={token}
       language={language}
@@ -75,14 +75,14 @@ export function CompatView({
 
 function CompletedResult({
   content,
-  guestName,
+  requesterName,
   reading,
   token,
   language,
   appLinksDict,
 }: {
   content: CompatContent;
-  guestName: string | null;
+  requesterName: string | null;
   reading: { title: string; body: string } | null;
   token: string;
   language: MarketingLanguage;
@@ -92,7 +92,10 @@ function CompletedResult({
 
   return (
     <div className="card-surface flex flex-col gap-4 rounded-2xl border border-foreground/10 p-6 sm:p-7">
-      <p className="text-sm font-medium text-accent-warm">{content.pairLine(guestName)}</p>
+      {/* 이 화면은 항상 게스트(링크를 받은 친구)만 보므로, 상단엔 방금 자기가 입력한 이름이
+          아니라 링크를 보낸 회원의 이름을 보여줘야 한다(2026-09-02, 사용자 리포트: "OOO님과의
+          궁합에서 마케팅 사이트에서 입력한 이름이 출력된다"). */}
+      <p className="text-sm font-medium text-accent-warm">{content.pairLine(requesterName)}</p>
       {reading ? (
         <>
           <h1 className="text-xl font-semibold">{reading.title}</h1>
@@ -178,7 +181,7 @@ function PendingForm({
         turnstileToken,
       });
       if (result.status === 'ok') {
-        onSubmitted({ status: 'completed', guestName: result.guestName, reading: result.reading });
+        onSubmitted({ status: 'completed', guestName: result.guestName, requesterName: result.requesterName, reading: result.reading });
       } else if (result.status === 'expired') {
         onSubmitted({ status: 'expired' });
       } else {
