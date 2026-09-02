@@ -100,6 +100,33 @@ import type { MarketingLanguage } from '@/lib/languages';
  * 추가하지 않았다. 다만 로컬 개발과 자체호스팅 전환 이전 기간엔 공개 LanguageTool API를 썼는데
  * (이 시점까지 실사용자 0명이라 실질적 피해는 없었음), 향후 자체 호스팅 없이 새 언어(예:
  * 베트남어)를 열게 되면 이 판단을 다시 검토해야 한다.
+ *
+ * ⚠️⚠️ 2026-09-02 개정 — "마케팅 사이트의 개인정보처리방침을 최종적으로 다시 한 번 체크해달라"는
+ * 사용자 요청으로 전체 재검토. 2026-08-29 재감사가 "AI 페일오버 충돌 여부"로 범위를 좁혔던
+ * 탓에 놓친, 실제 코드 vs 문서 간 진짜 불일치 2건을 이번에 새로 찾았다 — 둘 다 지난 재감사보다
+ * 먼저 도입됐는데도(각각 2026-08-17, 2026-08-21) 그 재감사에서조차 빠져 있었다:
+ *   11. **Google Analytics for Firebase(GA4)**(`saju-letter-mobile/src/services/analytics.ts`,
+ *       2026-08-17 도입) — 프로덕션 빌드에서만 수집을 켜고(`setAnalyticsCollectionEnabled`),
+ *       가입 완료 시 로그인 수단을 포함한 `sign_up` 이벤트를 명시적으로 로깅하며, 그 외에도
+ *       Firebase가 기본으로 자동 수집하는 표준 이벤트(앱 실행·세션 등)가 함께 켜진다. §1/§2/§4
+ *       어디에도 언급이 없었다 — Firebase(Google)를 "회원 인증, 푸시 알림 발송" 두 목적으로만
+ *       서술하고 있었는데, 실제로는 이용 분석이라는 세 번째 목적이 이미 운영 중이었다.
+ *   12. **Cloudflare Turnstile**(`saju-letter-marketing-site/src/components/Turnstile.tsx`,
+ *       2026-08-21 도입) — 홈 미니 데모·궁합 공유(게스트 제출)·리드 캡처·신년운세 리딩/이메일
+ *       구독 5개 공개 폼에서 봇/스팸 방지용으로 구동된다. 위젯이 Cloudflare 도메인에서 직접
+ *       로드돼 방문자의 브라우저에서 곧바로 Cloudflare로 신호를 보내는 구조라, 우리가 수집해서
+ *       보관하는 데이터는 아니지만 방문자 정보가 제3자(Cloudflare)로 전달되는 진짜 데이터
+ *       흐름이다 — §4(제3자 제공 및 처리위탁) 목록에 전혀 없었다.
+ * 두 항목 모두 §1(수집 항목)에 자동 수집 정보로, §4에 각각 처리 목적/제3자 항목으로, §2(이용
+ * 목적)에도 "이용 분석"·"부정 이용 방지" 문구로 반영했다 — 6개 언어 전부. effectiveDate와
+ * §10의 "최종 수정"도 2026년 9월 2일로 갱신했다. 이 개정도 AI가 코드를 근거로 작성한 것이라
+ * 법적 충분성은 여전히 변호사 확인이 필요하다. **이번 재검토에서 함께 확인했지만 문제없다고
+ * 판단해 손대지 않은 것들**: `saju-letter-backend`의 신규 `AiGenerationAttempt` 로그 테이블
+ * (2026-08-31 도입, 유저 원문이 아니라 사전 정의된 진단 문구만 저장 — 기존 "오류·크래시 진단
+ * 정보" 범주에 이미 포함되는 성격), Google Sign-In 라이브러리 교체(`react-native-nitro-google-
+ * signin`, 2026-09-01) — 수집 데이터 종류 변화 없이 내부 구현만 바뀜, `deepCompatibility`의
+ * `personAIsSelf` 자동 채움(2026-09-01) — 이미 저장된 파생값(chartFacts)만 재사용하고 원본
+ * 생년월일은 건드리지 않음.
  */
 
 export const PRIVACY_CONTACT_EMAIL = 'contact@mikomaru.com';
@@ -120,7 +147,7 @@ export interface PrivacyPolicyContent {
 export const PRIVACY_POLICY_CONTENT: Record<MarketingLanguage, PrivacyPolicyContent> = {
   ko: {
     title: '개인정보처리방침',
-    effectiveDate: '시행일자: 2026년 7월 29일 (최종 수정: 2026년 8월 29일)',
+    effectiveDate: '시행일자: 2026년 7월 29일 (최종 수정: 2026년 9월 2일)',
     intro:
       '사주편지(이하 "회사" 또는 "서비스")는 이용자의 개인정보를 중요하게 생각하며, 관련 법령을 준수합니다. ' +
       '본 방침은 사주편지 앱과 saju-letter.com(마케팅 사이트, 궁합 공유·신년운세 공개 페이지, 이메일 구독 신청 ' +
@@ -132,7 +159,7 @@ export const PRIVACY_POLICY_CONTENT: Record<MarketingLanguage, PrivacyPolicyCont
           '<ul>' +
           '<li>이용자가 직접 입력하는 정보: 이름(또는 별칭), 생년월일, 성별(선택), 기기 시간대</li>' +
           '<li>선택 입력 정보: 출생 시간("모름" 선택 가능), 이메일 주소(무료체험 어뷰징 방지 목적으로만 사용), 궁합 공유·즉석 궁합 이용 시 상대를 구분하기 위해 입력하는 메모(상대방에게는 노출되지 않음)</li>' +
-          '<li>자동으로 수집되는 정보: Firebase 인증 식별자(UID), 기기 푸시 토큰(FCM), 구독/결제 상태(RevenueCat 경유), 무료체험 남용 방지를 위한 Google Play Integrity 기기 무결성 신호, 오류·크래시 진단 정보, 공개(비로그인) 페이지 접속 시의 IP 주소(악용 방지를 위한 일시적 요청 빈도 제한 목적으로만 사용하며 장기 저장하지 않음)</li>' +
+          '<li>자동으로 수집되는 정보: Firebase 인증 식별자(UID), 기기 푸시 토큰(FCM), 프로덕션 빌드에서만 수집되는 앱 이용 분석 이벤트(Google Analytics for Firebase — 가입 완료 시 로그인 수단 포함), 구독/결제 상태(RevenueCat 경유), 무료체험 남용 방지를 위한 Google Play Integrity 기기 무결성 신호, 오류·크래시 진단 정보, 공개(비로그인) 페이지 접속 시의 IP 주소(악용 방지를 위한 일시적 요청 빈도 제한 목적으로만 사용하며 장기 저장하지 않음), 마케팅 사이트의 공개 제출 폼(홈 미니 데모·궁합 공유·리드 등록·신년운세)에서 봇 방지를 위해 구동되는 Cloudflare Turnstile을 통해 Cloudflare로 전달되는 브라우저 정보</li>' +
           '<li>사주 개인화 계산 결과: 온보딩 시 입력한 생년월일시를 바탕으로 계산되는 사주 전체(연주·월주·일주·시주) — 주간/월별 편지 등 개인화된 해석에 사용됩니다</li>' +
           '<li>이용자가 자유롭게 작성하는 내용: "오늘의 이야기" 기능에 입력한 텍스트(답장 생성을 위해 AI 제공업체로 전달됨), "문의하기" 기능에 입력한 제목과 내용</li>' +
           '<li>마케팅 사이트(saju-letter.com) 이용 시 수집되는 정보: 이메일 구독 신청 시 입력한 이메일 주소와 마케팅 수신 동의 여부·시각, 홈 미니 데모·신년운세·궁합 공유 제출 시 입력한 이름(해당되는 경우)·계산된 사주 정보·자유롭게 작성한 텍스트. 만 16세 확인을 위해 양력 생년월일(년·월·일)을 서버로 보내지만 저장하지 않으며, 사주 계산 자체는 이용자의 기기에서 이뤄집니다</li>' +
@@ -148,7 +175,7 @@ export const PRIVACY_POLICY_CONTENT: Record<MarketingLanguage, PrivacyPolicyCont
           '<li>"오늘의 이야기" 기능에 대한 개인화된 답장 생성</li>' +
           '<li>고객 문의 응대</li>' +
           '<li>마케팅 이메일 발송(명시적으로 동의한 이용자에 한함) 및 신년운세 리딩 생성</li>' +
-          '<li>서비스 품질 개선 및 오류 대응</li>' +
+          '<li>서비스 이용 현황 분석 및 품질 개선, 오류 대응, 부정 이용(봇·스팸) 방지</li>' +
           '</ul>',
       },
       {
@@ -163,9 +190,10 @@ export const PRIVACY_POLICY_CONTENT: Record<MarketingLanguage, PrivacyPolicyCont
         html:
           '<p>서비스 제공에 필요한 범위 내에서 아래 외부 업체에 개인정보 처리를 위탁하거나 제공합니다.</p>' +
           '<ul>' +
-          '<li><strong>Firebase(Google)</strong>: 회원 인증, 푸시 알림 발송</li>' +
+          '<li><strong>Firebase(Google)</strong>: 회원 인증, 푸시 알림 발송, 앱 이용 현황 분석(Google Analytics for Firebase, 프로덕션 빌드에서만 수집)</li>' +
           '<li><strong>RevenueCat</strong>: 구독 상태 확인 및 관리(실제 결제는 Google Play 빌링을 통해 처리되며, 카드 등 결제 수단 정보는 회사가 직접 보관하지 않습니다)</li>' +
           '<li><strong>AI 콘텐츠 생성 제공업체</strong>(현재 OpenAI, 설정에 따라 Anthropic 또는 Google로 달라질 수 있음): 편지 및 오늘의 이야기 답장의 문장 생성과, 마케팅 사이트(saju-letter.com)의 홈 미니 데모·신년운세 리딩 생성. 계산된 사주 정보, "오늘의 이야기" 기능에 직접 작성한 텍스트, 신년운세 제출 시 입력한 이름·자유 텍스트가 전달될 수 있습니다.</li>' +
+          '<li><strong>Cloudflare Turnstile</strong>: 마케팅 사이트 공개 제출 폼의 봇·스팸 방지(위젯이 구동되는 동안 방문자의 브라우저 정보가 Cloudflare로 전달됩니다)</li>' +
           '<li><strong>Resend</strong>: 마케팅 이메일 및 신년운세 결과 이메일 발송</li>' +
           '<li><strong>Sentry</strong>: 오류·크래시 모니터링</li>' +
           '</ul>',
@@ -213,13 +241,13 @@ export const PRIVACY_POLICY_CONTENT: Record<MarketingLanguage, PrivacyPolicyCont
         heading: '10. 고지의 의무',
         html:
           '<p>본 방침은 2026년 7월 29일부터 적용되며, 법령·정책 또는 서비스 변경에 따라 내용이 추가·삭제·수정될 ' +
-          '수 있습니다(가장 최근 수정: 2026년 8월 29일). 변경 시 앱 공지 또는 본 페이지를 통해 고지합니다.</p>',
+          '수 있습니다(가장 최근 수정: 2026년 9월 2일). 변경 시 앱 공지 또는 본 페이지를 통해 고지합니다.</p>',
       },
     ],
   },
   en: {
     title: 'Privacy Policy',
-    effectiveDate: 'Effective date: July 29, 2026 (last updated: August 29, 2026)',
+    effectiveDate: 'Effective date: July 29, 2026 (last updated: September 2, 2026)',
     intro:
       'Saju Letter ("we", "us", or "the Service") respects your privacy and is committed to protecting your ' +
       'personal information. This Privacy Policy explains what information we collect and how we use it when ' +
@@ -232,7 +260,7 @@ export const PRIVACY_POLICY_CONTENT: Record<MarketingLanguage, PrivacyPolicyCont
           '<ul>' +
           '<li>Provided by you: name (or nickname), birth date, gender (optional), device timezone</li>' +
           '<li>Optional: birth time (you may choose "unknown"), email address (used only to prevent free-trial abuse), a note you enter in compatibility-sharing or deep compatibility to help you tell people apart (never shown to the other person)</li>' +
-          '<li>Collected automatically: Firebase authentication identifier (UID), device push token (FCM), subscription/purchase status (via RevenueCat), Google Play Integrity device-integrity signals used to prevent free-trial abuse, crash/error diagnostic data, and — only on the public compatibility page — your IP address, used briefly for abuse-prevention rate limiting and not stored long-term</li>' +
+          '<li>Collected automatically: Firebase authentication identifier (UID), device push token (FCM), app-usage analytics events collected only in production builds (Google Analytics for Firebase — including the sign-in method on the sign-up event), subscription/purchase status (via RevenueCat), Google Play Integrity device-integrity signals used to prevent free-trial abuse, crash/error diagnostic data, and — only on public pages — your IP address, used briefly for abuse-prevention rate limiting and not stored long-term, plus browser information sent to Cloudflare while the Cloudflare Turnstile bot-protection widget is active on our marketing site\'s public submission forms (home demo, compatibility-sharing, lead sign-up, and Lunar New Year)</li>' +
           '<li>Personalization calculations: your full four-pillar saju chart (year, month, day, and hour pillars), calculated from the birth date and time you provide during onboarding — used to personalize weekly and monthly letters</li>' +
           '<li>Content you write: free text you enter in the "Today\'s Story" feature, which is sent to an AI provider to generate a personalized reply; and the subject and message you enter when contacting Support</li>' +
           '<li>Collected when you use our marketing site (saju-letter.com): the email address you provide when signing up, along with whether and when you consented to marketing emails; and, if you submit the home demo, compatibility-sharing, or Lunar New Year public pages, the name (where applicable), calculated saju information, and free text you enter. We send your Gregorian date of birth (year, month, day) only to confirm you are 16 or older and do not store it; the chart itself is calculated on your device</li>' +
@@ -248,7 +276,7 @@ export const PRIVACY_POLICY_CONTENT: Record<MarketingLanguage, PrivacyPolicyCont
           '<li>To generate a personalized reply in the "Today\'s Story" feature</li>' +
           '<li>To respond to customer support inquiries</li>' +
           '<li>To send marketing emails (only to users who have explicitly opted in) and to generate Lunar New Year readings</li>' +
-          '<li>To improve the service and respond to errors</li>' +
+          '<li>To analyze usage, improve the service, respond to errors, and prevent abuse (bots/spam)</li>' +
           '</ul>',
       },
       {
@@ -263,9 +291,10 @@ export const PRIVACY_POLICY_CONTENT: Record<MarketingLanguage, PrivacyPolicyCont
         html:
           '<p>We share data with the following third parties only as needed to provide the service:</p>' +
           '<ul>' +
-          '<li><strong>Firebase (Google)</strong>: authentication and push notifications</li>' +
+          '<li><strong>Firebase (Google)</strong>: authentication, push notifications, and app-usage analytics (Google Analytics for Firebase, collected only in production builds)</li>' +
           '<li><strong>RevenueCat</strong>: subscription status management (actual payment is processed by Google Play Billing; we do not store your card or payment details ourselves)</li>' +
           '<li><strong>Our AI content provider</strong> (currently OpenAI; may be Anthropic or Google depending on configuration): generates the wording of your letters and "Today\'s Story" replies, as well as the home mini demo and Lunar New Year readings on our marketing site (saju-letter.com). This may include your calculated saju values, the text you write in the "Today\'s Story" feature, and the name and free text you submit for a Lunar New Year reading.</li>' +
+          '<li><strong>Cloudflare Turnstile</strong>: bot and spam prevention on our marketing site\'s public submission forms (your browser information is sent to Cloudflare while the widget is active)</li>' +
           '<li><strong>Resend</strong>: sending marketing emails and Lunar New Year result emails</li>' +
           '<li><strong>Sentry</strong>: crash and error monitoring</li>' +
           '</ul>',
@@ -319,14 +348,14 @@ export const PRIVACY_POLICY_CONTENT: Record<MarketingLanguage, PrivacyPolicyCont
         heading: '10. Changes to This Policy',
         html:
           '<p>This policy is effective as of July 29, 2026, and may be updated as our practices, applicable ' +
-          'laws, or the service itself change (most recently updated: August 29, 2026). We will notify you of ' +
+          'laws, or the service itself change (most recently updated: September 2, 2026). We will notify you of ' +
           'material changes through the app or this page.</p>',
       },
     ],
   },
   ja: {
     title: 'プライバシーポリシー',
-    effectiveDate: '施行日: 2026年7月29日(最終更新: 2026年8月29日)',
+    effectiveDate: '施行日: 2026年7月29日(最終更新: 2026年9月2日)',
     intro:
       'サジュレター(以下「当社」または「本サービス」)は、利用者のプライバシーを尊重し、個人情報の保護に努めて' +
       'います。本ポリシーは、サジュレターアプリおよびsaju-letter.com(マーケティングサイト、相性シェア・旧正月' +
@@ -338,7 +367,7 @@ export const PRIVACY_POLICY_CONTENT: Record<MarketingLanguage, PrivacyPolicyCont
           '<ul>' +
           '<li>ご入力いただく情報: お名前(またはニックネーム)、生年月日、性別(任意)、端末のタイムゾーン</li>' +
           '<li>任意項目: 出生時刻(「わからない」を選択可能)、メールアドレス(無料体験の不正利用防止のみに使用)、相性シェア・その場でわかる相性のご利用時に相手を区別するために入力するメモ(相手には表示されません)</li>' +
-          '<li>自動的に収集される情報: Firebase認証ID(UID)、端末のプッシュ通知トークン(FCM)、サブスクリプション・購入状況(RevenueCat経由)、無料体験の不正利用防止のためのGoogle Play Integrity端末信頼性シグナル、エラー・クラッシュ診断情報、公開ページ(非会員向け)ご利用時のIPアドレス(不正利用防止のための一時的なリクエスト制限のみに使用し、長期保存はしません)</li>' +
+          '<li>自動的に収集される情報: Firebase認証ID(UID)、端末のプッシュ通知トークン(FCM)、プロダクションビルドでのみ収集されるアプリ利用分析イベント(Google Analytics for Firebase — 会員登録完了イベントにログイン手段を含む)、サブスクリプション・購入状況(RevenueCat経由)、無料体験の不正利用防止のためのGoogle Play Integrity端末信頼性シグナル、エラー・クラッシュ診断情報、公開ページ(非会員向け)ご利用時のIPアドレス(不正利用防止のための一時的なリクエスト制限のみに使用し、長期保存はしません)、マーケティングサイトの公開フォーム(ホームのミニデモ・相性シェア・リード登録・旧正月占い)でボット対策として動作するCloudflare Turnstileを通じてCloudflareに送信されるブラウザ情報</li>' +
           '<li>パーソナライズのための計算結果: オンボーディング時にご入力いただいた生年月日時をもとに計算される四柱全体(年柱・月柱・日柱・時柱) — 週間・月間レターの個人化された解釈に使用されます</li>' +
           '<li>ご自身で入力される内容: 「今日の物語」機能に自由に記入されたテキスト(返信生成のためAIプロバイダーに送信されます)、および「お問い合わせ」機能にご入力いただく件名と内容</li>' +
           '<li>マーケティングサイト(saju-letter.com)ご利用時に収集される情報: メール登録時にご入力いただくメールアドレスと、マーケティングメールへの同意有無・同意日時。ホームのミニデモ・相性シェア・旧正月占い公開ページ送信時にご入力いただくお名前(該当する場合)・計算された四柱情報・自由記入テキスト。満16歳確認のため太陽暦の生年月日(年・月・日)をサーバーに送りますが保存はせず、四柱の計算自体はご自身の端末内で行います</li>' +
@@ -354,7 +383,7 @@ export const PRIVACY_POLICY_CONTENT: Record<MarketingLanguage, PrivacyPolicyCont
           '<li>「今日の物語」機能へのパーソナライズされた返信生成</li>' +
           '<li>お問い合わせへの対応</li>' +
           '<li>マーケティングメールの送信(明示的に同意した利用者のみ)および旧正月占い結果の生成</li>' +
-          '<li>サービス品質の向上、障害対応</li>' +
+          '<li>サービス利用状況の分析、品質向上、障害対応、および不正利用(ボット・スパム)防止</li>' +
           '</ul>',
       },
       {
@@ -369,9 +398,10 @@ export const PRIVACY_POLICY_CONTENT: Record<MarketingLanguage, PrivacyPolicyCont
         html:
           '<p>本サービスの提供に必要な範囲内で、以下の外部事業者に個人情報の取り扱いを委託または提供しています。</p>' +
           '<ul>' +
-          '<li><strong>Firebase(Google)</strong>: 会員認証、プッシュ通知の送信</li>' +
+          '<li><strong>Firebase(Google)</strong>: 会員認証、プッシュ通知の送信、アプリ利用状況の分析(Google Analytics for Firebase、プロダクションビルドのみ収集)</li>' +
           '<li><strong>RevenueCat</strong>: サブスクリプション状況の管理(実際の決済はGoogle Playの請求システムを通じて行われ、カード情報などの決済手段情報は当社では保管しません)</li>' +
           '<li><strong>AIコンテンツ生成プロバイダー</strong>(現在はOpenAI。設定によりAnthropicまたはGoogleの場合もあります): レターおよび「今日の物語」の返信文の生成、およびマーケティングサイト(saju-letter.com)のホームミニデモ・旧正月占いリーディングの生成。計算済みの四柱情報、「今日の物語」機能にご自身で入力されたテキスト、旧正月占い送信時に入力されたお名前・自由記述テキストが送信される場合があります。</li>' +
+          '<li><strong>Cloudflare Turnstile</strong>: マーケティングサイトの公開フォームにおけるボット・スパム対策(ウィジェット動作中、訪問者のブラウザ情報がCloudflareに送信されます)</li>' +
           '<li><strong>Resend</strong>: マーケティングメールおよび旧正月占い結果メールの送信</li>' +
           '<li><strong>Sentry</strong>: エラー・クラッシュのモニタリング</li>' +
           '</ul>',
@@ -420,7 +450,7 @@ export const PRIVACY_POLICY_CONTENT: Record<MarketingLanguage, PrivacyPolicyCont
       {
         heading: '10. 本ポリシーの変更',
         html:
-          '<p>本ポリシーは2026年7月29日より施行します(最終更新: 2026年8月29日)。法令、方針、またはサービス内容' +
+          '<p>本ポリシーは2026年7月29日より施行します(最終更新: 2026年9月2日)。法令、方針、またはサービス内容' +
           'の変更に応じて内容を追加・削除・修正する場合があります。重要な変更がある場合は、アプリ内または本ページ' +
           'にてお知らせします。</p>',
       },
@@ -428,7 +458,7 @@ export const PRIVACY_POLICY_CONTENT: Record<MarketingLanguage, PrivacyPolicyCont
   },
   es: {
     title: 'Política de Privacidad',
-    effectiveDate: 'Fecha de vigencia: 29 de julio de 2026 (última actualización: 29 de agosto de 2026)',
+    effectiveDate: 'Fecha de vigencia: 29 de julio de 2026 (última actualización: 2 de septiembre de 2026)',
     intro:
       'Saju Letter ("nosotros" o "el Servicio") respeta tu privacidad y se compromete a proteger tu información ' +
       'personal. Esta Política de Privacidad explica qué información recopilamos y cómo la usamos cuando ' +
@@ -441,7 +471,7 @@ export const PRIVACY_POLICY_CONTENT: Record<MarketingLanguage, PrivacyPolicyCont
           '<ul>' +
           '<li>Proporcionada por ti: nombre (o apodo), fecha de nacimiento, género (opcional), zona horaria del dispositivo</li>' +
           '<li>Opcional: hora de nacimiento (puedes elegir "desconocida"), dirección de correo electrónico (usada solo para prevenir el abuso de la prueba gratuita), una nota que ingresas en la compatibilidad compartida o la compatibilidad detallada para distinguir a las personas (nunca se muestra a la otra persona)</li>' +
-          '<li>Recopilada automáticamente: identificador de autenticación de Firebase (UID), token de notificaciones push del dispositivo (FCM), estado de suscripción/compra (a través de RevenueCat), señales de integridad del dispositivo de Google Play Integrity usadas para prevenir el abuso de la prueba gratuita, datos de diagnóstico de errores/fallos, y — solo en la página pública de compatibilidad — tu dirección IP, usada brevemente para limitar la frecuencia de solicitudes y prevenir abusos, sin almacenamiento a largo plazo</li>' +
+          '<li>Recopilada automáticamente: identificador de autenticación de Firebase (UID), token de notificaciones push del dispositivo (FCM), eventos de análisis de uso de la app recopilados solo en compilaciones de producción (Google Analytics for Firebase — incluye el método de inicio de sesión en el evento de registro), estado de suscripción/compra (a través de RevenueCat), señales de integridad del dispositivo de Google Play Integrity usadas para prevenir el abuso de la prueba gratuita, datos de diagnóstico de errores/fallos, y — solo en páginas públicas — tu dirección IP, usada brevemente para limitar la frecuencia de solicitudes y prevenir abusos, sin almacenamiento a largo plazo, además de información del navegador enviada a Cloudflare mientras el widget de protección contra bots Cloudflare Turnstile está activo en los formularios públicos de nuestro sitio de marketing (demo de inicio, compatibilidad compartida, registro de contacto y Año Nuevo Lunar)</li>' +
           '<li>Cálculos de personalización: tu carta astral saju completa (los cuatro pilares: año, mes, día y hora), calculada a partir de la fecha y hora de nacimiento que proporcionas durante el proceso de incorporación — usada para personalizar las cartas semanales y mensuales</li>' +
           '<li>Contenido que escribes: el texto libre que ingresas en la función "Historia de Hoy", que se envía a un proveedor de IA para generar una respuesta personalizada; y el asunto y mensaje que ingresas al contactar con Soporte</li>' +
           '<li>Recopilada cuando usas nuestro sitio de marketing (saju-letter.com): la dirección de correo electrónico que proporcionas al registrarte, junto con si diste tu consentimiento para recibir correos de marketing y cuándo; y, si envías el demo de inicio, la compatibilidad compartida o las páginas públicas de Año Nuevo Lunar, el nombre (cuando corresponda), la información de saju calculada y el texto libre que ingresas. Enviamos tu fecha de nacimiento gregoriana (año, mes, día) solo para confirmar que tienes 16 años o más y no la almacenamos; la carta en sí se calcula en tu dispositivo</li>' +
@@ -457,7 +487,7 @@ export const PRIVACY_POLICY_CONTENT: Record<MarketingLanguage, PrivacyPolicyCont
           '<li>Para generar una respuesta personalizada en la función "Historia de Hoy"</li>' +
           '<li>Para responder a las consultas de soporte</li>' +
           '<li>Para enviar correos de marketing (solo a usuarios que hayan dado su consentimiento explícito) y generar lecturas de Año Nuevo Lunar</li>' +
-          '<li>Para mejorar el servicio y responder a errores</li>' +
+          '<li>Para analizar el uso, mejorar el servicio, responder a errores y prevenir el abuso (bots/spam)</li>' +
           '</ul>',
       },
       {
@@ -472,9 +502,10 @@ export const PRIVACY_POLICY_CONTENT: Record<MarketingLanguage, PrivacyPolicyCont
         html:
           '<p>Compartimos datos con los siguientes terceros solo en la medida necesaria para prestar el servicio:</p>' +
           '<ul>' +
-          '<li><strong>Firebase (Google)</strong>: autenticación y notificaciones push</li>' +
+          '<li><strong>Firebase (Google)</strong>: autenticación, notificaciones push y análisis de uso de la app (Google Analytics for Firebase, recopilado solo en compilaciones de producción)</li>' +
           '<li><strong>RevenueCat</strong>: gestión del estado de la suscripción (el pago real se procesa a través de Google Play Billing; nosotros no almacenamos tu tarjeta ni los datos de pago)</li>' +
           '<li><strong>Nuestro proveedor de contenido de IA</strong> (actualmente OpenAI; puede ser Anthropic o Google según la configuración): genera el texto de tus cartas y las respuestas de "Historia de Hoy", así como el mini demo de inicio y las lecturas de Año Nuevo Lunar en nuestro sitio de marketing (saju-letter.com). Esto puede incluir tus valores de saju calculados, el texto que escribes en la función "Historia de Hoy", y el nombre y el texto libre que envías para una lectura de Año Nuevo Lunar.</li>' +
+          '<li><strong>Cloudflare Turnstile</strong>: prevención de bots y spam en los formularios públicos de nuestro sitio de marketing (tu información del navegador se envía a Cloudflare mientras el widget está activo)</li>' +
           '<li><strong>Resend</strong>: envío de correos de marketing y de resultados de Año Nuevo Lunar</li>' +
           '<li><strong>Sentry</strong>: monitoreo de errores y fallos</li>' +
           '</ul>',
@@ -530,14 +561,14 @@ export const PRIVACY_POLICY_CONTENT: Record<MarketingLanguage, PrivacyPolicyCont
         heading: '10. Cambios en esta política',
         html:
           '<p>Esta política entra en vigencia el 29 de julio de 2026 y puede actualizarse a medida que cambien ' +
-          'nuestras prácticas, las leyes aplicables o el propio servicio (última actualización: 29 de agosto de ' +
-          '2026). Te notificaremos sobre cambios importantes a través de la app o esta página.</p>',
+          'nuestras prácticas, las leyes aplicables o el propio servicio (última actualización: 2 de septiembre ' +
+          'de 2026). Te notificaremos sobre cambios importantes a través de la app o esta página.</p>',
       },
     ],
   },
   pt: {
     title: 'Política de Privacidade',
-    effectiveDate: 'Data de vigência: 29 de julho de 2026 (última atualização: 29 de agosto de 2026)',
+    effectiveDate: 'Data de vigência: 29 de julho de 2026 (última atualização: 2 de setembro de 2026)',
     intro:
       'O Saju Letter ("nós" ou "o Serviço") respeita sua privacidade e se compromete a proteger suas ' +
       'informações pessoais. Esta Política de Privacidade explica quais informações coletamos e como as usamos ' +
@@ -550,7 +581,7 @@ export const PRIVACY_POLICY_CONTENT: Record<MarketingLanguage, PrivacyPolicyCont
           '<ul>' +
           '<li>Fornecidas por você: nome (ou apelido), data de nascimento, gênero (opcional), fuso horário do dispositivo</li>' +
           '<li>Opcional: horário de nascimento (você pode escolher "desconhecido"), endereço de e-mail (usado apenas para prevenir abuso do teste gratuito), uma nota que você insere na compatibilidade compartilhada ou na compatibilidade detalhada para diferenciar as pessoas (nunca é exibida para a outra pessoa)</li>' +
-          '<li>Coletadas automaticamente: identificador de autenticação do Firebase (UID), token de notificações push do dispositivo (FCM), status de assinatura/compra (via RevenueCat), sinais de integridade do dispositivo do Google Play Integrity usados para prevenir abuso do teste gratuito, dados de diagnóstico de erros/falhas e — somente na página pública de compatibilidade — seu endereço IP, usado brevemente para limitar a frequência de solicitações e prevenir abusos, sem armazenamento de longo prazo</li>' +
+          '<li>Coletadas automaticamente: identificador de autenticação do Firebase (UID), token de notificações push do dispositivo (FCM), eventos de análise de uso do app coletados apenas em builds de produção (Google Analytics for Firebase — inclui o método de login no evento de cadastro), status de assinatura/compra (via RevenueCat), sinais de integridade do dispositivo do Google Play Integrity usados para prevenir abuso do teste gratuito, dados de diagnóstico de erros/falhas e — somente em páginas públicas — seu endereço IP, usado brevemente para limitar a frequência de solicitações e prevenir abusos, sem armazenamento de longo prazo, além de informações do navegador enviadas ao Cloudflare enquanto o widget de proteção contra bots Cloudflare Turnstile está ativo nos formulários públicos do nosso site de marketing (demo da home, compatibilidade compartilhada, cadastro de contato e Ano Novo Lunar)</li>' +
           '<li>Cálculos de personalização: seu mapa saju completo (os quatro pilares: ano, mês, dia e hora), calculado a partir da data e hora de nascimento que você fornece durante o processo de integração — usado para personalizar as cartas semanais e mensais</li>' +
           '<li>Conteúdo que você escreve: o texto livre inserido no recurso "História de Hoje", que é enviado a um provedor de IA para gerar uma resposta personalizada; e o assunto e a mensagem que você insere ao entrar em contato com o Suporte</li>' +
           '<li>Coletadas quando você usa nosso site de marketing (saju-letter.com): o endereço de e-mail fornecido ao se cadastrar, junto com se e quando você consentiu em receber e-mails de marketing; e, se você enviar o demo da home, a compatibilidade compartilhada ou as páginas públicas de Ano Novo Lunar, o nome (quando aplicável), as informações de saju calculadas e o texto livre que você insere. Enviamos sua data de nascimento gregoriana (ano, mês, dia) apenas para confirmar que você tem 16 anos ou mais e não a armazenamos; o mapa em si é calculado no seu dispositivo</li>' +
@@ -566,7 +597,7 @@ export const PRIVACY_POLICY_CONTENT: Record<MarketingLanguage, PrivacyPolicyCont
           '<li>Para gerar uma resposta personalizada no recurso "História de Hoje"</li>' +
           '<li>Para responder a solicitações de suporte</li>' +
           '<li>Para enviar e-mails de marketing (apenas para usuários que deram consentimento explícito) e gerar leituras de Ano Novo Lunar</li>' +
-          '<li>Para melhorar o serviço e responder a erros</li>' +
+          '<li>Para analisar o uso, melhorar o serviço, responder a erros e prevenir abusos (bots/spam)</li>' +
           '</ul>',
       },
       {
@@ -581,9 +612,10 @@ export const PRIVACY_POLICY_CONTENT: Record<MarketingLanguage, PrivacyPolicyCont
         html:
           '<p>Compartilhamos dados com os seguintes terceiros apenas na medida necessária para fornecer o serviço:</p>' +
           '<ul>' +
-          '<li><strong>Firebase (Google)</strong>: autenticação e notificações push</li>' +
+          '<li><strong>Firebase (Google)</strong>: autenticação, notificações push e análise de uso do app (Google Analytics for Firebase, coletado apenas em builds de produção)</li>' +
           '<li><strong>RevenueCat</strong>: gerenciamento do status da assinatura (o pagamento real é processado pelo Google Play Billing; não armazenamos seu cartão nem dados de pagamento)</li>' +
           '<li><strong>Nosso provedor de conteúdo de IA</strong> (atualmente OpenAI; pode ser Anthropic ou Google dependendo da configuração): gera o texto das suas cartas e das respostas de "História de Hoje", bem como o mini demo da home e as leituras de Ano Novo Lunar em nosso site de marketing (saju-letter.com). Isso pode incluir seus valores de saju calculados, o texto que você escreve no recurso "História de Hoje", e o nome e o texto livre que você envia para uma leitura de Ano Novo Lunar.</li>' +
+          '<li><strong>Cloudflare Turnstile</strong>: prevenção de bots e spam nos formulários públicos do nosso site de marketing (suas informações do navegador são enviadas ao Cloudflare enquanto o widget está ativo)</li>' +
           '<li><strong>Resend</strong>: envio de e-mails de marketing e de resultados de Ano Novo Lunar</li>' +
           '<li><strong>Sentry</strong>: monitoramento de erros e falhas</li>' +
           '</ul>',
@@ -639,14 +671,14 @@ export const PRIVACY_POLICY_CONTENT: Record<MarketingLanguage, PrivacyPolicyCont
         heading: '10. Alterações nesta política',
         html:
           '<p>Esta política entra em vigor em 29 de julho de 2026 e pode ser atualizada conforme nossas ' +
-          'práticas, as leis aplicáveis ou o próprio serviço mudarem (última atualização: 29 de agosto de ' +
+          'práticas, as leis aplicáveis ou o próprio serviço mudarem (última atualização: 2 de setembro de ' +
           '2026). Notificaremos você sobre alterações relevantes por meio do aplicativo ou desta página.</p>',
       },
     ],
   },
   vi: {
     title: 'Chính sách Quyền riêng tư',
-    effectiveDate: 'Ngày hiệu lực: 29 tháng 7 năm 2026 (cập nhật lần cuối: 29 tháng 8 năm 2026)',
+    effectiveDate: 'Ngày hiệu lực: 29 tháng 7 năm 2026 (cập nhật lần cuối: 2 tháng 9 năm 2026)',
     intro:
       'Saju Letter ("chúng tôi" hoặc "Dịch vụ") tôn trọng quyền riêng tư của bạn và cam kết bảo vệ thông tin cá ' +
       'nhân của bạn. Chính sách Quyền riêng tư này giải thích thông tin nào chúng tôi thu thập và cách chúng ' +
@@ -659,7 +691,7 @@ export const PRIVACY_POLICY_CONTENT: Record<MarketingLanguage, PrivacyPolicyCont
           '<ul>' +
           '<li>Do bạn cung cấp: tên (hoặc biệt danh), ngày sinh, giới tính (không bắt buộc), múi giờ thiết bị</li>' +
           '<li>Tùy chọn: giờ sinh (bạn có thể chọn "không rõ"), địa chỉ email (chỉ dùng để ngăn chặn lạm dụng bản dùng thử miễn phí), ghi chú bạn nhập trong tính năng chia sẻ mức độ hợp nhau hoặc xem mức độ hợp nhau chi tiết để phân biệt mọi người (không bao giờ hiển thị cho người kia)</li>' +
-          '<li>Thu thập tự động: mã định danh xác thực Firebase (UID), token thông báo đẩy của thiết bị (FCM), trạng thái đăng ký/mua hàng (qua RevenueCat), tín hiệu toàn vẹn thiết bị từ Google Play Integrity dùng để ngăn chặn lạm dụng bản dùng thử miễn phí, dữ liệu chẩn đoán lỗi/sự cố, và — chỉ trên trang hợp nhau công khai — địa chỉ IP của bạn, được dùng trong thời gian ngắn để giới hạn tần suất yêu cầu nhằm ngăn lạm dụng, không lưu trữ lâu dài</li>' +
+          '<li>Thu thập tự động: mã định danh xác thực Firebase (UID), token thông báo đẩy của thiết bị (FCM), sự kiện phân tích sử dụng ứng dụng chỉ thu thập trên bản dựng production (Google Analytics for Firebase — bao gồm phương thức đăng nhập trong sự kiện đăng ký), trạng thái đăng ký/mua hàng (qua RevenueCat), tín hiệu toàn vẹn thiết bị từ Google Play Integrity dùng để ngăn chặn lạm dụng bản dùng thử miễn phí, dữ liệu chẩn đoán lỗi/sự cố, và — chỉ trên các trang công khai — địa chỉ IP của bạn, được dùng trong thời gian ngắn để giới hạn tần suất yêu cầu nhằm ngăn lạm dụng, không lưu trữ lâu dài, cùng với thông tin trình duyệt được gửi đến Cloudflare khi tiện ích chống bot Cloudflare Turnstile đang hoạt động trên các biểu mẫu công khai của trang web tiếp thị (bản demo trang chủ, chia sẻ mức độ hợp nhau, đăng ký nhận tin và Tết Nguyên Đán)</li>' +
           '<li>Kết quả tính toán cá nhân hóa: toàn bộ lá số saju của bạn (tứ trụ: năm, tháng, ngày, giờ), được tính toán từ ngày và giờ sinh bạn cung cấp trong quá trình thiết lập ban đầu — dùng để cá nhân hóa thư hằng tuần và hằng tháng</li>' +
           '<li>Nội dung bạn viết: văn bản tự do bạn nhập trong tính năng "Câu Chuyện Hôm Nay", được gửi đến nhà cung cấp AI để tạo phản hồi cá nhân hóa; và tiêu đề, nội dung bạn nhập khi liên hệ Hỗ trợ</li>' +
           '<li>Thu thập khi bạn dùng trang web tiếp thị của chúng tôi (saju-letter.com): địa chỉ email bạn cung cấp khi đăng ký, cùng với việc bạn có đồng ý nhận email tiếp thị hay không và thời điểm đồng ý; và nếu bạn gửi bản demo trang chủ, chia sẻ mức độ hợp nhau hoặc các trang Tết Nguyên Đán công khai, tên (nếu có), thông tin saju đã tính toán và văn bản tự do bạn nhập. Chúng tôi gửi ngày sinh dương lịch (năm, tháng, ngày) chỉ để xác nhận bạn từ 16 tuổi trở lên và không lưu trữ; bản thân lá số được tính trên thiết bị của bạn</li>' +
@@ -675,7 +707,7 @@ export const PRIVACY_POLICY_CONTENT: Record<MarketingLanguage, PrivacyPolicyCont
           '<li>Để tạo phản hồi cá nhân hóa trong tính năng "Câu Chuyện Hôm Nay"</li>' +
           '<li>Để phản hồi các yêu cầu hỗ trợ khách hàng</li>' +
           '<li>Để gửi email tiếp thị (chỉ cho người dùng đã đồng ý rõ ràng) và tạo bài đọc Tết Nguyên Đán</li>' +
-          '<li>Để cải thiện dịch vụ và xử lý lỗi</li>' +
+          '<li>Để phân tích việc sử dụng, cải thiện dịch vụ, xử lý lỗi và ngăn chặn lạm dụng (bot/spam)</li>' +
           '</ul>',
       },
       {
@@ -690,9 +722,10 @@ export const PRIVACY_POLICY_CONTENT: Record<MarketingLanguage, PrivacyPolicyCont
         html:
           '<p>Chúng tôi chỉ chia sẻ dữ liệu với các bên thứ ba sau trong phạm vi cần thiết để cung cấp dịch vụ:</p>' +
           '<ul>' +
-          '<li><strong>Firebase (Google)</strong>: xác thực và thông báo đẩy</li>' +
+          '<li><strong>Firebase (Google)</strong>: xác thực, thông báo đẩy và phân tích sử dụng ứng dụng (Google Analytics for Firebase, chỉ thu thập trên bản dựng production)</li>' +
           '<li><strong>RevenueCat</strong>: quản lý trạng thái đăng ký (thanh toán thực tế được xử lý qua Google Play Billing; chúng tôi không tự lưu trữ thẻ hay thông tin thanh toán của bạn)</li>' +
           '<li><strong>Nhà cung cấp nội dung AI của chúng tôi</strong> (hiện tại là OpenAI; có thể là Anthropic hoặc Google tùy theo cấu hình): tạo nội dung câu chữ cho thư của bạn và các phản hồi trong tính năng "Câu Chuyện Hôm Nay", cũng như bản demo trang chủ và các bài đọc Tết Nguyên Đán trên trang web tiếp thị của chúng tôi (saju-letter.com). Việc này có thể bao gồm các giá trị saju đã tính toán của bạn, văn bản bạn viết trong tính năng "Câu Chuyện Hôm Nay", và tên cùng văn bản tự do bạn gửi khi xem bài đọc Tết Nguyên Đán.</li>' +
+          '<li><strong>Cloudflare Turnstile</strong>: ngăn chặn bot và spam trên các biểu mẫu công khai của trang web tiếp thị (thông tin trình duyệt của bạn được gửi đến Cloudflare trong khi tiện ích đang hoạt động)</li>' +
           '<li><strong>Resend</strong>: gửi email tiếp thị và email kết quả Tết Nguyên Đán</li>' +
           '<li><strong>Sentry</strong>: giám sát lỗi và sự cố</li>' +
           '</ul>',
@@ -745,7 +778,7 @@ export const PRIVACY_POLICY_CONTENT: Record<MarketingLanguage, PrivacyPolicyCont
         heading: '10. Thay đổi đối với chính sách này',
         html:
           '<p>Chính sách này có hiệu lực từ ngày 29 tháng 7 năm 2026 và có thể được cập nhật khi các hoạt động ' +
-          'của chúng tôi, luật hiện hành hoặc bản thân dịch vụ thay đổi (cập nhật lần cuối: 29 tháng 8 năm ' +
+          'của chúng tôi, luật hiện hành hoặc bản thân dịch vụ thay đổi (cập nhật lần cuối: 2 tháng 9 năm ' +
           '2026). Chúng tôi sẽ thông báo cho bạn về những thay đổi quan trọng thông qua ứng dụng hoặc trang này.</p>',
       },
     ],
