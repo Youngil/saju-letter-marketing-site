@@ -95,7 +95,11 @@ function CompletedResult({
       {/* 이 화면은 항상 게스트(링크를 받은 친구)만 보므로, 상단엔 방금 자기가 입력한 이름이
           아니라 링크를 보낸 회원의 이름을 보여줘야 한다(2026-09-02, 사용자 리포트: "OOO님과의
           궁합에서 마케팅 사이트에서 입력한 이름이 출력된다"). */}
-      <p className="text-sm font-medium text-accent-warm">{content.pairLine(requesterName)}</p>
+      {/* 사이트 전역 강조색(text-accent-warm, #b5652f)을 쓰지 않는다(2026-09-02, 사용자 지적:
+          "한국적 정서에서는 이름에 붉은 색을 사용하는 것은 금기") — 이 accent-warm 자체는
+          링크/헤더 등 사이트 전반에 쓰는 브랜드 색이라 다른 곳은 그대로 두되, 실제 사람 이름을
+          담는 이 줄에서만 붉은 계열을 피해 본문과 같은 중립 색으로 바꿨다. */}
+      <p className="text-sm font-medium text-foreground/70">{content.pairLine(requesterName)}</p>
       {reading ? (
         <>
           <h1 className="text-xl font-semibold">{reading.title}</h1>
