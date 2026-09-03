@@ -127,6 +127,23 @@ import type { MarketingLanguage } from '@/lib/languages';
  * signin`, 2026-09-01) — 수집 데이터 종류 변화 없이 내부 구현만 바뀜, `deepCompatibility`의
  * `personAIsSelf` 자동 채움(2026-09-01) — 이미 저장된 파생값(chartFacts)만 재사용하고 원본
  * 생년월일은 건드리지 않음.
+ *
+ * ⚠️⚠️ 2026-09-03 개정 — Play Console 데이터 보안(Data Safety) 위저드의 "계정 삭제 URL"
+ * 요건(수집/공유 항목, 삭제 절차, **보유 기간 명시** 3가지)을 점검하던 중, §3(보유 및 이용
+ * 기간)이 "회원 탈퇴 시(또는 삭제 요청 접수 후 지체 없이) 파기"라고만 써서 Play가 요구하는
+ * "구체적인 보유 기간 명시"를 정확히 충족하지 못하고 있는 걸 발견해 "즉시 처리되며, 별도의
+ * 유예 기간 없이 그 자리에서 파기 또는 익명화"로 6개 언어 전부 더 구체적으로 다듬었다. 이
+ * 표현이 실제로 정확한지 Cloud SQL 백업 설정을 직접 확인했다 — 자동 백업(`backupConfiguration.
+ * enabled`)이 현재 꺼져 있어(운영 DB, 2026-09-03 확인) 삭제 후 남는 "백업 보관 꼬리"가 아예
+ * 없다. 즉 "지체 없이"라는 모호한 표현 대신 "즉시, 추가 유예 없이"라고 단정적으로 써도 실제
+ * 인프라 상태와 어긋나지 않는다 — 자동 백업이 켜지는 시점이 오면 이 문장도 그에 맞게 다시
+ * 검토해야 한다. **같은 점검 중 §3/§7의 AES-256 암호화 대상 서술("문의하기" 내용 포함)이
+ * 부정확한 게 아닌지 의심했으나, 코드 재확인 결과 `supportInquiryService.ts`가 실제로
+ * `fieldEncryptor.encrypt`/`.decrypt`를 메시지 저장/조회마다 호출하고 있어 — 이는 위 9번
+ * 항목이 이미 기록한 2026-08-23 암호화 범위 확장의 결과다 — 서술이 정확함을 재확인했다(수정
+ * 없음, 최초 의심은 오탐이었다).** effectiveDate와 §10의 "최종 수정"도 6개 언어 전부 2026년
+ * 9월 3일로 갱신했다. 이 개정도 AI가 코드를 근거로 작성한 것이라 법적 충분성은 여전히 변호사
+ * 확인이 필요하다.
  */
 
 export const PRIVACY_CONTACT_EMAIL = 'contact@mikomaru.com';
@@ -147,7 +164,7 @@ export interface PrivacyPolicyContent {
 export const PRIVACY_POLICY_CONTENT: Record<MarketingLanguage, PrivacyPolicyContent> = {
   ko: {
     title: '개인정보처리방침',
-    effectiveDate: '시행일자: 2026년 7월 29일 (최종 수정: 2026년 9월 2일)',
+    effectiveDate: '시행일자: 2026년 7월 29일 (최종 수정: 2026년 9월 3일)',
     intro:
       '사주편지(이하 "회사" 또는 "서비스")는 이용자의 개인정보를 중요하게 생각하며, 관련 법령을 준수합니다. ' +
       '본 방침은 사주편지 앱과 saju-letter.com(마케팅 사이트, 궁합 공유·신년운세 공개 페이지, 이메일 구독 신청 ' +
@@ -181,7 +198,7 @@ export const PRIVACY_POLICY_CONTENT: Record<MarketingLanguage, PrivacyPolicyCont
       {
         heading: '3. 개인정보의 보유 및 이용 기간',
         html:
-          '<p>원칙적으로 회원 탈퇴 시(또는 삭제 요청 접수 후 지체 없이) 파기합니다.</p>' +
+          '<p>회원 탈퇴 또는 삭제 요청은 접수 즉시 처리되며, 별도의 유예 기간 없이 그 자리에서 파기 또는 익명화됩니다.</p>' +
           '<p>생년월일·출생시간, "오늘의 이야기" 기능에 입력한 텍스트와 답장, 궁합 공유·즉석 궁합에서 상대를 구분하기 위해 입력한 메모, 신년운세 제출 시 자유롭게 작성한 텍스트, "문의하기" 기능에 입력한 내용은 AES-256 방식으로 암호화해 저장하며, 계산 결과물(일간·월지·시지)은 개인 식별이 어려운 값으로 판단해 암호화 없이 저장합니다.</p>' +
           '<p>관계 법령상 일정 기간 보존이 필요한 정보(예: 결제 기록)는 해당 법령이 정한 기간 동안 보존 후 파기합니다.</p>',
       },
@@ -241,13 +258,13 @@ export const PRIVACY_POLICY_CONTENT: Record<MarketingLanguage, PrivacyPolicyCont
         heading: '10. 고지의 의무',
         html:
           '<p>본 방침은 2026년 7월 29일부터 적용되며, 법령·정책 또는 서비스 변경에 따라 내용이 추가·삭제·수정될 ' +
-          '수 있습니다(가장 최근 수정: 2026년 9월 2일). 변경 시 앱 공지 또는 본 페이지를 통해 고지합니다.</p>',
+          '수 있습니다(가장 최근 수정: 2026년 9월 3일). 변경 시 앱 공지 또는 본 페이지를 통해 고지합니다.</p>',
       },
     ],
   },
   en: {
     title: 'Privacy Policy',
-    effectiveDate: 'Effective date: July 29, 2026 (last updated: September 2, 2026)',
+    effectiveDate: 'Effective date: July 29, 2026 (last updated: September 3, 2026)',
     intro:
       'Saju Letter ("we", "us", or "the Service") respects your privacy and is committed to protecting your ' +
       'personal information. This Privacy Policy explains what information we collect and how we use it when ' +
@@ -282,7 +299,7 @@ export const PRIVACY_POLICY_CONTENT: Record<MarketingLanguage, PrivacyPolicyCont
       {
         heading: '3. Retention Period',
         html:
-          '<p>We delete your information when you close your account (or promptly after we receive a deletion request).</p>' +
+          '<p>We delete your information immediately when you close your account or when we receive a deletion request — there is no additional grace period or delay.</p>' +
           '<p>Your birth date and birth time; the text you write in the "Today\'s Story" feature and its reply; the notes you enter in compatibility-sharing or deep compatibility to tell people apart; the free text you submit for a Lunar New Year reading; and the messages you send through Support are all stored encrypted (AES-256). Calculated results (day master, month branch, hour branch) are not personally identifying on their own, so we store them without encryption.</p>' +
           '<p>Where law requires longer retention (e.g., payment records), we retain that data only for the legally required period before deletion.</p>',
       },
@@ -348,14 +365,14 @@ export const PRIVACY_POLICY_CONTENT: Record<MarketingLanguage, PrivacyPolicyCont
         heading: '10. Changes to This Policy',
         html:
           '<p>This policy is effective as of July 29, 2026, and may be updated as our practices, applicable ' +
-          'laws, or the service itself change (most recently updated: September 2, 2026). We will notify you of ' +
+          'laws, or the service itself change (most recently updated: September 3, 2026). We will notify you of ' +
           'material changes through the app or this page.</p>',
       },
     ],
   },
   ja: {
     title: 'プライバシーポリシー',
-    effectiveDate: '施行日: 2026年7月29日(最終更新: 2026年9月2日)',
+    effectiveDate: '施行日: 2026年7月29日(最終更新: 2026年9月3日)',
     intro:
       'サジュレター(以下「当社」または「本サービス」)は、利用者のプライバシーを尊重し、個人情報の保護に努めて' +
       'います。本ポリシーは、サジュレターアプリおよびsaju-letter.com(マーケティングサイト、相性シェア・旧正月' +
@@ -389,7 +406,7 @@ export const PRIVACY_POLICY_CONTENT: Record<MarketingLanguage, PrivacyPolicyCont
       {
         heading: '3. 保有期間',
         html:
-          '<p>原則として、退会時(または削除リクエスト受領後、遅滞なく)削除します。</p>' +
+          '<p>退会または削除リクエストは受領後直ちに処理され、猶予期間を設けずその場で削除または匿名化されます。</p>' +
           '<p>生年月日・出生時刻、「今日の物語」機能に入力されたテキストとその返信、相性シェア・その場でわかる相性で相手を区別するために入力したメモ、旧正月占い送信時に自由に記入したテキスト、「お問い合わせ」機能に入力された内容は、AES-256方式で暗号化して保存し、計算結果(日干・月支・時支)は個人を特定しにくい値と判断し、暗号化せずに保存します。</p>' +
           '<p>法令により一定期間の保存が義務付けられている情報(決済記録など)は、当該法令が定める期間保存した後に削除します。</p>',
       },
@@ -450,7 +467,7 @@ export const PRIVACY_POLICY_CONTENT: Record<MarketingLanguage, PrivacyPolicyCont
       {
         heading: '10. 本ポリシーの変更',
         html:
-          '<p>本ポリシーは2026年7月29日より施行します(最終更新: 2026年9月2日)。法令、方針、またはサービス内容' +
+          '<p>本ポリシーは2026年7月29日より施行します(最終更新: 2026年9月3日)。法令、方針、またはサービス内容' +
           'の変更に応じて内容を追加・削除・修正する場合があります。重要な変更がある場合は、アプリ内または本ページ' +
           'にてお知らせします。</p>',
       },
@@ -458,7 +475,7 @@ export const PRIVACY_POLICY_CONTENT: Record<MarketingLanguage, PrivacyPolicyCont
   },
   es: {
     title: 'Política de Privacidad',
-    effectiveDate: 'Fecha de vigencia: 29 de julio de 2026 (última actualización: 2 de septiembre de 2026)',
+    effectiveDate: 'Fecha de vigencia: 29 de julio de 2026 (última actualización: 3 de septiembre de 2026)',
     intro:
       'Saju Letter ("nosotros" o "el Servicio") respeta tu privacidad y se compromete a proteger tu información ' +
       'personal. Esta Política de Privacidad explica qué información recopilamos y cómo la usamos cuando ' +
@@ -493,7 +510,7 @@ export const PRIVACY_POLICY_CONTENT: Record<MarketingLanguage, PrivacyPolicyCont
       {
         heading: '3. Período de retención',
         html:
-          '<p>Eliminamos tu información cuando cierras tu cuenta (o poco después de recibir una solicitud de eliminación).</p>' +
+          '<p>Eliminamos tu información de inmediato cuando cierras tu cuenta o cuando recibimos una solicitud de eliminación — no hay período de gracia adicional ni demora.</p>' +
           '<p>Tu fecha y hora de nacimiento; el texto que escribes en la función "Historia de Hoy" y su respuesta; las notas que ingresas en la compatibilidad compartida o la compatibilidad detallada para distinguir a las personas; el texto libre que envías para una lectura de Año Nuevo Lunar; y los mensajes que envías a Soporte se almacenan cifrados (AES-256). Los resultados calculados (día maestro, rama del mes, rama de la hora) no son identificables por sí solos, por lo que los almacenamos sin cifrar.</p>' +
           '<p>Cuando la ley exige una retención más larga (por ejemplo, registros de pago), conservamos esos datos solo durante el período legalmente requerido antes de eliminarlos.</p>',
       },
@@ -561,14 +578,14 @@ export const PRIVACY_POLICY_CONTENT: Record<MarketingLanguage, PrivacyPolicyCont
         heading: '10. Cambios en esta política',
         html:
           '<p>Esta política entra en vigencia el 29 de julio de 2026 y puede actualizarse a medida que cambien ' +
-          'nuestras prácticas, las leyes aplicables o el propio servicio (última actualización: 2 de septiembre ' +
+          'nuestras prácticas, las leyes aplicables o el propio servicio (última actualización: 3 de septiembre ' +
           'de 2026). Te notificaremos sobre cambios importantes a través de la app o esta página.</p>',
       },
     ],
   },
   pt: {
     title: 'Política de Privacidade',
-    effectiveDate: 'Data de vigência: 29 de julho de 2026 (última atualização: 2 de setembro de 2026)',
+    effectiveDate: 'Data de vigência: 29 de julho de 2026 (última atualização: 3 de setembro de 2026)',
     intro:
       'O Saju Letter ("nós" ou "o Serviço") respeita sua privacidade e se compromete a proteger suas ' +
       'informações pessoais. Esta Política de Privacidade explica quais informações coletamos e como as usamos ' +
@@ -603,7 +620,7 @@ export const PRIVACY_POLICY_CONTENT: Record<MarketingLanguage, PrivacyPolicyCont
       {
         heading: '3. Período de retenção',
         html:
-          '<p>Excluímos suas informações quando você encerra sua conta (ou logo após recebermos uma solicitação de exclusão).</p>' +
+          '<p>Excluímos suas informações imediatamente quando você encerra sua conta ou quando recebemos uma solicitação de exclusão — não há período de carência adicional nem atraso.</p>' +
           '<p>Sua data e horário de nascimento; o texto que você escreve no recurso "História de Hoje" e sua resposta; as notas que você insere na compatibilidade compartilhada ou na compatibilidade detalhada para diferenciar as pessoas; o texto livre que você envia para uma leitura de Ano Novo Lunar; e as mensagens que você envia ao Suporte são armazenados de forma criptografada (AES-256). Os resultados calculados (dia mestre, ramo do mês, ramo da hora) não são identificáveis por si só, portanto os armazenamos sem criptografia.</p>' +
           '<p>Quando a lei exige uma retenção mais longa (por exemplo, registros de pagamento), mantemos esses dados apenas pelo período legalmente exigido antes de excluí-los.</p>',
       },
@@ -671,14 +688,14 @@ export const PRIVACY_POLICY_CONTENT: Record<MarketingLanguage, PrivacyPolicyCont
         heading: '10. Alterações nesta política',
         html:
           '<p>Esta política entra em vigor em 29 de julho de 2026 e pode ser atualizada conforme nossas ' +
-          'práticas, as leis aplicáveis ou o próprio serviço mudarem (última atualização: 2 de setembro de ' +
+          'práticas, as leis aplicáveis ou o próprio serviço mudarem (última atualização: 3 de setembro de ' +
           '2026). Notificaremos você sobre alterações relevantes por meio do aplicativo ou desta página.</p>',
       },
     ],
   },
   vi: {
     title: 'Chính sách Quyền riêng tư',
-    effectiveDate: 'Ngày hiệu lực: 29 tháng 7 năm 2026 (cập nhật lần cuối: 2 tháng 9 năm 2026)',
+    effectiveDate: 'Ngày hiệu lực: 29 tháng 7 năm 2026 (cập nhật lần cuối: 3 tháng 9 năm 2026)',
     intro:
       'Saju Letter ("chúng tôi" hoặc "Dịch vụ") tôn trọng quyền riêng tư của bạn và cam kết bảo vệ thông tin cá ' +
       'nhân của bạn. Chính sách Quyền riêng tư này giải thích thông tin nào chúng tôi thu thập và cách chúng ' +
@@ -713,7 +730,7 @@ export const PRIVACY_POLICY_CONTENT: Record<MarketingLanguage, PrivacyPolicyCont
       {
         heading: '3. Thời gian lưu trữ',
         html:
-          '<p>Chúng tôi xóa thông tin của bạn khi bạn đóng tài khoản (hoặc ngay sau khi nhận được yêu cầu xóa).</p>' +
+          '<p>Chúng tôi xóa thông tin của bạn ngay lập tức khi bạn đóng tài khoản hoặc khi nhận được yêu cầu xóa — không có thời gian gia hạn hoặc trì hoãn bổ sung.</p>' +
           '<p>Ngày sinh và giờ sinh của bạn; văn bản bạn viết trong tính năng "Câu Chuyện Hôm Nay" và phản hồi của nó; ghi chú bạn nhập trong tính năng hợp nhau để phân biệt mọi người; văn bản tự do bạn gửi cho bài đọc Tết Nguyên Đán; và các tin nhắn bạn gửi cho Hỗ trợ đều được lưu trữ ở dạng mã hóa (AES-256). Các kết quả đã tính toán (thiên can ngày, địa chi tháng, địa chi giờ) tự thân không thể nhận dạng cá nhân, nên chúng tôi lưu trữ chúng mà không mã hóa.</p>' +
           '<p>Khi pháp luật yêu cầu lưu trữ lâu hơn (ví dụ: hồ sơ thanh toán), chúng tôi chỉ giữ dữ liệu đó trong thời gian pháp luật yêu cầu trước khi xóa.</p>',
       },
@@ -778,7 +795,7 @@ export const PRIVACY_POLICY_CONTENT: Record<MarketingLanguage, PrivacyPolicyCont
         heading: '10. Thay đổi đối với chính sách này',
         html:
           '<p>Chính sách này có hiệu lực từ ngày 29 tháng 7 năm 2026 và có thể được cập nhật khi các hoạt động ' +
-          'của chúng tôi, luật hiện hành hoặc bản thân dịch vụ thay đổi (cập nhật lần cuối: 2 tháng 9 năm ' +
+          'của chúng tôi, luật hiện hành hoặc bản thân dịch vụ thay đổi (cập nhật lần cuối: 3 tháng 9 năm ' +
           '2026). Chúng tôi sẽ thông báo cho bạn về những thay đổi quan trọng thông qua ứng dụng hoặc trang này.</p>',
       },
     ],
