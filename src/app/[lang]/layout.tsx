@@ -4,7 +4,7 @@ import type { Metadata } from 'next';
 import { Noto_Serif_JP, Noto_Serif_KR, Playfair_Display } from 'next/font/google';
 import '../globals.css';
 import { getDictionary } from '@/dictionaries';
-import { isMarketingLanguage, MARKETING_LANGUAGES, type MarketingLanguage } from '@/lib/languages';
+import { isLaunchContentLanguage, isMarketingLanguage, MARKETING_LANGUAGES, type MarketingLanguage } from '@/lib/languages';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { WEB_BASE_URL } from '@/lib/seo';
 import { organizationJsonLd } from '@/lib/structuredData';
@@ -87,12 +87,21 @@ export default async function LangLayout({
               <span className="truncate">{dict.brand}</span>
             </Link>
             <nav className="flex items-center gap-3 sm:gap-5">
-              <Link href={`/${lang}/blog`} className="text-sm font-medium text-foreground/70 hover:text-foreground">
-                {dict.nav.blog}
-              </Link>
-              <Link href={`/${lang}/compare`} className="text-sm font-medium text-foreground/70 hover:text-foreground">
-                {dict.nav.compare}
-              </Link>
+              {/* Blog/compare는 LAUNCH_CONTENT_LANGUAGES(ko/en/ja/es)만 지원한다 — pt/vi
+                  방문자(신년운세 캠페인이 지원하는 언어라 실제로 존재)에게 무조건 노출하면
+                  눌렀을 때 404가 난다(2026-09-03, 종합 버그 점검으로 발견). LanguageSwitcher.tsx가
+                  드롭다운에서 이미 같은 이유로 pt/vi를 뺀 것과 같은 원칙을 여기 헤더 내비에도
+                  적용한다. */}
+              {isLaunchContentLanguage(lang) && (
+                <>
+                  <Link href={`/${lang}/blog`} className="text-sm font-medium text-foreground/70 hover:text-foreground">
+                    {dict.nav.blog}
+                  </Link>
+                  <Link href={`/${lang}/compare`} className="text-sm font-medium text-foreground/70 hover:text-foreground">
+                    {dict.nav.compare}
+                  </Link>
+                </>
+              )}
               <LanguageSwitcher current={lang} />
             </nav>
           </div>
