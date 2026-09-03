@@ -1,14 +1,14 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import type { MarketingDictionary } from '@/dictionaries/types';
 import type { NonKoreanLanguage } from '@/lib/languages';
 import { calculateSaju } from '@/lib/saju';
 import { isOldEnough } from '@/lib/age';
 import { createReading } from '@/lib/lunarNewYearApi';
 import { ApiError } from '@/lib/apiClient';
-import { Turnstile, TURNSTILE_ENABLED } from '@/components/Turnstile';
+import { Turnstile, TURNSTILE_ENABLED, type TurnstileHandle } from '@/components/Turnstile';
 
 const MEMORABLE_EVENT_MAX_LENGTH = 300;
 const CURRENT_YEAR = new Date().getFullYear();
@@ -28,6 +28,7 @@ export function ReadingForm({ language, dict: t }: { language: NonKoreanLanguage
   const [memorableEvent, setMemorableEvent] = useState('');
   const [ageConfirmed, setAgeConfirmed] = useState(false);
   const [turnstileToken, setTurnstileToken] = useState<string | undefined>(undefined);
+  const turnstileRef = useRef<TurnstileHandle>(null);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -96,6 +97,11 @@ export function ReadingForm({ language, dict: t }: { language: NonKoreanLanguage
       } else {
         setError(t.errors.generic);
       }
+      // Turnstile 토큰은 1회용이라, 실패한 시도에 쓰인 토큰을 그대로 두면 재제출도 항상 403으로
+      // 막힌다(2026-09-03, 종합 버그 점검으로 발견) — 이 폼은 실패해도 언마운트되지 않으므로
+      // 새 토큰을 명시적으로 요청한다.
+      setTurnstileToken(undefined);
+      turnstileRef.current?.reset();
       setIsSubmitting(false);
     }
   }
@@ -207,7 +213,7 @@ export function ReadingForm({ language, dict: t }: { language: NonKoreanLanguage
       </label>
       <p className="text-xs text-stone-400">{t.consentPreviewNote}</p>
 
-      <Turnstile onVerify={setTurnstileToken} />
+      <Turnstile ref={turnstileRef} onVerify={setTurnstileToken} />
 
       {error && <p className="text-sm text-red-600">{error}</p>}
 

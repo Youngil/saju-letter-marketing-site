@@ -345,6 +345,10 @@ npm run build   # 프로덕션 빌드 — App Router 라우트/타입 검증 + M
   세 곳 다 함께 고쳤다 — 고정폭 대신 `flex-1`을 줘서 세 입력칸이 카드 폭을 균등하게 나눠 쓰도록
   바꿨다(색상/테두리 등 나머지 스타일은 그대로).
 
+- **전 저장소 종합 버그 점검 — High 2건 수정(2026-09-03, meta 저장소 `docs/audit-2026-09-03-full-sweep.md` 참고)**
+  - **Turnstile 토큰 재사용 — 재시도 시 5개 공개 폼이 영구 실패** — Turnstile 토큰은 1회용인데 `DemoForm`/`LeadCaptureForm`/`CompatView`의 `PendingForm`/`EmailSignupForm`/`ReadingForm` 어디도 제출 후 토큰을 리셋하지 않았다. 특히 `DemoForm`의 "다시 시도"는 결과 화면→폼으로 되돌아가며 `<Turnstile>`을 리마운트하는데, `next/script`가 같은 `src`의 스크립트를 전역에서 한 번만 로드된 것으로 캐시해 `onLoad`가 두 번째 마운트부터 다시 안 불려 위젯 자체가 렌더되지 않았다(100% 실패, 제출 버튼도 안 잠겨 그대로 클릭 가능). `Turnstile.tsx`를 두 가지로 고쳤다 — (1) 마운트 시점에 `window.turnstile`이 이미 있으면 `onLoad`를 기다리지 않고 즉시 렌더, (2) `forwardRef`+`useImperativeHandle`로 `reset()`을 노출해, 폼이 언마운트 없이 그대로 남는 나머지 4개 실패 경로에서도 명시적으로 새 토큰을 받을 수 있게 함. 5개 폼 전부 `catch`(또는 `DemoForm`의 "다시 시도" 클릭)에서 `setTurnstileToken(undefined)` + `turnstileRef.current?.reset()`을 호출하도록 수정. 이 저장소에 React 컴포넌트 렌더링 테스트 인프라가 없어 `Turnstile.tsx` 자체의 전용 테스트는 추가하지 않았다 — 타입체크·전체 스위트(29/29)·프로덕션 빌드로 검증.
+  - **`Accept-Language` 자동 감지가 우선순위(q값)를 무시함** — `middleware.ts`가 `LAUNCH_CONTENT_LANGUAGES.find(lang => header.includes(lang))`로, 헤더 전체에 대한 단순 부분 문자열 검사를 고정 배열 순서(`ko, en, ja, es`)로만 돌고 있었다 — `es-ES,es;q=0.9,en;q=0.8` 같은 흔한 헤더(스페인어가 실제 1순위)도 `en`이 배열에서 먼저 매치돼 영어 홈으로 잘못 리다이렉트됐다. `src/lib/languages.ts`에 `detectPreferredLaunchLanguage()`를 신설해 헤더를 q값 내림차순으로 정렬(동률은 헤더 순서 유지)한 뒤 전체 태그 → 기본 서브태그 순으로 매치를 시도하도록 바꿨다. 회귀 테스트 9건(`languages.test.ts`) 추가.
+
 ---
 
 세부 배경(마케팅 사이트 신규 구축 논의, 신년운세 캠페인 이관 계획 등)은 meta 저장소의 `CLAUDE.md`

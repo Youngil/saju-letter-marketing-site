@@ -1,10 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import type { MarketingDictionary } from '@/dictionaries/types';
 import { subscribeForDrip, logCampaignEvent } from '@/lib/lunarNewYearApi';
 import { ApiError } from '@/lib/apiClient';
-import { Turnstile, TURNSTILE_ENABLED } from '@/components/Turnstile';
+import { Turnstile, TURNSTILE_ENABLED, type TurnstileHandle } from '@/components/Turnstile';
 
 type ResultDict = NonNullable<MarketingDictionary['lunarNewYear']>['result'];
 
@@ -26,6 +26,7 @@ export function EmailSignupForm({
   const [email, setEmail] = useState('');
   const [consent, setConsent] = useState(false);
   const [turnstileToken, setTurnstileToken] = useState<string | undefined>(undefined);
+  const turnstileRef = useRef<TurnstileHandle>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [subscribed, setSubscribed] = useState(alreadySubscribed);
@@ -56,6 +57,11 @@ export function EmailSignupForm({
         setSubscribed(true);
       } else {
         setError(t.errors.generic);
+        // Turnstile 토큰은 1회용이라, 실패한 시도에 쓰인 토큰을 그대로 두면 재제출도 항상
+        // 403으로 막힌다(2026-09-03, 종합 버그 점검으로 발견) — 이 분기는 폼이 그대로 남으므로
+        // 새 토큰을 명시적으로 요청한다.
+        setTurnstileToken(undefined);
+        turnstileRef.current?.reset();
       }
     } finally {
       setIsSubmitting(false);
@@ -79,7 +85,7 @@ export function EmailSignupForm({
         <input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} className="mt-1" />
         <span>{t.consentLabel}</span>
       </label>
-      <Turnstile onVerify={setTurnstileToken} />
+      <Turnstile ref={turnstileRef} onVerify={setTurnstileToken} />
       {error && <p className="text-sm text-red-600">{error}</p>}
       <button
         type="submit"

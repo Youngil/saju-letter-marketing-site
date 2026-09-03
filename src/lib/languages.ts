@@ -52,6 +52,40 @@ export function isLaunchContentLanguage(lang: MarketingLanguage): lang is Launch
 }
 
 /**
+ * `Accept-Language` 헤더를 실제 우선순위(q값)대로 파싱해 지원 언어 중 첫 매치를 고른다
+ * (2026-09-03, 종합 버그 점검으로 발견) — `middleware.ts`가 예전엔
+ * `LAUNCH_CONTENT_LANGUAGES.find(lang => header.includes(lang))`로, 헤더 전체에 대한 단순
+ * 부분 문자열 검사를 고정 배열 순서(`ko, en, ja, es`)로만 돌고 있었다. `en`이 배열에서
+ * 두 번째라, `es-ES,es;q=0.9,en;q=0.8` 같은 흔한 헤더(스페인어가 실제 1순위)도 `'en'`이
+ * 먼저 매치돼 영어 홈으로 잘못 리다이렉트됐다 — 언어별 라우팅이 핵심인 사이트에서 구조적으로
+ * 자주 발생할 오탐이었다.
+ *
+ * 태그를 q값 내림차순으로 정렬한 뒤(동률은 헤더에 나온 순서 유지 — Array.sort는 안정 정렬),
+ * 전체 태그("es-ES")로 먼저 매치를 시도하고 안 되면 기본 서브태그("es")로도 시도한다.
+ */
+export function detectPreferredLaunchLanguage(acceptLanguageHeader: string): LaunchContentLanguage {
+  const entries = acceptLanguageHeader
+    .split(',')
+    .map((part) => {
+      const [rawTag, ...params] = part.trim().split(';');
+      const tag = rawTag?.trim().toLowerCase();
+      const qParam = params.find((p) => p.trim().startsWith('q='));
+      const q = qParam ? Number.parseFloat(qParam.trim().slice(2)) : 1;
+      return { tag, q: Number.isFinite(q) ? q : 1 };
+    })
+    .filter((entry): entry is { tag: string; q: number } => Boolean(entry.tag) && entry.tag !== '*')
+    .sort((a, b) => b.q - a.q);
+
+  for (const { tag } of entries) {
+    if (isLaunchContentLanguage(tag as MarketingLanguage)) return tag as LaunchContentLanguage;
+    const primarySubtag = tag.split('-')[0]!;
+    if (isLaunchContentLanguage(primarySubtag as MarketingLanguage)) return primarySubtag as LaunchContentLanguage;
+  }
+
+  return DEFAULT_LANGUAGE as LaunchContentLanguage;
+}
+
+/**
  * 마케팅 카피의 톤 2그룹(사용자 확정) — en/es는 사주 개념을 처음 접하는 독자에게 서양
  * 별자리에 빗대어 처음부터 설명하고, ko/ja는 각자 이미 익숙한 전통(사주, 四柱推命)과의
  * 유사성을 강조한다(2026-08-07: ko를 PR/QA 전용에서 정식 타겟으로 전환하면서 ja와 같은

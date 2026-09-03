@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import Image from 'next/image';
 import type { MarketingDictionary } from '@/dictionaries/types';
 import type { MarketingLanguage } from '@/lib/languages';
@@ -8,7 +8,7 @@ import { DISCLAIMER_CONTENT } from '@/content/disclaimer';
 import { calculateSaju } from '@/lib/saju';
 import { isOldEnough } from '@/lib/age';
 import { ApiError, getDemoReading, type DemoReadingResponse } from '@/lib/api';
-import { Turnstile, TURNSTILE_ENABLED } from './Turnstile';
+import { Turnstile, TURNSTILE_ENABLED, type TurnstileHandle } from './Turnstile';
 import { AppDownloadLinks } from './AppDownloadLinks';
 
 const CURRENT_YEAR = new Date().getFullYear();
@@ -34,6 +34,7 @@ export function DemoForm({
   const [month, setMonth] = useState('');
   const [day, setDay] = useState('');
   const [turnstileToken, setTurnstileToken] = useState<string | undefined>(undefined);
+  const turnstileRef = useRef<TurnstileHandle>(null);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -84,6 +85,11 @@ export function DemoForm({
       } else {
         setError(dict.errors.generic);
       }
+      // Turnstile 토큰은 1회용이라, 실패한 시도에 쓰인 토큰을 그대로 두면 재제출도 항상 403으로
+      // 막힌다(2026-09-03, 종합 버그 점검으로 발견) — 폼이 그대로 남는 실패 경로라 새 토큰을
+      // 명시적으로 요청한다.
+      setTurnstileToken(undefined);
+      turnstileRef.current?.reset();
     } finally {
       setIsSubmitting(false);
     }
@@ -118,7 +124,12 @@ export function DemoForm({
         </div>
         <button
           type="button"
-          onClick={() => setResult(null)}
+          onClick={() => {
+            // 결과를 본 뒤 다시 제출할 때도 이전 Turnstile 토큰은 이미 소모된 값이라 새로
+            // 받아야 한다(위 catch 블록과 같은 이유, 2026-09-03).
+            setTurnstileToken(undefined);
+            setResult(null);
+          }}
           className="text-sm text-foreground/60 underline underline-offset-2 hover:text-foreground"
         >
           {dict.tryAgain}
@@ -166,7 +177,7 @@ export function DemoForm({
         </div>
       </div>
 
-      <Turnstile onVerify={setTurnstileToken} />
+      <Turnstile ref={turnstileRef} onVerify={setTurnstileToken} />
 
       {error && <p className="text-sm text-red-600">{error}</p>}
 

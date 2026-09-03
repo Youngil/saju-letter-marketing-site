@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { DEFAULT_LANGUAGE, LAUNCH_CONTENT_LANGUAGES, MARKETING_LANGUAGES } from '@/lib/languages';
+import { MARKETING_LANGUAGES, detectPreferredLaunchLanguage } from '@/lib/languages';
 
 /**
  * saju-letter-newyear-campaign은 URL 세그먼트 없이 브라우저 언어 감지+localStorage만 썼다
@@ -30,8 +30,9 @@ export function middleware(request: NextRequest) {
   // 자동 감지 후보는 LAUNCH_CONTENT_LANGUAGES(ko/en/ja/es)로 한정한다(2026-08-08) —
   // LanguageSwitcher와 같은 이유(pt/vi는 블로그/compare가 아직 없어 "숨겨둔" 상태). URL에 이미
   // /pt나 /vi가 붙은 링크(신년운세 캠페인 등)는 위 hasLangPrefix에서 이미 걸러져 영향받지 않는다.
-  const acceptLanguage = (request.headers.get('accept-language') ?? '').toLowerCase();
-  const detected = LAUNCH_CONTENT_LANGUAGES.find((lang) => acceptLanguage.includes(lang)) ?? DEFAULT_LANGUAGE;
+  // 실제 우선순위(q값) 파싱은 detectPreferredLaunchLanguage 참고(2026-09-03, 종합 버그 점검 —
+  // 예전엔 헤더 전체에 대한 단순 부분 문자열 검사를 고정 배열 순서로만 돌아 우선순위를 무시했다).
+  const detected = detectPreferredLaunchLanguage(request.headers.get('accept-language') ?? '');
 
   const url = request.nextUrl.clone();
   url.pathname = `/${detected}${pathname === '/' ? '' : pathname}`;
