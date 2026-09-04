@@ -8,7 +8,7 @@ import type { InviteView } from '@/lib/compatApi';
 import { logCompatEvent, submitGuestInvite } from '@/lib/compatApi';
 import { ApiError } from '@/lib/apiClient';
 import { DISCLAIMER_CONTENT } from '@/content/disclaimer';
-import { calculateSaju, resolveSolarBirthDate } from '@/lib/saju';
+import { calculateSaju, getLunarLeapMonth, resolveSolarBirthDate } from '@/lib/saju';
 import { isOldEnough } from '@/lib/age';
 import { Turnstile, TURNSTILE_ENABLED, type TurnstileHandle } from '../Turnstile';
 import { AppDownloadLinks } from '../AppDownloadLinks';
@@ -134,6 +134,42 @@ function PendingForm({
   const [month, setMonth] = useState('');
   const [day, setDay] = useState('');
   const [isLeapMonth, setIsLeapMonth] = useState(false);
+
+  // 연/월/양음력 변경 시 isLeapMonth를 리셋한다(2026-09-04, 종합 버그 점검 2회차) —
+  // saju-letter-mobile의 onboarding.tsx/compat/deep.tsx가 이미 쓰는 것과 같은 패턴인데, 이
+  // 게스트 폼만 리셋이 빠져 있었다. 윤달 선택 후 다른(비윤달) 월/연도로 바꿔도 체크박스는
+  // 사라지지만 내부 상태(isLeapMonth)가 그대로 남아, lunar-javascript가 존재하지 않는
+  // (연,월,윤달) 조합에 예외를 던져 제출이 계속 실패하고("날짜를 다시 확인해주세요"라는
+  // 안내만 뜰 뿐 원인은 안 보임) 그 정확한 조합으로 돌아가지 않는 한 복구되지 않았다.
+  function parseIntOrNull(value: string): number | null {
+    if (value.trim() === '') return null;
+    const n = Number(value);
+    return Number.isInteger(n) ? n : null;
+  }
+
+  function canBeLeapMonth(nextCalendarType: 'solar' | 'lunar', yearStr: string, monthStr: string): boolean {
+    if (nextCalendarType !== 'lunar') return false;
+    const y = parseIntOrNull(yearStr);
+    const m = parseIntOrNull(monthStr);
+    if (y === null || m === null) return false;
+    return getLunarLeapMonth(y) === m;
+  }
+
+  function handleCalendarTypeChange(next: 'solar' | 'lunar') {
+    setCalendarType(next);
+    setIsLeapMonth((prev) => (canBeLeapMonth(next, year, month) ? prev : false));
+  }
+
+  function handleYearChange(nextYear: string) {
+    setYear(nextYear);
+    setIsLeapMonth((prev) => (canBeLeapMonth(calendarType, nextYear, month) ? prev : false));
+  }
+
+  function handleMonthChange(nextMonth: string) {
+    setMonth(nextMonth);
+    setIsLeapMonth((prev) => (canBeLeapMonth(calendarType, year, nextMonth) ? prev : false));
+  }
+
   const [turnstileToken, setTurnstileToken] = useState<string | undefined>(undefined);
   const turnstileRef = useRef<TurnstileHandle>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -234,7 +270,7 @@ function PendingForm({
         <button
           type="button"
           aria-pressed={calendarType === 'solar'}
-          onClick={() => setCalendarType('solar')}
+          onClick={() => handleCalendarTypeChange('solar')}
           className={`rounded-full border px-4 py-1.5 text-sm ${calendarType === 'solar' ? 'border-accent-warm bg-accent-warm text-white' : 'border-foreground/15 text-foreground/70'}`}
         >
           {content.calendarSolar}
@@ -242,7 +278,7 @@ function PendingForm({
         <button
           type="button"
           aria-pressed={calendarType === 'lunar'}
-          onClick={() => setCalendarType('lunar')}
+          onClick={() => handleCalendarTypeChange('lunar')}
           className={`rounded-full border px-4 py-1.5 text-sm ${calendarType === 'lunar' ? 'border-accent-warm bg-accent-warm text-white' : 'border-foreground/15 text-foreground/70'}`}
         >
           {content.calendarLunar}
@@ -258,7 +294,7 @@ function PendingForm({
           inputMode="numeric"
           placeholder={content.yearLabel}
           value={year}
-          onChange={(e) => setYear(e.target.value)}
+          onChange={(e) => handleYearChange(e.target.value)}
           min={1900}
           max={CURRENT_YEAR}
           className="min-w-0 flex-1 rounded-lg border border-foreground/15 bg-white px-2 py-2.5 transition focus-visible:border-accent-warm sm:px-3"
@@ -268,7 +304,7 @@ function PendingForm({
           inputMode="numeric"
           placeholder={content.monthLabel}
           value={month}
-          onChange={(e) => setMonth(e.target.value)}
+          onChange={(e) => handleMonthChange(e.target.value)}
           min={1}
           max={12}
           className="min-w-0 flex-1 rounded-lg border border-foreground/15 bg-white px-2 py-2.5 transition focus-visible:border-accent-warm sm:px-3"

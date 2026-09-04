@@ -1,4 +1,4 @@
-import { Lunar, Solar } from 'lunar-javascript';
+import { Lunar, LunarYear, Solar } from 'lunar-javascript';
 import { isEarthlyBranch, isHeavenlyStem, type EarthlyBranch, type HeavenlyStem } from './sajuVocabulary';
 
 /**
@@ -64,6 +64,15 @@ export function resolveSolarBirthDate(input: SajuFormInput): { year: number; mon
   const minute = timeKnown ? (input.minute ?? 0) : UNKNOWN_TIME_PLACEHOLDER.minute;
   const solar = resolveLunar(input, hour, minute).getSolar();
   return { year: solar.getYear(), month: solar.getMonth(), day: solar.getDay() };
+}
+
+/**
+ * 그 해에 윤달이 있으면 해당 월(1-12)을, 없으면 0을 반환 — saju-letter-mobile의
+ * `domain/saju/calendarInfo.ts::getLunarLeapMonth`를 그대로 포팅(2026-09-04, 종합 버그 점검
+ * 2회차). `CompatView.tsx`의 게스트 폼이 연/월/양음력 변경 시 `isLeapMonth`를 리셋하는 데 쓴다.
+ */
+export function getLunarLeapMonth(year: number): number {
+  return LunarYear.fromYear(year).getLeapMonth();
 }
 
 export function calculateSaju(input: SajuFormInput): SajuChart {

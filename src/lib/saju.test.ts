@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { calculateSaju, resolveSolarBirthDate } from './saju';
+import { calculateSaju, getLunarLeapMonth, resolveSolarBirthDate } from './saju';
 
 describe('calculateSaju', () => {
   // saju-letter-mobile/src/domain/saju/calculateSaju.test.ts의 검증된 샘플 1과 동일한 값
@@ -55,3 +55,17 @@ describe('calculateSaju', () => {
     expect(leapMonthChart.dayPillar).toEqual(equivalentSolarChart.dayPillar);
   });
 });
+
+describe(
+  'getLunarLeapMonth (2026-09-04, 종합 버그 점검 2회차 — CompatView.tsx의 게스트 폼이 연/월/양음력 ' +
+    '변경 시 isLeapMonth를 리셋하지 않던 버그 수정에 쓰인 헬퍼, saju-letter-mobile의 같은 사실로 검증)',
+  () => {
+    it('윤달이 있는 해는 그 월(1-12)을 반환한다', () => {
+      expect(getLunarLeapMonth(1993)).toBe(3);
+    });
+
+    it('윤달이 없는 해는 0을 반환한다', () => {
+      expect(getLunarLeapMonth(1988)).toBe(0);
+    });
+  },
+);
