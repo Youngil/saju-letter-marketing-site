@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
-import { LAUNCH_CONTENT_LANGUAGES, type MarketingLanguage } from '@/lib/languages';
+import { availableSwitcherLanguages, type MarketingLanguage } from '@/lib/languages';
 
 const LANGUAGE_LABELS: Record<MarketingLanguage, string> = {
   ko: '한국어',
@@ -39,10 +39,15 @@ export function LanguageSwitcher({ current }: { current: MarketingLanguage }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
 
+  const rest = pathname.replace(new RegExp(`^/${current}`), '');
+
   function pathForLanguage(lang: MarketingLanguage): string {
-    const rest = pathname.replace(new RegExp(`^/${current}`), '');
     return `/${lang}${rest}`;
   }
+
+  // 신년운세 캠페인 등 ko 미지원 경로에서는 드롭다운에서도 ko를 뺀다(2026-09-04, 종합 버그
+  // 점검 2회차 — 상세 근거는 availableSwitcherLanguages doc 참고).
+  const availableLanguages = availableSwitcherLanguages(rest);
 
   return (
     <div className="relative">
@@ -56,7 +61,7 @@ export function LanguageSwitcher({ current }: { current: MarketingLanguage }) {
       </button>
       {open && (
         <ul className="absolute right-0 mt-2 w-36 rounded-lg border border-foreground/10 bg-background py-1 shadow-lg z-50">
-          {LAUNCH_CONTENT_LANGUAGES.map((lang) => (
+          {availableLanguages.map((lang) => (
             <li key={lang}>
               <Link
                 href={pathForLanguage(lang)}

@@ -52,6 +52,24 @@ export function isLaunchContentLanguage(lang: MarketingLanguage): lang is Launch
 }
 
 /**
+ * `LanguageSwitcher.tsx`가 드롭다운에 보여줄 언어 목록을 정한다(2026-09-04, 종합 버그 점검
+ * 2회차로 발견) — 원래는 페이지가 무엇이든 `LAUNCH_CONTENT_LANGUAGES`(ko 포함) 4개를 항상
+ * 보여줬는데, 신년운세 캠페인(`/lunar-new-year/...`)은 애초에 한국어를 지원하지 않는 라우트라
+ * (meta 저장소 CLAUDE.md §9 "확장 기능 #6" 참고) en/es/ja/pt/vi로 그 캠페인에 들어온 방문자가
+ * "한국어"를 누르면 그 라우트가 `notFound()`를 던져 404를 만났다 — 헤더 내비(Blog/Compare)가
+ * pt/vi에게 죽은 링크였던 것(위 2026-09-03 항목)과 반대 방향의 같은 클래스 버그다.
+ *
+ * pt/vi를 계속 숨기는 기존 "발견 가능성" 판단(블로그/compare 미지원)은 그대로 두고, 신년운세
+ * 캠페인 경로에서만 ko를 뺀다. `restOfPath`는 언어 세그먼트를 뺀 나머지 경로(예:
+ * "/lunar-new-year/r/abc123") — `LanguageSwitcher`가 `pathname.replace(new RegExp(...))`로
+ * 이미 계산해두는 값을 그대로 받는다.
+ */
+export function availableSwitcherLanguages(restOfPath: string): LaunchContentLanguage[] {
+  const isLunarNewYearPath = restOfPath === '/lunar-new-year' || restOfPath.startsWith('/lunar-new-year/');
+  return isLunarNewYearPath ? LAUNCH_CONTENT_LANGUAGES.filter((lang) => lang !== 'ko') : LAUNCH_CONTENT_LANGUAGES;
+}
+
+/**
  * `Accept-Language` 헤더를 실제 우선순위(q값)대로 파싱해 지원 언어 중 첫 매치를 고른다
  * (2026-09-03, 종합 버그 점검으로 발견) — `middleware.ts`가 예전엔
  * `LAUNCH_CONTENT_LANGUAGES.find(lang => header.includes(lang))`로, 헤더 전체에 대한 단순
