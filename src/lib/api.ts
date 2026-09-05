@@ -1,11 +1,11 @@
-import type { MarketingLanguage } from './languages';
+import type { LaunchContentLanguage } from './languages';
 import type { Pillar } from './saju';
 import { request } from './apiClient';
 
 export { ApiError } from './apiClient';
 
 export interface DemoReadingInput {
-  language: MarketingLanguage;
+  language: LaunchContentLanguage;
   dayPillar: Pillar;
   /** 방문자 브라우저의 IANA 타임존 — "오늘의 일진"이 실제 무료 편지와 같도록 서버가 이 타임존
    * 기준 로컬 캘린더 날짜로 계산한다(2026-08-22, meta CLAUDE.md §4와 동일 원칙). */
@@ -46,7 +46,7 @@ export function getDemoReading(input: DemoReadingInput): Promise<DemoReadingResp
 
 export interface SubscribeLeadInput {
   email: string;
-  language: MarketingLanguage;
+  language: LaunchContentLanguage;
   consent: boolean;
   turnstileToken?: string;
 }

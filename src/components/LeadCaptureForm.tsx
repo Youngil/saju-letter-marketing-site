@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import type { MarketingDictionary } from '@/dictionaries/types';
-import type { MarketingLanguage } from '@/lib/languages';
+import type { LaunchContentLanguage } from '@/lib/languages';
 import { ApiError, getCouponAvailability, subscribeLead, type CouponAvailability } from '@/lib/api';
 import { Turnstile, TURNSTILE_ENABLED, type TurnstileHandle } from './Turnstile';
 
@@ -19,7 +19,7 @@ const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
  * 있다. `NEXT_PUBLIC_TURNSTILE_SITE_KEY`가 없으면 `Turnstile` 컴포넌트가 아무것도 렌더하지
  * 않고, 백엔드도 로컬(시크릿 없음)에서는 토큰 없이 통과시킨다 — 운영에서만 실질적으로 강제된다.
  */
-export function LeadCaptureForm({ language, dict }: { language: MarketingLanguage; dict: MarketingDictionary['leadCapture'] }) {
+export function LeadCaptureForm({ language, dict }: { language: LaunchContentLanguage; dict: MarketingDictionary['leadCapture'] }) {
   const [email, setEmail] = useState('');
   const [consent, setConsent] = useState(false);
   const [turnstileToken, setTurnstileToken] = useState<string | undefined>(undefined);

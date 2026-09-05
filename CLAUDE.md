@@ -45,6 +45,30 @@ Phase 5 주간 칼럼(화요일·EN→ko/ja/es), Phase 6 신년운세·궁합 so
 `content-posts/*.pt.mdx`/`*.vi.mdx` 3편씩만 새로 쓰면 끝난다 — 라우팅/타입/컴포넌트는 이미
 이 배열 하나만 참조하도록 만들어놔서 추가로 손댈 곳이 없다.
 
+**홈 미니 데모·리드 캡처도 2026-09-05부터 pt/vi를 제외한 4개 언어로 제한됐다** — 원래 이 둘은 콘텐츠
+제작 비용이 없다는 이유로 6개 언어 전부 열려 있었는데(위 문단), `saju-letter-backend`가 개인화 콘텐츠
+생성을 "현재 서비스 언어"(`ACTIVE_SERVICE_LANGUAGES`, ko/en/ja/es)로 제한하면서 사용자가 "모바일
+앱이나 마케팅 사이트에서 제공하는 언어 등에 대해서도 모두 앞으로도 일관성을 가지기를 원한다"고
+요청해 이 사이트도 같은 4개 언어로 맞췄다(`AskUserQuestion`으로 확인한 3가지 선택지 중 "함께
+4개로 제한(추천)"을 택함). **정본은 백엔드의 `ACTIVE_SERVICE_LANGUAGES` 하나지만 저장소 간 물리적
+공유는 하지 않는다** — 이 사이트는 이미 있던 `LAUNCH_CONTENT_LANGUAGES`/`isLaunchContentLanguage()`
+(블로그/compare가 써온 것과 정확히 같은 4개 값·같은 가드)를 그대로 재사용했다. `[lang]/page.tsx`의
+기존 `showContentLinks` 게이트(다인 소개 링크·compare 링크·"이번 주 다인의 글" 배너에 이미 적용
+중이던 것)를 히어로의 "#demo" CTA 앵커와 데모 섹션(`<DemoForm>`) 전체에도 그대로 확장했다 — pt/vi
+방문자는 이제 히어로에서 데모로 이어지는 CTA 자체가 보이지 않는다(존재하지 않는 섹션으로 스크롤
+유도하는 죽은 링크가 되는 걸 방지). **홈 화면 URL 라우팅 구조(6개 언어 정적 페이지)는 그대로
+유지한다** — `middleware.ts`의 언어 프리픽스 리다이렉트, `sitemap.ts`/`generateStaticParams`가
+여전히 6개 언어 전부를 대상으로 한다(§8의 `MARKETING_LANGUAGES` 6개 원칙 그대로) — 바뀐 건 그
+페이지 안에서 데모 섹션을 보여주느냐뿐이다. `DemoForm`/`LeadCaptureForm`의 `language` prop 타입과
+`api.ts`의 `DemoReadingInput`/`SubscribeLeadInput.language`도 `MarketingLanguage`(6개)에서
+`LaunchContentLanguage`(4개)로 좁혀 컴파일 타임에도 pt/vi 언어값이 이 두 요청에 흘러들 수 없게
+했다(방어적 이중화 — 런타임 게이트가 실수로 빠져도 타입 에러로 걸린다). **리드 캡처
+(`LeadCaptureForm`)는 2026-09-02부터 이미 홈 화면 렌더링 자체가 주석 처리돼 있어(§8 참고) 이번
+변경으로 당장 동작이 바뀌진 않는다** — 재개 시점을 위해 그 주석 안의 예시 코드에도 미리
+`showContentLinks` 게이트를 씌워뒀다(주석을 걷어내기만 하면 바로 4개 언어 제한이 적용됨).
+타입체크/전체 스위트(35/35)/프로덕션 빌드(6개 언어 정적 홈 페이지 전부 정상 생성 확인) 통과 +
+로컬 dev 서버에서 `curl`로 `/pt`는 데모 섹션이 0회, `/en`은 1회 나오는 것을 직접 확인했다.
+
 **톤 2그룹(`TONE_GROUP`, en/es=`explain-from-scratch`, ko/ja=`lean-into-tradition`, pt/vi는 보류
 상태로 값만 유지)** — en/es는 사주를 처음 접하는 독자에게 서양 별자리에 빗대어 개념부터
 설명하고, ko/ja는 이미 있는 자신의 전통(사주, 四柱推命)과의 유사성을 강조한다(한국어는 2026-08-07에

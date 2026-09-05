@@ -3,7 +3,7 @@
 import { useRef, useState } from 'react';
 import Image from 'next/image';
 import type { MarketingDictionary } from '@/dictionaries/types';
-import type { MarketingLanguage } from '@/lib/languages';
+import type { LaunchContentLanguage } from '@/lib/languages';
 import { DISCLAIMER_CONTENT } from '@/content/disclaimer';
 import { calculateSaju } from '@/lib/saju';
 import { isOldEnough } from '@/lib/age';
@@ -26,7 +26,7 @@ export function DemoForm({
   dict,
   appLinksDict,
 }: {
-  language: MarketingLanguage;
+  language: LaunchContentLanguage;
   dict: MarketingDictionary['demo'];
   appLinksDict: MarketingDictionary['appLinks'];
 }) {

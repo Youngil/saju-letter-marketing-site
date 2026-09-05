@@ -8,6 +8,8 @@ import {
   DEFAULT_LANGUAGE,
   type MarketingLanguage,
 } from '@/lib/languages';
+// 홈 미니 데모·리드 캡처도 2026-09-05부터 LAUNCH_CONTENT_LANGUAGES(4개)로 제한됐다 — 아래
+// showContentLinks 게이트 참고, CLAUDE.md §2 "언어 지원" 갱신 내역도 함께 참고.
 import { DemoForm } from '@/components/DemoForm';
 // LeadCaptureForm import는 아래 렌더링과 함께 잠시 꺼뒀다(2026-09-02) — §leadCapture 참고.
 import { AppDownloadLinks } from '@/components/AppDownloadLinks';
@@ -60,12 +62,14 @@ export default async function HomePage({ params }: { params: Promise<{ lang: str
           {dict.hero.title}
         </h1>
         <p className="max-w-xl text-lg text-foreground/70">{dict.hero.subtitle}</p>
-        <a
-          href="#demo"
-          className="rounded-full bg-accent-warm px-8 py-3 font-medium text-white transition hover:bg-accent-warm/90"
-        >
-          {dict.hero.ctaDemo}
-        </a>
+        {showContentLinks ? (
+          <a
+            href="#demo"
+            className="rounded-full bg-accent-warm px-8 py-3 font-medium text-white transition hover:bg-accent-warm/90"
+          >
+            {dict.hero.ctaDemo}
+          </a>
+        ) : null}
         <div className="flex flex-col items-center gap-2">
           <span className="text-xs font-medium uppercase tracking-wide text-foreground/40">{dict.appLinks.sectionLabel}</span>
           <AppDownloadLinks dict={dict.appLinks} />
@@ -80,15 +84,17 @@ export default async function HomePage({ params }: { params: Promise<{ lang: str
         ) : null}
       </section>
 
-      <section id="demo" className="flex flex-col gap-6">
-        <div className="text-center">
-          <h2 className="font-display mb-2 text-2xl font-semibold sm:text-3xl">{dict.demo.title}</h2>
-          <p className="mx-auto max-w-xl text-foreground/70">{dict.demo.subtitle}</p>
-        </div>
-        <div className="mx-auto w-full max-w-md">
-          <DemoForm language={lang} dict={dict.demo} appLinksDict={dict.appLinks} />
-        </div>
-      </section>
+      {showContentLinks ? (
+        <section id="demo" className="flex flex-col gap-6">
+          <div className="text-center">
+            <h2 className="font-display mb-2 text-2xl font-semibold sm:text-3xl">{dict.demo.title}</h2>
+            <p className="mx-auto max-w-xl text-foreground/70">{dict.demo.subtitle}</p>
+          </div>
+          <div className="mx-auto w-full max-w-md">
+            <DemoForm language={lang} dict={dict.demo} appLinksDict={dict.appLinks} />
+          </div>
+        </section>
+      ) : null}
 
       {latestPost ? (
         <section className="mx-auto w-full max-w-md">
@@ -123,10 +129,14 @@ export default async function HomePage({ params }: { params: Promise<{ lang: str
           그동안 화면에 표시하지 않도록 처리") — 30일 체험 쿠폰 개념 자체를 재검토 중이라, 그
           개념이 정리될 때까지 노출을 멈추는 임시 조치다. 컴포넌트(LeadCaptureForm.tsx)와
           문구(dict.leadCapture)는 그대로 남겨뒀다 — 재개할 때 이 주석을 걷어내고 아래 줄만
-          되살리면 된다.
-      <section className="mx-auto w-full max-w-md">
-        <LeadCaptureForm language={lang} dict={dict.leadCapture} />
-      </section>
+          되살리면 된다. **2026-09-05부터 LeadCaptureForm의 language prop도 LaunchContentLanguage로
+          좁아졌으니, 되살릴 때 반드시 showContentLinks 게이트 안에서만 렌더할 것** — 데모 폼과
+          같은 이유(pt/vi는 개인화 콘텐츠 서비스 대상이 아님)로 이 폼도 4개 언어로 제한한다.
+      {showContentLinks ? (
+        <section className="mx-auto w-full max-w-md">
+          <LeadCaptureForm language={lang} dict={dict.leadCapture} />
+        </section>
+      ) : null}
       */}
     </div>
   );
