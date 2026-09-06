@@ -19,6 +19,10 @@ import { getLatestPostSummary } from '@/lib/posts';
 import { WEB_BASE_URL, languageAlternates, buildSocialMetadata } from '@/lib/seo';
 import { notFound } from 'next/navigation';
 
+// "이번 주 다인의 글"이 DB 저장 글(2026-09-06)일 수도 있어, blog/page.tsx와 같은 주기로
+// 재검증한다 — 없으면 새로 발행된 글이 코드 배포 없이는 여기 절대 안 나타난다.
+export const revalidate = 3600;
+
 export async function generateMetadata({ params }: { params: Promise<{ lang: string }> }): Promise<Metadata> {
   const { lang: rawLang } = await params;
   if (!isMarketingLanguage(rawLang)) return {};

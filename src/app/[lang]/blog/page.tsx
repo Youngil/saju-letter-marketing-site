@@ -17,6 +17,10 @@ export async function generateStaticParams() {
   return LAUNCH_CONTENT_LANGUAGES.map((lang) => ({ lang }));
 }
 
+/** DB 저장 글(2026-09-06)이 코드 배포 없이 이 목록에 나타나려면 정기 재검증이 필요하다 —
+ * `blog/[slug]/page.tsx`와 같은 주기(1시간). */
+export const revalidate = 3600;
+
 export async function generateMetadata({ params }: { params: Promise<{ lang: string }> }): Promise<Metadata> {
   const { lang: rawLang } = await params;
   if (!isMarketingLanguage(rawLang) || !isLaunchContentLanguage(rawLang)) return {};

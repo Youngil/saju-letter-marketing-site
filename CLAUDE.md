@@ -225,6 +225,72 @@ Turnstile로 막혀 있었지만, 그 결과 페이지에서 임의의 제3자 �
       `npx tsc --noEmit`/`npm test`(35/35)/`npm run build`(6개 slug×4언어=24개 블로그
       정적 경로 생성 확인) 통과 + 로컬 dev 서버에서 `curl`로 두 글의 렌더링과 홈 "이번 주
       다인의 글" 배너가 최신 글(`zodiac-and-saju-feel`)을 가리키는 것까지 확인했다.
+    - **블로그 콘텐츠 DB 저장 도입(2026-09-06, 같은 날 이어서, 사용자 요청: "블로그를 매번
+      작성하여 배포해야 한다면, 자동화를 위해서라도 블로그를 데이터베이스를 이용하여 작성하도록
+      변경해주세요. 이미지는 마케팅 사이트에 저장하는 방식으로 하여 읽어오는 식으로 변경")** —
+      바로 위 "완전히 수동(편집) 프로세스" 항목이 드러낸 진짜 문제(글을 쓸 때마다 git 커밋+코드
+      배포가 필요해, 매주 나가야 할 콘텐츠 케이던스가 배포 사이클에 묶여있다)에 대한 근본 대응.
+      **세 가지를 사전에 확인받고 시작했다(AskUserQuestion, 전부 추천안 선택)**: (1) 이미지는
+      런타임 업로드 저장 대신 **지금처럼 git에 커밋** — Cloud Run은 배포 간·인스턴스 간
+      영속 파일시스템이 없어 "마케팅 사이트에 저장"이 "런타임에 올린 파일을 디스크에 쓴다"는
+      뜻이 될 수 없다는 걸 먼저 설명했고(요청 문구의 "마케팅 사이트에 저장"은 사용자 확인 결과
+      "지금처럼 git 커밋"을 가리킨 것으로 확정됐다 — 새 GCS 버킷 등 인프라 추가 없음). (2)
+      본문 형식은 **`next-mdx-remote`로 MDX 유지**(다이어그램 컴포넌트 임베드 계속 가능) —
+      DB 문자열을 마크다운/HTML로 낮추는 대신 런타임 MDX 컴파일러를 새로 들였다. (3) 발행
+      경로는 **API/스크립트로만**(admin-panel에 전용 UI를 새로 만들지 않음).
+      - **하이브리드 구조** — 기존 6개 정적 파일 글(`content-posts/*.mdx`, git 커밋)은 그대로
+        두고, 새 글부터 DB(`saju-letter-backend`의 `MarketingSiteBlogPost` 모델, 마이그레이션
+        `20260906090000_add_marketing_site_blog_posts`)로 발행할 수 있다. `posts.ts`의
+        `getAllPostSummaries`가 두 소스를 `date` 기준으로 병합하고, 새 `getPostContent(lang, slug)`
+        가 `isPostSlug(slug)`로 소스를 가른다 — 알려진 정적 slug는 파일에서(`{source:'file',
+        Component}`), 그 외는 DB에서(`{source:'db', bodyMdx}`) 찾는다(두 소스가 같은 slug를
+        가질 일은 없다고 가정 — 정적 slug는 `POST_SLUGS`에 코드로 등록된 것뿐이라 DB 발행 시점에
+        겹치지 않게 고르면 된다). `blog/[slug]/page.tsx`가 `source`로 렌더 분기 — `'file'`은
+        기존처럼 `<Component/>`를, `'db'`는 `next-mdx-remote/rsc`의 `<MDXRemote source={bodyMdx}
+        components={blogMdxComponents}/>`를 쓴다. **`next-mdx-remote`는 소스 문자열을 런타임에
+        컴파일하는 방식이라 `import` 구문을 지원하지 않는다**(`@next/mdx`의 빌드 시점 파일
+        컴파일과의 핵심 차이) — 그래서 `BlogDiagrams.tsx`에 새 export `blogMdxComponents`
+        (`RitualFlowDiagram`/`FixedVsChangingDiagram`/`NewYearTimelineDiagram`)를 두어 DB
+        본문이 `import` 없이 `<RitualFlowDiagram .../>` 태그만 쓰고, 실제 구현은 렌더러가 이
+        맵으로 주입한다 — 새 글을 DB로 발행할 땐 이 세 컴포넌트 이름만 태그로 쓸 수 있다.
+      - **ISR로 전환 — SSG만으로는 코드 배포 없는 발행이 성립하지 않는다**: 블로그 목록/상세
+        (그리고 "이번 주 다인의 글"을 보여주는 홈)는 원래 `generateStaticParams`로 빌드 시점에만
+        생성되는 순수 정적 페이지였다 — `export const revalidate` 없이는 한 번 빌드된 페이지가
+        무기한 캐시돼, DB에 새 글을 넣어도 다음 코드 배포 전까지 사이트에 절대 안 나타난다. 세
+        페이지(`[lang]/page.tsx`, `[lang]/blog/page.tsx`, `[lang]/blog/[slug]/page.tsx`)
+        전부에 `export const revalidate = 3600`(1시간)을 추가했다 — DB 저장 글(`generateStaticParams`
+        목록에 없는 slug)은 Next.js의 기본 `dynamicParams: true`가 최초 요청 시점에 렌더해주고,
+        이후 1시간 동안 캐시된다.
+      - **`blogApi.ts`(신규) — 백엔드 실패를 `compatApi.ts`/`lunarNewYearApi.ts`보다 한 단계
+        더 넓게 흡수한다**: 그 두 파일은 `ApiError`(HTTP 응답을 받았지만 실패)만 흡수하고 방문
+        시점에만(동적 렌더) 호출되는데, 블로그 목록/상세는 `generateStaticParams` 밖의 슬롯이
+        **정적 빌드 시점(`next build`)에도 호출될 수 있어**, `ApiError`가 아닌 네트워크 레벨
+        예외(빌드 시점에 백엔드가 아직 안 떠 있을 때 나는 `fetch failed`/`ECONNREFUSED` 등)까지
+        놓치면 블로그 글 하나 때문에 전체 사이트 빌드가 깨진다 — 실제로 로컬 `npm run build`
+        중 이 문제를 직접 재현해 발견했다(첫 구현은 `ApiError`만 흡수했다가 크래시). 그래서
+        `listDbBlogPosts`/`getDbBlogPost` 둘 다 `catch (error)`에서 종류를 가리지 않고
+        `console.warn` 후 빈 배열/`null`로 흡수한다 — 정적 파일 글은 이 실패와 무관하게 계속
+        보인다는 원칙은 그대로.
+      - **`sitemap.ts`도 async로 전환 + slug별 실제 발행 언어만 alternates에 건다** — DB 글이
+        언어별로 다른 조합(예: 특정 언어 번역이 아직 없음)으로 존재할 수 있어, 기존처럼
+        `BLOG_LANGUAGES × POST_SLUGS` 전체 조합을 기계적으로 나열하는 방식이 더는 안 맞는다 —
+        4개 언어 각각 `getAllPostSummaries`를 조회해 slug→실제 발행된 언어 집합을 구성한 뒤,
+        그 slug가 실제로 있는 언어에만 `alternates.languages`를 건다(`x-default`는 그 집합에
+        `en`이 있으면 `en`, 없으면 집합의 첫 언어로 폴백).
+      - **admin-panel에는 이 콘텐츠 전용 UI가 없다**(사용자 결정) — 발행은
+        `saju-letter-admin-backend`의 `POST /marketing-site/blog-posts`(관리자 세션 인증)를
+        curl/스크립트로 직접 호출한다. 본문에 `import` 구문이 섞여 들어오면 컴파일 단계에서야
+        모호하게 실패하는 대신 그 라우트가 발행 시점에 미리 400으로 막는다.
+      - **테스트/검증** — `posts.ts`의 병합/분기 로직은 `blogApi.ts`를 목킹해 단위 테스트로
+        검증했다(`posts.test.ts`) — 이 저장소의 vitest가 별도 설정 없이 Vite 기본값으로 돌아
+        `@next/mdx` 웹팩 로더가 없다는 걸 이번에 발견했다(`content-posts/*.mdx`의 동적 import가
+        테스트 환경에서 항상 실패 — `getPostModule`이 이를 이미 try/catch로 흡수해 null을
+        반환하므로 테스트가 깨지진 않지만, 정적 파일 slug가 실제로 `{source:'file'}`을 반환하는
+        것 자체는 이 환경에서 단위 테스트로 확인할 수 없다 — 이번 기능과 무관한 기존 갭이라 손대지
+        않고 테스트 주석에 남겨뒀다). `npx tsc --noEmit`/`npm test`(40/40)/`npm run lint`(무관한
+        기존 경고 2건 외 에러 없음)/`npm run build`(블로그 라우트가 `revalidate: 1h`로 표시되는
+        것 확인) 전부 통과 — 로컬에 `saju-letter-backend`가 안 떠 있는 상태로 빌드해 위
+        네트워크 실패 흡수 경로도 실제로 검증됐다.
   - **UI(Phase 5)** — 목록/상세는 `.letter-surface`. 공용 `BlogByline`(아바타+`dict.blog.byLabel`).
     선택적 카테고리 칩(`meta.category`). 홈 “이번 주 다인의 글”은 `getLatestPostSummary`로
     최신 `date`를 가리키며 **1차 출시 언어만**.

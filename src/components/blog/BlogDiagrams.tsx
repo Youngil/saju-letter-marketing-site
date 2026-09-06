@@ -168,6 +168,18 @@ function MoonIcon() {
     </svg>
   );
 }
+/**
+ * DB 저장 글(2026-09-06)이 `next-mdx-remote/rsc`의 `<MDXRemote components={...}>`로 렌더될 때
+ * 참조할 수 있는 컴포넌트 맵 — 정적 파일 글(`content-posts/*.mdx`)은 `import`로 직접 불러오지만,
+ * `next-mdx-remote`는 런타임에 문자열을 컴파일해 `import` 구문을 지원하지 않으므로 DB 본문에서는
+ * `<RitualFlowDiagram .../>`처럼 태그만 쓰고 실제 구현은 이 맵으로 주입해야 한다.
+ */
+export const blogMdxComponents = {
+  RitualFlowDiagram,
+  FixedVsChangingDiagram,
+  NewYearTimelineDiagram,
+};
+
 function SunIcon() {
   return (
     <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" aria-hidden="true">

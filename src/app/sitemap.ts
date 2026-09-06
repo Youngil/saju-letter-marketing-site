@@ -7,7 +7,7 @@ import {
   type NonKoreanLanguage,
   type LaunchContentLanguage,
 } from '@/lib/languages';
-import { BLOG_LANGUAGES, POST_SLUGS, type PostSlug } from '@/lib/posts';
+import { BLOG_LANGUAGES, getAllPostSummaries } from '@/lib/posts';
 import { WEB_BASE_URL, languageAlternates } from '@/lib/seo';
 
 // DEFAULT_LANGUAGE('en')는 항상 모든 언어 부분집합 안에 있지만, languages.ts에서 더 넓은
@@ -15,7 +15,7 @@ import { WEB_BASE_URL, languageAlternates } from '@/lib/seo';
 const DEFAULT_BLOG_LANGUAGE = DEFAULT_LANGUAGE as LaunchContentLanguage;
 const DEFAULT_LUNAR_LANGUAGE = DEFAULT_LANGUAGE as NonKoreanLanguage;
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const homePath = (lang: MarketingLanguage) => `/${lang}`;
   const homeEntries = MARKETING_LANGUAGES.map((lang) => ({
     url: `${WEB_BASE_URL}${homePath(lang)}`,
@@ -31,12 +31,30 @@ export default function sitemap(): MetadataRoute.Sitemap {
     lastModified: new Date(),
     alternates: { languages: languageAlternates(BLOG_LANGUAGES, blogIndexPath, DEFAULT_BLOG_LANGUAGE) },
   }));
-  const blogPostPath = (slug: PostSlug) => (lang: (typeof BLOG_LANGUAGES)[number]) => `/${lang}/blog/${slug}`;
-  const blogPostEntries = BLOG_LANGUAGES.flatMap((lang) =>
-    POST_SLUGS.map((slug) => ({
+  // 2026-09-06부터 slug 목록이 코드 상수(POST_SLUGS)만으로 안 끝난다 — DB 저장 글(코드 배포
+  // 없이 발행)이 언어별로 다른 조합으로 존재할 수 있어, 언어마다 실제 발행된 글을 직접 조회해
+  // slug→가능한 언어 집합을 구성한다(각 slug가 실제로 번역된 언어에만 alternates를 건다).
+  const summariesByLanguage = await Promise.all(
+    BLOG_LANGUAGES.map(async (lang) => ({ lang, slugs: (await getAllPostSummaries(lang)).map((post) => post.slug) })),
+  );
+  const languagesBySlug = new Map<string, (typeof BLOG_LANGUAGES)[number][]>();
+  for (const { lang, slugs } of summariesByLanguage) {
+    for (const slug of slugs) {
+      languagesBySlug.set(slug, [...(languagesBySlug.get(slug) ?? []), lang]);
+    }
+  }
+  const blogPostPath = (slug: string) => (lang: (typeof BLOG_LANGUAGES)[number]) => `/${lang}/blog/${slug}`;
+  const blogPostEntries = Array.from(languagesBySlug.entries()).flatMap(([slug, availableLangs]) =>
+    availableLangs.map((lang) => ({
       url: `${WEB_BASE_URL}${blogPostPath(slug)(lang)}`,
       lastModified: new Date(),
-      alternates: { languages: languageAlternates(BLOG_LANGUAGES, blogPostPath(slug), DEFAULT_BLOG_LANGUAGE) },
+      alternates: {
+        languages: languageAlternates(
+          availableLangs,
+          blogPostPath(slug),
+          availableLangs.includes(DEFAULT_BLOG_LANGUAGE) ? DEFAULT_BLOG_LANGUAGE : availableLangs[0]!,
+        ),
+      },
     })),
   );
   const comparePath = (lang: (typeof BLOG_LANGUAGES)[number]) => `/${lang}/compare`;
