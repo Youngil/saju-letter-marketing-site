@@ -36,7 +36,7 @@ export const dictionary: MarketingDictionary = {
     submitting: '편지를 쓰는 중…',
     resultTitle: '오늘 아침 편지의 맛보기',
     resultFromName: '다인',
-    resultFromRole: '사주편지를 쓰는 사람',
+    resultFromRole: '편지 쓰는 사람',
     resultCta: '이런 편지를 매일 아침 받아보세요 — 무료로 시작',
     tryAgain: '다른 날짜로 다시 보기',
     errors: {
