@@ -13,16 +13,16 @@ export const dictionary: MarketingDictionary = {
   hero: {
     title: '다인이 매일 아침 전하는 짧은 편지',
     subtitle:
-      '사주편지는 생년월일시를 바탕으로, 편지지기 다인이 짧고 따뜻한 한 통의 편지를 보내드려요. 긴 운세 리포트가 아니라, 매일 아침 도착하는 편지입니다. 아래에서 무료로 미리보기를 체험해보세요.',
-    ctaDemo: '무료로 편지 미리보기',
+      '사주편지는 생년월일시를 바탕으로, 다인이 짧고 따뜻한 한 통의 편지를 보내드려요. 긴 운세 리포트가 아니라, 매일 아침 도착하는 편지입니다. 아래에서 무료로 받아보세요.',
+    ctaDemo: '오늘의 편지 무료로 받아보기',
     dainName: '다인',
-    dainRole: '사주편지의 편지지기',
+    dainRole: '사주편지를 쓰는 사람',
     learnAboutDain: '다인 소개 보기',
     compareHint: '사주가 별자리와 어떻게 다른지 궁금하신가요?',
     compareLink: '별자리 vs 사주 보기',
   },
   demo: {
-    title: '무료로 편지 미리보기',
+    title: '오늘의 편지, 무료로 받아보기',
     subtitle: '가입 없이 바로 체험할 수 있어요. 생년월일을 입력하면 다인이 매일 아침 보내는 편지의 느낌을 바로 확인할 수 있습니다.',
     dateLabel: '생년월일',
     yearLabel: '년',
@@ -32,11 +32,11 @@ export const dictionary: MarketingDictionary = {
     timeUnknownLabel: '태어난 시간을 몰라요',
     hourLabel: '시',
     minuteLabel: '분',
-    submitButton: '편지 미리보기',
+    submitButton: '편지 받아보기',
     submitting: '편지를 쓰는 중…',
     resultTitle: '오늘 아침 편지의 맛보기',
     resultFromName: '다인',
-    resultFromRole: '사주편지의 편지지기',
+    resultFromRole: '사주편지를 쓰는 사람',
     resultCta: '이런 편지를 매일 아침 받아보세요 — 무료로 시작',
     tryAgain: '다른 날짜로 다시 보기',
     errors: {
@@ -47,10 +47,10 @@ export const dictionary: MarketingDictionary = {
     },
   },
   blog: {
-    title: '다인의 주간 칼럼',
+    title: '다인의 블로그',
     subtitle: '다인이 남기는 짧은 글 — 아침, 계절, 그리고 편지 쓰는 이야기.',
     readMore: '읽기',
-    empty: '아직 칼럼이 없어요. 곧 찾아올게요.',
+    empty: '아직 글이 없어요. 곧 찾아올게요.',
     byLabel: '다인',
     thisWeekLabel: '이번 주 다인의 글',
     thisWeekCta: '블로그 읽기',
@@ -78,7 +78,7 @@ export const dictionary: MarketingDictionary = {
     sajuColumnLabel: '일간(사주)',
     dayMasterSectionTitle: '사주의 10개 일간',
     dayMasterIntro:
-      '별자리는 태어난 달로 정해져 12개가 있어요. 사주의 일간은 태어난 날짜 그 자체로 정해지고 10일 주기로 10개가 순환해요 — 그래서 아래 별자리 표와 한 줄씩 대응되지는 않아요. 홈의 미리보기로 아침 편지의 느낌을 확인해보세요.',
+      '별자리는 태어난 달로 정해져 12개가 있어요. 사주의 일간은 태어난 날짜 그 자체로 정해지고 10일 주기로 10개가 순환해요 — 그래서 아래 별자리 표와 한 줄씩 대응되지는 않아요. 홈에서 오늘의 편지를 무료로 받아보며 느낌을 확인해보세요.',
     infoAmountTitle: '얼마나 다른 정보를 담고 있나요',
     infoAmountBody:
       "서양 별자리는 태어난 '월'만으로 정해지는 값 하나예요 — 예를 들어 3월에 태어났다면 평생 물고기자리 하나죠. 사주는 태어난 년·월·일·시 네 가지를 각각 하나의 '기둥'으로 세워요. 그래서 같은 달, 심지어 같은 날에 태어났더라도 시간이 다르면 출발점 자체가 꽤 달라질 수 있어요 — 별자리 하나만으로보다 훨씬 개인적인 조합인 셈이에요.",
@@ -89,7 +89,7 @@ export const dictionary: MarketingDictionary = {
     philosophyBody:
       '별자리든 사주 읽기든, 성향과 흐름을 돌아보는 하나의 렌즈일 뿐 앞날을 확정하는 게 아니에요. 사주편지의 매일 편지도 이 원칙을 지켜요 — 단정적인 예언이 아니라, 부드럽게 힘을 실어주는 한마디를 목표로 해요.',
     referenceTitle: '참고 자료: 별자리·일간 대응표',
-    ctaText: '내 아침 편지 미리보기, 무료로 받아보기',
+    ctaText: '내 아침 편지, 무료로 받아보기',
   },
   leadCapture: {
     title: '다인의 짧은 소개 편지 받기 — 30일 체험 포함',

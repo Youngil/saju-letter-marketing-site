@@ -14,7 +14,7 @@ export interface MarketingDictionary {
     ctaDemo: string;
     /** 히어로에 보이는 다인 이름(예: "Dain" / "다인"). */
     dainName: string;
-    /** 다인 역할 한 줄(예: "Your letter writer" / "사주편지의 편지지기"). */
+    /** 다인 역할 한 줄(예: "Your letter writer" / "사주편지를 쓰는 사람"). */
     dainRole: string;
     /** 다인 소개 글(who-writes-your-letter)로 가는 링크 문구. 1차 출시 언어에서만 렌더. */
     learnAboutDain: string;
