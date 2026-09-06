@@ -16,7 +16,7 @@ export const dictionary: MarketingDictionary = {
       '사주편지는 생년월일시를 바탕으로, 다인이 짧고 따뜻한 한 통의 편지를 보내드려요. 긴 운세 리포트가 아니라, 매일 아침 도착하는 편지입니다. 아래에서 무료로 받아보세요.',
     ctaDemo: '오늘의 편지 무료로 받아보기',
     dainName: '다인',
-    dainRole: '사주편지를 쓰는 사람',
+    dainRole: '편지 쓰는 사람',
     learnAboutDain: '다인 소개 보기',
     compareHint: '사주가 별자리와 어떻게 다른지 궁금하신가요?',
     compareLink: '별자리 vs 사주 보기',
