@@ -8,6 +8,7 @@ import { isLaunchContentLanguage, isMarketingLanguage, MARKETING_LANGUAGES, type
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { WEB_BASE_URL } from '@/lib/seo';
 import { organizationJsonLd } from '@/lib/structuredData';
+import { GoogleAnalytics } from '@/components/GoogleAnalytics';
 import { notFound } from 'next/navigation';
 
 /**
@@ -76,6 +77,7 @@ export default async function LangLayout({
       className={`h-full antialiased ${playfair.variable} ${notoSerifKr.variable} ${notoSerifJp.variable}`}
     >
       <body className="flex min-h-full flex-col bg-background text-foreground">
+        <GoogleAnalytics />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd(dict.brand)) }}

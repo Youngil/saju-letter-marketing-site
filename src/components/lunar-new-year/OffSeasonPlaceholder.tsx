@@ -44,7 +44,7 @@ export function OffSeasonPlaceholder({
         {t.body} <strong>{formatDate(nextStartsAt, language)}</strong>.
       </p>
       <p className="text-sm text-stone-500">{t.cta}</p>
-      <AppDownloadLinks dict={appLinksDict} />
+      <AppDownloadLinks dict={appLinksDict} context="newyear_offseason" />
     </div>
   );
 }

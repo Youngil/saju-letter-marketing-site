@@ -78,7 +78,7 @@ export default async function LunarNewYearResultPage({ params }: PageProps) {
       <section className="flex flex-col items-center gap-3 rounded-2xl border border-stone-200 bg-white p-6 text-center">
         <h2 className="text-base font-semibold text-stone-800">{t.appBridgeTitle}</h2>
         <p className="text-sm text-stone-600">{t.appBridgeBody}</p>
-        <AppDownloadLinks dict={dict.appLinks} />
+        <AppDownloadLinks dict={dict.appLinks} context="newyear_result" />
       </section>
     </main>
   );

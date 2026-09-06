@@ -76,7 +76,7 @@ export default async function HomePage({ params }: { params: Promise<{ lang: str
         ) : null}
         <div className="flex flex-col items-center gap-2">
           <span className="text-xs font-medium uppercase tracking-wide text-foreground/40">{dict.appLinks.sectionLabel}</span>
-          <AppDownloadLinks dict={dict.appLinks} />
+          <AppDownloadLinks dict={dict.appLinks} context="home_hero" />
         </div>
         {showContentLinks ? (
           <p className="max-w-md text-sm text-foreground/55">

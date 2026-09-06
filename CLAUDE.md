@@ -377,6 +377,50 @@ Turnstile로 막혀 있었지만, 그 결과 페이지에서 임의의 제3자 �
     부드럽게 연결한다(`offSeason.cta` + `AppDownloadLinks`, 결과 `appBridgeTitle`/`Body` +
     `AppDownloadLinks`). 캠페인 페이지에 다인 초상은 두지 않는다.
 
+## 8-1. Google Analytics 4 — 마케팅 사이트 웹 스트림(2026-09-07 도입)
+
+"제로 예산 그로스 전략" 문서(claude.ai 아티팩트, 사주편지 성장 원장)의 §2/§6(커뮤니티·PR 채널)
+효과를 실측하려면 이 사이트 자체의 유입 소스도 잡아야 한다는 논의에서 시작했다. `saju-letter-mobile`의
+Firebase Analytics(GA4 for Firebase, §12 — 이 문서에는 없고 mobile 저장소 CLAUDE.md 참고)와
+**같은 GA4 프로퍼티(`saju-letter-20575`)에 별도 "웹" 데이터 스트림**으로 연결해, BigQuery export
+(이미 연동된 `analytics_547122318` 데이터셋) 한 곳에서 앱/웹 이벤트를 함께 조회할 수 있게 했다.
+
+- **Firebase JS SDK 대신 gtag.js를 직접 쓴다** — 이 사이트는 Firebase Auth/Firestore 등 다른
+  Firebase 서비스를 쓰지 않아, 분석만을 위해 `firebase` 패키지 전체를 새 의존성으로 추가할 이유가
+  없다(`src/lib/analytics.ts`의 `trackEvent()` + `src/components/GoogleAnalytics.tsx`의 `<Script>`
+  두 개로 동일한 결과). `NEXT_PUBLIC_GA_MEASUREMENT_ID`가 없으면(로컬 개발 기본값) 스크립트 자체를
+  렌더링하지 않는다 — Turnstile의 "사이트 키 없으면 위젯을 안 그린다" fail-open과 같은 원칙.
+- **`AppDownloadLinks.tsx`를 이번에 `'use client'`로 전환했다** — 홈 히어로/신년운세 결과·오프시즌
+  화면은 서버 컴포넌트에서 렌더되는데, 서버 컴포넌트는 자기 JSX에 함수(이벤트 핸들러)를 직접 담을
+  수 없다(`compat/[token]` 페이지가 이미 겪은 "Functions cannot be passed directly to Client
+  Components" 크래시와 같은 RSC 경계 제약). 이 배지 자체를 클라이언트 컴포넌트로 만들면(순수
+  프레젠테이션이라 훅은 여전히 안 씀) 어느 부모가 렌더하든 안전하게 클릭을 잡을 수 있다. 새 `context`
+  prop(`'home_hero'` / `'demo_result'` / `'compat_result'` / `'newyear_result'` /
+  `'newyear_offseason'`)으로 `install_cta_click` 이벤트에 어느 화면의 CTA인지를 함께 싣는다 —
+  `CompatView.tsx`가 이미 쓰던 `onAndroidClick`/`onIosClick`(1st-party `CompatibilityEvent` 기록,
+  `logCompatEvent`)은 그대로 유지하고 GA 이벤트를 나란히 추가했을 뿐이다(어느 한쪽을 대체하지 않음).
+- **커스텀 이벤트는 3개뿐이다** — `install_cta_click`(위), `lead_submit`(`LeadCaptureForm.tsx`
+  제출 성공 시, 이메일 값 자체는 파라미터에 넣지 않음 — 폼이 현재 홈 화면에서 잠시 비노출 중이라
+  §8 참고, 재노출 시 자동으로 함께 동작한다), `compat_result_view`(`CompatView.tsx`, 궁합 결과
+  열람 — 기존 `logCompatEvent(token, 'result_viewed', 'guest')`와 나란히 남기되 토큰은 GA
+  이벤트 파라미터에 넣지 않는다 — mobile CLAUDE.md §12가 세운 "식별 가능한 값을 애널리틱스
+  이벤트에 평문으로 남기지 않는다" 원칙을 그대로 따름). 자동 수집되는 표준 이벤트(`page_view` 등)는
+  건드리지 않았다.
+- **인플루언서(그로스 문서 §3)·궁합 바이럴 루프(§4)는 이 GA 스트림이 아니라 이미 있는 1st-party
+  메커니즘이 더 정확하다** — 인플루언서는 `saju-letter-backend`의 `PromotionCode`(코드별
+  redeem 기록이 `userId`까지 정확히 남음), 궁합 퍼널은 이미 서버에 쌓이고 있는
+  `CompatibilityEvent`. 이 GA 스트림이 실제로 채우는 공백은 §2(커뮤니티 시딩)·§6(무료 PR)처럼
+  "어느 채널에서 왔는지"가 전혀 안 잡히던 부분이다 — Play 스토어 설치 링크에 UTM(`referrer`
+  파라미터)을 붙이면 Firebase Analytics(모바일 쪽)가 자동으로 채널을 잡아주는 것과 짝을 이룬다.
+- **개인정보처리방침 동시 갱신** — 2026-08-17 모바일 GA4 도입 때(2026-09-02 개정, §4·§1)와 같은
+  원칙으로, 이번에도 같은 날 §1(자동 수집 정보)·§4(제3자 제공)의 기존 "Firebase" 문구를 "Firebase /
+  Google Analytics"로 넓히고 이 사이트가 새로 보내는 3개 커스텀 이벤트가 개인 식별 정보를 담지
+  않는다는 점을 명시했다(`src/content/privacyPolicy.ts` 상단 2026-09-07 개정 주석 참고). 6개 언어
+  전부 반영, effectiveDate/§10 "최종 수정"도 2026년 9월 7일로 갱신.
+- **검증**: 타입체크·테스트(40/40)·프로덕션 빌드 전부 통과. 로컬 프로덕션 서버(`npm run start`)로
+  실제 렌더된 HTML에서 `googletagmanager.com/gtag/js?id=G-...` 스크립트 태그와 개인정보처리방침의
+  갱신된 문구를 `curl`로 직접 확인했다.
+
 ## 9. 왜 Next.js인가 (형제 저장소 스택 선택과 대비)
 
 이 사이트는 관리자 패널(`saju-letter-admin-panel`, Vite + React SPA — 로그인 뒤 내부 직원만 쓰는

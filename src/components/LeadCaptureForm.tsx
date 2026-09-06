@@ -5,6 +5,7 @@ import type { MarketingDictionary } from '@/dictionaries/types';
 import type { LaunchContentLanguage } from '@/lib/languages';
 import { ApiError, getCouponAvailability, subscribeLead, type CouponAvailability } from '@/lib/api';
 import { Turnstile, TURNSTILE_ENABLED, type TurnstileHandle } from './Turnstile';
+import { trackEvent } from '@/lib/analytics';
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -63,6 +64,7 @@ export function LeadCaptureForm({ language, dict }: { language: LaunchContentLan
     setIsSubmitting(true);
     try {
       await subscribeLead({ email, language, consent, turnstileToken });
+      trackEvent('lead_submit', { language });
       setSuccess(true);
     } catch (err) {
       if (err instanceof ApiError && err.reason === 'already_subscribed') {

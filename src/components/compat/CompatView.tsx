@@ -12,6 +12,7 @@ import { calculateSaju, getLunarLeapMonth, resolveSolarBirthDate } from '@/lib/s
 import { isOldEnough } from '@/lib/age';
 import { Turnstile, TURNSTILE_ENABLED, type TurnstileHandle } from '../Turnstile';
 import { AppDownloadLinks } from '../AppDownloadLinks';
+import { trackEvent } from '@/lib/analytics';
 
 const CURRENT_YEAR = new Date().getFullYear();
 
@@ -47,6 +48,10 @@ export function CompatView({
   useEffect(() => {
     if (view.status === 'completed') {
       logCompatEvent(token, 'result_viewed', 'guest');
+      // GA4에도 함께 남긴다(2026-09-07) — CompatibilityEvent(위 호출)는 이미 서버에 정확히
+      // 쌓이고 있지만 "어느 마케팅 채널에서 왔는지"(UTM/리퍼러)는 모른다. 토큰은 넣지 않는다
+      // (평문 식별자를 애널리틱스 이벤트에 남기지 않는다는 기존 원칙 — mobile CLAUDE.md §12).
+      trackEvent('compat_result_view', { language });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [view.status]);
@@ -111,7 +116,13 @@ function CompletedResult({
       )}
       <div className="mt-2 flex flex-col items-center gap-3">
         <p className="text-center text-sm font-medium text-foreground/70">{content.cta}</p>
-        <AppDownloadLinks dict={appLinksDict} onAndroidClick={logInstallClick} onIosClick={logInstallClick} emphasized />
+        <AppDownloadLinks
+          dict={appLinksDict}
+          onAndroidClick={logInstallClick}
+          onIosClick={logInstallClick}
+          emphasized
+          context="compat_result"
+        />
       </div>
     </div>
   );

@@ -120,7 +120,7 @@ export function DemoForm({
         <p className="text-center text-xs text-foreground/50">{DISCLAIMER_CONTENT[language].short}</p>
         <div className="mt-2 flex flex-col items-center gap-3">
           <p className="text-center text-sm font-medium text-foreground/70">{dict.resultCta}</p>
-          <AppDownloadLinks dict={appLinksDict} emphasized />
+          <AppDownloadLinks dict={appLinksDict} emphasized context="demo_result" />
         </div>
         <button
           type="button"
