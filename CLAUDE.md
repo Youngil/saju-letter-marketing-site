@@ -204,6 +204,27 @@ Turnstile로 막혀 있었지만, 그 결과 페이지에서 임의의 제3자 �
     체크리스트·8주 백로그는 `../docs/marketing-site-realignment-2026-08-26.md` §4.5–4.6.
     새 글: `POST_SLUGS`에 slug 추가 + `content-posts/{slug}.{lang}.mdx` 4종 + `meta.category`
     (`observation` / `explainer` / `behind` / `season`).
+    - **이 운영은 완전히 수동(편집) 프로세스다 — 자동으로 글을 쓰는 스케줄러/크론/AI 생성
+      파이프라인이 코드베이스 어디에도 없다**(2026-09-06, 사용자 질문: "주간 블로그 자동
+      작성 스케줄러는 제대로 동작하고 있나요?"에 대한 조사 결과) — 매일 편지 같은 AI 자동
+      생성 콘텐츠와 달리, 이 칼럼은 처음부터 "본문 집필은 편집 트랙"(§4.6)이라고 명시된
+      사람이 직접(또는 Claude Code 세션이) MDX 파일을 써서 커밋+배포하는 방식이다. 조사
+      시점 실제로 1주차(목표일 2026-09-01, `why-a-short-letter`)가 5일 지연된 채 미작성
+      상태였음을 확인 — "스케줄러 오작동"이 아니라 그 주에 실제 집필 작업이 진행되지
+      않았던 것. 사용자 확인 후 1·2주차(`why-a-short-letter`/`zodiac-and-saju-feel`)를
+      이 세션에서 4개 언어씩 작성해 발행했다 — `why-a-short-letter`는 백로그 목표일
+      그대로(2026-09-01) 날짜를 매겼고(형식만 지연 발행, 편집 캘린더상 그 주 몫), 아직
+      오지 않은 2주차 목표일(2026-09-08)도 그대로 매겨(2일 앞당겨 발행) 정렬 순서를
+      유지했다 — `getAllPostSummaries`는 `date` 문자열만 비교해 정렬하므로 실제 발행일과
+      `date` 필드가 달라도 동작에는 문제가 없다(스케줄링 게이트가 아니라 순수 메타데이터).
+      `why-a-short-letter`(behind)는 `what-is-saju.en.mdx`가 이미 쓰던 `RitualFlowDiagram`을
+      재사용해 "짧은 4단 편지" 구조를 시각화했고, `zodiac-and-saju-feel`(explainer)은
+      기존 `saju-vs-western-astrology`가 이미 다룬 "구조적 차이" 설명을 반복하지 않고
+      "실제로 느껴지는 차이"(별자리=이미 아는 나를 확인하는 느낌, 사주=오늘 하루의 안부를
+      묻는 느낌)라는 다른 각도로 써서 두 글을 상호 링크했다(`/compare` 링크도 함께).
+      `npx tsc --noEmit`/`npm test`(35/35)/`npm run build`(6개 slug×4언어=24개 블로그
+      정적 경로 생성 확인) 통과 + 로컬 dev 서버에서 `curl`로 두 글의 렌더링과 홈 "이번 주
+      다인의 글" 배너가 최신 글(`zodiac-and-saju-feel`)을 가리키는 것까지 확인했다.
   - **UI(Phase 5)** — 목록/상세는 `.letter-surface`. 공용 `BlogByline`(아바타+`dict.blog.byLabel`).
     선택적 카테고리 칩(`meta.category`). 홈 “이번 주 다인의 글”은 `getLatestPostSummary`로
     최신 `date`를 가리키며 **1차 출시 언어만**.

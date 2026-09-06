@@ -15,6 +15,8 @@ export const POST_SLUGS = [
   'saju-vs-western-astrology',
   'how-korean-new-year-works',
   'who-writes-your-letter',
+  'why-a-short-letter',
+  'zodiac-and-saju-feel',
 ] as const;
 export type PostSlug = (typeof POST_SLUGS)[number];
 
