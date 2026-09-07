@@ -155,6 +155,15 @@ import type { MarketingLanguage } from '@/lib/languages';
  * 캡처 제출, 이메일 자체는 포함하지 않음)·`compat_result_view`(궁합 결과 열람, 토큰은 포함하지
  * 않음) 3종 — 전부 식별 가능한 개인정보(이메일/이름/생년월일/토큰)를 이벤트 파라미터에 담지
  * 않는다. effectiveDate와 §10의 "최종 수정"도 6개 언어 전부 2026년 9월 7일로 갱신했다.
+ *
+ * ⚠️⚠️ 2026-09-07 개정(같은 날 이어서) — Play Console에서 7일 무료체험 Play Offer가 실제로는
+ * 존재하지 않았던 걸 발견해 재생성하는 과정에서, "구독 취소 시 결제한 기간이 끝난 뒤 어떻게
+ * 되는지"를 알려주는 곳이 이 방침에도 앱 UI에도 없다는 걸 사용자가 지적했다. §6(이용자의 권리와
+ * 행사 방법)의 구독 취소 관련 문장이 "남은 기간에 대한 환불은 되지 않는다"까지만 말하고, 그
+ * 기간이 끝난 뒤 무료 상태(구독 전용 기능 잠김)로 전환된다는 사실은 명시하지 않고 있었다 — 6개
+ * 언어 §6 전부에 이 문장을 추가했다(`saju-letter-mobile`의 구독 취소 확인/완료 다이얼로그
+ * 문구도 같은 날 같은 문장으로 함께 보강 — 그쪽 CLAUDE.md 참고). effectiveDate/§10 날짜는 이미
+ * 같은 날 위 GA4 개정으로 2026년 9월 7일로 갱신돼 있어 추가로 바꾸지 않았다.
  */
 
 export const PRIVACY_CONTACT_EMAIL = 'contact@mikomaru.com';
@@ -241,7 +250,8 @@ export const PRIVACY_POLICY_CONTENT: Record<MarketingLanguage, PrivacyPolicyCont
           '생년월일시 등 식별 가능한 정보는 즉시 알아볼 수 없는 값으로 대체되고 다시 로그인할 수 없으며, 구독 ' +
           '중이었다면 자동 결제 갱신도 함께 취소되지만 남은 기간에 대한 환불은 되지 않습니다. 계속 이용하면서 ' +
           '결제만 멈추고 싶다면, 탈퇴 대신 앱의 설정 화면에서 구독만 별도로 취소할 수 있습니다. 마케팅 이메일 ' +
-          '수신을 원하지 않으시면 각 이메일 하단의 수신거부 링크로 언제든지 거부하실 수 있습니다. 탈퇴 외에 ' +
+          '수신을 원하지 않으시면 각 이메일 하단의 수신거부 링크로 언제든지 거부하실 수 있습니다. 취소한 ' +
+          '구독은 이미 결제한 기간이 끝나면 무료 상태로 전환되어 구독 전용 기능은 다시 잠깁니다. 탈퇴 외에 ' +
           '개인정보 열람·정정 등을 원하시면 아래 연락처로 요청해 주십시오.</p>',
       },
       {
@@ -346,7 +356,9 @@ export const PRIVACY_POLICY_CONTENT: Record<MarketingLanguage, PrivacyPolicyCont
           'subscription — but any remaining paid time is not refunded. If you just want to stop future charges ' +
           "while continuing to use the app, you can cancel only your subscription from the app's Settings " +
           'screen instead of deleting your account. If you no longer want to receive marketing emails, you can ' +
-          'opt out anytime using the unsubscribe link at the bottom of each email. For any other requests — ' +
+          'opt out anytime using the unsubscribe link at the bottom of each email. After a cancelled ' +
+          'subscription reaches the end of its paid period, your account reverts to the free tier and ' +
+          'subscription-only features are locked again. For any other requests — ' +
           'such as accessing or correcting your information — please contact us using the information below.</p>',
       },
       {
@@ -450,7 +462,8 @@ export const PRIVACY_POLICY_CONTENT: Record<MarketingLanguage, PrivacyPolicyCont
           'できなくなり、サブスクリプションをご利用中の場合は自動更新も解約されますが、残りの期間分の返金はあり' +
           'ません。引き続きアプリを利用しながら支払いだけ止めたい場合は、退会の代わりにアプリの設定画面から' +
           'サブスクリプションだけを解約することもできます。マーケティングメールの受信を希望されない場合は、各' +
-          'メール下部の配信停止リンクからいつでも解除できます。退会以外に個人情報の閲覧・訂正などをご希望の場合' +
+          'メール下部の配信停止リンクからいつでも解除できます。解約したサブスクリプションはお支払い済みの期間が' +
+          '終了すると無料状態に戻り、サブスク限定の機能は再びご利用いただけなくなります。退会以外に個人情報の閲覧・訂正などをご希望の場合' +
           'は、下記の連絡先までご請求ください。</p>',
       },
       {
@@ -558,7 +571,9 @@ export const PRIVACY_POLICY_CONTENT: Record<MarketingLanguage, PrivacyPolicyCont
           'se reembolsará el tiempo restante ya pagado. Si solo quieres detener los próximos cobros mientras ' +
           'sigues usando la app, puedes cancelar únicamente tu suscripción desde la pantalla de Configuración ' +
           'en lugar de eliminar tu cuenta. Si ya no deseas recibir correos de marketing, puedes darte de baja ' +
-          'en cualquier momento usando el enlace de cancelación al final de cada correo. Para cualquier otra ' +
+          'en cualquier momento usando el enlace de cancelación al final de cada correo. Cuando una suscripción ' +
+          'cancelada llega al final del período ya pagado, tu cuenta pasa al plan gratuito y las funciones de ' +
+          'suscripción quedan bloqueadas de nuevo. Para cualquier otra ' +
           'solicitud — como acceder o corregir tu información — contáctanos usando los datos a continuación.</p>',
       },
       {
@@ -668,7 +683,9 @@ export const PRIVACY_POLICY_CONTENT: Record<MarketingLanguage, PrivacyPolicyCont
           'pago não será reembolsado. Se você só quer parar as próximas cobranças enquanto continua usando o ' +
           'app, pode cancelar apenas sua assinatura na tela de Configurações em vez de excluir sua conta. Se ' +
           'não quiser mais receber e-mails de marketing, você pode cancelar a inscrição a qualquer momento ' +
-          'usando o link no rodapé de cada e-mail. Para qualquer outra solicitação — como acessar ou corrigir ' +
+          'usando o link no rodapé de cada e-mail. Quando uma assinatura cancelada chega ao fim do período já ' +
+          'pago, sua conta passa para o plano gratuito e os recursos de assinatura ficam bloqueados novamente. ' +
+          'Para qualquer outra solicitação — como acessar ou corrigir ' +
           'suas informações — entre em contato conosco usando as informações abaixo.</p>',
       },
       {
@@ -776,7 +793,9 @@ export const PRIVACY_POLICY_CONTENT: Record<MarketingLanguage, PrivacyPolicyCont
           'đăng ký đang hoạt động — nhưng thời gian còn lại đã thanh toán sẽ không được hoàn tiền. Nếu bạn chỉ ' +
           'muốn dừng các khoản thanh toán tiếp theo trong khi vẫn tiếp tục sử dụng ứng dụng, bạn có thể chỉ ' +
           'hủy gói đăng ký từ màn hình Cài đặt thay vì xóa tài khoản. Nếu bạn không muốn nhận email tiếp thị ' +
-          'nữa, bạn có thể hủy đăng ký bất cứ lúc nào bằng liên kết ở cuối mỗi email. Với các yêu cầu khác — ' +
+          'nữa, bạn có thể hủy đăng ký bất cứ lúc nào bằng liên kết ở cuối mỗi email. Khi gói đăng ký đã hủy ' +
+          'hết thời gian đã thanh toán, tài khoản của bạn sẽ chuyển về gói miễn phí và các tính năng dành cho ' +
+          'người đăng ký sẽ bị khóa lại. Với các yêu cầu khác — ' +
           'như truy cập hoặc chỉnh sửa thông tin của bạn — vui lòng liên hệ với chúng tôi theo thông tin bên dưới.</p>',
       },
       {
