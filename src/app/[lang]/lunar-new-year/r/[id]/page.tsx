@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { isMarketingLanguage, isNonKoreanLanguage, type NonKoreanLanguage } from '@/lib/languages';
+import { isMarketingLanguage, isLaunchContentLanguage, type LaunchContentLanguage } from '@/lib/languages';
 import { getDictionary } from '@/dictionaries';
 import { getReading } from '@/lib/lunarNewYearApi';
 import { DISCLAIMER_CONTENT } from '@/content/disclaimer';
@@ -15,7 +15,7 @@ interface PageProps {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { lang: rawLang, id } = await params;
-  if (!isMarketingLanguage(rawLang) || !isNonKoreanLanguage(rawLang)) return {};
+  if (!isMarketingLanguage(rawLang) || !isLaunchContentLanguage(rawLang)) return {};
   const reading = await getReading(id);
   if (!reading) return {};
 
@@ -36,8 +36,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function LunarNewYearResultPage({ params }: PageProps) {
   const { lang: rawLang, id } = await params;
-  if (!isMarketingLanguage(rawLang) || !isNonKoreanLanguage(rawLang)) notFound();
-  const language: NonKoreanLanguage = rawLang;
+  if (!isMarketingLanguage(rawLang) || !isLaunchContentLanguage(rawLang)) notFound();
+  const language: LaunchContentLanguage = rawLang;
 
   const reading = await getReading(id);
   if (!reading) notFound();

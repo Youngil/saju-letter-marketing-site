@@ -81,6 +81,10 @@ PR/QA 전용에서 정식 타겟으로 바뀌면서 ja와 같은 그룹으로 �
 분기는 제거됐다(홈은 6개 언어 공통 편지 약속, 인포그래픽은 compare의 `CompareInfographic`으로
 이동). 구현은 언어별 dictionary 문구 차이가 본체다.
 
+**서비스 언어 통합 관리(2026-09-07, meta 저장소 CLAUDE.md §9 확장 기능 #15·`saju-letter-backend/CLAUDE.md` §7-1 참고)** — `saju-letter-backend`의 `ServiceLanguage` 공유 테이블을 이 사이트가 처음으로 실제 소비하기 시작했다. `src/lib/serviceLanguagesApi.ts::fetchActiveServiceLanguages()`(`blogApi.ts`와 같은 "어떤 실패든 조용히 안전값(`LAUNCH_CONTENT_LANGUAGES` 전체, 기본 `en`)으로 흡수" 원칙)가 새 공개 엔드포인트 `GET /marketing-site/service-languages`를 호출한다. `[lang]/layout.tsx`가 `revalidate=3600`(2026-09-06 블로그 DB 이관 때 도입한 것과 같은 ISR 패턴)로 이 값을 조회해 두 곳에 반영한다 — (1) `LanguageSwitcher`에 `activeLanguages` prop으로 직접 전달(별도 React Context 없이 — 이 컴포넌트가 layout.tsx의 유일한 직접 소비처라 prop 하나로 충분, 과설계 방지), (2) `[lang]/page.tsx`(홈, 서버 컴포넌트라 같은 함수를 직접 다시 호출)의 `showContentLinks`가 `isLaunchContentLanguage(lang)`뿐 아니라 "지금 이 언어가 활성 상태인가"도 함께 확인하도록 확장 — 관리자가 한 언어를 일시 중지하면 그 언어의 데모 CTA/블로그 배너도 조용히 숨는다. **`generateStaticParams`(빌드 타임 정적 라우트)는 이 실시간 값과 무관하게 정적 `LAUNCH_CONTENT_LANGUAGES`를 그대로 쓴다** — 새 언어의 정적 페이지 자체는 코드 배포 없이는 생기지 않으므로 그 축까지 실시간화할 이유가 없다.
+
+**신년운세 캠페인이 한국어를 포함하도록 뒤집혔다(사용자가 이전 설계 결정을 직접 반전)** — `lib/languages.ts`의 `NON_KOREAN_LANGUAGES`/`isNonKoreanLanguage`/`NonKoreanLanguage` 타입을 전부 삭제하고, 캠페인 3개 라우트(`lunar-new-year/page.tsx`/`unsubscribe/page.tsx`/`r/[id]/page.tsx`)와 관련 컴포넌트(`ReadingForm.tsx`/`OffSeasonPlaceholder.tsx`/`LunarNewYearHome.tsx`)·API 클라이언트(`lunarNewYearApi.ts`)를 `LaunchContentLanguage`(ko 포함 4개)로 교체했다. `ko.ts`에 그동안 없던 `lunarNewYear` 섹션(랜딩 폼/오프시즌/결과/수신거부 전체)을 새로 채웠다 — 다른 lunarNewYear 언어들과 같은 구조, 이 사이트 전반의 다인 보이스·해요체 톤. `OffSeasonPlaceholder.tsx`의 `INTL_LOCALE` 맵에 `ko: 'ko-KR'`를 추가했다. `LanguageSwitcher.tsx`의 `availableSwitcherLanguages()`가 갖고 있던 "`/lunar-new-year` 경로에서만 ko를 빼는" 특수 분기(2026-09-04 종합 버그 점검 2회차로 추가됐던 것)도 이제 필요 없어져 제거 — 함수가 단순히 `LAUNCH_CONTENT_LANGUAGES`를 그대로 반환한다. `sitemap.ts`의 신년운세 항목도 `NON_KOREAN_LANGUAGES` 대신 `LAUNCH_CONTENT_LANGUAGES`를 쓴다. 프로덕션 빌드로 `/ko/lunar-new-year`·`/ko/lunar-new-year/unsubscribe`가 실제로 정적 생성되는 것을 확인했다.
+
 ## 3. `/[lang]` URL 세그먼트 라우팅 — 신년운세 캠페인과 다른 선택
 
 `saju-letter-newyear-campaign`은 URL 세그먼트 없이 브라우저 언어 감지 + localStorage만 쓴다(단일

@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
-import { availableSwitcherLanguages, type MarketingLanguage } from '@/lib/languages';
+import { availableSwitcherLanguages, type LaunchContentLanguage, type MarketingLanguage } from '@/lib/languages';
 
 const LANGUAGE_LABELS: Record<MarketingLanguage, string> = {
   ko: '한국어',
@@ -34,8 +34,14 @@ const LANGUAGE_CODES: Record<MarketingLanguage, string> = {
  * 는 아직 없어서, 스위처로 노출하면 pt/vi로 바꾼 뒤 블로그/compare 내비게이션을 누르면 404가
  * 나는 어중간한 경험이 된다. 라우트 자체는 안 건드렸으므로 직접 링크(예: 신년운세 캠페인의
  * pt/vi 지원)는 그대로 동작한다 — 여기서는 "발견 가능성"만 숨긴다.
+ *
+ * `activeLanguages`(2026-09-07, 서비스 언어 통합 관리)는 관리자 패널에서 실시간으로 켜고 끄는
+ * 값이다 — `[lang]/layout.tsx`(서버 컴포넌트)가 `fetchActiveServiceLanguages()`로 최대 1시간
+ * 캐시(ISR) 조회한 뒤 이 컴포넌트에 직접 prop으로 내려준다. 이 컴포넌트는 layout.tsx가 직접
+ * 렌더하는 유일한 소비처라 별도 React Context 없이 prop 하나로 충분하다(과설계 방지 — 이
+ * 저장소 전반의 관례).
  */
-export function LanguageSwitcher({ current }: { current: MarketingLanguage }) {
+export function LanguageSwitcher({ current, activeLanguages }: { current: MarketingLanguage; activeLanguages: LaunchContentLanguage[] }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
 
@@ -45,9 +51,7 @@ export function LanguageSwitcher({ current }: { current: MarketingLanguage }) {
     return `/${lang}${rest}`;
   }
 
-  // 신년운세 캠페인 등 ko 미지원 경로에서는 드롭다운에서도 ko를 뺀다(2026-09-04, 종합 버그
-  // 점검 2회차 — 상세 근거는 availableSwitcherLanguages doc 참고).
-  const availableLanguages = availableSwitcherLanguages(rest);
+  const availableLanguages = availableSwitcherLanguages(rest).filter((lang) => activeLanguages.includes(lang));
 
   return (
     <div className="relative">

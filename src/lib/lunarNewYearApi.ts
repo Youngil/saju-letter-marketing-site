@@ -1,4 +1,4 @@
-import type { NonKoreanLanguage } from './languages';
+import type { LaunchContentLanguage } from './languages';
 import type { Pillar } from './saju';
 import { ApiError, request } from './apiClient';
 
@@ -22,7 +22,7 @@ export function getCampaignWindow(): Promise<CampaignWindowStatus> {
 
 export interface CreateReadingInput {
   name: string;
-  language: NonKoreanLanguage;
+  language: LaunchContentLanguage;
   yearPillar?: Pillar;
   monthPillar?: Pillar;
   dayPillar: Pillar;
@@ -76,7 +76,7 @@ export function createReading(input: CreateReadingInput): Promise<CreateReadingR
 export interface ReadingView {
   id: string;
   name: string;
-  language: NonKoreanLanguage;
+  language: LaunchContentLanguage;
   dayStem: string;
   content: ReadingContent;
   hasEmailSubscription: boolean;

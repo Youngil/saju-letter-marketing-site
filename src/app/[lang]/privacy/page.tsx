@@ -1,22 +1,24 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { isMarketingLanguage, MARKETING_LANGUAGES, DEFAULT_LANGUAGE, type MarketingLanguage } from '@/lib/languages';
+import { isMarketingLanguage, isLaunchContentLanguage, LAUNCH_CONTENT_LANGUAGES, DEFAULT_LANGUAGE, type MarketingLanguage } from '@/lib/languages';
 import { PRIVACY_POLICY_CONTENT } from '@/content/privacyPolicy';
 import { WEB_BASE_URL, languageAlternates, buildSocialMetadata } from '@/lib/seo';
 
 /**
- * saju-letter-backend/public/privacy.html에서 이관(2026-08-12) — 모든 마케팅 언어(6개)에서
- * 열려 있다. LAUNCH_CONTENT_LANGUAGES로 좁히는 블로그/compare와 다르게, 법적 고지 문서라
- * 1차 출시 언어 축과 무관하게 앱이 지원하는 언어 전부에서 접근 가능해야 한다 — 콘텐츠 자체는
- * 이관 시점에 이미 6개 언어 모두 채워져 있었다.
+ * saju-letter-backend/public/privacy.html에서 이관(2026-08-12) — 원래는 법적 고지 문서라 1차
+ * 출시 언어 축과 무관하게 앱이 지원하는 언어 전부(6개)에서 열어뒀지만, **2026-09-07 "모든
+ * 서비스를 1차 출시 4개 언어로 좁힌다"는 결정에 따라 LAUNCH_CONTENT_LANGUAGES(4)로 좁혔다** —
+ * 이제 pt/vi는 부모 레이아웃(`[lang]/layout.tsx`)의 게이트에서 이미 404가 나므로 이 페이지
+ * 자체의 게이트는 사실상 이중 방어다. `PRIVACY_POLICY_CONTENT`는 6개 언어 콘텐츠를 그대로
+ * 유지한다(삭제 아님) — 나중에 재개하면 이 배열에 언어만 추가하면 된다.
  */
 export async function generateStaticParams() {
-  return MARKETING_LANGUAGES.map((lang) => ({ lang }));
+  return LAUNCH_CONTENT_LANGUAGES.map((lang) => ({ lang }));
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ lang: string }> }): Promise<Metadata> {
   const { lang } = await params;
-  if (!isMarketingLanguage(lang)) return {};
+  if (!isMarketingLanguage(lang) || !isLaunchContentLanguage(lang)) return {};
   const policy = PRIVACY_POLICY_CONTENT[lang];
   const path = (l: MarketingLanguage) => `/${l}/privacy`;
   return {
@@ -24,7 +26,7 @@ export async function generateMetadata({ params }: { params: Promise<{ lang: str
     description: policy.intro,
     alternates: {
       canonical: `${WEB_BASE_URL}${path(lang)}`,
-      languages: languageAlternates(MARKETING_LANGUAGES, path, DEFAULT_LANGUAGE),
+      languages: languageAlternates(LAUNCH_CONTENT_LANGUAGES, path, DEFAULT_LANGUAGE),
     },
     ...buildSocialMetadata({
       title: policy.title,
@@ -37,7 +39,7 @@ export async function generateMetadata({ params }: { params: Promise<{ lang: str
 
 export default async function PrivacyPolicyPage({ params }: { params: Promise<{ lang: string }> }) {
   const { lang: rawLang } = await params;
-  if (!isMarketingLanguage(rawLang)) notFound();
+  if (!isMarketingLanguage(rawLang) || !isLaunchContentLanguage(rawLang)) notFound();
   const lang: MarketingLanguage = rawLang;
   const policy = PRIVACY_POLICY_CONTENT[lang];
 

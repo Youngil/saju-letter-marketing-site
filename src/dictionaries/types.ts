@@ -144,10 +144,14 @@ export interface MarketingDictionary {
     comingSoon: string;
   };
   /**
-   * saju-letter-newyear-campaign 이관분(2026-08-07) — ko를 제외한 5개 언어에만 존재한다(그
-   * 캠페인이 원래 ko를 지원하지 않았던 것과 같은 이유, languages.ts의 `NonKoreanLanguage` 참고).
-   * ko.ts는 이 필드를 채우지 않고, `/[lang]/lunar-new-year/*` 라우트가 `isNonKoreanLanguage`로
-   * 걸러 ko 요청 자체를 `notFound()` 처리하므로 런타임에 undefined로 접근될 일이 없다.
+   * saju-letter-newyear-campaign 이관분(2026-08-07). **2026-09-07부터 서비스 언어 통합 관리
+   * (languages.ts의 `LAUNCH_CONTENT_LANGUAGES`)를 그대로 따르면서 한국어도 포함한다** — 이전엔
+   * ko를 제외한 5개 언어(en/es/pt/ja/vi)만 이 필드를 채웠지만(그 캠페인이 원래 ko를 지원하지
+   * 않았던 설계), 이제 ko.ts도 이 필드를 채운다. `/[lang]/lunar-new-year/*` 라우트가 실제로
+   * 서빙하는 언어는 `isLaunchContentLanguage`(`LAUNCH_CONTENT_LANGUAGES` = ko/en/ja/es)로
+   * 좁혀진다 — pt.ts/vi.ts는 여전히 이 필드를 갖고 있지만(1차 출시 재개 대비, 데이터 손실 없음)
+   * 라우트가 그 두 언어를 `notFound()` 처리해 런타임에서 쓰이지 않을 뿐이다. optional인 이유는
+   * 오직 이 타입 정의 자체가 pt/vi를 포함한 `MARKETING_LANGUAGES` 전체를 대상으로 하기 때문.
    */
   lunarNewYear?: {
     navHome: string;

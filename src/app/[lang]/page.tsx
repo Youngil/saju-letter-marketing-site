@@ -4,12 +4,15 @@ import { getDictionary } from '@/dictionaries';
 import {
   isMarketingLanguage,
   isLaunchContentLanguage,
-  MARKETING_LANGUAGES,
+  LAUNCH_CONTENT_LANGUAGES,
   DEFAULT_LANGUAGE,
   type MarketingLanguage,
 } from '@/lib/languages';
-// 홈 미니 데모·리드 캡처도 2026-09-05부터 LAUNCH_CONTENT_LANGUAGES(4개)로 제한됐다 — 아래
-// showContentLinks 게이트 참고, CLAUDE.md §2 "언어 지원" 갱신 내역도 함께 참고.
+// 홈 미니 데모·리드 캡처도 2026-09-05부터 LAUNCH_CONTENT_LANGUAGES(4개)로 제한됐고,
+// 2026-09-07부터는 이 페이지 자체(부모 레이아웃 게이트 포함)도 6개 언어가 아니라 이 4개
+// 언어에서만 렌더된다 — 아래 showContentLinks는 이제 사실상 항상 true이지만(도달했다는 것
+// 자체가 이미 LAUNCH_CONTENT_LANGUAGES라는 뜻) 방어적으로 그대로 남겨뒀다.
+import { fetchActiveServiceLanguages } from '@/lib/serviceLanguagesApi';
 import { DemoForm } from '@/components/DemoForm';
 // LeadCaptureForm import는 아래 렌더링과 함께 잠시 꺼뒀다(2026-09-02) — §leadCapture 참고.
 import { AppDownloadLinks } from '@/components/AppDownloadLinks';
@@ -25,7 +28,7 @@ export const revalidate = 3600;
 
 export async function generateMetadata({ params }: { params: Promise<{ lang: string }> }): Promise<Metadata> {
   const { lang: rawLang } = await params;
-  if (!isMarketingLanguage(rawLang)) return {};
+  if (!isMarketingLanguage(rawLang) || !isLaunchContentLanguage(rawLang)) return {};
   const dict = await getDictionary(rawLang);
   const path = (lang: MarketingLanguage) => `/${lang}`;
 
@@ -34,7 +37,7 @@ export async function generateMetadata({ params }: { params: Promise<{ lang: str
     description: dict.hero.subtitle,
     alternates: {
       canonical: `${WEB_BASE_URL}${path(rawLang)}`,
-      languages: languageAlternates(MARKETING_LANGUAGES, path, DEFAULT_LANGUAGE),
+      languages: languageAlternates(LAUNCH_CONTENT_LANGUAGES, path, DEFAULT_LANGUAGE),
     },
     ...buildSocialMetadata({
       title: dict.hero.title,
@@ -46,10 +49,15 @@ export async function generateMetadata({ params }: { params: Promise<{ lang: str
 
 export default async function HomePage({ params }: { params: Promise<{ lang: string }> }) {
   const { lang: rawLang } = await params;
-  if (!isMarketingLanguage(rawLang)) notFound();
+  if (!isMarketingLanguage(rawLang) || !isLaunchContentLanguage(rawLang)) notFound();
   const lang: MarketingLanguage = rawLang;
   const dict = await getDictionary(lang);
-  const showContentLinks = isLaunchContentLanguage(lang);
+  // 서비스 언어 통합 관리(2026-09-07) — showContentLinks는 이제 "이 언어에 블로그/compare
+  // 콘텐츠가 구조적으로 있는가"(isLaunchContentLanguage)뿐 아니라 "이 언어가 지금 관리자
+  // 패널에서 활성 상태인가"(fetchActiveServiceLanguages, 최대 1시간 캐시)도 함께 본다 —
+  // 관리자가 한 언어를 일시 중지하면 그 언어의 데모/블로그 CTA도 함께 조용히 숨는다.
+  const { active: activeLanguages } = await fetchActiveServiceLanguages();
+  const showContentLinks = isLaunchContentLanguage(lang) && activeLanguages.includes(lang);
   const latestPost = showContentLinks ? await getLatestPostSummary(lang) : null;
 
   return (

@@ -39,22 +39,15 @@ describe('detectPreferredLaunchLanguage (2026-09-03, 종합 버그 점검 — Ac
   });
 });
 
-describe('availableSwitcherLanguages (2026-09-04, 종합 버그 점검 2회차 — 신년운세 캠페인에서 ko를 보여줘 404를 유발하던 버그 수정)', () => {
+describe('availableSwitcherLanguages (2026-09-07부터 신년운세 캠페인도 서비스 언어 통합 관리를 그대로 따라 ko를 포함한다 — 이전엔 그 캠페인 경로에서만 ko를 빼는 특수 분기가 있었다, meta 저장소 CLAUDE.md §9 참고)', () => {
   it('일반 경로에서는 LAUNCH_CONTENT_LANGUAGES 4개(ko 포함)를 그대로 보여준다', () => {
     expect(availableSwitcherLanguages('/blog/what-is-saju')).toEqual(['ko', 'en', 'ja', 'es']);
     expect(availableSwitcherLanguages('')).toEqual(['ko', 'en', 'ja', 'es']);
   });
 
-  it('신년운세 캠페인 루트 경로에서는 ko를 뺀다', () => {
-    expect(availableSwitcherLanguages('/lunar-new-year')).toEqual(['en', 'ja', 'es']);
-  });
-
-  it('신년운세 캠페인 하위 경로(결과/수신거부)에서도 ko를 뺀다', () => {
-    expect(availableSwitcherLanguages('/lunar-new-year/r/abc123')).toEqual(['en', 'ja', 'es']);
-    expect(availableSwitcherLanguages('/lunar-new-year/unsubscribe')).toEqual(['en', 'ja', 'es']);
-  });
-
-  it('경로 이름에 lunar-new-year가 우연히 포함될 뿐 실제로는 다른 경로면 ko를 빼지 않는다', () => {
-    expect(availableSwitcherLanguages('/blog/not-lunar-new-year-related')).toEqual(['ko', 'en', 'ja', 'es']);
+  it('신년운세 캠페인 경로(루트/하위)에서도 이제 ko를 포함해 4개 전부 보여준다', () => {
+    expect(availableSwitcherLanguages('/lunar-new-year')).toEqual(['ko', 'en', 'ja', 'es']);
+    expect(availableSwitcherLanguages('/lunar-new-year/r/abc123')).toEqual(['ko', 'en', 'ja', 'es']);
+    expect(availableSwitcherLanguages('/lunar-new-year/unsubscribe')).toEqual(['ko', 'en', 'ja', 'es']);
   });
 });

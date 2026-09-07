@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { isMarketingLanguage, MARKETING_LANGUAGES, DEFAULT_LANGUAGE, type MarketingLanguage } from '@/lib/languages';
+import { isMarketingLanguage, isLaunchContentLanguage, LAUNCH_CONTENT_LANGUAGES, DEFAULT_LANGUAGE, type MarketingLanguage } from '@/lib/languages';
 import { getDictionary } from '@/dictionaries';
 import { getCompatInvite } from '@/lib/compatApi';
 import { COMPAT_CONTENT } from '@/content/compatContent';
@@ -23,10 +23,17 @@ interface PageProps {
  *
  * generateStaticParams를 두지 않는다 — 토큰은 런타임에 계속 새로 생성되므로
  * lunar-new-year/r/[id]와 동일하게 완전 동적 라우트로 둔다.
+ *
+ * **2026-09-07 — "모든 서비스를 1차 출시 4개 언어로 좁힌다"는 결정에 따라 이 페이지도
+ * MARKETING_LANGUAGES(6) 대신 LAUNCH_CONTENT_LANGUAGES(4)만 허용한다.** 부모 레이아웃
+ * (`[lang]/layout.tsx`)의 게이트가 이미 pt/vi를 404 처리하므로 이 페이지 자체의 검사는
+ * 이중 방어지만, 문서/타입 일관성을 위해 그대로 맞췄다 — 직접 링크로도 더 이상 pt/vi 접근이
+ * 불가능하다(위 문단의 "직접 링크로는 pt/vi도 접근 가능" 서술은 이 변경으로 더 이상 유효하지
+ * 않다).
  */
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { lang: rawLang, token } = await params;
-  if (!isMarketingLanguage(rawLang)) return {};
+  if (!isMarketingLanguage(rawLang) || !isLaunchContentLanguage(rawLang)) return {};
   const content = COMPAT_CONTENT[rawLang];
   const view = await getCompatInvite(token, rawLang);
 
@@ -44,7 +51,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     robots: NOINDEX_ROBOTS,
     alternates: {
       canonical: `${WEB_BASE_URL}${path(rawLang)}`,
-      languages: languageAlternates(MARKETING_LANGUAGES, path, DEFAULT_LANGUAGE),
+      languages: languageAlternates(LAUNCH_CONTENT_LANGUAGES, path, DEFAULT_LANGUAGE),
     },
     openGraph: { title: og.title, description: og.description, url: `${WEB_BASE_URL}${path(rawLang)}` },
     twitter: { card: 'summary', title: og.title, description: og.description },
@@ -53,7 +60,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function CompatPage({ params }: PageProps) {
   const { lang: rawLang, token } = await params;
-  if (!isMarketingLanguage(rawLang)) notFound();
+  if (!isMarketingLanguage(rawLang) || !isLaunchContentLanguage(rawLang)) notFound();
   const lang: MarketingLanguage = rawLang;
 
   const view = await getCompatInvite(token, lang);

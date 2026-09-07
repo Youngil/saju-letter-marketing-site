@@ -1,10 +1,8 @@
 import type { MetadataRoute } from 'next';
 import {
-  MARKETING_LANGUAGES,
-  NON_KOREAN_LANGUAGES,
+  LAUNCH_CONTENT_LANGUAGES,
   DEFAULT_LANGUAGE,
   type MarketingLanguage,
-  type NonKoreanLanguage,
   type LaunchContentLanguage,
 } from '@/lib/languages';
 import { BLOG_LANGUAGES, getAllPostSummaries } from '@/lib/posts';
@@ -13,14 +11,16 @@ import { WEB_BASE_URL, languageAlternates } from '@/lib/seo';
 // DEFAULT_LANGUAGE('en')는 항상 모든 언어 부분집합 안에 있지만, languages.ts에서 더 넓은
 // MarketingLanguage로 선언돼 있어(호출부마다 다시 캐스팅하지 않도록) 여기서 한 번만 좁힌다.
 const DEFAULT_BLOG_LANGUAGE = DEFAULT_LANGUAGE as LaunchContentLanguage;
-const DEFAULT_LUNAR_LANGUAGE = DEFAULT_LANGUAGE as NonKoreanLanguage;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  // 2026-09-07 — "모든 서비스를 1차 출시 4개 언어로 좁힌다"는 결정에 따라 홈도
+  // MARKETING_LANGUAGES(6) 대신 LAUNCH_CONTENT_LANGUAGES(4)만 사이트맵에 올린다 — pt/vi는
+  // 이제 [lang]/layout.tsx 게이트에서 404가 나므로 사이트맵에 올려봐야 죽은 링크다.
   const homePath = (lang: MarketingLanguage) => `/${lang}`;
-  const homeEntries = MARKETING_LANGUAGES.map((lang) => ({
+  const homeEntries = LAUNCH_CONTENT_LANGUAGES.map((lang) => ({
     url: `${WEB_BASE_URL}${homePath(lang)}`,
     lastModified: new Date(),
-    alternates: { languages: languageAlternates(MARKETING_LANGUAGES, homePath, DEFAULT_LANGUAGE) },
+    alternates: { languages: languageAlternates(LAUNCH_CONTENT_LANGUAGES, homePath, DEFAULT_LANGUAGE) },
   }));
 
   // 블로그/compare는 1차 출시 타겟 언어(ko/en/ja/es)에만 존재한다(languages.ts의
@@ -64,30 +64,31 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     alternates: { languages: languageAlternates(BLOG_LANGUAGES, comparePath, DEFAULT_BLOG_LANGUAGE) },
   }));
 
-  // 신년운세 캠페인(2026-08-07 이관)은 위 1차 출시 언어 축과 무관하게, 원래 캠페인이 지원하던
-  // 5개 언어(ko 제외)를 그대로 유지한다 — languages.ts의 NON_KOREAN_LANGUAGES 참고.
-  const lunarNewYearPath = (lang: NonKoreanLanguage) => `/${lang}/lunar-new-year`;
-  const lunarNewYearEntries = NON_KOREAN_LANGUAGES.map((lang) => ({
+  // 신년운세 캠페인(2026-08-07 이관, 2026-09-07부터 서비스 언어 통합 관리를 그대로 따라 ko
+  // 포함 — languages.ts의 LAUNCH_CONTENT_LANGUAGES 참고, saju-letter-backend/CLAUDE.md §9와 짝).
+  const lunarNewYearPath = (lang: LaunchContentLanguage) => `/${lang}/lunar-new-year`;
+  const lunarNewYearEntries = LAUNCH_CONTENT_LANGUAGES.map((lang) => ({
     url: `${WEB_BASE_URL}${lunarNewYearPath(lang)}`,
     lastModified: new Date(),
-    alternates: { languages: languageAlternates(NON_KOREAN_LANGUAGES, lunarNewYearPath, DEFAULT_LUNAR_LANGUAGE) },
+    alternates: { languages: languageAlternates(LAUNCH_CONTENT_LANGUAGES, lunarNewYearPath, DEFAULT_BLOG_LANGUAGE) },
   }));
 
-  // 개인정보처리방침(2026-08-12, saju-letter-backend에서 이관)은 법적 고지 문서라
-  // LAUNCH_CONTENT_LANGUAGES가 아니라 홈과 같은 MARKETING_LANGUAGES(6개) 전체를 대상으로 한다.
+  // 개인정보처리방침(2026-08-12, saju-letter-backend에서 이관) — 2026-09-07부터 홈/블로그와
+  // 같이 LAUNCH_CONTENT_LANGUAGES(4개)로 좁혔다(이전엔 법적 고지 문서라는 이유로 6개 언어
+  // 전체 대상이었다).
   const privacyPath = (lang: MarketingLanguage) => `/${lang}/privacy`;
-  const privacyEntries = MARKETING_LANGUAGES.map((lang) => ({
+  const privacyEntries = LAUNCH_CONTENT_LANGUAGES.map((lang) => ({
     url: `${WEB_BASE_URL}${privacyPath(lang)}`,
     lastModified: new Date(),
-    alternates: { languages: languageAlternates(MARKETING_LANGUAGES, privacyPath, DEFAULT_LANGUAGE) },
+    alternates: { languages: languageAlternates(LAUNCH_CONTENT_LANGUAGES, privacyPath, DEFAULT_LANGUAGE) },
   }));
 
-  // 서비스 이용 안내(2026-09-02, 오락 목적 고지)도 privacy와 같은 이유로 6개 언어 전체 대상.
+  // 서비스 이용 안내(2026-09-02, 오락 목적 고지)도 privacy와 같은 이유로 4개 언어 대상.
   const disclaimerPath = (lang: MarketingLanguage) => `/${lang}/disclaimer`;
-  const disclaimerEntries = MARKETING_LANGUAGES.map((lang) => ({
+  const disclaimerEntries = LAUNCH_CONTENT_LANGUAGES.map((lang) => ({
     url: `${WEB_BASE_URL}${disclaimerPath(lang)}`,
     lastModified: new Date(),
-    alternates: { languages: languageAlternates(MARKETING_LANGUAGES, disclaimerPath, DEFAULT_LANGUAGE) },
+    alternates: { languages: languageAlternates(LAUNCH_CONTENT_LANGUAGES, disclaimerPath, DEFAULT_LANGUAGE) },
   }));
 
   return [

@@ -16,57 +16,48 @@ export function isMarketingLanguage(value: string): value is MarketingLanguage {
 }
 
 /**
- * ko를 제외한 5개 언어 — 블로그/compare/lunar-new-year처럼 "SEO 대상 또는 원래 ko 미지원이던
- * 콘텐츠"에서 공통으로 쓰는 축이라 한 곳에 모아뒀다(예전엔 posts.ts/content/compareZodiac.ts에
- * 각자 따로 정의돼 있었다).
- */
-export type NonKoreanLanguage = Exclude<MarketingLanguage, 'ko'>;
-
-export const NON_KOREAN_LANGUAGES: NonKoreanLanguage[] = MARKETING_LANGUAGES.filter(
-  (lang): lang is NonKoreanLanguage => lang !== 'ko',
-);
-
-export function isNonKoreanLanguage(lang: MarketingLanguage): lang is NonKoreanLanguage {
-  return lang !== 'ko';
-}
-
-/**
  * 1차 서비스 타겟 언어(2026-08-07, 사용자 결정) — 한국어/영어/일본어/스페인어 4개.
  * 포르투갈어/베트남어는 초기 콘텐츠(블로그/compare 번역) 제작 비용과 마케팅 포인트를
  * 줄이기 위해 1차 출시 이후로 미룬다 — 사이트 자체는 이미 6개 언어를 구조적으로 지원하므로
  * (dictionaries/*.ts, compareZodiac.ts에 pt/vi 값도 이미 채워져 있음), 나중에 이 배열에
  * 'pt'/'vi'를 추가하고 그 언어의 content-posts/*.mdx 3편만 채우면 바로 열린다 — 라우팅/타입/
  * 다른 코드는 손댈 필요 없다(BLOG_LANGUAGES/compare 페이지가 전부 이 배열 하나만 참조).
- * 홈(미니 데모)·리드 캡처는 콘텐츠 제작 비용이 없는 영역이라(데모는 실시간 AI 호출, 리드는
- * 이메일만 받음) 이 축과 무관하게 6개 언어 전부 그대로 연다 — MARKETING_LANGUAGES 참고.
+ *
+ * **2026-09-07부터 홈(미니 데모)·리드 캡처·개인정보처리방침·서비스 이용 안내·궁합 공유·
+ * 신년운세 캠페인도 전부 이 4개로 좁혔다** — "모든 서비스를 1차 출시 4개 언어로 좁힌다"는
+ * 결정에 따라, 예전에 "콘텐츠 제작 비용이 없다"는 이유로 6개 언어 그대로 열어뒀던 영역(홈
+ * 미니 데모/리드 캡처)과 "법적 문서라 1차 출시 언어 축과 무관해야 한다"는 이유로 유지했던
+ * 영역(개인정보처리방침/서비스 이용 안내)의 예외를 전부 없앴다 — 이제 이 배열이 사이트 전체의
+ * 유일한 언어 축이다. `MARKETING_LANGUAGES`(6)는 dictionary/content 타입 정의용으로만 남는다.
  */
 export type LaunchContentLanguage = 'ko' | 'en' | 'ja' | 'es';
 
 export const LAUNCH_CONTENT_LANGUAGES: LaunchContentLanguage[] = ['ko', 'en', 'ja', 'es'];
 
 /** 1차 출시에서 뺀 언어 — 실제로 어디서 쓰이진 않고, "왜 빠졌는지" 코드에서 바로 보이게 하는 문서용. */
-export const DEFERRED_CONTENT_LANGUAGES: NonKoreanLanguage[] = ['pt', 'vi'];
+export const DEFERRED_CONTENT_LANGUAGES: Exclude<MarketingLanguage, LaunchContentLanguage>[] = ['pt', 'vi'];
 
 export function isLaunchContentLanguage(lang: MarketingLanguage): lang is LaunchContentLanguage {
   return (LAUNCH_CONTENT_LANGUAGES as MarketingLanguage[]).includes(lang);
 }
 
 /**
- * `LanguageSwitcher.tsx`가 드롭다운에 보여줄 언어 목록을 정한다(2026-09-04, 종합 버그 점검
- * 2회차로 발견) — 원래는 페이지가 무엇이든 `LAUNCH_CONTENT_LANGUAGES`(ko 포함) 4개를 항상
- * 보여줬는데, 신년운세 캠페인(`/lunar-new-year/...`)은 애초에 한국어를 지원하지 않는 라우트라
- * (meta 저장소 CLAUDE.md §9 "확장 기능 #6" 참고) en/es/ja/pt/vi로 그 캠페인에 들어온 방문자가
- * "한국어"를 누르면 그 라우트가 `notFound()`를 던져 404를 만났다 — 헤더 내비(Blog/Compare)가
- * pt/vi에게 죽은 링크였던 것(위 2026-09-03 항목)과 반대 방향의 같은 클래스 버그다.
+ * `LanguageSwitcher.tsx`가 드롭다운에 보여줄 언어 목록을 정한다.
  *
- * pt/vi를 계속 숨기는 기존 "발견 가능성" 판단(블로그/compare 미지원)은 그대로 두고, 신년운세
- * 캠페인 경로에서만 ko를 뺀다. `restOfPath`는 언어 세그먼트를 뺀 나머지 경로(예:
- * "/lunar-new-year/r/abc123") — `LanguageSwitcher`가 `pathname.replace(new RegExp(...))`로
- * 이미 계산해두는 값을 그대로 받는다.
+ * **2026-09-07부터 신년운세 캠페인(`/lunar-new-year/...`)도 서비스 언어 통합 관리를 그대로
+ * 따라 한국어를 포함한다** — `saju-letter-backend`가 `CAMPAIGN_LANGUAGES` 독립 하드코딩을
+ * 폐기하고 `getActiveServiceLanguages()`(한국어 포함)를 그대로 쓰도록 뒤집은 것과 짝을 이룬다
+ * (meta 저장소 CLAUDE.md §9 참고). 이전엔 이 함수가 `/lunar-new-year` 경로에서만 ko를 빼는
+ * 특수 분기를 갖고 있었다(2026-09-04, 종합 버그 점검 2회차로 발견한 404 버그 대응) — 이제
+ * 그 캠페인도 ko를 지원하므로 이 분기 자체가 필요 없어져 제거했다. `restOfPath`는 언어
+ * 세그먼트를 뺀 나머지 경로 — 더 이상 쓰이지 않지만, `LanguageSwitcher`가 이미 계산해두는
+ * 값을 그대로 넘기는 시그니처는 유지한다(호출부 변경 최소화).
+ *
+ * pt/vi는 여전히 블로그/compare/신년운세 어디서도 콘텐츠가 없어(`isLaunchContentLanguage`)
+ * 드롭다운에서 계속 숨긴다.
  */
-export function availableSwitcherLanguages(restOfPath: string): LaunchContentLanguage[] {
-  const isLunarNewYearPath = restOfPath === '/lunar-new-year' || restOfPath.startsWith('/lunar-new-year/');
-  return isLunarNewYearPath ? LAUNCH_CONTENT_LANGUAGES.filter((lang) => lang !== 'ko') : LAUNCH_CONTENT_LANGUAGES;
+export function availableSwitcherLanguages(_restOfPath: string): LaunchContentLanguage[] {
+  return LAUNCH_CONTENT_LANGUAGES;
 }
 
 /**

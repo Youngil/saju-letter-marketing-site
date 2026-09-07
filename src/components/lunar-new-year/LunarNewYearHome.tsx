@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import type { MarketingDictionary } from '@/dictionaries/types';
-import type { NonKoreanLanguage } from '@/lib/languages';
+import type { LaunchContentLanguage } from '@/lib/languages';
 import { getCampaignWindow, type CampaignWindowStatus } from '@/lib/lunarNewYearApi';
 import { ReadingForm } from './ReadingForm';
 import { OffSeasonPlaceholder } from './OffSeasonPlaceholder';
@@ -14,7 +14,7 @@ export function LunarNewYearHome({
   dict: t,
   appLinksDict,
 }: {
-  language: NonKoreanLanguage;
+  language: LaunchContentLanguage;
   dict: LunarNewYearDict;
   appLinksDict: MarketingDictionary['appLinks'];
 }) {

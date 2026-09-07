@@ -1,16 +1,15 @@
 import type { MarketingDictionary } from '@/dictionaries/types';
-import type { NonKoreanLanguage } from '@/lib/languages';
+import type { LaunchContentLanguage } from '@/lib/languages';
 import { AppDownloadLinks } from '@/components/AppDownloadLinks';
 
-const INTL_LOCALE: Record<NonKoreanLanguage, string> = {
+const INTL_LOCALE: Record<LaunchContentLanguage, string> = {
+  ko: 'ko-KR',
   en: 'en-US',
   ja: 'ja-JP',
   es: 'es-ES',
-  pt: 'pt-BR',
-  vi: 'vi-VN',
 };
 
-function formatDate(date: { year: number; month: number; day: number }, language: NonKoreanLanguage): string {
+function formatDate(date: { year: number; month: number; day: number }, language: LaunchContentLanguage): string {
   const d = new Date(Date.UTC(date.year, date.month - 1, date.day));
   return new Intl.DateTimeFormat(INTL_LOCALE[language], {
     year: 'numeric',
@@ -32,7 +31,7 @@ export function OffSeasonPlaceholder({
   dict: t,
   appLinksDict,
 }: {
-  language: NonKoreanLanguage;
+  language: LaunchContentLanguage;
   nextStartsAt: { year: number; month: number; day: number };
   dict: OffSeasonDict;
   appLinksDict: MarketingDictionary['appLinks'];
