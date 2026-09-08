@@ -118,6 +118,11 @@ export const dictionary: MarketingDictionary = {
     privacyLinkLabel: 'Chính sách Quyền riêng tư',
     disclaimerLinkLabel: 'Về dịch vụ này',
   },
+  consent: {
+    message: 'Chúng tôi dùng cookie để hiểu cách bạn sử dụng trang này. Bạn có thể thay đổi lựa chọn bất cứ lúc nào.',
+    acceptButton: 'Đồng ý',
+    declineButton: 'Từ chối',
+  },
   appLinks: {
     sectionLabel: 'Tải ứng dụng',
     androidCta: 'Tải trên Google Play',

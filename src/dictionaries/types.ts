@@ -131,6 +131,17 @@ export interface MarketingDictionary {
     disclaimerLinkLabel: string;
   };
   /**
+   * 쿠키/추적 동의 배너(2026-09-08, 3차 종합 버그 점검 항목 3) — GA4가 방문자 동의 없이 항상
+   * 발화하던 문제를 최소한의 배너 + Google Consent Mode로 해결한다(`components/ConsentBanner.tsx`).
+   * ⚠️ 이 문구는 AI가 작성한 초안이다 — 실제 게시 전 법률 전문가 검토가 필요하다
+   * (`content/privacyPolicy.ts` 상단 주석과 같은 수준의 검토 대상).
+   */
+  consent: {
+    message: string;
+    acceptButton: string;
+    declineButton: string;
+  };
+  /**
    * 안드로이드/iOS 스토어 다운로드 CTA — 홈 히어로(첫 화면, 스크롤 없이 보임)·footer(전 페이지
    * 공통)·두 전환 지점(무료 미리보기 결과, 궁합 결과)에서 재사용한다
    * (`components/AppDownloadLinks.tsx`, 2026-08-25). 아직 어느 플랫폼도 스토어에 올라가지

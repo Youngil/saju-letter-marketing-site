@@ -116,6 +116,11 @@ export const dictionary: MarketingDictionary = {
     privacyLinkLabel: 'Política de Privacidade',
     disclaimerLinkLabel: 'Sobre este serviço',
   },
+  consent: {
+    message: 'Usamos cookies para entender como este site é usado. Você pode mudar sua escolha a qualquer momento.',
+    acceptButton: 'Aceitar',
+    declineButton: 'Recusar',
+  },
   appLinks: {
     sectionLabel: 'Baixe o app',
     androidCta: 'Disponível no Google Play',

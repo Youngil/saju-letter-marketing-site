@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { isMarketingLanguage, isLaunchContentLanguage, LAUNCH_CONTENT_LANGUAGES, DEFAULT_LANGUAGE, type MarketingLanguage } from '@/lib/languages';
+import { isMarketingLanguage, MARKETING_LANGUAGES, DEFAULT_LANGUAGE, type MarketingLanguage } from '@/lib/languages';
 import { getDictionary } from '@/dictionaries';
 import { getCompatInvite } from '@/lib/compatApi';
 import { COMPAT_CONTENT } from '@/content/compatContent';
@@ -18,22 +18,22 @@ interface PageProps {
  * /{lang}/... 로 리다이렉트해주므로, 공유 URL 자체는 여전히 언어 없이
  * (COMPAT_SHARE_BASE_URL/compat/{token}) 만들고 이 라우트가 그 리다이렉트를 받는다. 미들웨어의
  * 자동감지 후보가 LAUNCH_CONTENT_LANGUAGES(4개)로 한정된 건 이 사이트 전체(홈 포함)에 이미
- * 적용 중인 기존 정책이라 이 페이지만 따로 손대지 않는다 — 다만 이 라우트 자체(및
- * generateMetadata)는 privacy처럼 6개 언어 전부에서 직접 열린다(직접 링크로는 pt/vi도 접근 가능).
+ * 적용 중인 기존 정책이라 이 페이지만 따로 손대지 않는다.
  *
  * generateStaticParams를 두지 않는다 — 토큰은 런타임에 계속 새로 생성되므로
  * lunar-new-year/r/[id]와 동일하게 완전 동적 라우트로 둔다.
  *
- * **2026-09-07 — "모든 서비스를 1차 출시 4개 언어로 좁힌다"는 결정에 따라 이 페이지도
- * MARKETING_LANGUAGES(6) 대신 LAUNCH_CONTENT_LANGUAGES(4)만 허용한다.** 부모 레이아웃
- * (`[lang]/layout.tsx`)의 게이트가 이미 pt/vi를 404 처리하므로 이 페이지 자체의 검사는
- * 이중 방어지만, 문서/타입 일관성을 위해 그대로 맞췄다 — 직접 링크로도 더 이상 pt/vi 접근이
- * 불가능하다(위 문단의 "직접 링크로는 pt/vi도 접근 가능" 서술은 이 변경으로 더 이상 유효하지
- * 않다).
+ * **2026-09-07 커밋이 이 페이지를 privacy와 같은 이유로 착각해 LAUNCH_CONTENT_LANGUAGES(4)로
+ * 좁혔다가, 2026-09-08 3차 종합 버그 점검(항목 2)으로 되돌렸다.** 이 페이지는 "1차 출시
+ * 콘텐츠 언어" 축이 아니라 "이미 발급된 링크가 언어와 무관하게 계속 동작해야 하는" 트랜잭션
+ * 축이다 — 친구가 pt/vi 환경에서 받은 궁합 공유 링크를 열 때 그 링크가 만들어진 시점의 언어를
+ * 그대로 존중해야 하고, 그 링크는 2026-09-07 이전부터 이미 pt/vi로 발급돼 있었을 수 있다.
+ * `COMPAT_CONTENT`가 애초에 6개 언어(`MarketingLanguage`) 콘텐츠를 그대로 갖고 있었으므로
+ * (`content/compatContent.ts` 참고), 게이트만 `isMarketingLanguage`로 되돌리면 원상복구된다.
  */
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { lang: rawLang, token } = await params;
-  if (!isMarketingLanguage(rawLang) || !isLaunchContentLanguage(rawLang)) return {};
+  if (!isMarketingLanguage(rawLang)) return {};
   const content = COMPAT_CONTENT[rawLang];
   const view = await getCompatInvite(token, rawLang);
 
@@ -51,7 +51,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     robots: NOINDEX_ROBOTS,
     alternates: {
       canonical: `${WEB_BASE_URL}${path(rawLang)}`,
-      languages: languageAlternates(LAUNCH_CONTENT_LANGUAGES, path, DEFAULT_LANGUAGE),
+      languages: languageAlternates(MARKETING_LANGUAGES, path, DEFAULT_LANGUAGE),
     },
     openGraph: { title: og.title, description: og.description, url: `${WEB_BASE_URL}${path(rawLang)}` },
     twitter: { card: 'summary', title: og.title, description: og.description },
@@ -60,7 +60,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function CompatPage({ params }: PageProps) {
   const { lang: rawLang, token } = await params;
-  if (!isMarketingLanguage(rawLang) || !isLaunchContentLanguage(rawLang)) notFound();
+  if (!isMarketingLanguage(rawLang)) notFound();
   const lang: MarketingLanguage = rawLang;
 
   const view = await getCompatInvite(token, lang);

@@ -8,12 +8,12 @@ import type { MarketingLanguage } from '@/lib/languages';
  * 잘 안 보낸다는 이유로 영어 고정이었는데, 이제 진짜 `/{lang}/...` 라우트를 갖게 됐으니 함께
  * 번역했다 — 링크를 사람이 직접 붙여넣는 경우(크롤러가 아니라)도 있어서 손해 볼 게 없다.
  *
- * 원래는 privacyPolicy.ts와 같은 이유로 6개 언어(MARKETING_LANGUAGES) 전부 실제 서비스
- * 대상이었지만(궁합 공유는 번역 비용이 드는 마케팅 카피가 아니라 트랜잭션성 UI 문구라는 논리),
- * **2026-09-07 "모든 서비스를 1차 출시 4개 언어로 좁힌다"는 결정에 따라 실제 접근 가능한
- * 언어는 LAUNCH_CONTENT_LANGUAGES(4개)로 좁혀졌다** — `compat/[token]/page.tsx`가 이제
- * pt/vi를 404 처리한다. 이 파일의 타입(`Record<MarketingLanguage, CompatContent>`)과 pt/vi
- * 콘텐츠 값 자체는 삭제하지 않았다(재개 시 코드 변경 없이 바로 열리도록).
+ * privacyPolicy.ts와 같은 이유로 6개 언어(MARKETING_LANGUAGES) 전부 실제 서비스 대상이다 —
+ * 궁합 공유는 번역 비용이 드는 마케팅 카피가 아니라, 이미 발급된 링크가 언어와 무관하게 계속
+ * 동작해야 하는 트랜잭션성 UI 문구라는 논리다. **2026-09-07 커밋이 "모든 서비스를 1차 출시
+ * 4개 언어로 좁힌다"는 결정을 이 콘텐츠에도 잘못 적용해 `compat/[token]/page.tsx`가 잠깐
+ * pt/vi를 404 처리했으나, 2026-09-08 3차 종합 버그 점검(항목 2)으로 원복했다** — 이미
+ * pt/vi로 공유된 궁합 링크를 조용히 깨뜨리는 부작용이 있었다.
  */
 
 export interface CompatOgCopy {

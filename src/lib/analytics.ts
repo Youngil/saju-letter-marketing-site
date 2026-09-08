@@ -30,3 +30,54 @@ export function trackEvent(name: string, params?: Record<string, unknown>): void
   if (typeof window === 'undefined' || typeof window.gtag !== 'function') return;
   window.gtag('event', name, params);
 }
+
+/**
+ * 쿠키/추적 동의(2026-09-08, 3차 종합 버그 점검 항목 3) — 완전한 CMP(Consent Management
+ * Platform) 대신 최소한의 동의 배너 + Google Consent Mode v2로 구현한다(사용자가 명시적으로
+ * 이 절충안을 선택했다). `localStorage` 키 하나(`CONSENT_STORAGE_KEY`)에 선택+시각을 저장해
+ * 다음 방문 시 배너를 다시 안 띄운다 — 1년 지나면 다시 물어본다(개인정보 관행 변경 가능성을
+ * 감안한 관용적 유효기간, GDPR이 명시적으로 요구하는 숫자는 아니다).
+ */
+export const CONSENT_STORAGE_KEY = 'saju-letter-consent';
+const CONSENT_TTL_MS = 365 * 24 * 60 * 60 * 1000;
+
+export type ConsentChoice = 'granted' | 'denied';
+
+interface StoredConsent {
+  choice: ConsentChoice;
+  storedAt: number;
+}
+
+/** 저장된 선택이 없거나 만료됐으면 null — 배너를 다시 보여줘야 한다는 신호. */
+export function readStoredConsent(): ConsentChoice | null {
+  if (typeof window === 'undefined') return null;
+  try {
+    const raw = window.localStorage.getItem(CONSENT_STORAGE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as StoredConsent;
+    if (Date.now() - parsed.storedAt > CONSENT_TTL_MS) return null;
+    return parsed.choice === 'granted' || parsed.choice === 'denied' ? parsed.choice : null;
+  } catch {
+    // 프라이빗 브라우징 등에서 localStorage 접근 자체가 던질 수 있다 — 배너를 다시 보여주는
+    // 쪽으로 안전하게 흡수한다(artifact 스토리지 가이드와 같은 fail-open 원칙).
+    return null;
+  }
+}
+
+/** 방문자의 선택을 저장하고, GA4가 이미 로드돼 있으면 Consent Mode 상태를 즉시 갱신한다. */
+export function storeConsent(choice: ConsentChoice): void {
+  if (typeof window !== 'undefined') {
+    try {
+      window.localStorage.setItem(CONSENT_STORAGE_KEY, JSON.stringify({ choice, storedAt: Date.now() } satisfies StoredConsent));
+    } catch {
+      // 저장 실패해도 이번 세션의 Consent Mode 갱신 자체는 계속 진행한다.
+    }
+  }
+  if (typeof window === 'undefined' || typeof window.gtag !== 'function') return;
+  window.gtag('consent', 'update', {
+    analytics_storage: choice,
+    ad_storage: choice,
+    ad_user_data: choice,
+    ad_personalization: choice,
+  });
+}

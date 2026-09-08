@@ -12,6 +12,14 @@ import { WEB_BASE_URL, languageAlternates } from '@/lib/seo';
 // MarketingLanguage로 선언돼 있어(호출부마다 다시 캐스팅하지 않도록) 여기서 한 번만 좁힌다.
 const DEFAULT_BLOG_LANGUAGE = DEFAULT_LANGUAGE as LaunchContentLanguage;
 
+// 2026-09-08 3차 종합 버그 점검(항목 1) — `[lang]/page.tsx`/`blog/page.tsx`/`blog/[slug]/page.tsx`가
+// 2026-09-06 블로그 DB 하이브리드 전환 때 "이게 없으면 DB에 새로 발행한 글이 다음 배포 전까지
+// 사이트에 안 나타난다"는 이유로 이미 `revalidate = 3600`을 붙였는데, 같은 DB(`getAllPostSummaries`)를
+// 조회하는 이 sitemap.ts에는 그때 빠져 있었다 — 그 결과 DB로 발행된 새 글이 검색엔진용
+// sitemap.xml에는 다음 코드 배포 전까지 영원히 안 올라갈 수 있었다(라우트 자체는 ISR로 바로
+// 보였지만 sitemap은 무기한 캐시). 위 세 파일과 같은 값(1시간)으로 맞춘다.
+export const revalidate = 3600;
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // 2026-09-07 — "모든 서비스를 1차 출시 4개 언어로 좁힌다"는 결정에 따라 홈도
   // MARKETING_LANGUAGES(6) 대신 LAUNCH_CONTENT_LANGUAGES(4)만 사이트맵에 올린다 — pt/vi는

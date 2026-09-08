@@ -116,6 +116,11 @@ export const dictionary: MarketingDictionary = {
     privacyLinkLabel: 'プライバシーポリシー',
     disclaimerLinkLabel: 'サービスのご案内',
   },
+  consent: {
+    message: 'サイトの利用状況を把握するためにクッキーを使用しています。同意はいつでも変更できます。',
+    acceptButton: '同意する',
+    declineButton: '同意しない',
+  },
   appLinks: {
     sectionLabel: 'アプリを入手',
     androidCta: 'Google Playで入手',

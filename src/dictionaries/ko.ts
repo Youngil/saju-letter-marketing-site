@@ -121,6 +121,11 @@ export const dictionary: MarketingDictionary = {
     privacyLinkLabel: '개인정보처리방침',
     disclaimerLinkLabel: '서비스 이용 안내',
   },
+  consent: {
+    message: '더 나은 서비스를 위해 방문 통계를 수집하는 쿠키를 사용해요. 동의 여부는 언제든 바꿀 수 있어요.',
+    acceptButton: '동의해요',
+    declineButton: '거부해요',
+  },
   appLinks: {
     sectionLabel: '앱 다운로드',
     androidCta: 'Google Play에서 다운로드',
