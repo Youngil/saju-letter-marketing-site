@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { isMarketingLanguage, isLaunchContentLanguage, type LaunchContentLanguage } from '@/lib/languages';
+import { isMarketingLanguage, type MarketingLanguage } from '@/lib/languages';
 import { getDictionary } from '@/dictionaries';
 import { getReading } from '@/lib/lunarNewYearApi';
 import { DISCLAIMER_CONTENT } from '@/content/disclaimer';
@@ -13,9 +13,17 @@ interface PageProps {
   params: Promise<{ lang: string; id: string }>;
 }
 
+/**
+ * 2026-09-08 3차 종합 버그 점검(항목 1) — 이 라우트는 이미 발급된 신년운세 결과/공유 링크를
+ * 여는 트랜잭션 축이라(`compat/[token]`/`privacy`와 같은 축, `saju-letter-backend/CLAUDE.md`
+ * §9 참고), `getReadingById`(백엔드)에도 언어 게이트가 없다 — 2026-09-07 커밋이 이 페이지
+ * 게이트에 `isLaunchContentLanguage`(4)를 추가로 얹어 pt/vi로 발급된 기존 링크를 전부 404
+ * 처리했던 회귀를 `isMarketingLanguage`(6)로 되돌려 잡는다. `page.tsx`(랜딩 폼)와 같은
+ * `MARKETING_LANGUAGES` 복원과 짝을 이룬다.
+ */
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { lang: rawLang, id } = await params;
-  if (!isMarketingLanguage(rawLang) || !isLaunchContentLanguage(rawLang)) return {};
+  if (!isMarketingLanguage(rawLang)) return {};
   const reading = await getReading(id);
   if (!reading) return {};
 
@@ -36,8 +44,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function LunarNewYearResultPage({ params }: PageProps) {
   const { lang: rawLang, id } = await params;
-  if (!isMarketingLanguage(rawLang) || !isLaunchContentLanguage(rawLang)) notFound();
-  const language: LaunchContentLanguage = rawLang;
+  if (!isMarketingLanguage(rawLang)) notFound();
+  const language: MarketingLanguage = rawLang;
 
   const reading = await getReading(id);
   if (!reading) notFound();

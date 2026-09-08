@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useRef, useState } from 'react';
 import type { MarketingDictionary } from '@/dictionaries/types';
-import type { LaunchContentLanguage } from '@/lib/languages';
+import type { MarketingLanguage } from '@/lib/languages';
 import { calculateSaju } from '@/lib/saju';
 import { isOldEnough } from '@/lib/age';
 import { createReading } from '@/lib/lunarNewYearApi';
@@ -15,7 +15,7 @@ const CURRENT_YEAR = new Date().getFullYear();
 
 type LandingDict = NonNullable<MarketingDictionary['lunarNewYear']>['landing'];
 
-export function ReadingForm({ language, dict: t }: { language: LaunchContentLanguage; dict: LandingDict }) {
+export function ReadingForm({ language, dict: t }: { language: MarketingLanguage; dict: LandingDict }) {
   const router = useRouter();
 
   const [name, setName] = useState('');

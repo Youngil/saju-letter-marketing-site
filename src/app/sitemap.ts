@@ -1,6 +1,7 @@
 import type { MetadataRoute } from 'next';
 import {
   LAUNCH_CONTENT_LANGUAGES,
+  MARKETING_LANGUAGES,
   DEFAULT_LANGUAGE,
   type MarketingLanguage,
   type LaunchContentLanguage,
@@ -72,23 +73,29 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     alternates: { languages: languageAlternates(BLOG_LANGUAGES, comparePath, DEFAULT_BLOG_LANGUAGE) },
   }));
 
-  // 신년운세 캠페인(2026-08-07 이관, 2026-09-07부터 서비스 언어 통합 관리를 그대로 따라 ko
-  // 포함 — languages.ts의 LAUNCH_CONTENT_LANGUAGES 참고, saju-letter-backend/CLAUDE.md §9와 짝).
-  const lunarNewYearPath = (lang: LaunchContentLanguage) => `/${lang}/lunar-new-year`;
-  const lunarNewYearEntries = LAUNCH_CONTENT_LANGUAGES.map((lang) => ({
+  // 신년운세 캠페인(2026-08-07 이관) — 2026-09-08 3차 종합 버그 점검(항목 1)으로
+  // `MARKETING_LANGUAGES`(6)로 되돌렸다. 2026-09-07 커밋이 ko를 포함시키며 `LAUNCH_CONTENT_
+  // LANGUAGES`(4)로 좁혔는데, 그 과정에서 원래 있던 pt/vi가 실수로 함께 빠져 sitemap도 그
+  // 4개만 올리고 있었다 — `lunar-new-year/page.tsx`/`r/[id]/page.tsx`/`unsubscribe/page.tsx`가
+  // 전부 6개 언어로 복원됐으므로 sitemap도 실제 라우팅과 다시 맞춘다.
+  const lunarNewYearPath = (lang: MarketingLanguage) => `/${lang}/lunar-new-year`;
+  const lunarNewYearEntries = MARKETING_LANGUAGES.map((lang) => ({
     url: `${WEB_BASE_URL}${lunarNewYearPath(lang)}`,
     lastModified: new Date(),
-    alternates: { languages: languageAlternates(LAUNCH_CONTENT_LANGUAGES, lunarNewYearPath, DEFAULT_BLOG_LANGUAGE) },
+    alternates: { languages: languageAlternates(MARKETING_LANGUAGES, lunarNewYearPath, DEFAULT_LANGUAGE) },
   }));
 
-  // 개인정보처리방침(2026-08-12, saju-letter-backend에서 이관) — 2026-09-07부터 홈/블로그와
-  // 같이 LAUNCH_CONTENT_LANGUAGES(4개)로 좁혔다(이전엔 법적 고지 문서라는 이유로 6개 언어
-  // 전체 대상이었다).
+  // 개인정보처리방침(2026-08-12, saju-letter-backend에서 이관) — 2026-09-08 3차 종합 버그
+  // 점검(항목 2)으로 `MARKETING_LANGUAGES`(6)로 되돌렸다. 2026-09-07 커밋이 홈/블로그와 같이
+  // `LAUNCH_CONTENT_LANGUAGES`(4개)로 좁혔었지만, `privacy/page.tsx`의 게이트 자체는 같은 날
+  // 이어진 점검(항목 2 앞서 처리된 3차 점검 1건)으로 이미 6개 언어로 원복됐다 — 법적 고지
+  // 문서는 1차 출시 언어 축과 무관해야 한다는 원래 원칙 그대로. sitemap만 그 원복을 놓치고
+  // 있었다(`/pt/privacy`·`/vi/privacy`가 실제로 정상 응답하는데 sitemap엔 안 실림).
   const privacyPath = (lang: MarketingLanguage) => `/${lang}/privacy`;
-  const privacyEntries = LAUNCH_CONTENT_LANGUAGES.map((lang) => ({
+  const privacyEntries = MARKETING_LANGUAGES.map((lang) => ({
     url: `${WEB_BASE_URL}${privacyPath(lang)}`,
     lastModified: new Date(),
-    alternates: { languages: languageAlternates(LAUNCH_CONTENT_LANGUAGES, privacyPath, DEFAULT_LANGUAGE) },
+    alternates: { languages: languageAlternates(MARKETING_LANGUAGES, privacyPath, DEFAULT_LANGUAGE) },
   }));
 
   // 서비스 이용 안내(2026-09-02, 오락 목적 고지)도 privacy와 같은 이유로 4개 언어 대상.

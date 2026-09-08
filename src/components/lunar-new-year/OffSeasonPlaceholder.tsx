@@ -1,15 +1,20 @@
 import type { MarketingDictionary } from '@/dictionaries/types';
-import type { LaunchContentLanguage } from '@/lib/languages';
+import type { MarketingLanguage } from '@/lib/languages';
 import { AppDownloadLinks } from '@/components/AppDownloadLinks';
 
-const INTL_LOCALE: Record<LaunchContentLanguage, string> = {
+// pt/vi 항목은 2026-09-08 3차 종합 버그 점검(항목 1)으로 캠페인 언어 집합이
+// MARKETING_LANGUAGES(6)로 복원되며 함께 추가됐다 — 그전까지는 이 맵 자체가 4개뿐이라 pt/vi
+// 방문자가 오프시즌 화면에서 `formatDate`를 호출하면 `undefined` locale로 Intl이 예외를 던졌다.
+const INTL_LOCALE: Record<MarketingLanguage, string> = {
   ko: 'ko-KR',
   en: 'en-US',
   ja: 'ja-JP',
   es: 'es-ES',
+  pt: 'pt-BR',
+  vi: 'vi-VN',
 };
 
-function formatDate(date: { year: number; month: number; day: number }, language: LaunchContentLanguage): string {
+function formatDate(date: { year: number; month: number; day: number }, language: MarketingLanguage): string {
   const d = new Date(Date.UTC(date.year, date.month - 1, date.day));
   return new Intl.DateTimeFormat(INTL_LOCALE[language], {
     year: 'numeric',
@@ -31,7 +36,7 @@ export function OffSeasonPlaceholder({
   dict: t,
   appLinksDict,
 }: {
-  language: LaunchContentLanguage;
+  language: MarketingLanguage;
   nextStartsAt: { year: number; month: number; day: number };
   dict: OffSeasonDict;
   appLinksDict: MarketingDictionary['appLinks'];

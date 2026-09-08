@@ -1,4 +1,4 @@
-import type { LaunchContentLanguage } from './languages';
+import type { MarketingLanguage } from './languages';
 import type { Pillar } from './saju';
 import { ApiError, request } from './apiClient';
 
@@ -7,6 +7,13 @@ import { ApiError, request } from './apiClient';
  * 라우트를 그대로 호출한다(meta 저장소 CLAUDE.md §9 참고). 이 파일은 그 저장소의 `src/lib/api.ts`를
  * 그대로 옮긴 것이고, 이 사이트 자체의 `api.ts`(마케팅 리드/데모용)와는 대상 라우트가 완전히
  * 달라 섞지 않았다 — 공용 fetch/에러 처리(`apiClient.ts`)만 공유한다.
+ *
+ * `language`는 `LaunchContentLanguage`(4)가 아니라 `MarketingLanguage`(6)다(2026-09-08 3차
+ * 종합 버그 점검 항목 1) — 2026-09-07 커밋(`ff41953`)이 이 캠페인의 언어 집합을 원래의
+ * `NON_KOREAN_LANGUAGES`(5, en/es/pt/ja/vi)에서 `LAUNCH_CONTENT_LANGUAGES`(4, ko/en/ja/es)로
+ * 바꾸며 ko는 의도적으로 추가했지만 pt/vi를 실수로 함께 빠뜨려, 이미 발급된 pt/vi 결과·수신거부
+ * 링크가 전부 깨졌다. ko 지원은 유지하고 pt/vi를 되살려 `MARKETING_LANGUAGES`(6) 전체로
+ * 복원했다 — `src/dictionaries/pt.ts`/`vi.ts`에 `lunarNewYear` 콘텐츠가 이미 채워져 있다.
  */
 export interface CampaignWindowStatus {
   active: boolean;
@@ -22,7 +29,7 @@ export function getCampaignWindow(): Promise<CampaignWindowStatus> {
 
 export interface CreateReadingInput {
   name: string;
-  language: LaunchContentLanguage;
+  language: MarketingLanguage;
   yearPillar?: Pillar;
   monthPillar?: Pillar;
   dayPillar: Pillar;
@@ -76,7 +83,7 @@ export function createReading(input: CreateReadingInput): Promise<CreateReadingR
 export interface ReadingView {
   id: string;
   name: string;
-  language: LaunchContentLanguage;
+  language: MarketingLanguage;
   dayStem: string;
   content: ReadingContent;
   hasEmailSubscription: boolean;
