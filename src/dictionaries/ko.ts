@@ -92,14 +92,14 @@ export const dictionary: MarketingDictionary = {
     ctaText: '내 아침 편지, 무료로 받아보기',
   },
   leadCapture: {
-    title: '다인의 짧은 소개 편지 받기 — 30일 체험 포함',
+    title: '다인의 소개 편지 받기 — 30일 체험 포함',
     subtitle:
-      '이메일을 남겨주시면 며칠에 걸쳐 다인이 짧은 소개 노트를 보내드려요. 실제 아침 편지 예시도 들어 있고, 마지막 날엔 앱에서 쓸 수 있는 30일 무료체험 쿠폰(원래 7일 대신)을 드려요.',
+      '이메일을 남겨주시면 다인이 짧은 소개 편지를 바로 보내드려요. 실제 아침 편지 예시도 들어 있고, 앱에서 쓸 수 있는 30일 무료체험 쿠폰(원래 7일 대신)도 함께 드려요.',
     emailPlaceholder: 'you@example.com',
     consentLabel: '메일을 받고 싶어요 (언제든 수신거부 가능)',
     submitButton: '소개 편지 받기',
     submitting: '등록하는 중…',
-    success: '완료됐어요! 다인의 첫 노트를 메일함에서 기다려 주세요.',
+    success: '완료됐어요! 다인의 소개 편지를 메일함에서 확인해보세요.',
     remainingSlots: '선착순 {capacity}명 중 {issued}명 신청 완료, {remaining}명 남았어요',
     soldOut: '선착순 쿠폰이 모두 소진됐어요 — 소개 노트 등록은 계속 받고 있어요!',
     errors: {

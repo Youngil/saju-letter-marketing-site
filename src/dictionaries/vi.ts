@@ -89,14 +89,14 @@ export const dictionary: MarketingDictionary = {
     ctaText: 'Nhận miễn phí bản xem trước lá thư buổi sáng',
   },
   leadCapture: {
-    title: 'Nhận vài ghi chú từ Dain — kèm dùng thử 30 ngày',
+    title: 'Nhận một ghi chú từ Dain — kèm dùng thử 30 ngày',
     subtitle:
-      'Để lại email và Dain sẽ gửi vài ghi chú chào mừng ngắn trong vài ngày tới — kèm một lá thư buổi sáng mẫu. Ngày cuối cùng bạn nhận mã dùng thử miễn phí 30 ngày (thay vì 7 ngày như thường lệ).',
+      'Để lại email và Dain sẽ gửi ngay một ghi chú chào mừng ngắn — kèm một lá thư buổi sáng mẫu và mã dùng thử miễn phí 30 ngày (thay vì 7 ngày như thường lệ).',
     emailPlaceholder: 'ban@example.com',
     consentLabel: 'Tôi muốn nhận các email này (có thể hủy bất cứ lúc nào)',
     submitButton: 'Gửi ghi chú cho tôi',
     submitting: 'Đang đăng ký…',
-    success: 'Xong rồi! Hãy chờ ghi chú đầu tiên của Dain trong hộp thư.',
+    success: 'Xong rồi! Hãy kiểm tra hộp thư để xem ghi chú của Dain.',
     remainingSlots: 'Đã có {issued}/{capacity} người đăng ký — còn {remaining} suất',
     soldOut: 'Ưu đãi mã dùng thử đã hết suất — bạn vẫn có thể đăng ký nhận ghi chú!',
     errors: {

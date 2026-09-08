@@ -87,14 +87,14 @@ export const dictionary: MarketingDictionary = {
     ctaText: 'Receba grátis uma prévia da sua carta matinal',
   },
   leadCapture: {
-    title: 'Receba algumas notas de Dain — e um teste de 30 dias',
+    title: 'Receba uma nota de Dain — e um teste de 30 dias',
     subtitle:
-      'Deixe seu e-mail e Dain enviará algumas notas curtas de boas-vindas nos próximos dias — incluindo uma carta matinal de exemplo. No último dia, você ganha um código para um teste grátis de 30 dias (em vez dos 7 de costume).',
+      'Deixe seu e-mail e Dain enviará agora mesmo uma breve nota de boas-vindas — incluindo uma carta matinal de exemplo e um código para um teste grátis de 30 dias (em vez dos 7 de costume).',
     emailPlaceholder: 'voce@exemplo.com',
     consentLabel: 'Quero receber esses e-mails (você pode cancelar quando quiser)',
-    submitButton: 'Enviar as notas',
+    submitButton: 'Enviar a nota',
     submitting: 'Cadastrando…',
-    success: 'Pronto! Fique de olho na primeira nota de Dain na sua caixa de entrada.',
+    success: 'Pronto! Confira sua caixa de entrada para a nota de Dain.',
     remainingSlots: '{issued} de {capacity} vagas preenchidas — restam {remaining}',
     soldOut: 'Esta oferta de cupom já se esgotou — mas você ainda pode se cadastrar para as notas!',
     errors: {

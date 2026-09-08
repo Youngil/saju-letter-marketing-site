@@ -87,14 +87,14 @@ export const dictionary: MarketingDictionary = {
     ctaText: 'Recibe gratis una vista previa de tu carta matutina',
   },
   leadCapture: {
-    title: 'Recibe unas notas de Dain — y una prueba de 30 días',
+    title: 'Recibe una nota de Dain — y una prueba de 30 días',
     subtitle:
-      'Déjanos tu correo y Dain te enviará unas breves notas de bienvenida durante los próximos días — incluida una carta matutina de ejemplo. El último día recibirás un código para una prueba gratuita de 30 días (en vez de los 7 habituales).',
+      'Déjanos tu correo y Dain te enviará ahora mismo una breve nota de bienvenida — incluida una carta matutina de ejemplo y un código para una prueba gratuita de 30 días (en vez de los 7 habituales).',
     emailPlaceholder: 'tu@ejemplo.com',
     consentLabel: 'Quiero recibir estos correos (puedes darte de baja cuando quieras)',
-    submitButton: 'Enviarme las notas',
+    submitButton: 'Enviarme la nota',
     submitting: 'Registrando…',
-    success: '¡Listo! Espera la primera nota de Dain en tu bandeja de entrada.',
+    success: '¡Listo! Revisa tu bandeja de entrada para la nota de Dain.',
     remainingSlots: '{issued} de {capacity} cupos reclamados — quedan {remaining}',
     soldOut: 'Esta oferta de cupón ya se agotó — ¡pero puedes registrarte igual para las notas!',
     errors: {
