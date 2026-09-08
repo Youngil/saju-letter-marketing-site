@@ -14,7 +14,7 @@ import {
 // 자체가 이미 LAUNCH_CONTENT_LANGUAGES라는 뜻) 방어적으로 그대로 남겨뒀다.
 import { fetchActiveServiceLanguages } from '@/lib/serviceLanguagesApi';
 import { DemoForm } from '@/components/DemoForm';
-// LeadCaptureForm import는 아래 렌더링과 함께 잠시 꺼뒀다(2026-09-02) — §leadCapture 참고.
+import { LeadCaptureForm } from '@/components/LeadCaptureForm';
 import { AppDownloadLinks } from '@/components/AppDownloadLinks';
 import { DainHomeMark } from '@/components/DainHomeMark';
 import { BlogByline, categoryLabelFor } from '@/components/BlogByline';
@@ -136,20 +136,16 @@ export default async function HomePage({ params }: { params: Promise<{ lang: str
         </section>
       ) : null}
 
-      {/* 리드 캡처("다인의 짧은 소개 편지 받기 — 30일 체험 포함")를 잠시 화면에서 뺐다
-          (2026-09-02, 사용자 요청: "쿠폰과 코드와 관련해서 개념을 새롭게 만들어가려고 한다,
-          그동안 화면에 표시하지 않도록 처리") — 30일 체험 쿠폰 개념 자체를 재검토 중이라, 그
-          개념이 정리될 때까지 노출을 멈추는 임시 조치다. 컴포넌트(LeadCaptureForm.tsx)와
-          문구(dict.leadCapture)는 그대로 남겨뒀다 — 재개할 때 이 주석을 걷어내고 아래 줄만
-          되살리면 된다. **2026-09-05부터 LeadCaptureForm의 language prop도 LaunchContentLanguage로
-          좁아졌으니, 되살릴 때 반드시 showContentLinks 게이트 안에서만 렌더할 것** — 데모 폼과
-          같은 이유(pt/vi는 개인화 콘텐츠 서비스 대상이 아님)로 이 폼도 4개 언어로 제한한다.
+      {/* 리드 캡처 재개(2026-09-08) — 2026-09-02에 "쿠폰과 코드 개념을 새로 정리하는 동안
+          화면에서 빼달라"는 요청으로 잠시 꺼뒀던 것을, 그 개념 정리(2026-09-03 이벤트→쿠폰→
+          코드 3단 리팩터링)가 끝나고 실제 서비스 출시 주간에 들어서면서 다시 켰다.
+          showContentLinks 게이트 안에서만 렌더한다 — 데모 폼과 같은 이유(pt/vi는 개인화
+          콘텐츠 서비스 대상이 아님)로 이 폼도 4개 언어로 제한한다. */}
       {showContentLinks ? (
         <section className="mx-auto w-full max-w-md">
           <LeadCaptureForm language={lang} dict={dict.leadCapture} />
         </section>
       ) : null}
-      */}
     </div>
   );
 }
