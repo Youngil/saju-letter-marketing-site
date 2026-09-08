@@ -93,7 +93,7 @@ export const dictionary: MarketingDictionary = {
     subtitle:
       'Để lại email và Dain sẽ gửi ngay một ghi chú chào mừng ngắn — kèm một lá thư buổi sáng mẫu và mã dùng thử miễn phí 30 ngày (thay vì 7 ngày như thường lệ).',
     emailPlaceholder: 'ban@example.com',
-    consentLabel: 'Tôi muốn nhận các email này (có thể hủy bất cứ lúc nào)',
+    consentLabel: 'Tôi đồng ý nhận email chào mừng này (có thể hủy bất cứ lúc nào)',
     submitButton: 'Gửi ghi chú cho tôi',
     submitting: 'Đang đăng ký…',
     success: 'Xong rồi! Hãy kiểm tra hộp thư để xem ghi chú của Dain.',

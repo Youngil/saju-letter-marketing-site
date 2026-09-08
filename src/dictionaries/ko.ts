@@ -96,7 +96,7 @@ export const dictionary: MarketingDictionary = {
     subtitle:
       '이메일을 남겨주시면 다인이 짧은 소개 편지를 바로 보내드려요. 실제 아침 편지 예시도 들어 있고, 앱에서 쓸 수 있는 30일 무료체험 쿠폰(원래 7일 대신)도 함께 드려요.',
     emailPlaceholder: 'you@example.com',
-    consentLabel: '메일을 받고 싶어요 (언제든 수신거부 가능)',
+    consentLabel: '이 소개 편지 이메일 수신에 동의해요 (언제든 수신거부 가능)',
     submitButton: '소개 편지 받기',
     submitting: '등록하는 중…',
     success: '완료됐어요! 다인의 소개 편지를 메일함에서 확인해보세요.',

@@ -91,7 +91,7 @@ export const dictionary: MarketingDictionary = {
     subtitle:
       'メールアドレスをご登録いただくと、ダインからの短い紹介ノートをすぐにお届けします。実際の朝の手紙の例と、アプリで使える30日間無料体験クーポン(通常7日間のところ)も一緒にお送りします。',
     emailPlaceholder: 'you@example.com',
-    consentLabel: 'このメールを受け取る(いつでも配信停止できます)',
+    consentLabel: 'この紹介ノートメールの受信に同意します(いつでも配信停止できます)',
     submitButton: '紹介ノートを受け取る',
     submitting: '登録しています…',
     success: '登録が完了しました。ダインからの紹介ノートをメールボックスでご確認ください。',

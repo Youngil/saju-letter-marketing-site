@@ -90,7 +90,7 @@ export const dictionary: MarketingDictionary = {
     subtitle:
       "Leave your email and Dain will send you a short welcome note right away — including a sample morning letter and a code for a 30-day free trial (instead of the usual 7).",
     emailPlaceholder: 'you@example.com',
-    consentLabel: "I'd like to receive these emails (you can unsubscribe anytime)",
+    consentLabel: 'I consent to receiving this welcome email (you can unsubscribe anytime)',
     submitButton: 'Send me the note',
     submitting: 'Signing you up…',
     success: "You're all set! Check your inbox for Dain's welcome note.",

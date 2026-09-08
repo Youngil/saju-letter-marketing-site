@@ -91,7 +91,7 @@ export const dictionary: MarketingDictionary = {
     subtitle:
       'Déjanos tu correo y Dain te enviará ahora mismo una breve nota de bienvenida — incluida una carta matutina de ejemplo y un código para una prueba gratuita de 30 días (en vez de los 7 habituales).',
     emailPlaceholder: 'tu@ejemplo.com',
-    consentLabel: 'Quiero recibir estos correos (puedes darte de baja cuando quieras)',
+    consentLabel: 'Acepto recibir este correo de bienvenida (puedes darte de baja cuando quieras)',
     submitButton: 'Enviarme la nota',
     submitting: 'Registrando…',
     success: '¡Listo! Revisa tu bandeja de entrada para la nota de Dain.',
