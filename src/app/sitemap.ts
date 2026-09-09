@@ -98,12 +98,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     alternates: { languages: languageAlternates(MARKETING_LANGUAGES, privacyPath, DEFAULT_LANGUAGE) },
   }));
 
-  // 서비스 이용 안내(2026-09-02, 오락 목적 고지)도 privacy와 같은 이유로 4개 언어 대상.
+  // 서비스 이용 안내(2026-09-02, 오락 목적 고지) — 2026-09-09 5차 종합 버그 점검으로
+  // `disclaimer/page.tsx`의 게이트를 `MARKETING_LANGUAGES`(6)로 되돌렸으므로(privacy와 같은
+  // 이유로 법적/안전 고지 문서라 1차 출시 언어 축과 무관해야 함) sitemap도 함께 맞춘다.
   const disclaimerPath = (lang: MarketingLanguage) => `/${lang}/disclaimer`;
-  const disclaimerEntries = LAUNCH_CONTENT_LANGUAGES.map((lang) => ({
+  const disclaimerEntries = MARKETING_LANGUAGES.map((lang) => ({
     url: `${WEB_BASE_URL}${disclaimerPath(lang)}`,
     lastModified: new Date(),
-    alternates: { languages: languageAlternates(LAUNCH_CONTENT_LANGUAGES, disclaimerPath, DEFAULT_LANGUAGE) },
+    alternates: { languages: languageAlternates(MARKETING_LANGUAGES, disclaimerPath, DEFAULT_LANGUAGE) },
   }));
 
   return [

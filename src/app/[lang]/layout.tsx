@@ -118,10 +118,24 @@ export default async function LangLayout({
         />
         <header className="sticky top-0 z-10 border-b border-foreground/10 bg-background/85 backdrop-blur-md">
           <div className="mx-auto flex max-w-5xl items-center justify-between gap-2 px-4 py-4">
-            <Link href={`/${lang}`} className="font-display flex shrink-0 items-center gap-2 text-base font-semibold sm:text-lg">
-              <Image src="/logo-icon.png" alt="" width={28} height={28} className="h-7 w-7 shrink-0 rounded-md" />
-              <span className="truncate">{dict.brand}</span>
-            </Link>
+            {/* 로고는 홈(`[lang]/page.tsx`)으로 링크하는데, 홈은 콘텐츠 축(LAUNCH_CONTENT_LANGUAGES,
+                4개)만 서비스한다는 명시적 제품 결정(meta 저장소 CLAUDE.md §9 "1차 출시 언어는
+                ko/en/ja/es 4개")이 있다 — 블로그/compare 내비 링크와 같은 이유로 pt/vi에서는
+                이 링크도 눌러도 404가 난다(2026-09-09, 5차 종합 버그 점검으로 발견). pt/vi
+                방문자는 privacy/compat/lunar-new-year 같은 트랜잭션 페이지에 정당하게 도달할 수
+                있으므로(레이아웃 게이트는 6개 언어 전부 통과) 브랜드 마크 자체를 숨기지는 않고,
+                링크만 제거한 텍스트로 대체한다. */}
+            {isLaunchContentLanguage(lang) ? (
+              <Link href={`/${lang}`} className="font-display flex shrink-0 items-center gap-2 text-base font-semibold sm:text-lg">
+                <Image src="/logo-icon.png" alt="" width={28} height={28} className="h-7 w-7 shrink-0 rounded-md" />
+                <span className="truncate">{dict.brand}</span>
+              </Link>
+            ) : (
+              <span className="font-display flex shrink-0 items-center gap-2 text-base font-semibold sm:text-lg">
+                <Image src="/logo-icon.png" alt="" width={28} height={28} className="h-7 w-7 shrink-0 rounded-md" />
+                <span className="truncate">{dict.brand}</span>
+              </span>
+            )}
             <nav className="flex items-center gap-3 sm:gap-5">
               {/* Blog/compare는 LAUNCH_CONTENT_LANGUAGES(ko/en/ja/es)만 지원한다 — pt/vi
                   방문자(신년운세 캠페인이 지원하는 언어라 실제로 존재)에게 무조건 노출하면
@@ -147,6 +161,10 @@ export default async function LangLayout({
           <div className="mx-auto flex max-w-5xl flex-col gap-1 px-4 py-10 text-sm text-foreground/50">
             <span className="font-display font-medium text-foreground/70">{dict.brand}</span>
             <p>{dict.footer.privacyNote}</p>
+            {/* privacy/disclaimer 둘 다 트랜잭션/법적 고지 축이라 6개 언어(MARKETING_LANGUAGES)
+                전부에서 열린다(disclaimer는 2026-09-09 5차 종합 버그 점검으로 privacy와 같은
+                축으로 원복됐다 — `disclaimer/page.tsx` 상단 주석 참고) — 이 레이아웃 게이트도
+                6개 언어 전부를 통과시키므로 두 링크 모두 언어 가드 없이 항상 렌더해도 안전하다. */}
             <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1">
               <Link href={`/${lang}/privacy`} className="w-fit underline hover:text-foreground/70">
                 {dict.footer.privacyLinkLabel}
