@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { availableSwitcherLanguages, detectPreferredLaunchLanguage } from './languages';
+import { availableSwitcherLanguages, buildLanguageSwitchPath, detectPreferredLaunchLanguage } from './languages';
 
 describe('detectPreferredLaunchLanguage (2026-09-03, 종합 버그 점검 — Accept-Language 우선순위 무시 버그 수정)', () => {
   it('q값 없이 하나만 오면 그 언어를 고른다', () => {
@@ -49,5 +49,25 @@ describe('availableSwitcherLanguages (2026-09-07부터 신년운세 캠페인도
     expect(availableSwitcherLanguages('/lunar-new-year')).toEqual(['ko', 'en', 'ja', 'es']);
     expect(availableSwitcherLanguages('/lunar-new-year/r/abc123')).toEqual(['ko', 'en', 'ja', 'es']);
     expect(availableSwitcherLanguages('/lunar-new-year/unsubscribe')).toEqual(['ko', 'en', 'ja', 'es']);
+  });
+});
+
+describe('buildLanguageSwitchPath (2026-09-09, 최종 pre-launch 감사 — 언어 전환 시 ?token= 쿼리스트링이 사라지던 버그 수정)', () => {
+  it('쿼리스트링이 없으면 예전과 동일하게 경로만 반환한다', () => {
+    expect(buildLanguageSwitchPath('/blog/what-is-saju', 'ja', '')).toBe('/ja/blog/what-is-saju');
+  });
+
+  it('쿼리스트링이 있으면 언어를 바꾼 새 경로 뒤에 그대로 이어붙인다(회귀 테스트 — 수신거부 페이지의 ?token= 유실 버그)', () => {
+    expect(buildLanguageSwitchPath('/unsubscribe', 'ko', 'token=abc123')).toBe('/ko/unsubscribe?token=abc123');
+  });
+
+  it('여러 쿼리 파라미터도 그대로 보존한다', () => {
+    expect(buildLanguageSwitchPath('/lunar-new-year/unsubscribe', 'es', 'token=abc123&foo=bar')).toBe(
+      '/es/lunar-new-year/unsubscribe?token=abc123&foo=bar',
+    );
+  });
+
+  it('루트 경로(빈 rest)에서도 쿼리스트링을 보존한다', () => {
+    expect(buildLanguageSwitchPath('', 'en', 'ref=email')).toBe('/en?ref=email');
   });
 });

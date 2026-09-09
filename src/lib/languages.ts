@@ -95,6 +95,24 @@ export function detectPreferredLaunchLanguage(acceptLanguageHeader: string): Lau
 }
 
 /**
+ * `LanguageSwitcher.tsx`가 실제로 이동할 URL을 만든다(2026-09-09, 최종 pre-launch 감사
+ * `docs/audit-2026-09-09-final-prelaunch.md` "언어 전환기가 수신거부 페이지의 `?token=` 쿼리
+ * 파라미터를 버림" 대응). 예전엔 `usePathname()`만으로 `/${lang}${rest}`를 만들었는데,
+ * `usePathname()`은 쿼리스트링을 포함하지 않는다 — `UnsubscribeStatus.tsx`/
+ * `lunar-new-year/UnsubscribeStatus.tsx`처럼 `?token=...`에만 의존해 상태를 판단하는 페이지에서
+ * 언어를 바꾸면 토큰이 사라져 곧바로 "찾을 수 없음"으로 보였다(실제로는 이미 성공했을 수도
+ * 있는데 실패로 오인시킴). 특정 라우트만 예외 처리하는 대신, 모든 언어 전환에 현재 쿼리스트링을
+ * 그대로 이어붙이는 일반 해법을 택했다 — 이 사이트는 언어 스위처가 레이아웃 한 곳에서만
+ * 렌더되고(`[lang]/layout.tsx`) 페이지별로 다르게 동작할 필요가 없으며, 쿼리 파라미터가 언어
+ * 전환 후에도 유지되는 쪽이 일반적으로 유용하지 해가 되지 않는다(토큰/추적 파라미터 등 어떤
+ * 페이지가 미래에 쿼리 파라미터에 의존하게 되더라도 이 버그 클래스 자체가 재발하지 않는다).
+ */
+export function buildLanguageSwitchPath(restOfPath: string, lang: MarketingLanguage, queryString: string): string {
+  const base = `/${lang}${restOfPath}`;
+  return queryString ? `${base}?${queryString}` : base;
+}
+
+/**
  * 마케팅 카피의 톤 2그룹(사용자 확정) — en/es는 사주 개념을 처음 접하는 독자에게 서양
  * 별자리에 빗대어 처음부터 설명하고, ko/ja는 각자 이미 익숙한 전통(사주, 四柱推命)과의
  * 유사성을 강조한다(2026-08-07: ko를 PR/QA 전용에서 정식 타겟으로 전환하면서 ja와 같은

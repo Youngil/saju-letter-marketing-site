@@ -1,9 +1,9 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { useState } from 'react';
-import { availableSwitcherLanguages, type LaunchContentLanguage, type MarketingLanguage } from '@/lib/languages';
+import { usePathname, useSearchParams } from 'next/navigation';
+import { Suspense, useState } from 'react';
+import { availableSwitcherLanguages, buildLanguageSwitchPath, type LaunchContentLanguage, type MarketingLanguage } from '@/lib/languages';
 
 const LANGUAGE_LABELS: Record<MarketingLanguage, string> = {
   ko: '한국어',
@@ -40,29 +40,53 @@ const LANGUAGE_CODES: Record<MarketingLanguage, string> = {
  * 캐시(ISR) 조회한 뒤 이 컴포넌트에 직접 prop으로 내려준다. 이 컴포넌트는 layout.tsx가 직접
  * 렌더하는 유일한 소비처라 별도 React Context 없이 prop 하나로 충분하다(과설계 방지 — 이
  * 저장소 전반의 관례).
+ *
+ * **`useSearchParams()`는 Suspense 경계가 필요하다(2026-09-09, 쿼리스트링 보존 수정과 함께
+ * 도입)** — 이 훅을 쓰는 클라이언트 컴포넌트를 Suspense로 감싸지 않으면 이 컴포넌트를 포함한
+ * 정적 페이지 전체가 정적 렌더링에서 제외된다(Next.js App Router 공식 제약). 이 사이트는
+ * `generateStaticParams`로 대부분의 `[lang]/...` 페이지를 정적 생성하므로, `usePathname()`만
+ * 쓰던 예전 버전과 달리 이번엔 반드시 감싸야 한다 — 열려있지 않은 드롭다운 버튼과 똑같이 보이는
+ * `LanguageSwitcherFallback`을 폴백으로 둔다(정적 셸에 잠깐 보일 뿐, 하이드레이션 후 곧바로
+ * 실제 컴포넌트로 교체된다).
  */
-export function LanguageSwitcher({ current, activeLanguages }: { current: MarketingLanguage; activeLanguages: LaunchContentLanguage[] }) {
+function LanguageSwitcherButton({ current, onClick }: { current: MarketingLanguage; onClick?: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="rounded-full border border-foreground/15 px-2.5 py-1 text-sm font-medium text-foreground/70 hover:text-foreground sm:border-0 sm:px-0 sm:py-0"
+    >
+      <span className="sm:hidden">{LANGUAGE_CODES[current]}</span>
+      <span className="hidden sm:inline">{LANGUAGE_LABELS[current]}</span>
+    </button>
+  );
+}
+
+function LanguageSwitcherFallback({ current }: { current: MarketingLanguage }) {
+  return (
+    <div className="relative">
+      <LanguageSwitcherButton current={current} />
+    </div>
+  );
+}
+
+function LanguageSwitcherInner({ current, activeLanguages }: { current: MarketingLanguage; activeLanguages: LaunchContentLanguage[] }) {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const [open, setOpen] = useState(false);
 
   const rest = pathname.replace(new RegExp(`^/${current}`), '');
+  const queryString = searchParams.toString();
 
   function pathForLanguage(lang: MarketingLanguage): string {
-    return `/${lang}${rest}`;
+    return buildLanguageSwitchPath(rest, lang, queryString);
   }
 
   const availableLanguages = availableSwitcherLanguages(rest).filter((lang) => activeLanguages.includes(lang));
 
   return (
     <div className="relative">
-      <button
-        type="button"
-        onClick={() => setOpen((v) => !v)}
-        className="rounded-full border border-foreground/15 px-2.5 py-1 text-sm font-medium text-foreground/70 hover:text-foreground sm:border-0 sm:px-0 sm:py-0"
-      >
-        <span className="sm:hidden">{LANGUAGE_CODES[current]}</span>
-        <span className="hidden sm:inline">{LANGUAGE_LABELS[current]}</span>
-      </button>
+      <LanguageSwitcherButton current={current} onClick={() => setOpen((v) => !v)} />
       {open && (
         <ul className="absolute right-0 mt-2 w-36 rounded-lg border border-foreground/10 bg-background py-1 shadow-lg z-50">
           {availableLanguages.map((lang) => (
@@ -79,5 +103,13 @@ export function LanguageSwitcher({ current, activeLanguages }: { current: Market
         </ul>
       )}
     </div>
+  );
+}
+
+export function LanguageSwitcher({ current, activeLanguages }: { current: MarketingLanguage; activeLanguages: LaunchContentLanguage[] }) {
+  return (
+    <Suspense fallback={<LanguageSwitcherFallback current={current} />}>
+      <LanguageSwitcherInner current={current} activeLanguages={activeLanguages} />
+    </Suspense>
   );
 }
