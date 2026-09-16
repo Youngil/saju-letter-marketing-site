@@ -32,15 +32,20 @@ export async function generateMetadata({ params }: { params: Promise<{ lang: str
   const dict = await getDictionary(rawLang);
   const path = (lang: MarketingLanguage) => `/${lang}`;
 
+  // <title> 태그에는 브랜드명(예: "사주편지")을 붙인다 — hero.title 단독으로는 한국어 "사주"
+  // 키워드가 빠져 있어 그 검색어로 색인/검색될 여지를 스스로 줄이고 있었다(2026-09-16 발견).
+  // 화면에 보이는 H1(hero.title 자체)은 브랜드 보이스 그대로 두고, 메타데이터에서만 합성한다.
+  const pageTitle = `${dict.brand} — ${dict.hero.title}`;
+
   return {
-    title: dict.hero.title,
+    title: pageTitle,
     description: dict.hero.subtitle,
     alternates: {
       canonical: `${WEB_BASE_URL}${path(rawLang)}`,
       languages: languageAlternates(LAUNCH_CONTENT_LANGUAGES, path, DEFAULT_LANGUAGE),
     },
     ...buildSocialMetadata({
-      title: dict.hero.title,
+      title: pageTitle,
       description: dict.hero.subtitle,
       url: `${WEB_BASE_URL}${path(rawLang)}`,
     }),

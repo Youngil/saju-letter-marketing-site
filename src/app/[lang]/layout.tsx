@@ -85,7 +85,8 @@ export async function generateMetadata({ params }: { params: Promise<{ lang: str
     metadataBase: new URL(WEB_BASE_URL),
     // 페이지별 generateMetadata가 없는 세그먼트를 위한 폴백 기본값 — 실제로 이 값이 그대로
     // 쓰이는 페이지가 남지 않도록 각 page.tsx에 고유 title/description을 채워가는 중이다.
-    title: dict.hero.title,
+    // 홈(page.tsx)과 같은 이유로 브랜드명을 붙인다(2026-09-16, 한국어 "사주" 키워드 누락 수정).
+    title: `${dict.brand} — ${dict.hero.title}`,
     description: dict.hero.subtitle,
   };
 }
