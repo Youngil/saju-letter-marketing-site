@@ -118,6 +118,7 @@ function CompletedResult({
         <p className="text-center text-sm font-medium text-foreground/70">{content.cta}</p>
         <AppDownloadLinks
           dict={appLinksDict}
+          language={language}
           onAndroidClick={logInstallClick}
           onIosClick={logInstallClick}
           emphasized

@@ -1,7 +1,9 @@
 'use client';
 
+import Image from 'next/image';
 import { ANDROID_APP_LIVE, IOS_APP_LIVE, GOOGLE_PLAY_URL, APP_STORE_URL } from '@/lib/appLinks';
 import { trackEvent } from '@/lib/analytics';
+import type { MarketingLanguage } from '@/lib/languages';
 
 export interface AppDownloadLinksDict {
   androidCta: string;
@@ -20,8 +22,50 @@ export interface AppDownloadLinksDict {
  * 겪은 "Functions cannot be passed directly to Client Components" 크래시와 같은 종류의 제약).
  * 이 컴포넌트 자체를 클라이언트 컴포넌트로 만들면 훅 없이도(순수 프레젠테이션이라 여전히 훅은
  * 안 씀) 어느 부모(서버든 클라이언트든)에서 렌더되든 안전하게 클릭을 잡을 수 있다.
+ *
+ * **2026-09-17부터 안드로이드는 Google 공식 배지 이미지(`public/badges/google-play-{lang}.png`,
+ * Google Play 배지 생성기에서 받은 원본, 6개 언어)를 쓴다** — Google 브랜드 가이드라인상
+ * 배지는 변형 금지·페이지 언어와 일치·Play 리스팅으로 직접 링크가 조건이라, 원본 PNG를 그대로
+ * 페이지 언어로 골라 스토어 URL에만 연결한다(원본 PNG에 클리어 스페이스가 이미 포함돼 있어
+ * 추가 여백은 두지 않는다). **iOS는 여전히 텍스트 배지다** — Apple 마케팅 가이드라인은
+ * "Download on the App Store" 배지를 App Store에 실제 게시된 앱에만 허용하므로, iOS 출시
+ * (`NEXT_PUBLIC_IOS_APP_LIVE`)와 함께 공식 배지로 교체한다.
  */
-function AppLinkBadge({
+const GOOGLE_PLAY_BADGE_WIDTH = 646;
+const GOOGLE_PLAY_BADGE_HEIGHT = 250;
+
+function GooglePlayBadge({
+  language,
+  label,
+  onClick,
+  emphasized,
+}: {
+  language: MarketingLanguage;
+  label: string;
+  onClick?: () => void;
+  emphasized?: boolean;
+}) {
+  return (
+    <a
+      href={GOOGLE_PLAY_URL}
+      target="_blank"
+      rel="noopener noreferrer"
+      onClick={onClick}
+      className="inline-flex shrink-0 transition hover:opacity-90"
+    >
+      <Image
+        src={`/badges/google-play-${language}.png`}
+        alt={label}
+        width={GOOGLE_PLAY_BADGE_WIDTH}
+        height={GOOGLE_PLAY_BADGE_HEIGHT}
+        className={emphasized ? 'h-16 w-auto' : 'h-14 w-auto'}
+        priority={false}
+      />
+    </a>
+  );
+}
+
+function TextBadge({
   href,
   label,
   comingSoonLabel,
@@ -66,6 +110,7 @@ function AppLinkBadge({
 
 export function AppDownloadLinks({
   dict,
+  language,
   onAndroidClick,
   onIosClick,
   emphasized,
@@ -73,6 +118,8 @@ export function AppDownloadLinks({
   context,
 }: {
   dict: AppDownloadLinksDict;
+  /** 페이지 언어 — Google 배지는 페이지 언어와 같은 언어판을 써야 한다(가이드라인). */
+  language: MarketingLanguage;
   onAndroidClick?: () => void;
   onIosClick?: () => void;
   emphasized?: boolean;
@@ -93,15 +140,23 @@ export function AppDownloadLinks({
   }
 
   return (
-    <div className={`flex flex-wrap items-center gap-2 ${className ?? ''}`}>
-      <AppLinkBadge
-        href={ANDROID_APP_LIVE ? GOOGLE_PLAY_URL : undefined}
-        label={dict.androidCta}
-        comingSoonLabel={dict.comingSoon}
-        onClick={handleClick('android', onAndroidClick)}
-        emphasized={emphasized}
-      />
-      <AppLinkBadge
+    <div className={`flex flex-wrap items-center justify-center gap-3 ${className ?? ''}`}>
+      {ANDROID_APP_LIVE ? (
+        <GooglePlayBadge
+          language={language}
+          label={dict.androidCta}
+          onClick={handleClick('android', onAndroidClick)}
+          emphasized={emphasized}
+        />
+      ) : (
+        <TextBadge
+          href={undefined}
+          label={dict.androidCta}
+          comingSoonLabel={dict.comingSoon}
+          emphasized={emphasized}
+        />
+      )}
+      <TextBadge
         href={IOS_APP_LIVE ? APP_STORE_URL : undefined}
         label={dict.iosCta}
         comingSoonLabel={dict.comingSoon}
