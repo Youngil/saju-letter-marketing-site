@@ -39,6 +39,8 @@ export function trackEvent(name: string, params?: Record<string, unknown>): void
  * 감안한 관용적 유효기간, GDPR이 명시적으로 요구하는 숫자는 아니다).
  */
 export const CONSENT_STORAGE_KEY = 'saju-letter-consent';
+/** 유입 채널 꼬리표 보관 키(`attribution.ts`) — 동의 거부 시 함께 지우려고 여기 둔다(순환 import 방지). */
+export const ATTRIBUTION_STORAGE_KEY = 'saju-letter-attribution';
 const CONSENT_TTL_MS = 365 * 24 * 60 * 60 * 1000;
 
 export type ConsentChoice = 'granted' | 'denied';
@@ -69,6 +71,7 @@ export function storeConsent(choice: ConsentChoice): void {
   if (typeof window !== 'undefined') {
     try {
       window.localStorage.setItem(CONSENT_STORAGE_KEY, JSON.stringify({ choice, storedAt: Date.now() } satisfies StoredConsent));
+      if (choice === 'denied') window.localStorage.removeItem(ATTRIBUTION_STORAGE_KEY);
     } catch {
       // 저장 실패해도 이번 세션의 Consent Mode 갱신 자체는 계속 진행한다.
     }

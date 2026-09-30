@@ -3,6 +3,7 @@
 import Image from 'next/image';
 import { ANDROID_APP_LIVE, IOS_APP_LIVE, GOOGLE_PLAY_URL, APP_STORE_URL } from '@/lib/appLinks';
 import { trackEvent } from '@/lib/analytics';
+import { buildPlayStoreUrl, captureAttribution } from '@/lib/attribution';
 import type { MarketingLanguage } from '@/lib/languages';
 
 export interface AppDownloadLinksDict {
@@ -34,23 +35,41 @@ export interface AppDownloadLinksDict {
 const GOOGLE_PLAY_BADGE_WIDTH = 646;
 const GOOGLE_PLAY_BADGE_HEIGHT = 250;
 
+/**
+ * Play 스토어 링크에 방문자의 유입 채널을 실어 보낸다(2026-10-01, `src/lib/attribution.ts` 참고).
+ * 서버 렌더에는 "사이트 자체 유입" 기본값 링크를 두고(하이드레이션 불일치 방지), 누르는 순간
+ * (pointerdown — 새 탭 열기·가운데 클릭 포함, click — 키보드 포함) 브라우저에 기억된 실제
+ * 채널로 링크를 바꿔 끼운다. 상태/이펙트 없이 DOM의 href만 갱신하므로 추가 렌더가 없다.
+ */
+function refreshPlayStoreHref(anchor: HTMLAnchorElement, context?: string) {
+  if (!GOOGLE_PLAY_URL) return;
+  anchor.href = buildPlayStoreUrl(GOOGLE_PLAY_URL, captureAttribution(), context);
+}
+
+
 function GooglePlayBadge({
   language,
   label,
+  context,
   onClick,
   emphasized,
 }: {
   language: MarketingLanguage;
+  context?: string;
   label: string;
   onClick?: () => void;
   emphasized?: boolean;
 }) {
   return (
     <a
-      href={GOOGLE_PLAY_URL}
+      href={GOOGLE_PLAY_URL ? buildPlayStoreUrl(GOOGLE_PLAY_URL, null, context) : undefined}
       target="_blank"
       rel="noopener noreferrer"
-      onClick={onClick}
+      onPointerDown={(e) => refreshPlayStoreHref(e.currentTarget, context)}
+      onClick={(e) => {
+        refreshPlayStoreHref(e.currentTarget, context);
+        onClick?.();
+      }}
       className="inline-flex shrink-0 transition hover:opacity-90"
     >
       <Image
@@ -144,6 +163,7 @@ export function AppDownloadLinks({
       {ANDROID_APP_LIVE ? (
         <GooglePlayBadge
           language={language}
+          context={context}
           label={dict.androidCta}
           onClick={handleClick('android', onAndroidClick)}
           emphasized={emphasized}

@@ -10,6 +10,7 @@ import { isOldEnough } from '@/lib/age';
 import { ApiError, getDemoReading, type DemoReadingResponse } from '@/lib/api';
 import { Turnstile, TURNSTILE_ENABLED, type TurnstileHandle } from './Turnstile';
 import { AppDownloadLinks } from './AppDownloadLinks';
+import { trackEvent } from '@/lib/analytics';
 
 const CURRENT_YEAR = new Date().getFullYear();
 
@@ -62,6 +63,9 @@ export function DemoForm({
       return;
     }
 
+    // GA4 퍼널(2026-10-01): 채널별로 "사이트 방문 → 미리보기 시도 → 편지 확인 → 설치 버튼"을
+    // 비교하기 위한 두 이벤트. 입력 검증을 통과해 실제로 요청을 보내는 시점만 센다.
+    trackEvent('demo_submit', { language });
     setIsSubmitting(true);
     try {
       const chart = calculateSaju({ calendarType: 'solar', year: yearNum, month: monthNum, day: dayNum });
@@ -77,6 +81,7 @@ export function DemoForm({
       });
 
       setResult(reading);
+      trackEvent('demo_result_view', { language });
     } catch (err) {
       if (err instanceof ApiError && (err.reason === 'underage' || err.reason === 'birth_date_required')) {
         setError(err.reason === 'underage' ? dict.errors.underage : dict.errors.date);

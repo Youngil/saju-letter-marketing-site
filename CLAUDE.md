@@ -403,7 +403,7 @@ Firebase Analytics(GA4 for Firebase, §12 — 이 문서에는 없고 mobile 저
   `'newyear_offseason'`)으로 `install_cta_click` 이벤트에 어느 화면의 CTA인지를 함께 싣는다 —
   `CompatView.tsx`가 이미 쓰던 `onAndroidClick`/`onIosClick`(1st-party `CompatibilityEvent` 기록,
   `logCompatEvent`)은 그대로 유지하고 GA 이벤트를 나란히 추가했을 뿐이다(어느 한쪽을 대체하지 않음).
-- **커스텀 이벤트는 3개뿐이다** — `install_cta_click`(위), `lead_submit`(`LeadCaptureForm.tsx`
+- **커스텀 이벤트는 처음엔 3개였다(2026-10-01에 데모 2개 추가 — 아래 참고)** — `install_cta_click`(위), `lead_submit`(`LeadCaptureForm.tsx`
   제출 성공 시, 이메일 값 자체는 파라미터에 넣지 않음 — 폼이 현재 홈 화면에서 잠시 비노출 중이라
   §8 참고, 재노출 시 자동으로 함께 동작한다), `compat_result_view`(`CompatView.tsx`, 궁합 결과
   열람 — 기존 `logCompatEvent(token, 'result_viewed', 'guest')`와 나란히 남기되 토큰은 GA
@@ -424,6 +424,13 @@ Firebase Analytics(GA4 for Firebase, §12 — 이 문서에는 없고 mobile 저
 - **검증**: 타입체크·테스트(40/40)·프로덕션 빌드 전부 통과. 로컬 프로덕션 서버(`npm run start`)로
   실제 렌더된 HTML에서 `googletagmanager.com/gtag/js?id=G-...` 스크립트 태그와 개인정보처리방침의
   갱신된 문구를 `curl`로 직접 확인했다.
+- **유입 채널 → 설치 연결 + 무료 미리보기 퍼널 이벤트(2026-10-01)** — 사용자가 "마케팅별 효과를 GA로 판단해 주별로 전략을 바꾸고 싶다"고 요청해 점검해 보니, 틱톡·인스타 프로필 링크(`?utm_source=…`)로 사이트에 들어온 방문자가 사이트의 Play 배지로 설치하면 배지 링크가 고정 URL이라 채널 정보가 끊겨, 앱 쪽 Firebase(`sign_up`/`trial_start`/`purchase`)에서 이 경로가 전부 "출처 없음"이었다.
+  - `src/lib/attribution.ts`(신규) — 진입 시 UTM(없으면 궁합 공유 페이지 직접 진입 → `compat_share`, 그다음 외부 referrer를 google/reddit/tiktok 등으로 매핑)을 기억해 두고, `buildPlayStoreUrl()`이 Play 링크의 `referrer`(Install Referrer) 파라미터에 `utm_source/medium/campaign` + `utm_content`(=배지의 `context`, 예: `home_hero`/`demo_result`)를 싣는다. 유입 정보가 없으면 `marketing_site / website / direct`.
+  - **보관은 분석 쿠키 동의자만** — 방문자 식별자는 없지만 기기에 남기는 비필수 저장이라, `localStorage`(최대 30일, last touch)는 `readStoredConsent() === 'granted'`일 때만 쓰고, 미동의자는 그 페이지(탭) 메모리에만 둔다(처음 들어온 홈에서 바로 배지를 누르는 흔한 경로는 동의 없이도 잡힘, 전체 새로고침 후엔 사라짐). 동의를 거부로 바꾸면 `storeConsent('denied')`가 보관 값을 지운다. 키 상수는 순환 import를 피하려고 `analytics.ts`에 두고 재수출한다.
+  - `AppDownloadLinks.tsx` — 서버 렌더는 기본값 링크, 누르는 순간(`pointerdown`/`click`) DOM `href`만 실제 채널로 바꿔 끼운다(상태·이펙트 없음 → 하이드레이션 불일치·`react-hooks/set-state-in-effect` 회피). `AttributionCapture.tsx`(신규, `[lang]/layout.tsx`에 마운트)가 배지 없는 페이지(블로그 등)로 들어온 경우에도 진입 시점에 기록한다.
+  - `DemoForm.tsx` — `demo_submit`(검증 통과 후 요청 직전), `demo_result_view`(결과 표시) 추가. 파라미터는 `language`뿐.
+  - 개인정보처리방침 6개 언어 §1 웹 분석 괄호 문구에 "무료 미리보기 이용"과 "유입 경로만 Google Play에 전달, 동의 시에만 최대 30일 보관"을 추가, effectiveDate/§10을 2026년 10월 1일로 갱신(`privacyPolicy.ts` 상단 주석).
+  - **검증**: 타입체크·테스트(166/166, `attribution.test.ts` 신규)·프로덕션 빌드 통과. 로컬 프로덕션 서버를 headless Chrome(CDP)으로 구동해 배지 `href`를 직접 확인 — UTM 착지 페이지에서는 동의 여부와 무관하게 `tiktok`이 실리고, 동의자는 다른 페이지로 새로 들어와도 유지되며, 미동의자는 새로고침 후 `marketing_site`로 돌아가고 `localStorage`에 아무것도 남지 않음.
 - **쿠키/추적 동의 없이 항상 발화하던 문제 — Consent Mode + 동의 배너로 대응(2026-09-08)** — 도입 당시엔
   동의 처리를 넣지 않고 GA4를 무조건 로드했다. §11 "전 저장소 종합 버그 점검 3회차"의 Medium
   항목으로 고쳤다 — `GoogleAnalytics.tsx`/`ConsentBanner.tsx`/`analytics.ts`의 `readStoredConsent`/

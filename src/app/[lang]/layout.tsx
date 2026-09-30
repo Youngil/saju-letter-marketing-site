@@ -11,6 +11,7 @@ import { WEB_BASE_URL } from '@/lib/seo';
 import { organizationJsonLd } from '@/lib/structuredData';
 import { GoogleAnalytics } from '@/components/GoogleAnalytics';
 import { ConsentBanner } from '@/components/ConsentBanner';
+import { AttributionCapture } from '@/components/AttributionCapture';
 import { GA_MEASUREMENT_ID } from '@/lib/analytics';
 import { notFound } from 'next/navigation';
 
@@ -179,6 +180,7 @@ export default async function LangLayout({
         {/* GA_MEASUREMENT_ID가 없으면(로컬 개발 기본값) GoogleAnalytics 자체가 아무것도 안
             띄우므로, 동의를 물을 추적 자체가 없는 배너도 함께 숨긴다. */}
         {GA_MEASUREMENT_ID && <ConsentBanner dict={dict.consent} />}
+        <AttributionCapture />
       </body>
     </html>
   );
