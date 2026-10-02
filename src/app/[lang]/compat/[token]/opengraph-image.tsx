@@ -1,7 +1,7 @@
 import { ImageResponse } from 'next/og';
 import { isMarketingLanguage } from '@/lib/languages';
 import { getCompatInvite } from '@/lib/compatApi';
-import { COMPAT_CONTENT } from '@/content/compatContent';
+import { COMPAT_CONTENT, resolveCompatOg } from '@/content/compatContent';
 
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
@@ -18,10 +18,7 @@ export default async function Image({ params }: { params: Promise<{ lang: string
   const content = COMPAT_CONTENT[lang];
   const view = await getCompatInvite(token, lang);
 
-  const og =
-    view.status === 'completed'
-      ? { title: content.og.completed.titleFor(view.requesterName), description: content.og.completed.description }
-      : content.og[view.status];
+  const og = resolveCompatOg(content, view);
 
   return new ImageResponse(
     (
@@ -39,7 +36,7 @@ export default async function Image({ params }: { params: Promise<{ lang: string
           textAlign: 'center',
         }}
       >
-        <div style={{ fontSize: 28, letterSpacing: 4, color: '#208aef', marginBottom: 24 }}>SAJU LETTER</div>
+        <div style={{ fontSize: 28, letterSpacing: 4, color: '#a85e2c', marginBottom: 24 }}>SAJU LETTER</div>
         <div style={{ fontSize: 56, fontWeight: 700, lineHeight: 1.2 }}>{og.title}</div>
         <div style={{ fontSize: 30, marginTop: 24, color: '#6b6151' }}>{og.description}</div>
       </div>

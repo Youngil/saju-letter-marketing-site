@@ -14,7 +14,8 @@ export type CompatReading = { title: string; body: string };
 export type InviteView =
   | { status: 'not_found' }
   | { status: 'expired' }
-  | { status: 'pending' }
+  /** 2026-10-02부터 백엔드가 대기 중에도 보낸 사람 이름을 준다(구 백엔드면 없음 → optional). */
+  | { status: 'pending'; requesterName?: string | null }
   | {
       status: 'completed';
       guestName: string | null;

@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import Image from 'next/image';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import type { MarketingLanguage } from '@/lib/languages';
 import type { MarketingDictionary } from '@/dictionaries/types';
 import { COMPAT_CONTENT, type CompatContent } from '@/content/compatContent';
@@ -15,6 +16,9 @@ import { AppDownloadLinks } from '../AppDownloadLinks';
 import { trackEvent } from '@/lib/analytics';
 
 const CURRENT_YEAR = new Date().getFullYear();
+/** 선택형 연도 목록 — 만 16세 미만은 어차피 막히지만(isOldEnough) 목록에서 미리 빼 두면 고르기 쉽다. */
+const YEAR_OPTIONS = Array.from({ length: CURRENT_YEAR - 16 - 1920 + 1 }, (_, i) => CURRENT_YEAR - 16 - i);
+const MONTH_OPTIONS = Array.from({ length: 12 }, (_, i) => i + 1);
 
 /**
  * saju-letter-backend/public/compat.js + guest-day-master.js를 포팅한 클라이언트 컴포넌트
@@ -27,9 +31,12 @@ const CURRENT_YEAR = new Date().getFullYear();
  * (2026-09-02, 사용자 리포트: "Functions cannot be passed directly to Client Components" 런타임
  * 에러) — `CompatContent`에 함수 필드(`pairLine`, `og.completed.titleFor`)가 있어서, page.tsx가
  * 이 객체를 통째로 prop으로 넘기면 서버→클라이언트 RSC 경계를 함수가 못 건너가 항상(상태와
- * 무관하게) 크래시했다. `generateMetadata`(page.tsx, 완전히 서버 전용)는 이 함수들을 그 자리에서
- * 호출해 문자열 결과만 쓰므로 그대로 둬도 문제없다 — 이 컴포넌트 트리로 prop 전달되는 경로만
- * 문제였다.
+ * 무관하게) 크래시했다.
+ *
+ * **2026-10-02 다인의 편지 세계로 재구성** — 흰 카드 위 일반 웹 폼이라 앱을 모르는 친구에게 이 서비스가
+ * 무엇인지 전혀 전달되지 않았고(이 페이지가 앱보다 더 많은 사람의 첫인상이다), 누가 보냈는지도 안 보였다.
+ * 이제 대기·결과 모두 다인의 편지 한 장(`LetterSheet`)이고, 대기 제목에 보낸 사람 이름, 날짜는 선택형,
+ * 결과 뒤에는 앱에서 할 수 있는 일(매일 편지 + 누구에게나 궁합 편지)을 먼저 말하고 설치로 잇는다.
  */
 export function CompatView({
   token,
@@ -48,9 +55,7 @@ export function CompatView({
   useEffect(() => {
     if (view.status === 'completed') {
       logCompatEvent(token, 'result_viewed', 'guest');
-      // GA4에도 함께 남긴다(2026-09-07) — CompatibilityEvent(위 호출)는 이미 서버에 정확히
-      // 쌓이고 있지만 "어느 마케팅 채널에서 왔는지"(UTM/리퍼러)는 모른다. 토큰은 넣지 않는다
-      // (평문 식별자를 애널리틱스 이벤트에 남기지 않는다는 기존 원칙 — mobile CLAUDE.md §12).
+      // GA4에도 함께 남긴다(2026-09-07) — 토큰은 넣지 않는다(평문 식별자를 애널리틱스에 남기지 않는 원칙).
       trackEvent('compat_result_view', { language });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -63,7 +68,15 @@ export function CompatView({
     return <p className="text-red-600">{content.expired}</p>;
   }
   if (view.status === 'pending') {
-    return <PendingForm token={token} language={language} content={content} onSubmitted={setView} />;
+    return (
+      <PendingForm
+        token={token}
+        language={language}
+        content={content}
+        requesterName={view.requesterName ?? null}
+        onSubmitted={setView}
+      />
+    );
   }
 
   return (
@@ -77,6 +90,30 @@ export function CompatView({
     />
   );
 }
+
+/** 다인이 보낸 편지 한 장 — 발신자 줄 + 종이 면. 대기 폼과 결과가 같은 셸을 쓴다. */
+function LetterSheet({ content, children }: { content: CompatContent; children: ReactNode }) {
+  return (
+    <>
+      <div className="flex items-center gap-3 border-b border-foreground/10 pb-4">
+        <Image
+          src="/dain-portrait.png"
+          alt=""
+          width={44}
+          height={44}
+          className="h-11 w-11 rounded-full border border-foreground/15 bg-[#F3EBDC] object-cover"
+        />
+        <div className="min-w-0">
+          <div className="text-sm font-semibold">{content.fromName}</div>
+          <div className="text-xs text-foreground/55">{content.fromRole}</div>
+        </div>
+      </div>
+      {children}
+    </>
+  );
+}
+
+const SHEET_CLASS = 'letter-surface flex flex-col gap-5 rounded-sm p-6 sm:p-8';
 
 function CompletedResult({
   content,
@@ -96,26 +133,29 @@ function CompletedResult({
   const logInstallClick = () => logCompatEvent(token, 'install_cta_clicked', 'guest');
 
   return (
-    <div className="card-surface flex flex-col gap-4 rounded-2xl border border-foreground/10 p-6 sm:p-7">
-      {/* 이 화면은 항상 게스트(링크를 받은 친구)만 보므로, 상단엔 방금 자기가 입력한 이름이
-          아니라 링크를 보낸 회원의 이름을 보여줘야 한다(2026-09-02, 사용자 리포트: "OOO님과의
-          궁합에서 마케팅 사이트에서 입력한 이름이 출력된다"). */}
-      {/* 사이트 전역 강조색(text-accent-warm, #b5652f)을 쓰지 않는다(2026-09-02, 사용자 지적:
-          "한국적 정서에서는 이름에 붉은 색을 사용하는 것은 금기") — 이 accent-warm 자체는
-          링크/헤더 등 사이트 전반에 쓰는 브랜드 색이라 다른 곳은 그대로 두되, 실제 사람 이름을
-          담는 이 줄에서만 붉은 계열을 피해 본문과 같은 중립 색으로 바꿨다. */}
-      <p className="text-sm font-medium text-foreground/70">{content.pairLine(requesterName)}</p>
-      {reading ? (
-        <>
-          <h1 className="text-xl font-semibold">{reading.title}</h1>
-          <p className="text-foreground/80">{reading.body}</p>
-          <p className="text-xs text-foreground/50">{DISCLAIMER_CONTENT[language].short}</p>
-        </>
-      ) : (
-        <p className="text-foreground/60">{content.loading}</p>
-      )}
-      <div className="mt-2 flex flex-col items-center gap-3">
-        <p className="text-center text-sm font-medium text-foreground/70">{content.cta}</p>
+    <div className="flex flex-col gap-6">
+      <div className={SHEET_CLASS}>
+        <LetterSheet content={content}>
+          {/* 이 화면은 항상 게스트만 보므로 보낸 회원의 이름을 쓴다(2026-09-02). 사람 이름 줄은 붉은 계열을
+              피한다(이름에 붉은 색은 금기) — 중립 색 유지. */}
+          <p className="text-sm font-medium text-foreground/70">{content.pairLine(requesterName)}</p>
+          {reading ? (
+            <>
+              <h1 className="font-display text-2xl leading-snug text-balance">{reading.title}</h1>
+              <p className="whitespace-pre-line leading-relaxed text-foreground/85">{reading.body}</p>
+              <p className="self-end font-display text-lg">{content.signature}</p>
+              <p className="text-xs text-foreground/50">{DISCLAIMER_CONTENT[language].short}</p>
+            </>
+          ) : (
+            <p className="text-foreground/60">{content.loading}</p>
+          )}
+        </LetterSheet>
+      </div>
+
+      {/* 결과 다음의 고리 — 예전엔 작은 한 줄 + 배지뿐이라 입소문이 여기서 끝났다. */}
+      <section className="flex flex-col items-center gap-3 rounded-sm border border-accent-warm/30 bg-accent-warm-soft/60 p-6 text-center">
+        <h2 className="font-display text-xl text-balance">{content.ctaTitle}</h2>
+        <p className="max-w-[46ch] text-sm leading-relaxed text-foreground/75">{content.ctaBody}</p>
         <AppDownloadLinks
           dict={appLinksDict}
           language={language}
@@ -124,7 +164,7 @@ function CompletedResult({
           emphasized
           context="compat_result"
         />
-      </div>
+      </section>
     </div>
   );
 }
@@ -133,11 +173,13 @@ function PendingForm({
   token,
   language,
   content,
+  requesterName,
   onSubmitted,
 }: {
   token: string;
   language: MarketingLanguage;
   content: CompatContent;
+  requesterName: string | null;
   onSubmitted: (view: InviteView) => void;
 }) {
   const [name, setName] = useState('');
@@ -147,12 +189,8 @@ function PendingForm({
   const [day, setDay] = useState('');
   const [isLeapMonth, setIsLeapMonth] = useState(false);
 
-  // 연/월/양음력 변경 시 isLeapMonth를 리셋한다(2026-09-04, 종합 버그 점검 2회차) —
-  // saju-letter-mobile의 onboarding.tsx/compat/deep.tsx가 이미 쓰는 것과 같은 패턴인데, 이
-  // 게스트 폼만 리셋이 빠져 있었다. 윤달 선택 후 다른(비윤달) 월/연도로 바꿔도 체크박스는
-  // 사라지지만 내부 상태(isLeapMonth)가 그대로 남아, lunar-javascript가 존재하지 않는
-  // (연,월,윤달) 조합에 예외를 던져 제출이 계속 실패하고("날짜를 다시 확인해주세요"라는
-  // 안내만 뜰 뿐 원인은 안 보임) 그 정확한 조합으로 돌아가지 않는 한 복구되지 않았다.
+  // 연/월/양음력 변경 시 isLeapMonth를 리셋한다(2026-09-04) — 윤달 선택 후 다른 월/연도로 바꿔도 내부
+  // 상태가 남아 존재하지 않는 (연,월,윤달) 조합으로 제출이 계속 실패하던 문제.
   function parseIntOrNull(value: string): number | null {
     if (value.trim() === '') return null;
     const n = Number(value);
@@ -167,20 +205,37 @@ function PendingForm({
     return getLunarLeapMonth(y) === m;
   }
 
+  // 일 목록은 고른 달의 날 수만큼(음력은 최대 30일). 고른 날이 그 달에 없으면(31일 → 2월) 비운다.
+  function maxDayFor(nextCalendarType: 'solar' | 'lunar', yearStr: string, monthStr: string): number {
+    if (nextCalendarType === 'lunar') return 30;
+    const y = parseIntOrNull(yearStr);
+    const m = parseIntOrNull(monthStr);
+    return y !== null && m !== null ? new Date(y, m, 0).getDate() : 31;
+  }
+
+  function clampDay(nextCalendarType: 'solar' | 'lunar', yearStr: string, monthStr: string) {
+    setDay((prev) => (prev && Number(prev) > maxDayFor(nextCalendarType, yearStr, monthStr) ? '' : prev));
+  }
+
   function handleCalendarTypeChange(next: 'solar' | 'lunar') {
     setCalendarType(next);
     setIsLeapMonth((prev) => (canBeLeapMonth(next, year, month) ? prev : false));
+    clampDay(next, year, month);
   }
 
   function handleYearChange(nextYear: string) {
     setYear(nextYear);
     setIsLeapMonth((prev) => (canBeLeapMonth(calendarType, nextYear, month) ? prev : false));
+    clampDay(calendarType, nextYear, month);
   }
 
   function handleMonthChange(nextMonth: string) {
     setMonth(nextMonth);
     setIsLeapMonth((prev) => (canBeLeapMonth(calendarType, year, nextMonth) ? prev : false));
+    clampDay(calendarType, year, nextMonth);
   }
+
+  const dayOptions = Array.from({ length: maxDayFor(calendarType, year, month) }, (_, i) => i + 1);
 
   const [turnstileToken, setTurnstileToken] = useState<string | undefined>(undefined);
   const turnstileRef = useRef<TurnstileHandle>(null);
@@ -195,7 +250,7 @@ function PendingForm({
     const monthNum = Number(month);
     const dayNum = Number(day);
 
-    if (!trimmedName || !Number.isInteger(yearNum) || !Number.isInteger(monthNum) || !Number.isInteger(dayNum)) {
+    if (!trimmedName || !year || !month || !day || !Number.isInteger(yearNum) || !Number.isInteger(monthNum) || !Number.isInteger(dayNum)) {
       setError(content.formError);
       return;
     }
@@ -246,9 +301,7 @@ function PendingForm({
       } else {
         setError(content.submitError);
       }
-      // Turnstile 토큰은 1회용이라, 실패한 시도에 쓰인 토큰을 그대로 두면 재제출도 항상 403으로
-      // 막힌다(2026-09-03, 종합 버그 점검으로 발견) — 이 폼은 실패해도 언마운트되지 않으므로
-      // 새 토큰을 명시적으로 요청한다.
+      // Turnstile 토큰은 1회용이라 실패한 시도의 토큰을 그대로 두면 재제출도 막힌다(2026-09-03).
       setTurnstileToken(undefined);
       turnstileRef.current?.reset();
     } finally {
@@ -257,101 +310,110 @@ function PendingForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="card-surface flex flex-col gap-5 rounded-2xl border border-foreground/10 p-6 sm:p-7">
-      <div>
-        <h1 className="text-xl font-semibold">{content.pendingTitle}</h1>
-        <p className="mt-1 text-sm text-foreground/70">{content.pendingIntro}</p>
-      </div>
+    <div className="flex flex-col gap-4">
+      <p className="text-center text-xs tracking-wide text-foreground/55">{content.aboutLine}</p>
+      <form onSubmit={handleSubmit} className={SHEET_CLASS}>
+        <LetterSheet content={content}>
+          <div>
+            {/* 누가 보냈는지를 제목에(2026-10-02) — 모르는 링크에 생년월일을 넣게 하는 화면이라 보낸 사람이
+                가장 먼저 보여야 한다. 백엔드가 이름을 주지 않으면(구 백엔드) 일반 문구로 떨어진다. */}
+            <h1 className="font-display text-2xl leading-snug text-balance">{content.pendingTitleFor(requesterName)}</h1>
+            <p className="mt-2 text-sm leading-relaxed text-foreground/70">{content.pendingIntroLetter}</p>
+          </div>
 
-      <div>
-        <label className="mb-1.5 block text-sm font-medium" htmlFor="guest-name">
-          {content.nameLabel}
-        </label>
-        <input
-          id="guest-name"
-          type="text"
-          maxLength={60}
-          placeholder={content.namePlaceholder}
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          className="w-full rounded-lg border border-foreground/15 bg-white px-3 py-2.5 transition focus-visible:border-accent-warm"
-        />
-      </div>
+          <div>
+            <label className="mb-1.5 block text-sm font-medium" htmlFor="guest-name">
+              {content.nameLabel}
+            </label>
+            <input
+              id="guest-name"
+              type="text"
+              maxLength={60}
+              placeholder={content.namePlaceholder}
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="w-full rounded-lg border border-foreground/15 bg-white px-3 py-2.5 transition focus-visible:border-accent-warm"
+            />
+          </div>
 
-      <div className="flex gap-2">
-        <button
-          type="button"
-          aria-pressed={calendarType === 'solar'}
-          onClick={() => handleCalendarTypeChange('solar')}
-          className={`rounded-full border px-4 py-1.5 text-sm ${calendarType === 'solar' ? 'border-accent-warm bg-accent-warm text-white' : 'border-foreground/15 text-foreground/70'}`}
-        >
-          {content.calendarSolar}
-        </button>
-        <button
-          type="button"
-          aria-pressed={calendarType === 'lunar'}
-          onClick={() => handleCalendarTypeChange('lunar')}
-          className={`rounded-full border px-4 py-1.5 text-sm ${calendarType === 'lunar' ? 'border-accent-warm bg-accent-warm text-white' : 'border-foreground/15 text-foreground/70'}`}
-        >
-          {content.calendarLunar}
-        </button>
-      </div>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              aria-pressed={calendarType === 'solar'}
+              onClick={() => handleCalendarTypeChange('solar')}
+              className={`rounded-full border px-4 py-1.5 text-sm ${calendarType === 'solar' ? 'border-accent-warm bg-accent-warm text-white' : 'border-foreground/15 text-foreground/70'}`}
+            >
+              {content.calendarSolar}
+            </button>
+            <button
+              type="button"
+              aria-pressed={calendarType === 'lunar'}
+              onClick={() => handleCalendarTypeChange('lunar')}
+              className={`rounded-full border px-4 py-1.5 text-sm ${calendarType === 'lunar' ? 'border-accent-warm bg-accent-warm text-white' : 'border-foreground/15 text-foreground/70'}`}
+            >
+              {content.calendarLunar}
+            </button>
+          </div>
 
-      {/* 예전엔 각 입력칸이 고정폭(w-20/w-16 등)이라 카드 폭 전체를 못 채우고 왼쪽에 몰려 붙어
-       * 보였다(DemoForm.tsx와 같은 패턴이 복사돼 있었음, 2026-08-26 사용자 지적으로 함께 수정) —
-       * flex-1로 바꿔 세 칸이 폭을 균등하게 나눠 쓰도록 고쳤다. */}
-      <div className="flex gap-1.5 sm:gap-2">
-        <input
-          type="number"
-          inputMode="numeric"
-          placeholder={content.yearLabel}
-          value={year}
-          onChange={(e) => handleYearChange(e.target.value)}
-          min={1900}
-          max={CURRENT_YEAR}
-          className="min-w-0 flex-1 rounded-lg border border-foreground/15 bg-white px-2 py-2.5 transition focus-visible:border-accent-warm sm:px-3"
-        />
-        <input
-          type="number"
-          inputMode="numeric"
-          placeholder={content.monthLabel}
-          value={month}
-          onChange={(e) => handleMonthChange(e.target.value)}
-          min={1}
-          max={12}
-          className="min-w-0 flex-1 rounded-lg border border-foreground/15 bg-white px-2 py-2.5 transition focus-visible:border-accent-warm sm:px-3"
-        />
-        <input
-          type="number"
-          inputMode="numeric"
-          placeholder={content.dayLabel}
-          value={day}
-          onChange={(e) => setDay(e.target.value)}
-          min={1}
-          max={31}
-          className="min-w-0 flex-1 rounded-lg border border-foreground/15 bg-white px-2 py-2.5 transition focus-visible:border-accent-warm sm:px-3"
-        />
-      </div>
+          {/* 연·월·일을 고르는 목록으로(2026-10-02) — 숫자 입력칸 셋은 휴대폰에서 키보드가 올라오며 화면이
+              밀려 입력이 엉키기 쉬웠다. */}
+          <div className="flex gap-1.5 sm:gap-2">
+            <DateSelect id="guest-year" label={content.yearLabel} value={year} onChange={handleYearChange} options={YEAR_OPTIONS} />
+            <DateSelect id="guest-month" label={content.monthLabel} value={month} onChange={handleMonthChange} options={MONTH_OPTIONS} />
+            <DateSelect id="guest-day" label={content.dayLabel} value={day} onChange={setDay} options={dayOptions} />
+          </div>
 
-      {calendarType === 'lunar' && (
-        <label className="flex items-center gap-2 text-sm text-foreground/70">
-          <input type="checkbox" checked={isLeapMonth} onChange={(e) => setIsLeapMonth(e.target.checked)} className="accent-accent-warm" />
-          {content.leapMonthLabel}
-        </label>
-      )}
+          {calendarType === 'lunar' && (
+            <label className="flex items-center gap-2 text-sm text-foreground/70">
+              <input type="checkbox" checked={isLeapMonth} onChange={(e) => setIsLeapMonth(e.target.checked)} className="accent-accent-warm" />
+              {content.leapMonthLabel}
+            </label>
+          )}
 
-      <Turnstile ref={turnstileRef} onVerify={setTurnstileToken} />
+          <Turnstile ref={turnstileRef} onVerify={setTurnstileToken} />
 
-      {error && <p className="text-sm text-red-600">{error}</p>}
+          {error && <p className="text-sm text-red-600">{error}</p>}
 
-      <button
-        type="submit"
-        disabled={isSubmitting || (TURNSTILE_ENABLED && !turnstileToken)}
-        className="rounded-full bg-accent-warm px-6 py-3 font-medium text-white transition hover:bg-accent-warm/90 disabled:pointer-events-none disabled:opacity-50"
-      >
-        {isSubmitting ? content.submitting : content.submit}
-      </button>
-    </form>
+          <button
+            type="submit"
+            disabled={isSubmitting || (TURNSTILE_ENABLED && !turnstileToken)}
+            className="rounded-full bg-accent-warm px-6 py-3 font-medium text-white transition hover:bg-accent-warm/90 disabled:pointer-events-none disabled:opacity-50"
+          >
+            {isSubmitting ? content.submitting : content.submit}
+          </button>
+        </LetterSheet>
+      </form>
+    </div>
   );
 }
 
+function DateSelect({
+  id,
+  label,
+  value,
+  onChange,
+  options,
+}: {
+  id: string;
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  options: number[];
+}) {
+  return (
+    <select
+      id={id}
+      aria-label={label}
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      className={`min-w-0 flex-1 rounded-lg border border-foreground/15 bg-white px-2 py-2.5 transition focus-visible:border-accent-warm sm:px-3 ${value ? '' : 'text-foreground/45'}`}
+    >
+      <option value="">{label}</option>
+      {options.map((option) => (
+        <option key={option} value={String(option)}>
+          {option}
+        </option>
+      ))}
+    </select>
+  );
+}

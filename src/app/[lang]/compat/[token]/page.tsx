@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation';
 import { isMarketingLanguage, MARKETING_LANGUAGES, DEFAULT_LANGUAGE, type MarketingLanguage } from '@/lib/languages';
 import { getDictionary } from '@/dictionaries';
 import { getCompatInvite } from '@/lib/compatApi';
-import { COMPAT_CONTENT } from '@/content/compatContent';
+import { COMPAT_CONTENT, resolveCompatOg } from '@/content/compatContent';
 import { CompatView } from '@/components/compat/CompatView';
 import { WEB_BASE_URL, languageAlternates, NOINDEX_ROBOTS } from '@/lib/seo';
 
@@ -37,10 +37,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const content = COMPAT_CONTENT[rawLang];
   const view = await getCompatInvite(token, rawLang);
 
-  const og =
-    view.status === 'completed'
-      ? { title: content.og.completed.titleFor(view.requesterName), description: content.og.completed.description }
-      : content.og[view.status];
+  const og = resolveCompatOg(content, view);
   const path = (lang: MarketingLanguage) => `/${lang}/compat/${token}`;
 
   return {
