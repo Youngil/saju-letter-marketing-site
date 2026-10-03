@@ -560,3 +560,12 @@ npm run build   # 프로덕션 빌드 — App Router 라우트/타입 검증 + M
 
 세부 배경(마케팅 사이트 신규 구축 논의, 신년운세 캠페인 이관 계획 등)은 meta 저장소의 `CLAUDE.md`
 (`../CLAUDE.md` §9)와 `docs/setup-guide.md`(`../docs/setup-guide.md`) 참고.
+
+## 2026-10-03 — 디자인 감사(앱 UX 감사 작성자 관점) P0~P2 반영
+
+운영 사이트를 모바일(390)·데스크톱(1440)으로 직접 보고 meta `docs/ux-audit-2026-10-01.md`의 기준("오늘 나에게 온 편지를 읽는다")으로 평가했다. 카피 방향은 맞지만 앱 개편이 얻은 것(봉인된 편지·날짜 도장·서명·어절 줄바꿈)이 사이트엔 없었다. 브랜치 `fix/site-design-audit`.
+
+- **P0** — ko `word-break: keep-all`(제목 "짧/은 편지", 본문 "따/뜻한"), ja 본문 `line-break: strict`·제목 `word-break: auto-phrase`, 제목 `text-wrap: balance`, ko/ja 본문 산세리프 명시(Windows 일본어가 자간 넓은 UI 글꼴로 떨어졌다), 데모·신년운세 결과의 마무리 이탤릭 제거, "이번 주 다인의 글" → "다인의 최근 글"(키 `latestNoteLabel`), 강조색 #A85E2C(앱 대비 감사 값).
+- **P1** — 히어로에 실제 앱 화면(봉인된 봉투+펼친 편지, 언어별 실기기 캡처를 `public/home/app-preview-<lang>.webp`로; 원본·생성 스크립트는 모바일 `store-assets/site_hero.py`, git 미관리), 홈 컨테이너 max-w-5xl·데스크톱 두 단. 데모 결과를 앱 편지 형식으로(발신자+`Postmark` 날짜 도장 → 첫 문장 세리프 → 본문 → "— 다인" 서명, 면책·앱 안내는 종이 밖). 데모 섹션 제목을 히어로 버튼과 다른 말로. 비활성 버튼은 중립 회색. Turnstile `appearance: 'interaction-only'`. 리드 폼 신청 수는 절반 찰 때까지 "선착순 N명"(`limitedSlots`).
+- **P2** — 라틴 디스플레이 Playfair → Lora(앱과 통일), es 히어로 버튼 축약.
+- 확인: 로컬(백엔드 4000 + 사이트 3200 — 백엔드 CORS가 `MARKETING_SITE_WEB_ORIGIN=http://localhost:3200`)에서 4개 언어 화면·데모 결과 실제 생성, 타입체크·테스트 166개·프로덕션 빌드 통과. 운영 Turnstile은 헤드리스 브라우저를 막아 운영 데모 결과는 자동 확인 불가.
