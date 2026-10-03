@@ -6,6 +6,7 @@ export const dictionary: MarketingDictionary = {
   languageSwitcherLabel: 'English',
   nav: { home: 'Home', blog: 'Blog', compare: 'Zodiac vs. Saju' },
   hero: {
+    appPreviewAlt: 'Saju Letter app — a sealed morning letter and the opened letter',
     title: 'Every morning, a short letter from Dain',
     subtitle:
       'Saju Letter sends a warm, personal letter based on the moment you were born — not a long fortune report. Meet Dain, your letter writer, and try a free preview below.',
@@ -17,7 +18,7 @@ export const dictionary: MarketingDictionary = {
     compareLink: 'Zodiac vs. saju',
   },
   demo: {
-    title: 'Try a free letter preview',
+    title: 'Just your birth date',
     subtitle: 'No sign-up needed. Enter your birth date and see a taste of the morning letter Dain writes.',
     dateLabel: 'Date of birth',
     yearLabel: 'Year',
@@ -94,6 +95,7 @@ export const dictionary: MarketingDictionary = {
     submitButton: 'Send me the note',
     submitting: 'Signing you up…',
     success: "You're all set! Check your inbox for Dain's welcome note.",
+    limitedSlots: 'Limited to the first {capacity}',
     remainingSlots: '{issued} of {capacity} spots claimed — {remaining} left',
     soldOut: "This coupon offer is fully claimed — but you can still sign up for the notes!",
     errors: {

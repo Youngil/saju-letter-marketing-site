@@ -6,6 +6,7 @@ export const dictionary: MarketingDictionary = {
   languageSwitcherLabel: '日本語',
   nav: { home: 'ホーム', blog: 'ブログ', compare: '星座と四柱推命' },
   hero: {
+    appPreviewAlt: 'サジュレターのアプリ画面 — 封をした朝の手紙と、開いた手紙',
     title: '毎朝、ダインからの短い手紙が届きます',
     subtitle:
       'サジュレターは、生まれた瞬間をもとにした四柱推命を、長い鑑定書ではなく短い手紙でお届けします。手紙を書くダインを紹介し、まずは無料のプレビューをお試しください。',
@@ -17,7 +18,7 @@ export const dictionary: MarketingDictionary = {
     compareLink: '星座と四柱推命を比べる',
   },
   demo: {
-    title: '無料で手紙をプレビュー',
+    title: '生年月日だけで大丈夫です',
     subtitle: '会員登録は不要です。生年月日を入力すると、ダインが毎朝お届けする手紙の雰囲気をすぐに体験できます。',
     dateLabel: '生年月日',
     yearLabel: '年',
@@ -95,6 +96,7 @@ export const dictionary: MarketingDictionary = {
     submitButton: '紹介ノートを受け取る',
     submitting: '登録しています…',
     success: '登録が完了しました。ダインからの紹介ノートをメールボックスでご確認ください。',
+    limitedSlots: '先着{capacity}名',
     remainingSlots: '先着{capacity}名中{issued}名が申込み済み — 残り{remaining}名',
     soldOut: '先着クーポンは終了しました — 紹介ノートの登録は引き続き受け付けています。',
     errors: {

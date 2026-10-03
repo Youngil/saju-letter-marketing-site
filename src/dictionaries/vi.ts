@@ -8,6 +8,7 @@ export const dictionary: MarketingDictionary = {
   languageSwitcherLabel: 'Tiếng Việt',
   nav: { home: 'Trang chủ', blog: 'Blog', compare: 'Cung hoàng đạo vs. Bát Tự' },
   hero: {
+    appPreviewAlt: 'Ứng dụng Saju Letter — lá thư buổi sáng còn niêm phong và lá thư đã mở',
     title: 'Mỗi sáng, một lá thư ngắn từ Dain',
     subtitle:
       'Saju Letter gửi bạn một lá thư ấm áp, cá nhân dựa trên khoảnh khắc bạn chào đời — không phải bản luận giải dài. Gặp Dain, người viết thư cho bạn, và thử xem trước miễn phí bên dưới.',
@@ -19,7 +20,7 @@ export const dictionary: MarketingDictionary = {
     compareLink: 'Cung hoàng đạo vs. Bát Tự',
   },
   demo: {
-    title: 'Xem trước lá thư miễn phí',
+    title: 'Chỉ cần ngày sinh của bạn',
     subtitle: 'Không cần đăng ký. Nhập ngày sinh để cảm nhận giọng điệu lá thư buổi sáng mà Dain viết.',
     dateLabel: 'Ngày sinh',
     yearLabel: 'Năm',
@@ -97,6 +98,7 @@ export const dictionary: MarketingDictionary = {
     submitButton: 'Gửi ghi chú cho tôi',
     submitting: 'Đang đăng ký…',
     success: 'Xong rồi! Hãy kiểm tra hộp thư để xem ghi chú của Dain.',
+    limitedSlots: 'Chỉ dành cho {capacity} người đầu tiên',
     remainingSlots: 'Đã có {issued}/{capacity} người đăng ký — còn {remaining} suất',
     soldOut: 'Ưu đãi mã dùng thử đã hết suất — bạn vẫn có thể đăng ký nhận ghi chú!',
     errors: {

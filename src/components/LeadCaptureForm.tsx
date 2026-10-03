@@ -99,10 +99,14 @@ export function LeadCaptureForm({ language, dict }: { language: LaunchContentLan
         availability.remaining !== null &&
         (availability.remaining > 0 ? (
           <p className="text-sm font-medium text-accent-warm">
-            {dict.remainingSlots
-              .replace('{capacity}', String(availability.capacity))
-              .replace('{issued}', String(availability.issued))
-              .replace('{remaining}', String(availability.remaining))}
+            {/* 신청 수가 적을 때 "100명 중 2명"은 희소성이 아니라 "아무도 안 쓴다"로 읽힌다(2026-10-03, 디자인 감사 P1) —
+                절반이 찰 때까지는 정원만 보여 준다. */}
+            {(availability.issued ?? 0) * 2 >= availability.capacity
+              ? dict.remainingSlots
+                  .replace('{capacity}', String(availability.capacity))
+                  .replace('{issued}', String(availability.issued))
+                  .replace('{remaining}', String(availability.remaining))
+              : dict.limitedSlots.replace('{capacity}', String(availability.capacity))}
           </p>
         ) : (
           <p className="text-sm text-foreground/60">{dict.soldOut}</p>
@@ -123,7 +127,7 @@ export function LeadCaptureForm({ language, dict }: { language: LaunchContentLan
       <button
         type="submit"
         disabled={isSubmitting || (TURNSTILE_ENABLED && !turnstileToken)}
-        className="rounded-full bg-accent-warm px-6 py-3 font-medium text-white transition hover:bg-accent-warm/90 disabled:pointer-events-none disabled:opacity-50"
+        className="rounded-full bg-accent-warm px-6 py-3 font-medium text-white transition hover:bg-accent-warm/90 disabled:pointer-events-none disabled:bg-foreground/10 disabled:text-foreground/45"
       >
         {isSubmitting ? dict.submitting : dict.submitButton}
       </button>

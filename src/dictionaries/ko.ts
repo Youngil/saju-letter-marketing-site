@@ -11,6 +11,7 @@ export const dictionary: MarketingDictionary = {
   languageSwitcherLabel: '한국어',
   nav: { home: '홈', blog: '블로그', compare: '별자리 vs 사주' },
   hero: {
+    appPreviewAlt: '사주편지 앱 화면 — 봉인된 아침 편지와 펼친 편지',
     title: '다인이 매일 아침 전하는 짧은 편지',
     subtitle:
       '사주편지는 생년월일시를 바탕으로, 다인이 짧고 따뜻한 한 통의 편지를 보내드려요. 긴 운세 리포트가 아니라, 매일 아침 도착하는 편지입니다. 아래에서 무료로 받아보세요.',
@@ -22,7 +23,7 @@ export const dictionary: MarketingDictionary = {
     compareLink: '별자리 vs 사주 보기',
   },
   demo: {
-    title: '오늘의 편지, 무료로 받아보기',
+    title: '생년월일만 알려주세요',
     subtitle: '가입 없이 바로 체험할 수 있어요. 생년월일을 입력하면 다인이 매일 아침 보내는 편지의 느낌을 바로 확인할 수 있습니다.',
     dateLabel: '생년월일',
     yearLabel: '년',
@@ -100,6 +101,7 @@ export const dictionary: MarketingDictionary = {
     submitButton: '소개 편지 받기',
     submitting: '등록하는 중…',
     success: '완료됐어요! 다인의 소개 편지를 메일함에서 확인해보세요.',
+    limitedSlots: '선착순 {capacity}명',
     remainingSlots: '선착순 {capacity}명 중 {issued}명 신청 완료, {remaining}명 남았어요',
     soldOut: '선착순 쿠폰이 모두 소진됐어요 — 소개 노트 등록은 계속 받고 있어요!',
     errors: {

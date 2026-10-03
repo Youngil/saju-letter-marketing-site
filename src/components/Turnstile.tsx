@@ -14,7 +14,10 @@ export const TURNSTILE_ENABLED = Boolean(SITE_KEY);
 declare global {
   interface Window {
     turnstile?: {
-      render: (container: string | HTMLElement, options: { sitekey: string; callback: (token: string) => void }) => string;
+      render: (
+        container: string | HTMLElement,
+        options: { sitekey: string; callback: (token: string) => void; appearance?: 'always' | 'execute' | 'interaction-only' },
+      ) => string;
       reset: (widgetId?: string) => void;
       remove: (widgetId: string) => void;
     };
@@ -61,7 +64,12 @@ export const Turnstile = forwardRef<TurnstileHandle, { onVerify: (token: string)
 
   useEffect(() => {
     if (!scriptLoaded || !SITE_KEY) return;
-    widgetIdRef.current = window.turnstile?.render(`#${containerId}`, { sitekey: SITE_KEY, callback: onVerify });
+    widgetIdRef.current = window.turnstile?.render(`#${containerId}`, {
+      sitekey: SITE_KEY,
+      callback: onVerify,
+      // 사람 확인이 실제로 필요할 때만 위젯이 보인다 — 평소엔 입력칸과 버튼 사이에 빈 자리만 남았다(2026-10-03).
+      appearance: 'interaction-only',
+    });
     return () => {
       if (widgetIdRef.current !== undefined) window.turnstile?.remove(widgetIdRef.current);
       widgetIdRef.current = undefined;

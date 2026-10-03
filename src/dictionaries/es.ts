@@ -6,6 +6,7 @@ export const dictionary: MarketingDictionary = {
   languageSwitcherLabel: 'Español',
   nav: { home: 'Inicio', blog: 'Blog', compare: 'Zodiaco vs. Saju' },
   hero: {
+    appPreviewAlt: 'App de Saju Letter: una carta de la mañana sellada y la carta abierta',
     title: 'Cada mañana, una carta breve de Dain',
     subtitle:
       'Saju Letter te envía una carta cálida y personal basada en el momento en que naciste — no un informe largo de fortuna. Conoce a Dain, quien escribe tus cartas, y prueba una vista previa gratis abajo.',
@@ -17,7 +18,7 @@ export const dictionary: MarketingDictionary = {
     compareLink: 'Zodiaco vs. saju',
   },
   demo: {
-    title: 'Prueba una vista previa de la carta',
+    title: 'Solo tu fecha de nacimiento',
     subtitle: 'No necesitas registrarte. Ingresa tu fecha de nacimiento y siente el tono de la carta matutina que escribe Dain.',
     dateLabel: 'Fecha de nacimiento',
     yearLabel: 'Año',
@@ -95,6 +96,7 @@ export const dictionary: MarketingDictionary = {
     submitButton: 'Enviarme la nota',
     submitting: 'Registrando…',
     success: '¡Listo! Revisa tu bandeja de entrada para la nota de Dain.',
+    limitedSlots: 'Solo para las primeras {capacity} personas',
     remainingSlots: '{issued} de {capacity} cupos reclamados — quedan {remaining}',
     soldOut: 'Esta oferta de cupón ya se agotó — ¡pero puedes registrarte igual para las notas!',
     errors: {

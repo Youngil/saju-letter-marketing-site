@@ -10,6 +10,7 @@ import { isOldEnough } from '@/lib/age';
 import { ApiError, getDemoReading, type DemoReadingResponse } from '@/lib/api';
 import { Turnstile, TURNSTILE_ENABLED, type TurnstileHandle } from './Turnstile';
 import { AppDownloadLinks } from './AppDownloadLinks';
+import { Postmark } from './Postmark';
 import { trackEvent } from '@/lib/analytics';
 
 const CURRENT_YEAR = new Date().getFullYear();
@@ -101,29 +102,36 @@ export function DemoForm({
   }
 
   if (result) {
+    // 결과는 앱의 편지와 같은 형식(2026-10-03, 디자인 감사 P1) — 발신자·날짜 도장 → 첫 문장(세리프) → 본문 →
+    // "— 다인" 서명. 면책·앱 안내 같은 시스템 문구는 종이 밖에 둔다(앱 원칙: 종이 안에 시스템 문구 없음).
     return (
-      <div className="letter-surface flex flex-col gap-4 rounded-sm p-6 sm:p-7">
-        <div className="flex items-center gap-3">
-          <Image
-            src="/dain-portrait.png"
-            alt=""
-            width={40}
-            height={40}
-            className="h-10 w-10 rounded-full border border-foreground/15 bg-[#F3EBDC] object-cover"
-          />
-          <div className="min-w-0 text-left">
-            <div className="text-sm font-semibold text-foreground">{dict.resultFromName}</div>
-            <div className="text-xs text-foreground/55">{dict.resultFromRole}</div>
+      <div className="flex flex-col gap-5">
+        <p className="text-center text-xs font-semibold tracking-wide text-accent-warm uppercase">{dict.resultTitle}</p>
+        <article className="letter-surface flex flex-col gap-4 rounded-sm p-6 sm:p-7">
+          <div className="flex items-center gap-3">
+            <Image
+              src="/dain-portrait.png"
+              alt=""
+              width={40}
+              height={40}
+              className="h-10 w-10 rounded-full border border-foreground/15 bg-[#F3EBDC] object-cover"
+            />
+            <div className="min-w-0 text-left">
+              <div className="text-sm font-semibold text-foreground">{dict.resultFromName}</div>
+              <div className="text-xs text-foreground/55">{dict.resultFromRole}</div>
+            </div>
+            <Postmark language={language} className="ml-auto" />
           </div>
-        </div>
-        <h3 className="text-xs font-semibold tracking-wide text-accent-warm uppercase">{dict.resultTitle}</h3>
-        <div className="flex flex-col gap-3 text-lg leading-relaxed">
-          <p className="font-medium">{result.hook}</p>
-          <p>{result.interpretation}</p>
-          <p className="text-foreground/70">{result.closing}</p>
-        </div>
+          <hr className="border-foreground/10" />
+          <p className="font-display text-xl leading-snug font-semibold">{result.hook}</p>
+          <div className="flex flex-col gap-3 text-base leading-relaxed sm:text-lg">
+            <p>{result.interpretation}</p>
+            <p className="text-foreground/70">{result.closing}</p>
+          </div>
+          <p className="font-display self-end text-lg">— {dict.resultFromName}</p>
+        </article>
         <p className="text-center text-xs text-foreground/50">{DISCLAIMER_CONTENT[language].short}</p>
-        <div className="mt-2 flex flex-col items-center gap-3">
+        <div className="flex flex-col items-center gap-3">
           <p className="text-center text-sm font-medium text-foreground/70">{dict.resultCta}</p>
           <AppDownloadLinks dict={appLinksDict} language={language} emphasized context="demo_result" />
         </div>
@@ -189,7 +197,7 @@ export function DemoForm({
       <button
         type="submit"
         disabled={isSubmitting || (TURNSTILE_ENABLED && !turnstileToken)}
-        className="rounded-full bg-accent-warm px-6 py-3 font-medium text-white transition hover:bg-accent-warm/90 disabled:pointer-events-none disabled:opacity-50"
+        className="rounded-full bg-accent-warm px-6 py-3 font-medium text-white transition hover:bg-accent-warm/90 disabled:pointer-events-none disabled:bg-foreground/10 disabled:text-foreground/45"
       >
         {isSubmitting ? dict.submitting : dict.submitButton}
       </button>
