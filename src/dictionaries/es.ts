@@ -10,7 +10,7 @@ export const dictionary: MarketingDictionary = {
     title: 'Cada mañana, una carta breve de Dain',
     subtitle:
       'Saju Letter te envía una carta cálida y personal basada en el momento en que naciste — no un informe largo de fortuna. Conoce a Dain, quien escribe tus cartas, y prueba una vista previa gratis abajo.',
-    ctaDemo: 'Probar una vista previa de la carta',
+    ctaDemo: 'Prueba una carta gratis',
     dainName: 'Dain',
     dainRole: 'Quien escribe tus cartas',
     learnAboutDain: 'Conocer a Dain',

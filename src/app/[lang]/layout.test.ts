@@ -10,7 +10,7 @@ vi.mock('next/navigation', () => ({
 // next/font/google은 빌드 타임 폰트 최적화용 매크로라 순수 vitest 환경에서 실행 불가 — 이
 // 레이아웃이 실제로 쓰는 형태(변수 CSS 클래스를 노출하는 객체)만 흉내낸다.
 vi.mock('next/font/google', () => ({
-  Playfair_Display: () => ({ variable: '--font-playfair' }),
+  Lora: () => ({ variable: '--font-lora' }),
   Noto_Serif_KR: () => ({ variable: '--font-noto-kr' }),
   Noto_Serif_JP: () => ({ variable: '--font-noto-ja' }),
 }));

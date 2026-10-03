@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import type { Metadata } from 'next';
-import { Noto_Serif_JP, Noto_Serif_KR, Playfair_Display } from 'next/font/google';
+import { Lora, Noto_Serif_JP, Noto_Serif_KR } from 'next/font/google';
 import '../globals.css';
 import { getDictionary } from '@/dictionaries';
 import { isLaunchContentLanguage, isMarketingLanguage, MARKETING_LANGUAGES, type MarketingLanguage } from '@/lib/languages';
@@ -27,10 +27,12 @@ export const revalidate = 3600;
  * 앱 `use-serif-font-family`와 같은 언어별 디스플레이 세리프(Phase 3).
  * 세 폰트 모두 로드하되 CSS `html[lang]`로 실제로 쓰는 패밀리만 고른다.
  */
-const playfair = Playfair_Display({
-  subsets: ['latin'],
+// 라틴 디스플레이는 앱과 같은 Lora(2026-10-03, 디자인 감사 P2) — Playfair는 고대비라 작은 크기에서 가늘고,
+// 숫자가 올드스타일이라 앱에선 "0 days"가 "o days"로 보였다(앱은 개편 1단계에서 Lora로 교체).
+const lora = Lora({
+  subsets: ['latin', 'latin-ext'],
   weight: ['600', '700'],
-  variable: '--font-playfair',
+  variable: '--font-lora',
   display: 'swap',
 });
 const notoSerifKr = Noto_Serif_KR({
@@ -110,7 +112,7 @@ export default async function LangLayout({
   return (
     <html
       lang={lang}
-      className={`h-full antialiased ${playfair.variable} ${notoSerifKr.variable} ${notoSerifJp.variable}`}
+      className={`h-full antialiased ${lora.variable} ${notoSerifKr.variable} ${notoSerifJp.variable}`}
     >
       <body className="flex min-h-full flex-col bg-background text-foreground">
         <GoogleAnalytics />
