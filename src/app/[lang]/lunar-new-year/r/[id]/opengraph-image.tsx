@@ -31,7 +31,7 @@ export default async function Image({ params }: { params: Promise<{ id: string }
           textAlign: 'center',
         }}
       >
-        <div style={{ fontSize: 28, letterSpacing: 4, color: '#b5652f', marginBottom: 24 }}>SAJU LETTER</div>
+        <div style={{ fontSize: 28, letterSpacing: 4, color: '#a85e2c', marginBottom: 24 }}>SAJU LETTER</div>
         <div style={{ fontSize: 64, fontWeight: 700, lineHeight: 1.2 }}>{title}</div>
         <div style={{ fontSize: 32, marginTop: 24, color: '#6b6151' }}>{subtitle}</div>
       </div>

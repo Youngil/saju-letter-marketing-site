@@ -49,7 +49,7 @@ export const dictionary: MarketingDictionary = {
     readMore: 'Đọc',
     empty: 'Chưa có chuyên mục nào — hãy quay lại sau nhé.',
     byLabel: 'Viết bởi Dain',
-    thisWeekLabel: 'Ghi chép tuần này của Dain',
+    latestNoteLabel: 'Ghi chép mới nhất của Dain',
     thisWeekCta: 'Đọc chuyên mục',
     categories: {
       observation: 'Quan sát',

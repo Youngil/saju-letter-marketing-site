@@ -52,7 +52,7 @@ export const dictionary: MarketingDictionary = {
     readMore: '읽기',
     empty: '아직 글이 없어요. 곧 찾아올게요.',
     byLabel: '다인',
-    thisWeekLabel: '이번 주 다인의 글',
+    latestNoteLabel: '다인의 최근 글',
     thisWeekCta: '블로그 읽기',
     categories: {
       observation: '관찰',

@@ -47,7 +47,7 @@ export const dictionary: MarketingDictionary = {
     readMore: 'Ler',
     empty: 'Ainda não há colunas — volte em breve.',
     byLabel: 'Escrito por Dain',
-    thisWeekLabel: 'A nota de Dain desta semana',
+    latestNoteLabel: 'A nota mais recente de Dain',
     thisWeekCta: 'Ler a coluna',
     categories: {
       observation: 'Observação',

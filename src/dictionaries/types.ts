@@ -55,7 +55,8 @@ export interface MarketingDictionary {
     empty: string;
     byLabel: string;
     /** 홈 “이번 주 다인의 글” 섹션 라벨. */
-    thisWeekLabel: string;
+    /** 홈의 최신 글 배너 머리표. "이번 주"라고 쓰면 최신 글이 2주 넘게 지난 날에도 그렇게 보여 "최근 글"로(2026-10-03). */
+    latestNoteLabel: string;
     /** 홈 티저 CTA. */
     thisWeekCta: string;
     categories: {

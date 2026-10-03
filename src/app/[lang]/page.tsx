@@ -116,7 +116,7 @@ export default async function HomePage({ params }: { params: Promise<{ lang: str
       {latestPost ? (
         <section className="mx-auto w-full max-w-md">
           <p className="mb-3 text-center text-xs font-medium tracking-wide text-foreground/45 uppercase">
-            {dict.blog.thisWeekLabel}
+            {dict.blog.latestNoteLabel}
           </p>
           <article className="letter-surface rounded-sm px-5 py-6 text-left sm:px-6">
             <BlogByline

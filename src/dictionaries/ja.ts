@@ -47,7 +47,7 @@ export const dictionary: MarketingDictionary = {
     readMore: '読む',
     empty: 'まだコラムがありません。近日公開予定です。',
     byLabel: '文: ダイン',
-    thisWeekLabel: '今週のダインの文章',
+    latestNoteLabel: 'ダインの最近の文章',
     thisWeekCta: 'コラムを読む',
     categories: {
       observation: '観察',

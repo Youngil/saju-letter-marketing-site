@@ -120,7 +120,7 @@ export function DemoForm({
         <div className="flex flex-col gap-3 text-lg leading-relaxed">
           <p className="font-medium">{result.hook}</p>
           <p>{result.interpretation}</p>
-          <p className="text-foreground/70 italic">{result.closing}</p>
+          <p className="text-foreground/70">{result.closing}</p>
         </div>
         <p className="text-center text-xs text-foreground/50">{DISCLAIMER_CONTENT[language].short}</p>
         <div className="mt-2 flex flex-col items-center gap-3">
