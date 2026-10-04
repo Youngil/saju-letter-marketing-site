@@ -1,20 +1,19 @@
 import Link from 'next/link';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { MDXRemote } from 'next-mdx-remote/rsc';
 import { getDictionary } from '@/dictionaries';
 import {
   isMarketingLanguage,
   isLaunchContentLanguage,
-  LAUNCH_CONTENT_LANGUAGES,
   DEFAULT_LANGUAGE,
   type LaunchContentLanguage,
 } from '@/lib/languages';
-import { BLOG_LANGUAGES, getPostContent, POST_SLUGS } from '@/lib/posts';
+import { BLOG_LANGUAGES, getLanguagesForSlug, getPostContent, POST_SLUGS } from '@/lib/posts';
+import { jsonLdScript } from '@/lib/structuredData';
+import { SafeMdx } from '@/components/blog/SafeMdx';
 import { WEB_BASE_URL, languageAlternates, buildSocialMetadata } from '@/lib/seo';
 import { articleJsonLd } from '@/lib/structuredData';
 import { BlogByline, categoryLabelFor } from '@/components/BlogByline';
-import { blogMdxComponents } from '@/components/blog/BlogDiagrams';
 
 // 정적 파일 글(POST_SLUGS)만 빌드 시점에 미리 만든다 — DB 저장 글(2026-09-06)은 이 목록에 없어도
 // Next.js의 기본 `dynamicParams: true`가 최초 요청 시점에 렌더해준다(코드 배포 없이 발행하는
@@ -38,13 +37,21 @@ export async function generateMetadata({
   const content = await getPostContent(rawLang, slug);
   if (!content) return {};
   const path = (lang: LaunchContentLanguage) => `/${lang}/blog/${slug}`;
+  // 실제로 공개된 언어만 hreflang에 건다(sitemap.ts와 같은 계산).
+  const available = await getLanguagesForSlug(slug);
+  const alternateLanguages = available.length > 0 ? available : [rawLang];
+  const defaultLanguage = DEFAULT_LANGUAGE as LaunchContentLanguage;
 
   return {
     title: content.meta.title,
     description: content.meta.description,
     alternates: {
       canonical: `${WEB_BASE_URL}${path(rawLang)}`,
-      languages: languageAlternates(LAUNCH_CONTENT_LANGUAGES, path, DEFAULT_LANGUAGE as LaunchContentLanguage),
+      languages: languageAlternates(
+        alternateLanguages,
+        path,
+        alternateLanguages.includes(defaultLanguage) ? defaultLanguage : alternateLanguages[0]!,
+      ),
     },
     ...buildSocialMetadata({
       title: content.meta.title,
@@ -69,7 +76,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ lang:
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify(
+          __html: jsonLdScript(
             articleJsonLd({
               title: meta.title,
               description: meta.description,
@@ -94,7 +101,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ lang:
           {content.source === 'file' ? (
             <content.Component />
           ) : (
-            <MDXRemote source={content.bodyMdx} components={blogMdxComponents} />
+            <SafeMdx source={content.bodyMdx} slug={slug} />
           )}
         </div>
       </div>

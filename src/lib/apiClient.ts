@@ -15,10 +15,20 @@ export class ApiError extends Error {
   }
 }
 
+/**
+ * 시간 제한(2026-10-06 전체 점검) — 예전엔 없어서 백엔드가 멈추면 레이아웃(언어 목록 조회)까지 함께 멈췄다.
+ * 조회는 짧게, 제출(POST)은 AI 동기 생성(데모·신년운세·궁합)을 기다려야 해서 길게 둔다.
+ */
+const GET_TIMEOUT_MS = 10_000;
+const SUBMIT_TIMEOUT_MS = 120_000;
+
 export async function request<T>(path: string, init?: RequestInit): Promise<T> {
+  const isSubmit = Boolean(init?.method && init.method.toUpperCase() !== 'GET');
   const response = await fetch(`${API_BASE_URL}${path}`, {
     ...init,
-    headers: { 'Content-Type': 'application/json', ...(init?.headers ?? {}) },
+    signal: init?.signal ?? AbortSignal.timeout(isSubmit ? SUBMIT_TIMEOUT_MS : GET_TIMEOUT_MS),
+    // 본문이 있을 때만 Content-Type을 붙인다 — GET에 붙이면 브라우저가 매번 CORS 사전 요청(OPTIONS)을 보낸다.
+    headers: { ...(init?.body != null ? { 'Content-Type': 'application/json' } : {}), ...(init?.headers ?? {}) },
   });
 
   const contentType = response.headers.get('content-type') ?? '';

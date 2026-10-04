@@ -72,7 +72,13 @@ export function availableSwitcherLanguages(_restOfPath: string): LaunchContentLa
  * 태그를 q값 내림차순으로 정렬한 뒤(동률은 헤더에 나온 순서 유지 — Array.sort는 안정 정렬),
  * 전체 태그("es-ES")로 먼저 매치를 시도하고 안 되면 기본 서브태그("es")로도 시도한다.
  */
-export function detectPreferredLaunchLanguage(acceptLanguageHeader: string): LaunchContentLanguage {
+export function detectPreferredLaunchLanguage(
+  acceptLanguageHeader: string,
+  /** 관리자가 켜 둔 언어만 후보로(2026-10-06). 생략하면 1차 출시 4개 언어 전부. */
+  candidates: readonly LaunchContentLanguage[] = LAUNCH_CONTENT_LANGUAGES,
+  fallback: LaunchContentLanguage = DEFAULT_LANGUAGE as LaunchContentLanguage,
+): LaunchContentLanguage {
+  const isCandidate = (value: string): value is LaunchContentLanguage => (candidates as readonly string[]).includes(value);
   const entries = acceptLanguageHeader
     .split(',')
     .map((part) => {
@@ -86,12 +92,12 @@ export function detectPreferredLaunchLanguage(acceptLanguageHeader: string): Lau
     .sort((a, b) => b.q - a.q);
 
   for (const { tag } of entries) {
-    if (isLaunchContentLanguage(tag as MarketingLanguage)) return tag as LaunchContentLanguage;
+    if (isCandidate(tag)) return tag;
     const primarySubtag = tag.split('-')[0]!;
-    if (isLaunchContentLanguage(primarySubtag as MarketingLanguage)) return primarySubtag as LaunchContentLanguage;
+    if (isCandidate(primarySubtag)) return primarySubtag;
   }
 
-  return DEFAULT_LANGUAGE as LaunchContentLanguage;
+  return fallback;
 }
 
 /**

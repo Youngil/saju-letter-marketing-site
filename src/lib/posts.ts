@@ -138,3 +138,14 @@ export function formatPostDate(dateIso: string, lang: MarketingLanguage): string
 export function isPostCategory(value: unknown): value is PostCategory {
   return typeof value === 'string' && (POST_CATEGORIES as readonly string[]).includes(value);
 }
+
+/**
+ * slug마다 실제로 공개된 블로그 언어(2026-10-06) — sitemap과 글 페이지의 hreflang이 같은 값을 쓰게 한다. 예전엔
+ * 글 페이지가 4개 언어를 무조건 alternates에 넣어, 번역이 보류된 언어는 404를 가리켰다.
+ */
+export async function getLanguagesForSlug(slug: string): Promise<(typeof BLOG_LANGUAGES)[number][]> {
+  const found = await Promise.all(
+    BLOG_LANGUAGES.map(async (lang) => ((await getAllPostSummaries(lang)).some((post) => post.slug === slug) ? lang : null)),
+  );
+  return found.filter((lang): lang is (typeof BLOG_LANGUAGES)[number] => lang !== null);
+}

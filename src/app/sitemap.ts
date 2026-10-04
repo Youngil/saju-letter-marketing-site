@@ -8,6 +8,7 @@ import {
 } from '@/lib/languages';
 import { BLOG_LANGUAGES, getAllPostSummaries } from '@/lib/posts';
 import { WEB_BASE_URL, languageAlternates } from '@/lib/seo';
+import { fetchActiveServiceLanguages } from '@/lib/serviceLanguagesApi';
 
 // DEFAULT_LANGUAGE('en')는 항상 모든 언어 부분집합 안에 있지만, languages.ts에서 더 넓은
 // MarketingLanguage로 선언돼 있어(호출부마다 다시 캐스팅하지 않도록) 여기서 한 번만 좁힌다.
@@ -78,11 +79,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // LANGUAGES`(4)로 좁혔는데, 그 과정에서 원래 있던 pt/vi가 실수로 함께 빠져 sitemap도 그
   // 4개만 올리고 있었다 — `lunar-new-year/page.tsx`/`r/[id]/page.tsx`/`unsubscribe/page.tsx`가
   // 전부 6개 언어로 복원됐으므로 sitemap도 실제 라우팅과 다시 맞춘다.
+  // 2026-10-06: 랜딩은 지금 서비스 중인 언어만 열리므로(비활성 언어는 기본 언어로 리다이렉트) sitemap도 그 언어만 올린다.
+  const { active: activeLanguages, default: activeDefault } = await fetchActiveServiceLanguages();
   const lunarNewYearPath = (lang: MarketingLanguage) => `/${lang}/lunar-new-year`;
-  const lunarNewYearEntries = MARKETING_LANGUAGES.map((lang) => ({
+  const lunarNewYearEntries = activeLanguages.map((lang) => ({
     url: `${WEB_BASE_URL}${lunarNewYearPath(lang)}`,
     lastModified: new Date(),
-    alternates: { languages: languageAlternates(MARKETING_LANGUAGES, lunarNewYearPath, DEFAULT_LANGUAGE) },
+    alternates: { languages: languageAlternates(activeLanguages, lunarNewYearPath, activeDefault) },
   }));
 
   // 개인정보처리방침(2026-08-12, saju-letter-backend에서 이관) — 2026-09-08 3차 종합 버그

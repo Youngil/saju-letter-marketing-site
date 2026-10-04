@@ -5,7 +5,6 @@ import Image from 'next/image';
 import type { MarketingDictionary } from '@/dictionaries/types';
 import type { LaunchContentLanguage } from '@/lib/languages';
 import { DISCLAIMER_CONTENT } from '@/content/disclaimer';
-import { calculateSaju } from '@/lib/saju';
 import { isOldEnough } from '@/lib/age';
 import { ApiError, getDemoReading, type DemoReadingResponse } from '@/lib/api';
 import { Turnstile, TURNSTILE_ENABLED, type TurnstileHandle } from './Turnstile';
@@ -53,6 +52,13 @@ export function DemoForm({
       setError(dict.errors.date);
       return;
     }
+    // 실제로 있는 날짜인지(2월 30일·13월 등) — 예전엔 사주 계산이 예외를 던져 "날짜 오류" 대신 일반 오류가 뜨고
+    // 보안 토큰까지 새로 받아야 했다(2026-10-06).
+    const asDate = new Date(Date.UTC(yearNum, monthNum - 1, dayNum));
+    if (asDate.getUTCFullYear() !== yearNum || asDate.getUTCMonth() !== monthNum - 1 || asDate.getUTCDate() !== dayNum) {
+      setError(dict.errors.date);
+      return;
+    }
     if (!isOldEnough(yearNum, monthNum, dayNum)) {
       setError(dict.errors.underage);
       return;
@@ -69,6 +75,8 @@ export function DemoForm({
     trackEvent('demo_submit', { language });
     setIsSubmitting(true);
     try {
+      // 사주 계산 라이브러리(lunar-javascript, 수백 KB)는 제출할 때만 받는다 — 홈 첫 화면 JS에서 뺐다(2026-10-06).
+      const { calculateSaju } = await import('@/lib/saju');
       const chart = calculateSaju({ calendarType: 'solar', year: yearNum, month: monthNum, day: dayNum });
 
       const reading = await getDemoReading({

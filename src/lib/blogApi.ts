@@ -1,6 +1,6 @@
 import type { MarketingLanguage } from './languages';
 import type { PostCategory } from './posts';
-import { request } from './apiClient';
+import { ApiError, request } from './apiClient';
 
 /**
  * saju-letter-backend의 블로그 글 DB 조회 API — 2026-09-06, 사용자 요청("블로그를 매번 작성하여
@@ -28,11 +28,21 @@ export interface DbBlogPostDetail extends DbBlogPostSummary {
  * 없는 슬롯에도 정적 빌드 시점(`next build`)에 호출될 수 있어서다 — 여기서 예외를 다시 던지면
  * 블로그 글 하나 때문에 사이트 전체 빌드가 실패한다. 정적 파일 글은 이 실패와 무관하게 계속 보인다.
  */
+/**
+ * 빌드 중(백엔드가 없을 수 있음)에만 오류를 흡수한다. 실행 중에는 404만 "없음"으로 보고 나머지(429·5xx·시간 초과)는
+ * 던진다(2026-10-06) — 흡수하면 ISR 재검증이 그 결과(빈 목록·notFound)를 1시간 캐시해, 백엔드가 잠깐 느렸을 뿐인데
+ * 공개된 글이 404가 되거나 목록에서 사라졌다. 던지면 Next가 직전에 잘 만든 페이지를 계속 보여 준다.
+ */
+function shouldSwallow(): boolean {
+  return process.env.NEXT_PHASE === 'phase-production-build';
+}
+
 export async function listDbBlogPosts(language: MarketingLanguage): Promise<DbBlogPostSummary[]> {
   try {
     const result = await request<{ posts: DbBlogPostSummary[] }>(`/marketing-site/blog-posts?language=${encodeURIComponent(language)}`);
     return result.posts;
   } catch (error) {
+    if (!shouldSwallow()) throw error;
     console.warn('listDbBlogPosts failed', error);
     return [];
   }
@@ -42,6 +52,8 @@ export async function getDbBlogPost(language: MarketingLanguage, slug: string): 
   try {
     return await request<DbBlogPostDetail>(`/marketing-site/blog-posts/${encodeURIComponent(slug)}?language=${encodeURIComponent(language)}`);
   } catch (error) {
+    if (error instanceof ApiError && error.status === 404) return null;
+    if (!shouldSwallow()) throw error;
     console.warn('getDbBlogPost failed', error);
     return null;
   }

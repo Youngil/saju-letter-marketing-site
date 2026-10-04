@@ -16,12 +16,34 @@ declare global {
     turnstile?: {
       render: (
         container: string | HTMLElement,
-        options: { sitekey: string; callback: (token: string) => void; appearance?: 'always' | 'execute' | 'interaction-only' },
+        options: {
+          sitekey: string;
+          callback: (token: string) => void;
+          'error-callback'?: () => void;
+          'expired-callback'?: () => void;
+          'timeout-callback'?: () => void;
+          appearance?: 'always' | 'execute' | 'interaction-only';
+        },
       ) => string;
       reset: (widgetId?: string) => void;
       remove: (widgetId: string) => void;
     };
   }
+}
+
+const FAILURE_MESSAGES: Record<string, string> = {
+  ko: '보안 확인을 불러오지 못했어요. 광고 차단기를 끄거나 페이지를 새로고침해 주세요.',
+  en: "We couldn't load the security check. Please turn off ad blockers or refresh the page.",
+  ja: 'セキュリティ確認を読み込めませんでした。広告ブロッカーをオフにするか、ページを再読み込みしてください。',
+  es: 'No pudimos cargar la verificación de seguridad. Desactiva el bloqueador de anuncios o recarga la página.',
+  pt: 'Não foi possível carregar a verificação de segurança. Desative o bloqueador de anúncios ou recarregue a página.',
+  vi: 'Không thể tải bước xác minh bảo mật. Vui lòng tắt trình chặn quảng cáo hoặc tải lại trang.',
+};
+
+/** 페이지 언어(<html lang>)로 안내 문구를 고른다 — 이 위젯은 5개 폼이 공유해 사전을 따로 받지 않는다. */
+function failureMessage(): string {
+  const lang = typeof document === 'undefined' ? 'en' : document.documentElement.lang;
+  return FAILURE_MESSAGES[lang] ?? FAILURE_MESSAGES.en!;
 }
 
 export interface TurnstileHandle {
@@ -55,6 +77,9 @@ export const Turnstile = forwardRef<TurnstileHandle, { onVerify: (token: string)
   const containerId = useId().replace(/:/g, '');
   const [scriptLoaded, setScriptLoaded] = useState(false);
   const widgetIdRef = useRef<string | undefined>(undefined);
+  // 스크립트가 막히거나(광고 차단기·네트워크) 확인이 실패하면 폼 버튼이 이유 없이 회색으로 남았다(2026-10-06) —
+  // 위젯 자리에 안내를 띄운다. 위젯이 평소엔 보이지 않아(interaction-only) 이 안내가 유일한 단서다.
+  const [failed, setFailed] = useState(false);
 
   useEffect(() => {
     // 이전 마운트에서 스크립트가 이미 로드돼 있으면 next/script의 onLoad가 이번엔 안 불린다 —
@@ -66,7 +91,17 @@ export const Turnstile = forwardRef<TurnstileHandle, { onVerify: (token: string)
     if (!scriptLoaded || !SITE_KEY) return;
     widgetIdRef.current = window.turnstile?.render(`#${containerId}`, {
       sitekey: SITE_KEY,
-      callback: onVerify,
+      callback: (token) => {
+        setFailed(false);
+        onVerify(token);
+      },
+      'error-callback': () => setFailed(true),
+      'timeout-callback': () => setFailed(true),
+      // 토큰은 몇 분 뒤 만료된다 — 폼이 죽은 토큰으로 제출해 403을 받지 않게 비우고 새로 받는다.
+      'expired-callback': () => {
+        onVerify('');
+        if (widgetIdRef.current !== undefined) window.turnstile?.reset(widgetIdRef.current);
+      },
       // 사람 확인이 실제로 필요할 때만 위젯이 보인다 — 평소엔 입력칸과 버튼 사이에 빈 자리만 남았다(2026-10-03).
       appearance: 'interaction-only',
     });
@@ -89,10 +124,16 @@ export const Turnstile = forwardRef<TurnstileHandle, { onVerify: (token: string)
   return (
     <>
       <div id={containerId} />
+      {failed && (
+        <p role="alert" className="text-sm text-red-700">
+          {failureMessage()}
+        </p>
+      )}
       <Script
         src="https://challenges.cloudflare.com/turnstile/v0/api.js"
         strategy="afterInteractive"
         onLoad={() => setScriptLoaded(true)}
+        onError={() => setFailed(true)}
       />
     </>
   );

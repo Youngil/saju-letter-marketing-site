@@ -1,10 +1,21 @@
 import { describe, expect, it, vi } from 'vitest';
 
 class NotFoundSentinel extends Error {}
+class RedirectSentinel extends Error {}
 vi.mock('next/navigation', () => ({
   notFound: () => {
     throw new NotFoundSentinel('notFound() called');
   },
+  redirect: (to: string) => {
+    throw new RedirectSentinel(to);
+  },
+}));
+// 관리자가 켠 언어(2026-10-06부터 랜딩이 이 값으로 새 결과를 받을 언어를 정한다) — 지금 운영과 같은 4개.
+vi.mock('@/lib/serviceLanguagesApi', () => ({
+  fetchActiveServiceLanguages: async () => ({ active: ['ko', 'en', 'ja', 'es'], default: 'en' }),
+}));
+vi.mock('@/lib/lunarNewYearApi', () => ({
+  getCampaignWindow: async () => ({ active: true }),
 }));
 
 /**
@@ -23,11 +34,20 @@ describe('/[lang]/lunar-new-year 언어 게이트 — 6개 언어(MARKETING_LANG
     expect(metadata.title).toBeTruthy();
   });
 
-  it.each(marketingLanguages)('기본 export(LunarNewYearPage)가 %s에서 notFound()를 호출하지 않는다', async (lang) => {
+  it.each(['ko', 'en', 'ja', 'es'] as const)('기본 export(LunarNewYearPage)가 활성 언어 %s에서 랜딩을 그린다', async (lang) => {
     const pageModule = await import('./page');
     const LunarNewYearPage = pageModule.default;
     await expect(LunarNewYearPage({ params: Promise.resolve({ lang }) })).resolves.toBeTruthy();
   });
+
+  it.each(['pt', 'vi'] as const)(
+    '비활성 언어 %s의 랜딩은 404 대신 기본 언어 랜딩으로 보낸다(2026-10-06 — 백엔드가 비활성 언어 결과를 거부해 폼 제출이 400이었다)',
+    async (lang) => {
+      const pageModule = await import('./page');
+      const LunarNewYearPage = pageModule.default;
+      await expect(LunarNewYearPage({ params: Promise.resolve({ lang }) })).rejects.toThrow('/en/lunar-new-year');
+    },
+  );
 
   it('지원하지 않는 언어 코드는 여전히 notFound()로 404 처리한다', async () => {
     const pageModule = await import('./page');

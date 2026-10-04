@@ -23,8 +23,9 @@ export interface CampaignWindowStatus {
   nextStartsAt?: { year: number; month: number; day: number };
 }
 
+/** 서버 렌더용(2026-10-06) — 5분 캐시. 랜딩이 이 값으로 폼과 비시즌 화면을 서버에서 고른다. */
 export function getCampaignWindow(): Promise<CampaignWindowStatus> {
-  return request('/newyear-campaign/window');
+  return request('/newyear-campaign/window', { next: { revalidate: 300 } });
 }
 
 export interface CreateReadingInput {

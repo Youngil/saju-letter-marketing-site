@@ -15,7 +15,16 @@ const CURRENT_YEAR = new Date().getFullYear();
 
 type LandingDict = NonNullable<MarketingDictionary['lunarNewYear']>['landing'];
 
-export function ReadingForm({ language, dict: t }: { language: MarketingLanguage; dict: LandingDict }) {
+export function ReadingForm({
+  language,
+  dict: t,
+  offSeasonMessage,
+}: {
+  language: MarketingLanguage;
+  dict: LandingDict;
+  /** 제출 시점에 기간이 끝났다고 서버가 답하면(campaign_not_active) 보여 줄 문구. */
+  offSeasonMessage: string;
+}) {
   const router = useRouter();
 
   const [name, setName] = useState('');
@@ -94,6 +103,8 @@ export function ReadingForm({ language, dict: t }: { language: MarketingLanguage
         setError(err.reason === 'underage' ? t.errors.underage : t.errors.date);
       } else if (err instanceof ApiError && err.status === 429) {
         setError(t.errors.rateLimited);
+      } else if (err instanceof ApiError && err.reason === 'campaign_not_active') {
+        setError(offSeasonMessage);
       } else {
         setError(t.errors.generic);
       }

@@ -71,3 +71,10 @@ describe('buildLanguageSwitchPath (2026-09-09, 최종 pre-launch 감사 — 언�
     expect(buildLanguageSwitchPath('', 'en', 'ref=email')).toBe('/en?ref=email');
   });
 });
+
+describe('detectPreferredLaunchLanguage — 관리자가 켠 언어만 후보(2026-10-06)', () => {
+  it('꺼진 언어는 건너뛰고 다음 선호 언어나 기본 언어로 간다', () => {
+    expect(detectPreferredLaunchLanguage('ja,ko;q=0.8', ['ko', 'en'], 'en')).toBe('ko');
+    expect(detectPreferredLaunchLanguage('ja', ['ko', 'es'], 'es')).toBe('es');
+  });
+});

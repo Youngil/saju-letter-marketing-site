@@ -33,3 +33,11 @@ export function articleJsonLd(params: { title: string; description: string; date
     },
   };
 }
+
+/**
+ * `<script type="application/ld+json">`에 넣을 문자열(2026-10-06). JSON.stringify만으로는 AI가 쓴 제목에 `</script>`가
+ * 들어가면 태그를 빠져나갈 수 있어 `<`를 이스케이프한다(JSON으로는 같은 값).
+ */
+export function jsonLdScript(value: unknown): string {
+  return JSON.stringify(value).replace(/</g, '\\u003c');
+}

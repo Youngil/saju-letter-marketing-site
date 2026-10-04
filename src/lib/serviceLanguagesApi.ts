@@ -21,7 +21,10 @@ export interface ActiveServiceLanguages {
 
 export async function fetchActiveServiceLanguages(): Promise<ActiveServiceLanguages> {
   try {
-    const result = await request<{ languages: string[]; defaultLanguage: string }>('/marketing-site/service-languages');
+    // 동적 라우트(/compat/[token] 등)에서도 매 요청 백엔드를 부르지 않게 데이터 캐시를 명시한다(2026-10-06).
+    const result = await request<{ languages: string[]; defaultLanguage: string }>('/marketing-site/service-languages', {
+      next: { revalidate: 3600 },
+    });
     const active = result.languages.filter(
       (lang): lang is LaunchContentLanguage => isMarketingLanguage(lang) && isLaunchContentLanguage(lang),
     );

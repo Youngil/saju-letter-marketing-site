@@ -1,10 +1,11 @@
 import type { Metadata } from 'next';
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
+import { fetchActiveServiceLanguages } from '@/lib/serviceLanguagesApi';
+import { getCampaignWindow, type CampaignWindowStatus } from '@/lib/lunarNewYearApi';
 import { getDictionary } from '@/dictionaries';
 import {
   isMarketingLanguage,
   MARKETING_LANGUAGES,
-  DEFAULT_LANGUAGE,
   type MarketingLanguage,
 } from '@/lib/languages';
 import { LunarNewYearHome } from '@/components/lunar-new-year/LunarNewYearHome';
@@ -31,13 +32,14 @@ export async function generateMetadata({ params }: { params: Promise<{ lang: str
   const dict = await getDictionary(rawLang);
   if (!dict.lunarNewYear) return {};
   const path = (lang: MarketingLanguage) => `/${lang}/lunar-new-year`;
+  const { active, default: activeDefault } = await fetchActiveServiceLanguages();
 
   return {
     title: dict.lunarNewYear.landing.title,
     description: dict.lunarNewYear.landing.subtitle,
     alternates: {
       canonical: `${WEB_BASE_URL}${path(rawLang)}`,
-      languages: languageAlternates(MARKETING_LANGUAGES, path, DEFAULT_LANGUAGE),
+      languages: languageAlternates(active, path, activeDefault),
     },
     ...buildSocialMetadata({
       title: dict.lunarNewYear.landing.title,
@@ -48,6 +50,9 @@ export async function generateMetadata({ params }: { params: Promise<{ lang: str
   };
 }
 
+/** 기간·활성 언어를 5분마다 다시 읽는다(2026-10-06 — 랜딩을 서버에서 그리면서). */
+export const revalidate = 300;
+
 export default async function LunarNewYearPage({ params }: { params: Promise<{ lang: string }> }) {
   const { lang: rawLang } = await params;
   if (!isMarketingLanguage(rawLang)) notFound();
@@ -55,5 +60,18 @@ export default async function LunarNewYearPage({ params }: { params: Promise<{ l
   const dict = await getDictionary(language);
   if (!dict.lunarNewYear) notFound();
 
-  return <LunarNewYearHome language={language} dict={dict.lunarNewYear} appLinksDict={dict.appLinks} />;
+  // 새 결과를 만드는 랜딩은 지금 서비스 중인 언어만 연다(2026-10-06) — 백엔드는 활성 언어로만 결과를 만들어,
+  // 비활성 언어(pt/vi) 방문자는 폼을 끝까지 채운 뒤 400을 받았다. 기존 결과·수신거부 링크(r/[id], unsubscribe)는
+  // 6개 언어 그대로 둔다.
+  const { active, default: defaultLanguage } = await fetchActiveServiceLanguages();
+  if (!(active as string[]).includes(language)) redirect(`/${defaultLanguage}/lunar-new-year`);
+
+  const windowStatus: CampaignWindowStatus | null = await getCampaignWindow().catch((error) => {
+    console.warn('getCampaignWindow failed', error);
+    return null;
+  });
+
+  return (
+    <LunarNewYearHome language={language} dict={dict.lunarNewYear} appLinksDict={dict.appLinks} windowStatus={windowStatus} />
+  );
 }
