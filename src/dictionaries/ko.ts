@@ -117,6 +117,8 @@ export const dictionary: MarketingDictionary = {
     success: '수신거부가 완료됐어요. 아쉽지만 다음에 또 만나요!',
     alreadyUnsubscribed: '이미 수신거부된 상태예요.',
     notFound: '해당 구독 정보를 찾을 수 없어요.',
+    error: '잠시 연결이 원활하지 않아 처리하지 못했어요. 다시 시도해 주세요.',
+    retry: '다시 시도',
   },
   footer: {
     privacyNote: '만 16세 확인을 위해 양력 생년월일을 서버로 보내지만 저장하지는 않아요. 사주 계산은 브라우저에서 이뤄집니다.',
@@ -202,6 +204,8 @@ export const dictionary: MarketingDictionary = {
       success: '신년 이메일 시리즈 수신거부가 완료됐어요. 아쉽지만 다음에 또 만나요!',
       alreadyUnsubscribed: '이미 수신거부된 상태예요.',
       notFound: '해당 구독 정보를 찾을 수 없어요.',
+      error: '잠시 연결이 원활하지 않아 처리하지 못했어요. 다시 시도해 주세요.',
+      retry: '다시 시도',
     },
     footerPrivacy: '이 페이지는 사주편지가 제공하는 프로모션 체험이에요. 생년월일시는 브라우저 밖으로 전송되지 않고, 계산된 사주 값만 서버로 전달돼요.',
   },

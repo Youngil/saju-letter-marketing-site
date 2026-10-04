@@ -112,6 +112,8 @@ export const dictionary: MarketingDictionary = {
     success: 'Te has dado de baja. ¡Lamentamos verte partir!',
     alreadyUnsubscribed: 'Ya estás dado de baja.',
     notFound: 'No pudimos encontrar esa suscripción.',
+    error: 'No pudimos procesarlo en este momento. Inténtalo de nuevo.',
+    retry: 'Intentar de nuevo',
   },
   footer: {
     privacyNote: 'Enviamos tu fecha de nacimiento gregoriana solo para confirmar que tienes 16 años o más — no la almacenamos. Tu carta se calcula en el navegador.',
@@ -196,6 +198,8 @@ export const dictionary: MarketingDictionary = {
       success: 'Te has dado de baja de la serie de correos de Año Nuevo. ¡Lamentamos verte partir!',
       alreadyUnsubscribed: 'Ya te has dado de baja.',
       notFound: 'No pudimos encontrar esa suscripción.',
+      error: 'No pudimos procesarlo en este momento. Inténtalo de nuevo.',
+      retry: 'Intentar de nuevo',
     },
     footerPrivacy:
       'Esta es una experiencia promocional de Saju Letter. Tu fecha y hora de nacimiento nunca salen de tu navegador — solo se envía la carta calculada.',

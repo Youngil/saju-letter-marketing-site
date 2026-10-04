@@ -1,6 +1,6 @@
 import type { MarketingLanguage } from './languages';
 import type { Pillar } from './saju';
-import { ApiError, request } from './apiClient';
+import { ApiError, request, sendBeaconJson } from './apiClient';
 
 /**
  * saju-letter-newyear-campaign 이관분(2026-08-07) — 백엔드는 무변경이라 기존 `/newyear-campaign/*`
@@ -97,7 +97,8 @@ export interface ReadingView {
  */
 export async function getReading(id: string): Promise<ReadingView | null> {
   try {
-    return await request<ReadingView>(`/newyear-campaign/readings/${id}`);
+    // id는 주소에서 온 값이라 인코딩한다 — `..` 같은 값으로 다른 백엔드 경로를 부르지 못하게(2026-10-06).
+    return await request<ReadingView>(`/newyear-campaign/readings/${encodeURIComponent(id)}`);
   } catch (error) {
     if (error instanceof ApiError) return null;
     throw error;
@@ -128,13 +129,5 @@ export function logCampaignEvent(
   type: string,
   params: { readingId?: string; subscriptionId?: string; metadata?: Record<string, unknown> } = {},
 ): void {
-  const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:4000';
-  fetch(`${API_BASE_URL}/newyear-campaign/events`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ type, ...params }),
-    keepalive: true,
-  }).catch((error) => {
-    console.warn('logCampaignEvent failed', error);
-  });
+  sendBeaconJson('/newyear-campaign/events', { type, ...params });
 }

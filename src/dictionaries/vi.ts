@@ -114,6 +114,8 @@ export const dictionary: MarketingDictionary = {
     success: 'Bạn đã hủy đăng ký thành công. Rất tiếc khi phải chia tay!',
     alreadyUnsubscribed: 'Bạn đã hủy đăng ký trước đó rồi.',
     notFound: 'Không tìm thấy đăng ký này.',
+    error: 'Hiện chưa thể xử lý. Vui lòng thử lại.',
+    retry: 'Thử lại',
   },
   footer: {
     privacyNote: 'Chúng tôi gửi ngày sinh dương lịch chỉ để xác nhận bạn từ 16 tuổi trở lên — không lưu trữ. Lá số được tính trên trình duyệt.',
@@ -198,6 +200,8 @@ export const dictionary: MarketingDictionary = {
       success: 'Bạn đã hủy đăng ký chuỗi email năm mới. Rất tiếc phải chia tay bạn!',
       alreadyUnsubscribed: 'Bạn đã hủy đăng ký rồi.',
       notFound: 'Chúng tôi không tìm thấy đăng ký đó.',
+      error: 'Hiện chưa thể xử lý. Vui lòng thử lại.',
+      retry: 'Thử lại',
     },
     footerPrivacy:
       'Đây là trải nghiệm quảng bá của Saju Letter. Ngày và giờ sinh của bạn không bao giờ rời khỏi trình duyệt của bạn — chỉ lá số đã tính toán được gửi đi.',

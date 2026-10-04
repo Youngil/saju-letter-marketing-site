@@ -3,7 +3,7 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { getDictionary } from '@/dictionaries';
 import { isMarketingLanguage, MARKETING_LANGUAGES, type MarketingLanguage } from '@/lib/languages';
-import { UnsubscribeStatus } from '@/components/lunar-new-year/UnsubscribeStatus';
+import { UnsubscribeStatus } from '@/components/UnsubscribeStatus';
 import { NOINDEX_ROBOTS } from '@/lib/seo';
 
 /**
@@ -32,7 +32,7 @@ export default async function LunarNewYearUnsubscribePage({ params }: { params: 
 
   return (
     <Suspense fallback={null}>
-      <UnsubscribeStatus dict={dict.lunarNewYear.unsubscribe} />
+      <UnsubscribeStatus dict={dict.lunarNewYear.unsubscribe} kind="newyear" />
     </Suspense>
   );
 }

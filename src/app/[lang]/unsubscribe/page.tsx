@@ -22,7 +22,7 @@ export default async function UnsubscribePage({ params }: { params: Promise<{ la
 
   return (
     <Suspense fallback={null}>
-      <UnsubscribeStatus dict={dict.unsubscribe} />
+      <UnsubscribeStatus dict={dict.unsubscribe} kind="lead" />
     </Suspense>
   );
 }

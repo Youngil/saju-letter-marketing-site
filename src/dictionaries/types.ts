@@ -129,6 +129,9 @@ export interface MarketingDictionary {
     success: string;
     alreadyUnsubscribed: string;
     notFound: string;
+    /** 일시 오류(네트워크·429·5xx) — "링크 없음"과 구분한다(2026-10-06). */
+    error: string;
+    retry: string;
   };
   footer: {
     privacyNote: string;
@@ -234,6 +237,9 @@ export interface MarketingDictionary {
       success: string;
       alreadyUnsubscribed: string;
       notFound: string;
+      /** 일시 오류(네트워크·429·5xx) — "링크 없음"과 구분한다(2026-10-06). */
+      error: string;
+      retry: string;
     };
     footerPrivacy: string;
   };

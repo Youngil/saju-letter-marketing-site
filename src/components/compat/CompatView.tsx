@@ -14,8 +14,8 @@ import { isOldEnough } from '@/lib/age';
 import { Turnstile, TURNSTILE_ENABLED, type TurnstileHandle } from '../Turnstile';
 import { AppDownloadLinks } from '../AppDownloadLinks';
 import { trackEvent } from '@/lib/analytics';
+import { CURRENT_YEAR } from '@/lib/birthDate';
 
-const CURRENT_YEAR = new Date().getFullYear();
 /** 선택형 연도 목록 — 만 16세 미만은 어차피 막히지만(isOldEnough) 목록에서 미리 빼 두면 고르기 쉽다. */
 const YEAR_OPTIONS = Array.from({ length: CURRENT_YEAR - 16 - 1920 + 1 }, (_, i) => CURRENT_YEAR - 16 - i);
 const MONTH_OPTIONS = Array.from({ length: 12 }, (_, i) => i + 1);

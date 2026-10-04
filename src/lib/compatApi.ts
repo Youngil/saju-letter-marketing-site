@@ -1,6 +1,6 @@
 import type { MarketingLanguage } from './languages';
 import type { EarthlyBranch, HeavenlyStem } from './sajuVocabulary';
-import { ApiError, request } from './apiClient';
+import { ApiError, request, sendBeaconJson } from './apiClient';
 
 /**
  * 궁합 공유 웹페이지(2026-08-12, saju-letter-backend/public/compat.js에서 이관)가 호출하는
@@ -101,13 +101,5 @@ export async function submitGuestInvite(token: string, input: SubmitGuestInviteI
  * 무시). 실패해도 게스트 UX를 절대 막지 않는다.
  */
 export function logCompatEvent(token: string, type: 'result_viewed' | 'install_cta_clicked', actor: 'guest'): void {
-  const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:4000';
-  fetch(`${API_BASE_URL}/compatibility-invites/${encodeURIComponent(token)}/events`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ type, actor }),
-    keepalive: true,
-  }).catch((error) => {
-    console.warn('logCompatEvent failed', error);
-  });
+  sendBeaconJson(`/compatibility-invites/${encodeURIComponent(token)}/events`, { type, actor });
 }

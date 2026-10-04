@@ -9,9 +9,9 @@ import { isOldEnough } from '@/lib/age';
 import { createReading } from '@/lib/lunarNewYearApi';
 import { ApiError } from '@/lib/apiClient';
 import { Turnstile, TURNSTILE_ENABLED, type TurnstileHandle } from '@/components/Turnstile';
+import { isValidBirthDate } from '@/lib/birthDate';
 
 const MEMORABLE_EVENT_MAX_LENGTH = 300;
-const CURRENT_YEAR = new Date().getFullYear();
 
 type LandingDict = NonNullable<MarketingDictionary['lunarNewYear']>['landing'];
 
@@ -53,7 +53,7 @@ export function ReadingForm({
     const yearNum = Number(year);
     const monthNum = Number(month);
     const dayNum = Number(day);
-    if (!Number.isInteger(yearNum) || !Number.isInteger(monthNum) || !Number.isInteger(dayNum) || yearNum < 1900 || yearNum > CURRENT_YEAR) {
+    if (!isValidBirthDate(yearNum, monthNum, dayNum)) {
       setError(t.errors.date);
       return;
     }

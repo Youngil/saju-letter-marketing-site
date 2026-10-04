@@ -145,3 +145,16 @@ export const TONE_GROUP: Record<MarketingLanguage, ToneGroup> = {
   ja: 'lean-into-tradition',
   vi: 'lean-into-tradition',
 };
+
+/**
+ * 날짜를 그 언어로 쓸 때의 Intl 로캘(2026-10-06 공용화 — 블로그 날짜·신년운세 비시즌·날짜 도장이 각자 갖고 있었고 es가
+ * 'es'/'es-ES'로 달랐다).
+ */
+export const INTL_LOCALE: Record<MarketingLanguage, string> = {
+  ko: 'ko-KR',
+  en: 'en-US',
+  ja: 'ja-JP',
+  es: 'es-ES',
+  pt: 'pt-BR',
+  vi: 'vi-VN',
+};

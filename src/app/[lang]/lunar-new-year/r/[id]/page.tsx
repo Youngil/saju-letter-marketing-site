@@ -55,7 +55,7 @@ export default async function LunarNewYearResultPage({ params }: PageProps) {
   const t = dict.lunarNewYear.result;
 
   return (
-    <main className="mx-auto flex w-full max-w-lg flex-1 flex-col gap-6 px-4 py-10">
+    <div className="mx-auto flex w-full max-w-lg flex-1 flex-col gap-6 px-4 py-10">
       <article className="rounded-2xl bg-white p-6 shadow-sm">
         <h1 className="text-xl font-semibold">{reading.content.title}</h1>
         <p className="mt-3 text-stone-700">{reading.content.greeting}</p>
@@ -88,6 +88,6 @@ export default async function LunarNewYearResultPage({ params }: PageProps) {
         <p className="text-sm text-stone-600">{t.appBridgeBody}</p>
         <AppDownloadLinks dict={dict.appLinks} language={language} context="newyear_result" />
       </section>
-    </main>
+    </div>
   );
 }

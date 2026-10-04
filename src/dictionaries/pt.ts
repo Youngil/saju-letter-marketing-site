@@ -112,6 +112,8 @@ export const dictionary: MarketingDictionary = {
     success: 'Sua inscrição foi cancelada. Sentiremos sua falta!',
     alreadyUnsubscribed: 'Sua inscrição já está cancelada.',
     notFound: 'Não encontramos essa inscrição.',
+    error: 'Não foi possível concluir agora. Tente novamente.',
+    retry: 'Tentar novamente',
   },
   footer: {
     privacyNote: 'Enviamos sua data de nascimento gregoriana só para confirmar que você tem 16 anos ou mais — não a armazenamos. Seu mapa é calculado no navegador.',
@@ -196,6 +198,8 @@ export const dictionary: MarketingDictionary = {
       success: 'Você cancelou a inscrição na série de e-mails de Ano Novo. Sentiremos sua falta!',
       alreadyUnsubscribed: 'Você já cancelou a inscrição.',
       notFound: 'Não conseguimos encontrar essa inscrição.',
+      error: 'Não foi possível concluir agora. Tente novamente.',
+      retry: 'Tentar novamente',
     },
     footerPrivacy:
       'Esta é uma experiência promocional do Saju Letter. Sua data e hora de nascimento nunca saem do seu navegador — apenas o mapa calculado é enviado.',

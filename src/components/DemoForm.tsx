@@ -11,8 +11,8 @@ import { Turnstile, TURNSTILE_ENABLED, type TurnstileHandle } from './Turnstile'
 import { AppDownloadLinks } from './AppDownloadLinks';
 import { Postmark } from './Postmark';
 import { trackEvent } from '@/lib/analytics';
+import { isValidBirthDate } from '@/lib/birthDate';
 
-const CURRENT_YEAR = new Date().getFullYear();
 
 /**
  * 신년운세 캠페인의 ReadingForm.tsx보다 가볍다 — 이름/사연은 받지 않는다. 생년월일은 로컬에서
@@ -48,14 +48,8 @@ export function DemoForm({
     const yearNum = Number(year);
     const monthNum = Number(month);
     const dayNum = Number(day);
-    if (!Number.isInteger(yearNum) || !Number.isInteger(monthNum) || !Number.isInteger(dayNum) || yearNum < 1900 || yearNum > CURRENT_YEAR) {
-      setError(dict.errors.date);
-      return;
-    }
-    // 실제로 있는 날짜인지(2월 30일·13월 등) — 예전엔 사주 계산이 예외를 던져 "날짜 오류" 대신 일반 오류가 뜨고
-    // 보안 토큰까지 새로 받아야 했다(2026-10-06).
-    const asDate = new Date(Date.UTC(yearNum, monthNum - 1, dayNum));
-    if (asDate.getUTCFullYear() !== yearNum || asDate.getUTCMonth() !== monthNum - 1 || asDate.getUTCDate() !== dayNum) {
+    // 실제로 있는 날짜인지까지(2월 30일·13월 등) — 예전엔 사주 계산이 예외를 던져 일반 오류가 떴다(2026-10-06).
+    if (!isValidBirthDate(yearNum, monthNum, dayNum)) {
       setError(dict.errors.date);
       return;
     }

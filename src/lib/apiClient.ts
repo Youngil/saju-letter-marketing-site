@@ -3,7 +3,22 @@
  * 신년운세 캠페인 이관 시점) — lunarNewYearApi.ts도 같은 fetch/에러 처리 로직이 필요해져서
  * 중복 대신 이 파일을 공유한다.
  */
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:4000';
+export const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:4000';
+
+/**
+ * 응답을 기다리지 않는 이벤트 기록(2026-10-06 공용화 — 궁합·신년운세가 같은 코드를 각자 갖고 있었다). 페이지를 떠나도
+ * 보내지도록 keepalive, 실패는 조용히 무시한다(기록 실패가 방문자 화면을 막으면 안 된다).
+ */
+export function sendBeaconJson(path: string, body: unknown): void {
+  fetch(`${API_BASE_URL}${path}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+    keepalive: true,
+  }).catch((error) => {
+    console.warn(`event ${path} failed`, error);
+  });
+}
 
 export class ApiError extends Error {
   constructor(

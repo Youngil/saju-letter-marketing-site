@@ -1,6 +1,7 @@
 import type { ComponentType } from 'react';
 import { LAUNCH_CONTENT_LANGUAGES, type MarketingLanguage } from './languages';
 import { listDbBlogPosts, getDbBlogPost } from './blogApi';
+import { INTL_LOCALE } from '@/lib/languages';
 
 /** 블로그는 1차 출시 타겟 언어(ko/en/ja/es)에서만 연다 — pt/vi는 이 배열에 언어를 추가하고
  * 그 언어의 content-posts/*.mdx를 채우면 열린다(languages.ts의 LAUNCH_CONTENT_LANGUAGES 참고). */
@@ -116,15 +117,6 @@ export async function getLatestPostSummary(lang: MarketingLanguage): Promise<Pos
   const posts = await getAllPostSummaries(lang);
   return posts[0] ?? null;
 }
-
-const INTL_LOCALE: Record<MarketingLanguage, string> = {
-  ko: 'ko-KR',
-  en: 'en-US',
-  ja: 'ja-JP',
-  es: 'es',
-  pt: 'pt-BR',
-  vi: 'vi-VN',
-};
 
 /** ISO `YYYY-MM-DD`를 언어별 긴 날짜로. 정오 고정으로 TZ 하루 밀림을 피한다. */
 export function formatPostDate(dateIso: string, lang: MarketingLanguage): string {
