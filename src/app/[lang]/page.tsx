@@ -5,22 +5,20 @@ import { getDictionary } from '@/dictionaries';
 import {
   isMarketingLanguage,
   isLaunchContentLanguage,
-  LAUNCH_CONTENT_LANGUAGES,
-  DEFAULT_LANGUAGE,
   type MarketingLanguage,
 } from '@/lib/languages';
 // 홈 미니 데모·리드 캡처도 2026-09-05부터 LAUNCH_CONTENT_LANGUAGES(4개)로 제한됐고,
 // 2026-09-07부터는 이 페이지 자체(부모 레이아웃 게이트 포함)도 6개 언어가 아니라 이 4개
 // 언어에서만 렌더된다 — 아래 showContentLinks는 이제 사실상 항상 true이지만(도달했다는 것
 // 자체가 이미 LAUNCH_CONTENT_LANGUAGES라는 뜻) 방어적으로 그대로 남겨뒀다.
-import { fetchActiveServiceLanguages } from '@/lib/serviceLanguagesApi';
+import { activeContentLanguages, fetchActiveServiceLanguages } from '@/lib/serviceLanguagesApi';
 import { DemoForm } from '@/components/DemoForm';
 import { LeadCaptureForm } from '@/components/LeadCaptureForm';
 import { AppDownloadLinks } from '@/components/AppDownloadLinks';
 import { DainHomeMark } from '@/components/DainHomeMark';
 import { BlogByline, categoryLabelFor } from '@/components/BlogByline';
 import { getLatestPostSummary } from '@/lib/posts';
-import { WEB_BASE_URL, languageAlternates, buildSocialMetadata } from '@/lib/seo';
+import { WEB_BASE_URL, activeLanguageAlternates, buildSocialMetadata, NOINDEX_ROBOTS } from '@/lib/seo';
 import { notFound } from 'next/navigation';
 
 // "이번 주 다인의 글"이 DB 저장 글(2026-09-06)일 수도 있어, blog/page.tsx와 같은 주기로
@@ -38,13 +36,20 @@ export async function generateMetadata({ params }: { params: Promise<{ lang: str
   // 화면에 보이는 H1(hero.title 자체)은 브랜드 보이스 그대로 두고, 메타데이터에서만 합성한다.
   const pageTitle = `${dict.brand} — ${dict.hero.title}`;
 
+  // hreflang은 지금 켠 콘텐츠 언어끼리만(sitemap.ts와 같은 계산, 2026-10-06 전체 점검 3차 후속). 관리자가 이 언어를 껐으면
+  // 데모·소개 링크를 숨긴 껍데기 페이지라(아래 showContentLinks) 검색 결과에서 빼 달라고 noindex를 건다.
+  const serviceLanguages = await fetchActiveServiceLanguages();
+  const contentLanguages = activeContentLanguages(serviceLanguages);
+  const isActive = contentLanguages.includes(rawLang);
+
   return {
     title: pageTitle,
     description: dict.hero.subtitle,
     alternates: {
       canonical: `${WEB_BASE_URL}${path(rawLang)}`,
-      languages: languageAlternates(LAUNCH_CONTENT_LANGUAGES, path, DEFAULT_LANGUAGE),
+      languages: activeLanguageAlternates(contentLanguages, path, serviceLanguages.default),
     },
+    ...(isActive ? {} : { robots: NOINDEX_ROBOTS }),
     ...buildSocialMetadata({
       title: pageTitle,
       description: dict.hero.subtitle,

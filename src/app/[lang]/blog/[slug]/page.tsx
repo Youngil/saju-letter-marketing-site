@@ -5,13 +5,13 @@ import { getDictionary } from '@/dictionaries';
 import {
   isMarketingLanguage,
   isLaunchContentLanguage,
-  DEFAULT_LANGUAGE,
   type LaunchContentLanguage,
 } from '@/lib/languages';
+import { activeContentLanguages, fetchActiveServiceLanguages } from '@/lib/serviceLanguagesApi';
 import { BLOG_LANGUAGES, getLanguagesForSlug, getPostContent, POST_SLUGS } from '@/lib/posts';
 import { jsonLdScript } from '@/lib/structuredData';
 import { SafeMdx } from '@/components/blog/SafeMdx';
-import { WEB_BASE_URL, languageAlternates, buildSocialMetadata } from '@/lib/seo';
+import { WEB_BASE_URL, activeLanguageAlternates, buildSocialMetadata } from '@/lib/seo';
 import { articleJsonLd } from '@/lib/structuredData';
 import { BlogByline, categoryLabelFor } from '@/components/BlogByline';
 import { SwitcherLanguageLimit } from '@/components/SwitcherLanguageLimit';
@@ -38,21 +38,16 @@ export async function generateMetadata({
   const content = await getPostContent(rawLang, slug);
   if (!content) return {};
   const path = (lang: LaunchContentLanguage) => `/${lang}/blog/${slug}`;
-  // 실제로 공개된 언어만 hreflang에 건다(sitemap.ts와 같은 계산).
-  const available = await getLanguagesForSlug(slug);
-  const alternateLanguages = available.length > 0 ? available : [rawLang];
-  const defaultLanguage = DEFAULT_LANGUAGE as LaunchContentLanguage;
+  // 실제로 공개됐고 + 지금 켠 언어만 hreflang에 건다(sitemap.ts와 같은 계산, 켠 언어 필터는 2026-10-06 전체 점검 3차 후속).
+  const [available, serviceLanguages] = await Promise.all([getLanguagesForSlug(slug), fetchActiveServiceLanguages()]);
+  const alternateLanguages = activeContentLanguages(serviceLanguages, available.length > 0 ? available : [rawLang]);
 
   return {
     title: content.meta.title,
     description: content.meta.description,
     alternates: {
       canonical: `${WEB_BASE_URL}${path(rawLang)}`,
-      languages: languageAlternates(
-        alternateLanguages,
-        path,
-        alternateLanguages.includes(defaultLanguage) ? defaultLanguage : alternateLanguages[0]!,
-      ),
+      languages: activeLanguageAlternates(alternateLanguages, path, serviceLanguages.default),
     },
     ...buildSocialMetadata({
       title: content.meta.title,

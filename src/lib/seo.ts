@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { DEFAULT_LANGUAGE } from './languages';
 
 export const WEB_BASE_URL = process.env.NEXT_PUBLIC_WEB_BASE_URL ?? 'http://localhost:3200';
 
@@ -17,6 +18,30 @@ export function languageAlternates<L extends string>(
     ...Object.fromEntries(languages.map((lang) => [lang, `${WEB_BASE_URL}${pathFor(lang)}`])),
     'x-default': `${WEB_BASE_URL}${pathFor(defaultLang)}`,
   };
+}
+
+/**
+ * hreflang `x-default`로 쓸 언어(2026-10-06 전체 점검 3차 후속) — 관리자가 정한 기본 언어가 목록에 있으면 그것(middleware
+ * 자동 감지 폴백과 같다), 없으면 en, 그것도 없으면 첫 언어. 목록이 비면 null.
+ */
+export function pickAlternateDefault<L extends string>(languages: readonly L[], preferred: string): L | null {
+  if (languages.length === 0) return null;
+  if ((languages as readonly string[]).includes(preferred)) return preferred as L;
+  if ((languages as readonly string[]).includes(DEFAULT_LANGUAGE)) return DEFAULT_LANGUAGE as L;
+  return languages[0]!;
+}
+
+/**
+ * 지금 켠 언어만으로 hreflang을 만든다(sitemap·홈·블로그·compare) — 목록이 비면(그 페이지의 언어를 관리자가 전부 껐다)
+ * undefined라 hreflang을 아예 걸지 않는다. `preferredDefault`는 보통 `fetchActiveServiceLanguages().default`.
+ */
+export function activeLanguageAlternates<L extends string>(
+  languages: readonly L[],
+  pathFor: (lang: L) => string,
+  preferredDefault: string,
+): Record<string, string> | undefined {
+  const defaultLang = pickAlternateDefault(languages, preferredDefault);
+  return defaultLang === null ? undefined : languageAlternates(languages, pathFor, defaultLang);
 }
 
 /** 검색결과에 노출될 필요 없는 개인화/트랜잭션 페이지(궁합 공유·신년운세 결과·수신거부 등)에 쓴다. */

@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
+  activeContentLanguages,
   loadActiveServiceLanguages,
   parseServiceLanguages,
   resetServiceLanguagesMemoryForTest,
@@ -19,6 +20,16 @@ afterEach(() => {
   vi.unstubAllGlobals();
   vi.unstubAllEnvs();
   vi.restoreAllMocks();
+});
+
+describe('activeContentLanguages — sitemap·hreflang용 콘텐츠 축 ∩ 켠 언어', () => {
+  it('콘텐츠 축(ko/en/ja/es) 중 켠 언어만, 콘텐츠 축 순서대로 — pt/vi는 켜져 있어도 빠진다', () => {
+    expect(activeContentLanguages({ active: ['es', 'pt', 'ko', 'vi'], default: 'ko' })).toEqual(['ko', 'es']);
+  });
+
+  it('후보를 넘기면(글이 발행된 언어) 그 안에서만 고른다', () => {
+    expect(activeContentLanguages({ active: ['ko', 'en', 'ja'], default: 'en' }, ['en', 'es'])).toEqual(['en']);
+  });
 });
 
 describe('parseServiceLanguages — 관리자가 켠 언어 원본(6개 축)을 그대로', () => {

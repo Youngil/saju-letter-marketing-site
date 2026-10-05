@@ -1,5 +1,5 @@
 import { cache } from 'react';
-import { DEFAULT_LANGUAGE, LAUNCH_CONTENT_LANGUAGES, isMarketingLanguage, type MarketingLanguage } from './languages';
+import { DEFAULT_LANGUAGE, LAUNCH_CONTENT_LANGUAGES, isMarketingLanguage, type LaunchContentLanguage, type MarketingLanguage } from './languages';
 import { request } from './apiClient';
 
 /**
@@ -34,6 +34,17 @@ export function parseServiceLanguages(result: { languages?: unknown; defaultLang
   if (active.length === 0) return null;
   const def = typeof result.defaultLanguage === 'string' && isMarketingLanguage(result.defaultLanguage) ? result.defaultLanguage : DEFAULT_LANGUAGE;
   return { active, default: def };
+}
+
+/**
+ * 콘텐츠 축(홈·블로그·compare) 중 관리자가 지금 켠 언어만 — sitemap·hreflang용(2026-10-06 전체 점검 3차 후속).
+ * 예전엔 정적 4개 언어를 그대로 걸어, 관리자가 언어를 꺼도 검색엔진엔 그 언어판을 계속 알렸다. `candidates` 순서를 지킨다.
+ */
+export function activeContentLanguages<L extends LaunchContentLanguage>(
+  service: ActiveServiceLanguages,
+  candidates: readonly L[] = LAUNCH_CONTENT_LANGUAGES as L[],
+): L[] {
+  return candidates.filter((lang) => service.active.includes(lang));
 }
 
 let lastGood: ActiveServiceLanguages | null = null;

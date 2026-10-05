@@ -6,11 +6,11 @@ import {
   isMarketingLanguage,
   isLaunchContentLanguage,
   LAUNCH_CONTENT_LANGUAGES,
-  DEFAULT_LANGUAGE,
   type LaunchContentLanguage,
 } from '@/lib/languages';
+import { activeContentLanguages, fetchActiveServiceLanguages } from '@/lib/serviceLanguagesApi';
 import { getAllPostSummaries } from '@/lib/posts';
-import { WEB_BASE_URL, languageAlternates, buildSocialMetadata } from '@/lib/seo';
+import { WEB_BASE_URL, activeLanguageAlternates, buildSocialMetadata } from '@/lib/seo';
 import { BlogByline, categoryLabelFor } from '@/components/BlogByline';
 
 export async function generateStaticParams() {
@@ -26,13 +26,15 @@ export async function generateMetadata({ params }: { params: Promise<{ lang: str
   if (!isMarketingLanguage(rawLang) || !isLaunchContentLanguage(rawLang)) return {};
   const dict = await getDictionary(rawLang);
   const path = (lang: LaunchContentLanguage) => `/${lang}/blog`;
+  // hreflang은 지금 켠 콘텐츠 언어끼리만(sitemap.ts와 같은 계산, 2026-10-06 전체 점검 3차 후속).
+  const serviceLanguages = await fetchActiveServiceLanguages();
 
   return {
     title: dict.blog.title,
     description: dict.blog.subtitle,
     alternates: {
       canonical: `${WEB_BASE_URL}${path(rawLang)}`,
-      languages: languageAlternates(LAUNCH_CONTENT_LANGUAGES, path, DEFAULT_LANGUAGE as LaunchContentLanguage),
+      languages: activeLanguageAlternates(activeContentLanguages(serviceLanguages), path, serviceLanguages.default),
     },
     ...buildSocialMetadata({
       title: dict.blog.title,
