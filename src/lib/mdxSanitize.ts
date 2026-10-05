@@ -112,7 +112,6 @@ const SAFE_IMAGE_SCHEMES = new Set(['http', 'https']);
  * (`java\tscript:`) 그것들을 지운 뒤 스킴을 본다.
  */
 export function isSafeUrl(url: string, kind: 'link' | 'image' = 'link'): boolean {
-  // eslint-disable-next-line no-control-regex
   const compact = url.replace(/[\u0000- \u007f-\u009f]/g, '').toLowerCase();
   const scheme = /^([a-z][a-z0-9+.-]*):/.exec(compact)?.[1];
   if (!scheme) return true;

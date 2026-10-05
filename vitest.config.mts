@@ -16,6 +16,11 @@ const srcDir = fileURLToPath(new URL('./src', import.meta.url));
  * 무관하게 독립적으로 별칭을 해석하므로, 이 설정은 오직 `npm test`(vitest)에만 영향을 준다.
  */
 export default defineConfig({
+  test: {
+    // 라우트 테스트는 첫 테스트 안에서 `await import('./page')`로 모듈 그래프를 처음 불러온다 — 전체 실행 중 CPU가 바쁘면
+    // 그 첫 테스트(보통 ko)만 기본 5초를 넘겨 가끔 실패했다(2026-10-07 확인, 7차 이전 기준에서도 4번에 1번꼴).
+    testTimeout: 20_000,
+  },
   resolve: {
     alias: {
       '@': srcDir,
