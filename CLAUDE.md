@@ -41,7 +41,7 @@
 
 ## 4. 페이지별 현재 동작
 
-- **홈 `/[lang]`**(4개 언어, ISR 3600): 히어로 + `DainHomeMark` + `AppDownloadLinks` + `DemoForm` + 최신 글 배너(`getLatestPostSummary`). **`<LeadCaptureForm>`은 주석 처리로 임시 비노출**(쿠폰 개념 재정립 중; 컴포넌트·`dict.leadCapture` 유지, 주석 안 예시에 `showContentLinks` 게이트 포함).
+- **홈 `/[lang]`**(4개 언어, ISR 3600): 히어로 + `DainHomeMark` + `AppDownloadLinks` + `DemoForm` + 최신 글 배너(`getLatestPostSummary`) + **`<LeadCaptureForm>`(노출 중, 30일 체험 쿠폰 안내 포함 — 의도된 상태)**. 데모·리드 폼 모두 `showContentLinks` 게이트 안.
 - **미니 데모**: `src/lib/saju.ts`가 `lunar-javascript`로 **브라우저에서 사주 계산**(백엔드는 계산 안 함 — 데모·궁합·신년운세 폼 모두 `await import('@/lib/saju')`로 지연 로드, 정적 import 금지)해 천간/지지를 `POST /marketing-site/demo-readings`로. 만 16세 확인용 양력 년/월/일은 서버가 검증만 하고 저장 안 함. 결과(`teaser`)는 DB 미저장.
 - **블로그**(4개 언어, ISR 3600) — 하이브리드:
   - 파일 글: `content-posts/{slug}.{lang}.mdx` + `POST_SLUGS`(`@next/mdx`, `export const meta = {...}`, `meta.category` = `observation`/`explainer`/`behind`/`season`).
@@ -58,7 +58,7 @@
 - **`/.well-known/assetlinks.json`**: Android App Links(지문 일치 확인, 실기기 검증 미확인).
 - 아이콘: `src/app/icon.png`/`apple-icon.png`, 헤더 로고 `public/logo-icon.png`. `public/icon.png` 이름 금지(라우트 충돌).
 
-## 5. 리드·드립·쿠폰 (현재 홈 비노출)
+## 5. 리드·드립·쿠폰 (홈에 노출 중)
 
 - 리드는 이메일만(나이 게이트·개인화 없음). 드립은 백엔드가 `(language × dayNumber)` 단위로 공유 캐시(`dripService.ts`), 다인 페르소나 프롬프트 — 프롬프트 변경은 기존 캐시에 소급 안 됨. 드립 기준일 = max(가입일, 관리자 지정 앱 출시일).
 - 쿠폰 모델은 백엔드에서 이벤트→쿠폰→코드(`PromotionEvent`/`PromotionCoupon`/`PromotionCode`)로 통합됨. 이 사이트의 계약은 유지: `LeadCaptureForm`이 `GET /marketing-site/coupon-availability`의 `capacity`/`issued`/`remaining`을 `remainingSlots`로 표시, 소진 시 `soldOut`, 조회 실패는 무시. 캡·오퍼링 관리는 백엔드/관리자 패널/모바일 소관.

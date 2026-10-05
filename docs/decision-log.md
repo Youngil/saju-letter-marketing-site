@@ -569,3 +569,7 @@ npm run build   # 프로덕션 빌드 — App Router 라우트/타입 검증 + M
 - **P1** — 히어로에 실제 앱 화면(봉인된 봉투+펼친 편지, 언어별 실기기 캡처를 `public/home/app-preview-<lang>.webp`로; 원본·생성 스크립트는 모바일 `store-assets/site_hero.py`, git 미관리), 홈 컨테이너 max-w-5xl·데스크톱 두 단. 데모 결과를 앱 편지 형식으로(발신자+`Postmark` 날짜 도장 → 첫 문장 세리프 → 본문 → "— 다인" 서명, 면책·앱 안내는 종이 밖). 데모 섹션 제목을 히어로 버튼과 다른 말로. 비활성 버튼은 중립 회색. Turnstile `appearance: 'interaction-only'`. 리드 폼 신청 수는 절반 찰 때까지 "선착순 N명"(`limitedSlots`).
 - **P2** — 라틴 디스플레이 Playfair → Lora(앱과 통일), es 히어로 버튼 축약.
 - 확인: 로컬(백엔드 4000 + 사이트 3200 — 백엔드 CORS가 `MARKETING_SITE_WEB_ORIGIN=http://localhost:3200`)에서 4개 언어 화면·데모 결과 실제 생성, 타입체크·테스트 166개·프로덕션 빌드 통과. 운영 Turnstile은 헤드리스 브라우저를 막아 운영 데모 결과는 자동 확인 불가.
+
+## 2026-10-06 — 홈 리드 캡처 폼은 노출 유지(사용자 확인)
+
+- 전체 점검 3차에서 CLAUDE.md §4/§5가 `<LeadCaptureForm>`을 "주석 처리로 임시 비노출"로 적고 있었지만, 실제 홈은 2026-09-08 재개 이후 계속 렌더하고 있었다(`showContentLinks` 게이트 안). 사용자가 **30일 체험 코드 안내까지 포함해 의도적으로 노출 중**임을 확인해, 코드는 그대로 두고 문서만 현재 상태로 고쳤다.
