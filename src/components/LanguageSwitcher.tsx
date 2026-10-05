@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation';
-import { Suspense, useState } from 'react';
+import { Suspense, useEffect, useId, useRef, useState, type Ref } from 'react';
 import { availableSwitcherLanguages, resolveLanguageSwitchPath, type MarketingLanguage } from '@/lib/languages';
 import { useSwitcherPathLimit } from './SwitcherLanguageLimit';
 
@@ -49,11 +49,31 @@ const LANGUAGE_CODES: Record<MarketingLanguage, string> = {
  * `LanguageSwitcherFallback`을 폴백으로 둔다(정적 셸에 잠깐 보일 뿐, 하이드레이션 후 곧바로
  * 실제 컴포넌트로 교체된다).
  */
-function LanguageSwitcherButton({ current, onClick }: { current: MarketingLanguage; onClick?: () => void }) {
+/**
+ * 펼침 상태는 공개(disclosure) 패턴으로 알린다(2026-10-06 전체 점검 3차 후속, 접근성) — `aria-expanded` + `aria-controls`.
+ * `aria-haspopup`은 붙이지 않는다: 그 값(true=menu)은 화살표 키로 움직이는 `role="menu"`를 약속하는데, 이 목록은
+ * 평범한 링크 목록이라 탭 키로 움직인다(W3C APG가 사이트 내비게이션에 menu 역할 대신 권하는 방식).
+ */
+function LanguageSwitcherButton({
+  current,
+  onClick,
+  expanded,
+  controls,
+  buttonRef,
+}: {
+  current: MarketingLanguage;
+  onClick?: () => void;
+  expanded?: boolean;
+  controls?: string;
+  buttonRef?: Ref<HTMLButtonElement>;
+}) {
   return (
     <button
+      ref={buttonRef}
       type="button"
       onClick={onClick}
+      aria-expanded={expanded ?? false}
+      aria-controls={expanded ? controls : undefined}
       className="rounded-full border border-foreground/15 px-2.5 py-1 text-sm font-medium text-foreground/70 hover:text-foreground sm:border-0 sm:px-0 sm:py-0"
     >
       <span className="sm:hidden">{LANGUAGE_CODES[current]}</span>
@@ -75,6 +95,29 @@ function LanguageSwitcherInner({ current, activeLanguages }: { current: Marketin
   const searchParams = useSearchParams();
   const [open, setOpen] = useState(false);
   const pathLimit = useSwitcherPathLimit();
+  const listId = useId();
+  const containerRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+
+  // 열려 있을 때만 — Escape로 닫고 초점을 버튼으로 돌려주며, 목록 바깥을 누르면 닫는다(접근성, 2026-10-06 전체 점검 3차 후속).
+  useEffect(() => {
+    if (!open) return;
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key !== 'Escape') return;
+      setOpen(false);
+      buttonRef.current?.focus();
+    }
+    function handlePointerDown(event: PointerEvent) {
+      if (event.target instanceof Node && containerRef.current?.contains(event.target)) return;
+      setOpen(false);
+    }
+    document.addEventListener('keydown', handleKeyDown);
+    document.addEventListener('pointerdown', handlePointerDown);
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      document.removeEventListener('pointerdown', handlePointerDown);
+    };
+  }, [open]);
 
   const rest = pathname.replace(new RegExp(`^/${current}`), '');
   const queryString = searchParams.toString();
@@ -86,10 +129,16 @@ function LanguageSwitcherInner({ current, activeLanguages }: { current: Marketin
   const availableLanguages = availableSwitcherLanguages(rest, activeLanguages);
 
   return (
-    <div className="relative">
-      <LanguageSwitcherButton current={current} onClick={() => setOpen((v) => !v)} />
+    <div ref={containerRef} className="relative">
+      <LanguageSwitcherButton
+        current={current}
+        onClick={() => setOpen((v) => !v)}
+        expanded={open}
+        controls={listId}
+        buttonRef={buttonRef}
+      />
       {open && (
-        <ul className="absolute right-0 mt-2 w-36 rounded-lg border border-foreground/10 bg-background py-1 shadow-lg z-50">
+        <ul id={listId} className="absolute right-0 mt-2 w-36 rounded-lg border border-foreground/10 bg-background py-1 shadow-lg z-50">
           {availableLanguages.map((lang) => (
             <li key={lang}>
               <Link
