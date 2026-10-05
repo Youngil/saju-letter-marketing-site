@@ -123,6 +123,16 @@ describe('/[lang]/lunar-new-year/r/[id] 소유자만 메일 구독', () => {
     expect(forms[0]!.props).toMatchObject({ readingId: READING_ID, ownerToken: OWNER_TOKEN, alreadySubscribed: true });
   });
 
+  it('새 소유자 쿠키(nyo, 여러 결과)에서도 이 결과의 토큰을 찾아 넘긴다', async () => {
+    const { addOwnerEntry } = await import('@/lib/readingOwner');
+    const now = Math.floor(Date.now() / 1000);
+    const other = addOwnerEntry(undefined, '11111111-2222-4333-8444-555555555555', 'b3RoZXItdG9rZW4tdmFsdWU', now);
+    cookieJar.set('nyo', addOwnerEntry(other, READING_ID, OWNER_TOKEN, now));
+    const { getReading } = await import('@/lib/lunarNewYearApi');
+    await renderPage();
+    expect(getReading).toHaveBeenCalledWith(READING_ID, OWNER_TOKEN);
+  });
+
   it('쿠키가 있어도 백엔드가 소유자가 아니라고 하면(토큰 불일치) 폼이 없다', async () => {
     cookieJar.set(`nyo_${READING_ID}`, OWNER_TOKEN);
     const tree = await renderPage();

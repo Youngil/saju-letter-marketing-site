@@ -1,13 +1,14 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import {
+  addOwnerEntry,
   isValidOwnerToken,
   isValidReadingId,
-  ownerCookieName,
+  OWNER_COOKIE_NAME,
   ownerCookieOptions,
 } from '@/lib/readingOwner';
 
 /**
- * 신년운세 결과를 만든 브라우저에 소유자 토큰을 httpOnly 쿠키로 심는다(2026-10-07 전체 점검 7차 항목 1, 배경은
+ * 신년운세 결과를 만든 브라우저에 소유자 토큰을 httpOnly 쿠키(`nyo`, 최근 결과 여러 개)로 심는다(2026-10-07 전체 점검 7차 항목 1, 배경은
  * `lib/readingOwner.ts`). 백엔드를 부르지 않는다 — 토큰이 맞는지는 백엔드가 쓸 때마다 확인하고, 여기서 틀린 값을 심어도
  * 그 브라우저가 그 결과의 구독 폼을 못 볼 뿐이다.
  *
@@ -28,8 +29,10 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'invalid_request' }, { status: 400 });
   }
 
+  // 쿠키 하나에 최근 결과 몇 개만(2026-10-06 전체 점검 8차) — 결과마다 쿠키를 따로 심으면 모든 요청 헤더가 계속 커졌다.
+  const value = addOwnerEntry(request.cookies.get(OWNER_COOKIE_NAME)?.value, readingId, ownerToken, Math.floor(Date.now() / 1000));
   const response = new NextResponse(null, { status: 204 });
-  response.cookies.set(ownerCookieName(readingId), ownerToken, ownerCookieOptions());
+  response.cookies.set(OWNER_COOKIE_NAME, value, ownerCookieOptions());
   // 쿠키를 심는 응답이 어디에도 캐시되지 않게.
   response.headers.set('Cache-Control', 'no-store');
   return response;

@@ -1,10 +1,14 @@
 import { describe, expect, it } from 'vitest';
 import {
+  addOwnerEntry,
   isValidOwnerToken,
   isValidReadingId,
+  legacyOwnerCookieName,
+  MAX_OWNER_ENTRIES,
   OWNER_COOKIE_MAX_AGE_SECONDS,
-  ownerCookieName,
+  OWNER_COOKIE_NAME,
   ownerCookieOptions,
+  parseOwnerCookie,
   readOwnerToken,
 } from './readingOwner';
 
@@ -20,8 +24,8 @@ describe('readingOwner', () => {
     expect(isValidOwnerToken('a'.repeat(257))).toBe(false);
   });
 
-  it('쿠키 이름은 결과별(소문자 id)', () => {
-    expect(ownerCookieName(READING_ID)).toBe('nyo_3f2b8c1e-4d5a-4b6c-8d7e-9f0a1b2c3d4e');
+  it('예전 결과별 쿠키 이름(읽기 호환)은 소문자 id', () => {
+    expect(legacyOwnerCookieName(READING_ID)).toBe('nyo_3f2b8c1e-4d5a-4b6c-8d7e-9f0a1b2c3d4e');
   });
 
   it('쿠키는 httpOnly·SameSite=Lax·90일, 운영에서만 Secure', () => {
@@ -36,12 +40,67 @@ describe('readingOwner', () => {
     expect(ownerCookieOptions(false).secure).toBe(false);
   });
 
-  it('요청 쿠키에서 이 결과의 토큰만 꺼내고, 모양이 틀리면 없는 것으로 본다', () => {
-    const jar = new Map([[ownerCookieName(READING_ID), 'abcDEF0123456789_-xyz']]);
+  it('예전 결과별 쿠키에서도 이 결과의 토큰만 꺼내고, 모양이 틀리면 없는 것으로 본다', () => {
+    const jar = new Map([[legacyOwnerCookieName(READING_ID), 'abcDEF0123456789_-xyz']]);
     const store = { get: (name: string) => (jar.has(name) ? { value: jar.get(name)! } : undefined) };
     expect(readOwnerToken(READING_ID, store)).toBe('abcDEF0123456789_-xyz');
     expect(readOwnerToken('not-a-uuid', store)).toBeUndefined();
-    jar.set(ownerCookieName(READING_ID), 'bad value');
+    jar.set(legacyOwnerCookieName(READING_ID), 'bad value');
     expect(readOwnerToken(READING_ID, store)).toBeUndefined();
+  });
+});
+
+/** 2026-10-06 전체 점검 8차 항목 8 — 결과마다 쿠키를 따로 심어 헤더가 계속 커지던 것을 쿠키 하나(최근 N개)로. */
+describe('readingOwner — 쿠키 하나에 최근 결과 여러 개', () => {
+  const NOW = 1_800_000_000;
+  const TOKEN = 'abcDEF0123456789_-xyz';
+  const id = (n: number) => `00000000-0000-4000-8000-${n.toString().padStart(12, '0')}`;
+  const storeOf = (value: string) => ({ get: (name: string) => (name === OWNER_COOKIE_NAME ? { value } : undefined) });
+
+  it('새 결과를 더해도 앞서 만든 결과의 토큰이 남는다', () => {
+    let value = addOwnerEntry(undefined, id(1), `${TOKEN}1`, NOW);
+    value = addOwnerEntry(value, id(2), `${TOKEN}2`, NOW + 10);
+    expect(readOwnerToken(id(1), storeOf(value), NOW + 20)).toBe(`${TOKEN}1`);
+    expect(readOwnerToken(id(2), storeOf(value), NOW + 20)).toBe(`${TOKEN}2`);
+    expect(readOwnerToken(id(3), storeOf(value), NOW + 20)).toBeUndefined();
+  });
+
+  it('최근 MAX_OWNER_ENTRIES개만 남기고 가장 오래된 결과부터 뺀다', () => {
+    let value: string | undefined;
+    for (let n = 1; n <= MAX_OWNER_ENTRIES + 2; n += 1) value = addOwnerEntry(value, id(n), TOKEN, NOW + n);
+    const entries = parseOwnerCookie(value, NOW + 100);
+    expect(entries).toHaveLength(MAX_OWNER_ENTRIES);
+    expect(entries[0]!.readingId).toBe(id(3));
+    expect(entries.at(-1)!.readingId).toBe(id(MAX_OWNER_ENTRIES + 2));
+  });
+
+  it('토큰이 최대 길이여도 쿠키 한도(4KB) 안에 든다', () => {
+    let value: string | undefined;
+    for (let n = 1; n <= MAX_OWNER_ENTRIES + 5; n += 1) value = addOwnerEntry(value, id(n), 'a'.repeat(256), NOW);
+    expect(`${OWNER_COOKIE_NAME}=${value}`.length).toBeLessThan(4000);
+    expect(parseOwnerCookie(value, NOW).at(-1)!.readingId).toBe(id(MAX_OWNER_ENTRIES + 5));
+  });
+
+  it('같은 결과를 다시 심으면 새 토큰으로 바꾸고 맨 뒤로 옮긴다', () => {
+    let value = addOwnerEntry(undefined, id(1), `${TOKEN}old`, NOW);
+    value = addOwnerEntry(value, id(2), TOKEN, NOW);
+    value = addOwnerEntry(value, id(1), `${TOKEN}new`, NOW + 5);
+    expect(parseOwnerCookie(value, NOW + 5).map((e) => e.readingId)).toEqual([id(2), id(1)]);
+    expect(readOwnerToken(id(1), storeOf(value), NOW + 5)).toBe(`${TOKEN}new`);
+  });
+
+  it('결과마다 90일이 지나면 버린다(쿠키는 마지막으로 심은 때부터 90일이라 항목별로 본다)', () => {
+    let value = addOwnerEntry(undefined, id(1), TOKEN, NOW);
+    value = addOwnerEntry(value, id(2), TOKEN, NOW + 80 * 24 * 60 * 60);
+    const later = NOW + OWNER_COOKIE_MAX_AGE_SECONDS + 1;
+    expect(readOwnerToken(id(1), storeOf(value), later)).toBeUndefined();
+    expect(readOwnerToken(id(2), storeOf(value), later)).toBe(TOKEN);
+    expect(parseOwnerCookie(addOwnerEntry(value, id(3), TOKEN, later), later).map((e) => e.readingId)).toEqual([id(2), id(3)]);
+  });
+
+  it('모양이 틀린 항목은 건너뛰고 나머지는 읽는다', () => {
+    const good = addOwnerEntry(undefined, id(1), TOKEN, NOW);
+    const value = `garbage~../x.${TOKEN}.abc~${id(2)}.bad token.abc~${good}`;
+    expect(parseOwnerCookie(value, NOW).map((e) => e.readingId)).toEqual([id(1)]);
   });
 });
