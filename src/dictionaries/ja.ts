@@ -122,9 +122,10 @@ export const dictionary: MarketingDictionary = {
     privacyNote: '満16歳確認のため太陽暦の生年月日をサーバーに送りますが、保存はしません。四柱の計算はブラウザ内で行います。',
     privacyLinkLabel: 'プライバシーポリシー',
     disclaimerLinkLabel: 'サービスのご案内',
+    cookieSettingsLabel: 'Cookie設定',
   },
   consent: {
-    message: 'サイトの利用状況を把握するためにクッキーを使用しています。同意はいつでも変更できます。',
+    message: 'サイトの利用状況を把握するためにクッキーを使用しています。同意はページ下部の「Cookie設定」からいつでも変更できます。',
     acceptButton: '同意する',
     declineButton: '同意しない',
   },

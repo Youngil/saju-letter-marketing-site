@@ -124,9 +124,10 @@ export const dictionary: MarketingDictionary = {
     privacyNote: 'Chúng tôi gửi ngày sinh dương lịch chỉ để xác nhận bạn từ 16 tuổi trở lên — không lưu trữ. Lá số được tính trên trình duyệt.',
     privacyLinkLabel: 'Chính sách Quyền riêng tư',
     disclaimerLinkLabel: 'Về dịch vụ này',
+    cookieSettingsLabel: 'Cài đặt cookie',
   },
   consent: {
-    message: 'Chúng tôi dùng cookie để hiểu cách bạn sử dụng trang này. Bạn có thể thay đổi lựa chọn bất cứ lúc nào.',
+    message: 'Chúng tôi dùng cookie để hiểu cách bạn sử dụng trang này. Bạn có thể thay đổi lựa chọn bất cứ lúc nào tại "Cài đặt cookie" ở cuối trang.',
     acceptButton: 'Đồng ý',
     declineButton: 'Từ chối',
   },

@@ -12,8 +12,8 @@
  * 저장 값은 채널 이름 같은 캠페인 꼬리표뿐이고 방문자 식별자는 없다. 그래도 기기에 정보를
  * 남기는 일이라(EU ePrivacy 기준 비필수 저장), **브라우저 보관(localStorage, 최대 30일)은 분석
  * 쿠키에 동의한 방문자에게만** 한다 — 동의하지 않은 방문자는 이 페이지를 떠나기 전까지만
- * 메모리에 들고 있다가 버린다(처음 들어온 홈에서 바로 배지를 누르는 흔한 경로는 그대로 잡힌다).
- * 동의를 거부로 바꾸면 보관된 값도 지운다(`analytics.ts`의 `storeConsent`). 마지막
+ * 메모리에 들고 있다가 버린다(처음 들어온 홈에서 바로 배지를 누르는 흔한 경로는 그대로 잡힌다). 진입 뒤에 배너에서
+ * 동의하면 그때 메모리 값을 보관한다(`persistAttributionTouch`). 동의를 거부로 바꾸면 보관된 값도 지운다(`analytics.ts`의 `storeConsent`). 마지막
  * 유입(last touch)이 이긴다. 30일은 GA4 기본 캠페인 기간과 비슷한 관용치다.
  */
 export interface AttributionTouch {
@@ -130,16 +130,31 @@ export function captureAttribution(now: number = Date.now()): AttributionTouch |
   const touch = deriveTouch(window.location.href, typeof document !== 'undefined' ? document.referrer : '', now);
   if (touch) {
     inMemoryTouch = touch;
-    if (readStoredConsent() === 'granted') {
-      try {
-        window.localStorage.setItem(ATTRIBUTION_STORAGE_KEY, JSON.stringify(touch));
-      } catch {
-        // 프라이빗 브라우징 등 — 저장 못 해도 이번 페이지에서는 메모리 값으로 쓴다.
-      }
-    }
+    if (readStoredConsent() === 'granted') writeTouch(touch);
     return touch;
   }
   return readStoredTouch(now);
+}
+
+function writeTouch(touch: AttributionTouch): void {
+  try {
+    window.localStorage.setItem(ATTRIBUTION_STORAGE_KEY, JSON.stringify(touch));
+  } catch {
+    // 프라이빗 브라우징 등 — 저장 못 해도 이번 페이지에서는 메모리 값으로 쓴다.
+  }
+}
+
+/**
+ * 진입 뒤에 동의한 방문자의 유입을 그때 보관한다(2026-10-06 전체 점검 8차) — `captureAttribution`은 진입 순간 한 번만
+ * 돌아서, 처음 온 방문자(아직 동의 전 → 메모리에만)가 배너에서 "동의"를 눌러도 유입이 브라우저에 남지 않았다. 그러면 다른
+ * 날 다시 와서 배지를 누르거나, 언어를 바꿔 문서가 새로 로드되기만 해도 30일 귀속이 끊겼다. 동의 배너가 `granted`를
+ * 저장한 직후 부른다. 이 문서에서 뽑은 유입이 없으면(직접 방문 등) 이전에 보관된 값을 건드리지 않는다.
+ */
+export function persistAttributionTouch(now: number = Date.now()): void {
+  if (typeof window === 'undefined') return;
+  if (readStoredConsent() !== 'granted') return;
+  if (!inMemoryTouch || now - inMemoryTouch.storedAt > ATTRIBUTION_TTL_MS) return;
+  writeTouch(inMemoryTouch);
 }
 
 /**

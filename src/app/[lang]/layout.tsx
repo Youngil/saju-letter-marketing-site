@@ -11,6 +11,7 @@ import { WEB_BASE_URL } from '@/lib/seo';
 import { organizationJsonLd } from '@/lib/structuredData';
 import { GoogleAnalytics } from '@/components/GoogleAnalytics';
 import { ConsentBanner } from '@/components/ConsentBanner';
+import { ConsentSettingsLink } from '@/components/ConsentSettingsLink';
 import { AttributionCapture } from '@/components/AttributionCapture';
 import { GA_MEASUREMENT_ID } from '@/lib/analytics';
 import { notFound } from 'next/navigation';
@@ -182,6 +183,8 @@ export default async function LangLayout({
               <Link href={`/${lang}/disclaimer`} className="w-fit underline hover:text-foreground/70">
                 {dict.footer.disclaimerLinkLabel}
               </Link>
+              {/* 동의 배너를 다시 여는 "쿠키 설정"(2026-10-06 전체 점검 8차) — 배너와 같은 조건. */}
+              {GA_MEASUREMENT_ID && <ConsentSettingsLink label={dict.footer.cookieSettingsLabel} />}
             </div>
           </div>
         </footer>

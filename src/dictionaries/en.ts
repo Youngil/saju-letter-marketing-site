@@ -121,9 +121,10 @@ export const dictionary: MarketingDictionary = {
     privacyNote: 'We send your Gregorian date of birth only to confirm you are 16 or older — we do not store it. Your chart is calculated in the browser.',
     privacyLinkLabel: 'Privacy Policy',
     disclaimerLinkLabel: 'About This Service',
+    cookieSettingsLabel: 'Cookie settings',
   },
   consent: {
-    message: 'We use cookies to understand how visitors use this site. You can change your choice anytime.',
+    message: 'We use cookies to understand how visitors use this site. You can change your choice anytime under "Cookie settings" at the bottom of the page.',
     acceptButton: 'Accept',
     declineButton: 'Decline',
   },

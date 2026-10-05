@@ -142,6 +142,8 @@ export interface MarketingDictionary {
     privacyNote: string;
     privacyLinkLabel: string;
     disclaimerLinkLabel: string;
+    /** 동의 배너를 다시 여는 푸터 버튼(2026-10-06) — 개인정보처리방침 §1이 같은 이름으로 가리킨다. */
+    cookieSettingsLabel: string;
   };
   /**
    * 쿠키/추적 동의 배너(2026-09-08, 3차 종합 버그 점검 항목 3) — GA4가 방문자 동의 없이 항상

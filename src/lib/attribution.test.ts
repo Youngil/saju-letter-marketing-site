@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { ATTRIBUTION_STORAGE_KEY, buildPlayStoreUrl, captureAttribution, deriveTouch, readStoredTouch, resetAttributionMemoryForTest, sanitizeTag } from './attribution';
+import { ATTRIBUTION_STORAGE_KEY, buildPlayStoreUrl, captureAttribution, deriveTouch, persistAttributionTouch, readStoredTouch, resetAttributionMemoryForTest, sanitizeTag } from './attribution';
 import { CONSENT_STORAGE_KEY, storeConsent } from './analytics';
 
 const NOW = 1_800_000_000_000;
@@ -128,5 +128,46 @@ describe('captureAttribution', () => {
 
   it('SSR(window 없음)에서는 null', () => {
     expect(captureAttribution(NOW)).toBeNull();
+  });
+});
+
+/**
+ * 2026-10-06 전체 점검 8차 항목 2 — 처음 온 방문자는 진입 순간 아직 동의 전이라 유입이 메모리에만 있다. 예전엔 배너에서
+ * 동의해도 보관하지 않아, 문서가 새로 로드되면(언어 전환·다음 방문) 30일 귀속이 끊겼다. 배너가 granted 직후 부른다.
+ */
+describe('persistAttributionTouch — 진입 뒤에 동의', () => {
+  it('진입 때 메모리에만 있던 유입을 동의 직후 보관하고, 새 문서에서도 읽힌다', () => {
+    const store = stubBrowser('https://www.saju-letter.com/en?utm_source=tiktok&utm_medium=social&utm_campaign=bio', '', null);
+    captureAttribution(NOW);
+    expect(store.has(ATTRIBUTION_STORAGE_KEY)).toBe(false);
+
+    // 배너에서 "동의" → storeConsent('granted') → persistAttributionTouch()
+    storeConsent('granted');
+    persistAttributionTouch(NOW + 1000);
+    expect(JSON.parse(store.get(ATTRIBUTION_STORAGE_KEY)!)).toMatchObject({ source: 'tiktok', medium: 'social', campaign: 'bio' });
+
+    // 언어를 바꿔 문서가 새로 로드됨(모듈 메모리 초기화) — 유입 없는 같은 사이트 주소라도 보관된 값으로 이어진다.
+    resetAttributionMemoryForTest();
+    (globalThis as unknown as { window: { location: { href: string } } }).window.location.href = 'https://www.saju-letter.com/ko';
+    expect(captureAttribution(NOW + 2000)).toMatchObject({ source: 'tiktok', campaign: 'bio' });
+  });
+
+  it('동의하지 않았으면(거부·미선택) 보관하지 않는다', () => {
+    const store = stubBrowser('https://www.saju-letter.com/en?utm_source=reddit', '', null);
+    captureAttribution(NOW);
+    persistAttributionTouch(NOW);
+    expect(store.has(ATTRIBUTION_STORAGE_KEY)).toBe(false);
+    storeConsent('denied');
+    persistAttributionTouch(NOW);
+    expect(store.has(ATTRIBUTION_STORAGE_KEY)).toBe(false);
+  });
+
+  it('이 문서에서 뽑은 유입이 없으면 이전에 보관된 값을 건드리지 않는다', () => {
+    const store = stubBrowser('https://www.saju-letter.com/en', '', 'granted');
+    const earlier = { source: 'instagram', medium: 'social', campaign: 'ig', storedAt: NOW - 1000 };
+    store.set(ATTRIBUTION_STORAGE_KEY, JSON.stringify(earlier));
+    captureAttribution(NOW);
+    persistAttributionTouch(NOW);
+    expect(JSON.parse(store.get(ATTRIBUTION_STORAGE_KEY)!)).toEqual(earlier);
   });
 });

@@ -1,8 +1,29 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { readStoredConsent, storeConsent } from '@/lib/analytics';
+import { useEffect, useState, useSyncExternalStore } from 'react';
+import { OPEN_CONSENT_SETTINGS_EVENT, readStoredConsent, storeConsent } from '@/lib/analytics';
+import { persistAttributionTouch } from '@/lib/attribution';
 import type { MarketingDictionary } from '@/dictionaries/types';
+
+/** 저장된 동의 선택을 읽는 작은 스토어 — 이 탭에서 고르면 `notifyStoredConsentChanged`, 다른 탭은 `storage` 이벤트. */
+const storedConsentListeners = new Set<() => void>();
+
+function subscribeStoredConsent(listener: () => void): () => void {
+  storedConsentListeners.add(listener);
+  window.addEventListener('storage', listener);
+  return () => {
+    storedConsentListeners.delete(listener);
+    window.removeEventListener('storage', listener);
+  };
+}
+
+function notifyStoredConsentChanged(): void {
+  for (const listener of storedConsentListeners) listener();
+}
+
+function readNeedsChoice(): boolean {
+  return readStoredConsent() === null;
+}
 
 /**
  * 쿠키/추적 동의 배너(2026-09-08, 3차 종합 버그 점검 항목 3) — GA4가 방문자 동의 없이 항상
@@ -15,25 +36,31 @@ import type { MarketingDictionary } from '@/dictionaries/types';
  * 주석과 동일한 검토 대상).
  *
  * `[lang]/layout.tsx`가 모든 페이지에 이 컴포넌트를 렌더하지만, 저장된 선택이 이미 있으면
- * (또는 만료 전이면) 아무것도 보여주지 않는다 — `readStoredConsent()`가 `GoogleAnalytics.tsx`의
+ * (또는 만료 전이면) 푸터 "쿠키 설정"으로 다시 열기 전까지 아무것도 보여주지 않는다 — `readStoredConsent()`가 `GoogleAnalytics.tsx`의
  * 인라인 스크립트와 같은 `localStorage` 키/TTL을 공유한다.
  */
 export function ConsentBanner({ dict }: { dict: MarketingDictionary['consent'] }) {
-  // 서버 렌더 시점엔 localStorage에 접근할 수 없어 항상 숨김 상태로 시작하고, 마운트 후에만
-  // 실제 저장 여부를 확인한다(hydration mismatch 방지 — 이 저장소의 다른 localStorage 소비처가
-  // 없어 새로 세운 관례).
-  const [visible, setVisible] = useState(false);
+  // 저장된 선택이 없는가 — 작은 외부 스토어로 읽는다(2026-10-06 전체 점검 8차, 예전엔 effect 안 setState). 서버 렌더와
+  // 하이드레이션 중엔 localStorage를 못 읽으니 "있음"(숨김)으로 보고, 하이드레이션 뒤 실제 값으로 다시 그린다.
+  const needsChoice = useSyncExternalStore(subscribeStoredConsent, readNeedsChoice, () => false);
+  // 푸터 "쿠키 설정"(`ConsentSettingsLink`)이 이미 고른 방문자에게도 배너를 다시 연다.
+  const [reopened, setReopened] = useState(false);
 
   useEffect(() => {
-    setVisible(readStoredConsent() === null);
+    const reopen = () => setReopened(true);
+    window.addEventListener(OPEN_CONSENT_SETTINGS_EVENT, reopen);
+    return () => window.removeEventListener(OPEN_CONSENT_SETTINGS_EVENT, reopen);
   }, []);
 
   function handleChoice(choice: 'granted' | 'denied') {
     storeConsent(choice);
-    setVisible(false);
+    // 진입 뒤에 동의했으면 이 페이지 메모리에만 있던 유입을 지금 보관한다 — 거부·철회는 storeConsent가 보관 값을 지운다.
+    if (choice === 'granted') persistAttributionTouch();
+    setReopened(false);
+    notifyStoredConsentChanged();
   }
 
-  if (!visible) return null;
+  if (!needsChoice && !reopened) return null;
 
   return (
     <div className="fixed inset-x-0 bottom-0 z-50 border-t border-foreground/10 bg-background/95 px-4 py-4 backdrop-blur-md">

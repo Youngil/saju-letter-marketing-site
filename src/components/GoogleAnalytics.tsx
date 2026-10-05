@@ -1,5 +1,5 @@
 import Script from 'next/script';
-import { GA_MEASUREMENT_ID, CONSENT_STORAGE_KEY } from '@/lib/analytics';
+import { GA_MEASUREMENT_ID, CONSENT_STORAGE_KEY, consentModeState } from '@/lib/analytics';
 import { inlinePageContextFunctionSource } from '@/lib/pageLocation';
 import { GoogleAnalyticsPageView } from './GoogleAnalyticsPageView';
 
@@ -16,7 +16,8 @@ import { GoogleAnalyticsPageView } from './GoogleAnalyticsPageView';
  * 이미 저장된 선택(`localStorage`, `CONSENT_STORAGE_KEY`)이 있으면 이 초기화 스크립트 안에서
  * 바로 그 값으로 갱신한다 — `ConsentBanner`(클라이언트 컴포넌트, 마운트 후에야 실행)를 기다리면
  * 재방문자도 매번 짧게 `denied` 상태로 첫 이벤트가 나갈 수 있어, 여기서 동기적으로 한 번 더
- * 반영한다(1년 TTL 판정은 `analytics.ts`의 `CONSENT_TTL_MS`와 값을 맞춰야 한다).
+ * 반영한다(1년 TTL 판정은 `analytics.ts`의 `CONSENT_TTL_MS`와 값을 맞춰야 한다). 동의해도 열리는 건 `analytics_storage`
+ * 하나뿐이고 광고 저장소 3종은 항상 `denied`(2026-10-06 전체 점검 8차 — 값은 `consentModeState()` 하나로 `storeConsent`와 공유).
  *
  * **자동 page_view 끔(2026-10-06 전체 점검 3차 후속, 개인정보)** — 예전엔 `gtag('config', ID)`가 주소 전체(궁합 토큰,
  * 신년운세 결과 id, 수신거부 `?token=`)로 page_view를 보냈다. 이제 `config`는 같은 인라인 스크립트에서(동의 기본값
@@ -36,22 +37,12 @@ export function GoogleAnalytics() {
           window.dataLayer = window.dataLayer || [];
           function gtag(){dataLayer.push(arguments);}
           window.gtag = gtag;
-          gtag('consent', 'default', {
-            analytics_storage: 'denied',
-            ad_storage: 'denied',
-            ad_user_data: 'denied',
-            ad_personalization: 'denied'
-          });
+          gtag('consent', 'default', ${JSON.stringify(consentModeState('denied'))});
           try {
             var stored = JSON.parse(window.localStorage.getItem('${CONSENT_STORAGE_KEY}') || 'null');
             var oneYearMs = 365 * 24 * 60 * 60 * 1000;
             if (stored && stored.choice === 'granted' && (Date.now() - stored.storedAt) <= oneYearMs) {
-              gtag('consent', 'update', {
-                analytics_storage: 'granted',
-                ad_storage: 'granted',
-                ad_user_data: 'granted',
-                ad_personalization: 'granted'
-              });
+              gtag('consent', 'update', ${JSON.stringify(consentModeState('granted'))});
             }
           } catch (e) {}
           gtag('js', new Date());

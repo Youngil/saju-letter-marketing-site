@@ -127,9 +127,10 @@ export const dictionary: MarketingDictionary = {
     privacyNote: '만 16세 확인을 위해 양력 생년월일을 서버로 보내지만 저장하지는 않아요. 사주 계산은 브라우저에서 이뤄집니다.',
     privacyLinkLabel: '개인정보처리방침',
     disclaimerLinkLabel: '서비스 이용 안내',
+    cookieSettingsLabel: '쿠키 설정',
   },
   consent: {
-    message: '더 나은 서비스를 위해 방문 통계를 수집하는 쿠키를 사용해요. 동의 여부는 언제든 바꿀 수 있어요.',
+    message: '더 나은 서비스를 위해 방문 통계를 수집하는 쿠키를 사용해요. 동의 여부는 페이지 맨 아래 "쿠키 설정"에서 언제든 바꿀 수 있어요.',
     acceptButton: '동의해요',
     declineButton: '거부해요',
   },
