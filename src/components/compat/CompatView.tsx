@@ -252,6 +252,8 @@ function PendingForm({
         },
       );
     }
+    // 양력으로 돌아가면 음력 모듈이 필요 없다 — 받기 실패 안내가 남아 있으면 지운다(2026-10-06 전체 점검 3차 후속).
+    if (next === 'solar') setError((prev) => (prev === content.loadError ? null : prev));
     setCalendarType(next);
     setIsLeapMonth((prev) => (canBeLeapMonth(next, year, month) ? prev : false));
     clampDay(next, year, month);
@@ -273,6 +275,14 @@ function PendingForm({
   // 윤달 체크박스는 그해 윤달인 달에만(2026-10-06 전체 점검 3차) — 예전엔 음력이면 늘 보여, 윤달이 없는 달에 체크하면
   // 사주 계산이 예외를 던져 일반 계산 오류만 떴다. 제출 값도 지금 해당될 때만 true로 보낸다.
   const leapMonthApplies = canBeLeapMonth(calendarType, year, month);
+
+  // "윤달인지 확인해 주세요" 안내가 뜨면 방금 나타난 윤달 체크박스로 초점을 옮긴다(접근성, 2026-10-06 전체 점검 3차 후속) —
+  // 안내 문단만 읽히고 무엇을 확인해야 하는지 화면 낭독기 사용자가 찾아 헤매지 않게.
+  const leapCheckboxRef = useRef<HTMLInputElement>(null);
+  const showingLeapHint = error === content.leapMonthCheckHint;
+  useEffect(() => {
+    if (showingLeapHint && leapMonthApplies) leapCheckboxRef.current?.focus();
+  }, [showingLeapHint, leapMonthApplies]);
 
   const [turnstileToken, setTurnstileToken] = useState<string | undefined>(undefined);
   const turnstileRef = useRef<TurnstileHandle>(null);
@@ -431,14 +441,24 @@ function PendingForm({
 
           {leapMonthApplies && (
             <label className="flex items-center gap-2 text-sm text-foreground/70">
-              <input type="checkbox" checked={isLeapMonth} onChange={(e) => setIsLeapMonth(e.target.checked)} className="accent-accent-warm" />
+              <input
+                ref={leapCheckboxRef}
+                type="checkbox"
+                checked={isLeapMonth}
+                onChange={(e) => setIsLeapMonth(e.target.checked)}
+                className="accent-accent-warm"
+              />
               {content.leapMonthLabel}
             </label>
           )}
 
           <Turnstile ref={turnstileRef} onVerify={setTurnstileToken} />
 
-          {error && <p className="text-sm text-red-600">{error}</p>}
+          {error && (
+            <p role="alert" className="text-sm text-red-600">
+              {error}
+            </p>
+          )}
 
           <button
             type="submit"

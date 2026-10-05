@@ -85,7 +85,11 @@ export function EmailSignupForm({
         <span>{t.consentLabel}</span>
       </label>
       <Turnstile ref={turnstileRef} onVerify={setTurnstileToken} />
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {error && (
+        <p role="alert" className="text-sm text-red-600">
+          {error}
+        </p>
+      )}
       <button
         type="submit"
         disabled={isSubmitting || (TURNSTILE_ENABLED && !turnstileToken)}
