@@ -72,7 +72,9 @@ export default async function LunarNewYearResultPage({ params }: PageProps) {
   // 사람(isOwner)에게만(2026-10-07). 예전엔 링크를 받은 친구가 자기 이메일로 구독해 주인의 사연으로 쓴 메일을 받아 갔다.
   // 위기 신호로 대체된 결과(subscriptionAvailable === false)는 주인에게도 폼을 보이지 않는다.
   const isOwner = reading.isOwner === true && ownerToken !== undefined;
-  const showSignup = isOwner && reading.subscriptionAvailable !== false;
+  // 위기 신호로 대체된 결과(주인에게만 알려진다) — 도움 안내 글이라 공유 버튼·앱 홍보도 보이지 않는다(2026-10-06 전체 점검 8차).
+  const isCrisisSubstitute = isOwner && reading.subscriptionAvailable === false;
+  const showSignup = isOwner && !isCrisisSubstitute;
 
   return (
     <div className="mx-auto flex w-full max-w-lg flex-1 flex-col gap-6 px-4 py-10">
@@ -85,14 +87,16 @@ export default async function LunarNewYearResultPage({ params }: PageProps) {
         <p className="mt-4 text-xs text-stone-400">{DISCLAIMER_CONTENT[language].short}</p>
       </article>
 
-      <div className="flex justify-center">
-        <ShareButton
-          url={`${WEB_BASE_URL}/${language}/lunar-new-year/r/${id}`}
-          title={reading.content.title}
-          shareLabel={t.shareButton}
-          copiedLabel={t.shareCopied}
-        />
-      </div>
+      {!isCrisisSubstitute && (
+        <div className="flex justify-center">
+          <ShareButton
+            url={`${WEB_BASE_URL}/${language}/lunar-new-year/r/${id}`}
+            title={reading.content.title}
+            shareLabel={t.shareButton}
+            copiedLabel={t.shareCopied}
+          />
+        </div>
+      )}
 
       {showSignup && ownerToken ? (
         <section className="rounded-2xl border border-amber-200 bg-amber-50 p-6">
@@ -122,12 +126,14 @@ export default async function LunarNewYearResultPage({ params }: PageProps) {
         </section>
       ) : null}
 
-      {/* Phase 6 soft connect — 캠페인 본문과 분리된 아침 편지/앱 안내. 다인 초상 없음. */}
-      <section className="flex flex-col items-center gap-3 rounded-2xl border border-stone-200 bg-white p-6 text-center">
-        <h2 className="text-base font-semibold text-stone-800">{t.appBridgeTitle}</h2>
-        <p className="text-sm text-stone-600">{t.appBridgeBody}</p>
-        <AppDownloadLinks dict={dict.appLinks} language={language} context="newyear_result" />
-      </section>
+      {/* Phase 6 soft connect — 캠페인 본문과 분리된 아침 편지/앱 안내. 다인 초상 없음. 위기 대체 결과엔 없음. */}
+      {!isCrisisSubstitute && (
+        <section className="flex flex-col items-center gap-3 rounded-2xl border border-stone-200 bg-white p-6 text-center">
+          <h2 className="text-base font-semibold text-stone-800">{t.appBridgeTitle}</h2>
+          <p className="text-sm text-stone-600">{t.appBridgeBody}</p>
+          <AppDownloadLinks dict={dict.appLinks} language={language} context="newyear_result" />
+        </section>
+      )}
     </div>
   );
 }

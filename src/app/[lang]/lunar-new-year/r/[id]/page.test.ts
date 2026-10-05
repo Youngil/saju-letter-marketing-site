@@ -1,6 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { isValidElement, type ReactElement, type ReactNode } from 'react';
 import { EmailSignupForm } from '@/components/lunar-new-year/EmailSignupForm';
+import { ShareButton } from '@/components/lunar-new-year/ShareButton';
+import { AppDownloadLinks } from '@/components/AppDownloadLinks';
 
 class NotFoundSentinel extends Error {}
 vi.mock('next/navigation', () => ({
@@ -127,7 +129,8 @@ describe('/[lang]/lunar-new-year/r/[id] 소유자만 메일 구독', () => {
     expect(findElements(tree, EmailSignupForm)).toHaveLength(0);
   });
 
-  it('위기 신호로 대체된 결과(subscriptionAvailable false)는 소유자에게도 폼이 없다', async () => {
+  // 2026-10-06 전체 점검 8차 — 도움 안내로 대체된 결과에 공유 버튼·앱 홍보를 붙이지 않는다.
+  it('위기 신호로 대체된 결과(subscriptionAvailable false)는 소유자에게도 폼·공유 버튼·앱 안내가 없다', async () => {
     cookieJar.set(`nyo_${READING_ID}`, OWNER_TOKEN);
     const { getReading } = await import('@/lib/lunarNewYearApi');
     vi.mocked(getReading).mockResolvedValue({
@@ -138,6 +141,21 @@ describe('/[lang]/lunar-new-year/r/[id] 소유자만 메일 구독', () => {
     } as never);
     const tree = await renderPage();
     expect(findElements(tree, EmailSignupForm)).toHaveLength(0);
+    expect(findElements(tree, ShareButton)).toHaveLength(0);
+    expect(findElements(tree, AppDownloadLinks)).toHaveLength(0);
+  });
+
+  it('일반 결과는 공유 버튼과 앱 안내를 그대로 보여 준다(공유 링크·소유자 모두)', async () => {
+    const publicTree = await renderPage();
+    expect(findElements(publicTree, ShareButton)).toHaveLength(1);
+    expect(findElements(publicTree, AppDownloadLinks)).toHaveLength(1);
+
+    cookieJar.set(`nyo_${READING_ID}`, OWNER_TOKEN);
+    const { getReading } = await import('@/lib/lunarNewYearApi');
+    vi.mocked(getReading).mockResolvedValue({ ...PUBLIC_READING, isOwner: true, subscriptionAvailable: true } as never);
+    const ownerTree = await renderPage();
+    expect(findElements(ownerTree, ShareButton)).toHaveLength(1);
+    expect(findElements(ownerTree, AppDownloadLinks)).toHaveLength(1);
   });
 
   it('모양이 틀린 쿠키 값은 백엔드로 보내지 않는다', async () => {
