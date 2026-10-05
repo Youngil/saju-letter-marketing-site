@@ -1,6 +1,6 @@
 import { ImageResponse } from 'next/og';
 import { isMarketingLanguage } from '@/lib/languages';
-import { getCompatInvite } from '@/lib/compatApi';
+import { getCompatInvite, type InviteView } from '@/lib/compatApi';
 import { COMPAT_CONTENT, resolveCompatOg } from '@/content/compatContent';
 
 export const size = { width: 1200, height: 630 };
@@ -16,7 +16,8 @@ export default async function Image({ params }: { params: Promise<{ lang: string
   const { lang: rawLang, token } = await params;
   const lang = isMarketingLanguage(rawLang) ? rawLang : 'en';
   const content = COMPAT_CONTENT[lang];
-  const view = await getCompatInvite(token, lang);
+  // 일시 오류(429·5xx)면 이름 없는 일반 카드로 — 미리보기 카드가 "초대 없음"으로 굳지 않게.
+  const view = await getCompatInvite(token, lang).catch((): InviteView => ({ status: 'pending' }));
 
   const og = resolveCompatOg(content, view);
 

@@ -10,7 +10,7 @@ export const contentType = 'image/png';
  */
 export default async function Image({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const reading = await getReading(id);
+  const reading = await getReading(id).catch(() => null);
 
   const title = reading?.content.title ?? 'Saju Letter';
   const subtitle = reading ? `for ${reading.name}` : 'Korean New Year Fortune';

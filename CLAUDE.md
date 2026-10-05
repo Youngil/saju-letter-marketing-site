@@ -94,7 +94,8 @@
 ## 10. 백엔드 연동
 
 - 클라이언트: `apiClient.ts`, `api.ts`(데모/leads/unsubscribe/쿠폰), `compatApi.ts`, `lunarNewYearApi.ts`, `blogApi.ts`, `serviceLanguagesApi.ts`.
-- `compat/[token]`·`r/[id]`는 **Next 서버에서** 백엔드를 호출(단일 IP로 보임 — 백엔드가 별도 한도). `getCompatInvite`/`getReading`은 **모든 `ApiError`를 not_found/null로 흡수**.
+- `compat/[token]`·`r/[id]`는 **Next 서버에서** 백엔드를 호출(단일 IP로 보임 — 백엔드가 별도 한도). `getCompatInvite`/`getReading`은 **영구 실패(404 등)만 not_found/null**, 429·5xx·시간 초과는 던져 `[lang]/error.tsx`(`unstable_retry`)가 다시 시도를 보여 준다(메타데이터·OG는 잡아서 일반 문구).
+- `apiClient.request()`의 시간 제한 `signal` 때문에 **Next fetch 중복 제거가 꺼진다** — 한 렌더에서 여러 번 부르는 서버 조회 함수(`getCompatInvite`/`getReading`/`getPostContent`/`getAllPostSummaries` 등)는 React `cache()`로 감싼다.
 
 ## 11. 환경변수
 

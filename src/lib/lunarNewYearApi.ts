@@ -1,6 +1,7 @@
+import { cache } from 'react';
 import type { MarketingLanguage } from './languages';
 import type { Pillar } from './saju';
-import { ApiError, request, sendBeaconJson } from './apiClient';
+import { ApiError, isRetryableApiError, request, sendBeaconJson } from './apiClient';
 
 /**
  * saju-letter-newyear-campaign 이관분(2026-08-07) — 백엔드는 무변경이라 기존 `/newyear-campaign/*`
@@ -91,19 +92,19 @@ export interface ReadingView {
 }
 
 /**
- * 404뿐 아니라 어떤 ApiError든(429 rate-limit, 5xx 등) null로 흡수한다(2026-08-17) —
- * compatApi.ts의 getCompatInvite와 같은 이유·같은 수정. 이 함수도 generateMetadata/
- * opengraph-image.tsx/페이지 컴포넌트 세 곳에서 서버사이드로 호출된다.
+ * 404 같은 영구 실패만 null(없는 결과)로 보고, 429·5xx·시간 초과는 던진다(2026-10-06 전체 점검 3차) — compatApi.ts의
+ * getCompatInvite와 같은 이유·같은 수정(예전엔 일시 오류도 404 화면이 됐다). 한 요청 안의 generateMetadata·
+ * 페이지 호출은 `cache()`로 한 번에 묶는다.
  */
-export async function getReading(id: string): Promise<ReadingView | null> {
+export const getReading = cache(async (id: string): Promise<ReadingView | null> => {
   try {
     // id는 주소에서 온 값이라 인코딩한다 — `..` 같은 값으로 다른 백엔드 경로를 부르지 못하게(2026-10-06).
     return await request<ReadingView>(`/newyear-campaign/readings/${encodeURIComponent(id)}`);
   } catch (error) {
-    if (error instanceof ApiError) return null;
+    if (error instanceof ApiError && !isRetryableApiError(error)) return null;
     throw error;
   }
-}
+});
 
 export interface SubscribeInput {
   readingId: string;

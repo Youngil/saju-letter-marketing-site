@@ -1,4 +1,4 @@
-import type { ComponentType } from 'react';
+import { cache, type ComponentType } from 'react';
 import { LAUNCH_CONTENT_LANGUAGES, type MarketingLanguage } from './languages';
 import { listDbBlogPosts, getDbBlogPost } from './blogApi';
 import { INTL_LOCALE } from '@/lib/languages';
@@ -87,21 +87,27 @@ async function getFilePostSummaries(lang: MarketingLanguage): Promise<PostSummar
   return modules.filter((post): post is PostSummary => post !== null);
 }
 
-/** 정적 파일 글(git 커밋) + DB 저장 글(2026-09-06, 코드 배포 없이 발행)을 날짜 기준으로 병합한다. */
-export async function getAllPostSummaries(lang: MarketingLanguage): Promise<PostSummary[]> {
+/**
+ * 정적 파일 글(git 커밋) + DB 저장 글(2026-09-06, 코드 배포 없이 발행)을 날짜 기준으로 병합한다.
+ *
+ * 이 파일의 백엔드 조회 함수들은 React `cache()`로 감싼다(2026-10-06 전체 점검 3차) — apiClient의 시간 제한
+ * signal 때문에 Next의 fetch 중복 제거가 꺼져, 글 페이지 한 번 렌더에 generateMetadata·페이지·hreflang 계산이
+ * 같은 상세 2번 + 목록 4번을 따로 불렀다. `cache()`는 한 요청 안에서만 기억한다(ISR 재검증 주기와 무관).
+ */
+export const getAllPostSummaries = cache(async (lang: MarketingLanguage): Promise<PostSummary[]> => {
   const [filePosts, dbPosts] = await Promise.all([getFilePostSummaries(lang), listDbBlogPosts(lang)]);
   // DB는 카테고리 없음을 null로 표현하지만(Prisma nullable 컬럼), PostMeta는 optional(undefined)
   // 관례를 쓴다(`isPostCategory` 등 기존 소비처와 형태를 맞추기 위함) — 여기서 한 번만 정규화한다.
   const normalizedDbPosts: PostSummary[] = dbPosts.map((post) => ({ ...post, category: post.category ?? undefined }));
   return [...filePosts, ...normalizedDbPosts].sort((a, b) => b.date.localeCompare(a.date));
-}
+});
 
 /**
  * `blog/[slug]/page.tsx` 전용 — 알려진 정적 slug면 파일에서, 아니면 DB에서 찾는다. 두 소스가
  * 같은 slug를 가질 일은 없다고 가정한다(정적 slug는 `POST_SLUGS`에 코드로 등록된 것뿐이라
  * DB 발행 시점에 겹치지 않게 고르면 된다) — 겹치면 이 함수는 항상 파일 쪽을 우선한다.
  */
-export async function getPostContent(lang: MarketingLanguage, slug: string): Promise<PostContent | null> {
+export const getPostContent = cache(async (lang: MarketingLanguage, slug: string): Promise<PostContent | null> => {
   if (isPostSlug(slug)) {
     const mod = await getPostModule(lang, slug);
     return mod ? { source: 'file', Component: mod.Component, meta: mod.meta } : null;
@@ -110,7 +116,7 @@ export async function getPostContent(lang: MarketingLanguage, slug: string): Pro
   if (!post) return null;
   const meta: PostMeta = { title: post.title, description: post.description, date: post.date, category: post.category ?? undefined };
   return { source: 'db', bodyMdx: post.bodyMdx, meta };
-}
+});
 
 /** 홈 “이번 주 다인의 글” — 날짜 최신 1건(언어별 MDX가 있는 것만). */
 export async function getLatestPostSummary(lang: MarketingLanguage): Promise<PostSummary | null> {

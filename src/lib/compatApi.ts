@@ -1,6 +1,7 @@
+import { cache } from 'react';
 import type { MarketingLanguage } from './languages';
 import type { EarthlyBranch, HeavenlyStem } from './sajuVocabulary';
-import { ApiError, request, sendBeaconJson } from './apiClient';
+import { ApiError, isRetryableApiError, request, sendBeaconJson } from './apiClient';
 
 /**
  * 궁합 공유 웹페이지(2026-08-12, saju-letter-backend/public/compat.js에서 이관)가 호출하는
@@ -28,21 +29,22 @@ export type InviteView =
     };
 
 /**
- * 404뿐 아니라 어떤 ApiError든(429 rate-limit, 5xx 등) not_found 뷰로 흡수한다(2026-08-17) —
- * lunarNewYearApi.ts의 getReading과 같은 패턴. 이 함수는 generateMetadata/opengraph-image.tsx/
- * 페이지 컴포넌트 세 곳 모두에서 서버사이드로 호출되므로, 여기서 흡수하지 않으면 일시적인
- * 429/5xx 하나가 SSR 렌더/메타데이터/OG 이미지 생성 전체를 그대로 크래시시킨다 — "초대를 못
- * 찾음"으로 보이는 게 흰 화면보다 낫다는 판단(진짜 원인은 새로고침하면 대부분 사라지는 일시적
- * 상태이므로, 완전히 잘못된 안내는 아니다).
+ * 404(없는 토큰) 같은 영구 실패만 not_found 뷰로 바꾸고, 429·5xx·시간 초과는 그대로 던진다(2026-10-06 전체 점검 3차). 예전엔
+ * 모든 ApiError를 not_found로 흡수해, 백엔드의 IP당 조회 한도(분당 300, 이 서버 전체가 한 IP로 보인다)에 잠깐
+ * 걸리기만 해도 멀쩡한 초대가 "찾을 수 없음"으로 보였다. 페이지는 던진 오류를 [lang]/error.tsx(다시 시도)로
+ * 넘기고, 메타데이터·OG 이미지는 각자 잡아 일반 문구로 그린다.
+ *
+ * React `cache()`로 한 번의 요청 안에서 한 번만 부른다 — apiClient의 시간 제한 signal 때문에 Next의 fetch
+ * 중복 제거가 꺼져, generateMetadata와 페이지가 같은 초대를 두 번씩 조회하며 위 한도를 두 배로 썼다.
  */
-export async function getCompatInvite(token: string, language: MarketingLanguage): Promise<InviteView> {
+export const getCompatInvite = cache(async (token: string, language: MarketingLanguage): Promise<InviteView> => {
   try {
     return await request<InviteView>(`/compatibility-invites/${encodeURIComponent(token)}?language=${encodeURIComponent(language)}`);
   } catch (error) {
-    if (error instanceof ApiError) return { status: 'not_found' };
+    if (error instanceof ApiError && !isRetryableApiError(error)) return { status: 'not_found' };
     throw error;
   }
-}
+});
 
 export interface SubmitGuestInviteInput {
   name: string;

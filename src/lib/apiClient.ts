@@ -31,6 +31,14 @@ export class ApiError extends Error {
 }
 
 /**
+ * 다시 시도하면 나을 수 있는 실패인가(2026-10-06 전체 점검 3차) — 429·408·5xx. 그 밖의 4xx(404 없음, 400 잘못된
+ * 요청)는 다시 불러도 같으니 "없음"으로 봐도 된다. ApiError가 아닌 예외(네트워크·시간 초과)는 호출부가 그대로 던진다.
+ */
+export function isRetryableApiError(error: ApiError): boolean {
+  return error.status === 429 || error.status === 408 || error.status >= 500;
+}
+
+/**
  * 시간 제한(2026-10-06 전체 점검) — 예전엔 없어서 백엔드가 멈추면 레이아웃(언어 목록 조회)까지 함께 멈췄다.
  * 조회는 짧게, 제출(POST)은 AI 동기 생성(데모·신년운세·궁합)을 기다려야 해서 길게 둔다.
  */
