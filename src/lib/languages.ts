@@ -3,7 +3,7 @@
  * (/[lang]/...) 기반 라우팅을 쓴다 — 블로그/compare 페이지가 언어별로 독립 인덱싱돼야
  * SEO에 유리하기 때문이다(신년운세 캠페인은 공유 링크 하나로 끝나는 단일 세션 퍼널이라
  * 브라우저 감지+localStorage만으로 충분했지만, 이 사이트는 그렇지 않다). 그래서 언어 감지는
- * middleware.ts의 리다이렉트 시점 한 번뿐이고, 이후로는 URL이 언어를 그대로 들고 있다.
+ * proxy.ts의 리다이렉트 시점 한 번뿐이고, 이후로는 URL이 언어를 그대로 들고 있다.
  */
 export type MarketingLanguage = 'ko' | 'en' | 'es' | 'pt' | 'ja' | 'vi';
 
@@ -70,7 +70,7 @@ export function availableSwitcherLanguages(restOfPath: string, activeLanguages: 
 
 /**
  * `Accept-Language` 헤더를 실제 우선순위(q값)대로 파싱해 지원 언어 중 첫 매치를 고른다
- * (2026-09-03, 종합 버그 점검으로 발견) — `middleware.ts`가 예전엔
+ * (2026-09-03, 종합 버그 점검으로 발견) — `proxy.ts`가 예전엔
  * `LAUNCH_CONTENT_LANGUAGES.find(lang => header.includes(lang))`로, 헤더 전체에 대한 단순
  * 부분 문자열 검사를 고정 배열 순서(`ko, en, ja, es`)로만 돌고 있었다. `en`이 배열에서
  * 두 번째라, `es-ES,es;q=0.9,en;q=0.8` 같은 흔한 헤더(스페인어가 실제 1순위)도 `'en'`이

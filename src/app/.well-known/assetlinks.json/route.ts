@@ -4,7 +4,7 @@ import { NextResponse } from "next/server";
  * Android App Links 검증용 파일(2026-08-12, saju-letter-backend/src/server.ts에서 이관) —
  * 궁합 공유 링크의 도메인이 saju-letter.com(apex, 백엔드)에서 www.saju-letter.com(이 사이트)로
  * 바뀌면서, App Links 검증도 이제 이 도메인 기준으로 이뤄져야 한다.
- * middleware.ts의 매처가 "."을 포함한 경로를 이미 제외하므로 이 경로는 언어 리다이렉트의
+ * proxy.ts의 매처가 "."을 포함한 경로를 이미 제외하므로 이 경로는 언어 리다이렉트의
  * 영향을 받지 않는다.
  *
  * **SHA-256 지문 검증 완료(2026-09-03)** — 아래 값은 더 이상 자리표시자가 아니다. 사용자가
