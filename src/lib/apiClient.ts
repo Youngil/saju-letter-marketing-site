@@ -45,13 +45,34 @@ export function isRetryableApiError(error: ApiError): boolean {
 const GET_TIMEOUT_MS = 10_000;
 const SUBMIT_TIMEOUT_MS = 120_000;
 
+/**
+ * 서버 내부 호출 표시 헤더(2026-10-06 전체 점검 3차 후속) — `compat/[token]`·`r/[id]` 같은 서버 렌더는 Next 서버 한
+ * IP에서 백엔드를 부르므로, 방문자 모두가 백엔드의 IP별 한도 하나를 나눠 쓴다. 백엔드는 이 헤더 값이 자기
+ * `MARKETING_INTERNAL_KEY`와 같으면 그 한도에서 뺀다.
+ *
+ * **서버에서만, 그리고 키가 있을 때만 붙인다.** 값은 런타임 환경변수 `MARKETING_INTERNAL_KEY`(Secret Manager) —
+ * `NEXT_PUBLIC_` 접두사를 절대 붙이지 않는다(붙이면 클라이언트 번들에 인라인돼 누구나 한도를 우회한다). 브라우저
+ * 번들에선 `process.env.MARKETING_INTERNAL_KEY`가 비어 있지만, `typeof window` 검사로 한 번 더 막는다.
+ */
+export const INTERNAL_KEY_HEADER = 'X-Marketing-Internal-Key';
+
+export function internalKeyHeaders(): Record<string, string> {
+  if (typeof window !== 'undefined') return {};
+  const key = process.env.MARKETING_INTERNAL_KEY?.trim();
+  return key ? { [INTERNAL_KEY_HEADER]: key } : {};
+}
+
 export async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const isSubmit = Boolean(init?.method && init.method.toUpperCase() !== 'GET');
   const response = await fetch(`${API_BASE_URL}${path}`, {
     ...init,
     signal: init?.signal ?? AbortSignal.timeout(isSubmit ? SUBMIT_TIMEOUT_MS : GET_TIMEOUT_MS),
     // 본문이 있을 때만 Content-Type을 붙인다 — GET에 붙이면 브라우저가 매번 CORS 사전 요청(OPTIONS)을 보낸다.
-    headers: { ...(init?.body != null ? { 'Content-Type': 'application/json' } : {}), ...(init?.headers ?? {}) },
+    headers: {
+      ...(init?.body != null ? { 'Content-Type': 'application/json' } : {}),
+      ...internalKeyHeaders(),
+      ...(init?.headers ?? {}),
+    },
   });
 
   const contentType = response.headers.get('content-type') ?? '';

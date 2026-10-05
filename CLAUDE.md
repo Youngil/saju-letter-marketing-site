@@ -94,12 +94,14 @@
 ## 10. 백엔드 연동
 
 - 클라이언트: `apiClient.ts`, `api.ts`(데모/leads/unsubscribe/쿠폰), `compatApi.ts`, `lunarNewYearApi.ts`, `blogApi.ts`, `serviceLanguagesApi.ts`.
-- `compat/[token]`·`r/[id]`는 **Next 서버에서** 백엔드를 호출(단일 IP로 보임 — 백엔드가 별도 한도). `getCompatInvite`/`getReading`은 **영구 실패(404 등)만 not_found/null**, 429·5xx·시간 초과는 던져 `[lang]/error.tsx`(`unstable_retry`)가 다시 시도를 보여 준다(메타데이터·OG는 잡아서 일반 문구).
+- `compat/[token]`·`r/[id]`는 **Next 서버에서** 백엔드를 호출(단일 IP로 보임 — 백엔드가 별도 한도, 서버 요청엔 `MARKETING_INTERNAL_KEY`가 있으면 내부 키 헤더, §11). `getCompatInvite`/`getReading`은 **영구 실패(404 등)만 not_found/null**, 429·5xx·시간 초과는 던져 `[lang]/error.tsx`(`unstable_retry`)가 다시 시도를 보여 준다(메타데이터·OG는 잡아서 일반 문구).
 - `apiClient.request()`의 시간 제한 `signal` 때문에 **Next fetch 중복 제거가 꺼진다** — 한 렌더에서 여러 번 부르는 서버 조회 함수(`getCompatInvite`/`getReading`/`getPostContent`/`getAllPostSummaries` 등)는 React `cache()`로 감싼다.
 
 ## 11. 환경변수
 
 `NEXT_PUBLIC_API_BASE_URL`, `NEXT_PUBLIC_WEB_BASE_URL`, `NEXT_PUBLIC_TURNSTILE_SITE_KEY`, `NEXT_PUBLIC_GA_MEASUREMENT_ID`, `NEXT_PUBLIC_GOOGLE_PLAY_URL`, `NEXT_PUBLIC_APP_STORE_URL`, `NEXT_PUBLIC_ANDROID_APP_LIVE`, `NEXT_PUBLIC_IOS_APP_LIVE` — 전부 빌드 타임 인라인. Cloud Run `--source` 배포 시 build-env-vars로 지정(새 변수는 `--update-build-env-vars`). 절차는 `../docs/setup-guide.md`.
+
+**서버 전용(런타임) `MARKETING_INTERNAL_KEY`** — `apiClient.request()`가 **서버에서만**(`typeof window === 'undefined'`) 값이 있을 때 `X-Marketing-Internal-Key` 헤더로 보낸다(`internalKeyHeaders()`). Next 서버 렌더(`compat/[token]`·`r/[id]` 등)가 한 IP로 보여 방문자 전체가 백엔드의 IP별 한도 하나를 나눠 쓰는 문제 대응 — 백엔드가 같은 값을 알면 그 한도에서 뺀다. **build-env-var가 아니라 Cloud Run 런타임 시크릿**(`--update-secrets=MARKETING_INTERNAL_KEY=<시크릿>:latest`, 백엔드와 같은 Secret Manager 값)으로만 넣고, **`NEXT_PUBLIC_` 접두사 절대 금지**(클라이언트 번들에 인라인된다). 없으면 헤더 없이 예전처럼 동작. PowerShell로 시크릿 파일을 만들 땐 UTF-8 BOM 주의.
 
 ## 12. 실행·검증
 
