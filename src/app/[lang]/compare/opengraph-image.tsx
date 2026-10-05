@@ -1,6 +1,6 @@
 import { ImageResponse } from 'next/og';
 import { getDictionary } from '@/dictionaries';
-import { isMarketingLanguage, isLaunchContentLanguage } from '@/lib/languages';
+import { isMarketingLanguage, isLaunchContentLanguage, LAUNCH_CONTENT_LANGUAGES } from '@/lib/languages';
 
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
@@ -9,6 +9,11 @@ export const contentType = 'image/png';
  * saju-letter-newyear-campaign의 r/[id]/opengraph-image.tsx와 같은 Next.js 파일 규약을
  * 쓴다 — 다만 compare 페이지는 정적 콘텐츠라 백엔드 호출 없이 dictionary만으로 카드를 만든다.
  */
+/** 빌드 때 콘텐츠 축 4개 언어 카드를 미리 만든다(2026-10-06 전체 점검 8차) — compare 페이지와 같은 언어 집합. */
+export function generateStaticParams() {
+  return LAUNCH_CONTENT_LANGUAGES.map((lang) => ({ lang }));
+}
+
 export default async function Image({ params }: { params: Promise<{ lang: string }> }) {
   const { lang: rawLang } = await params;
   const dict = await getDictionary(isMarketingLanguage(rawLang) && isLaunchContentLanguage(rawLang) ? rawLang : 'en');
