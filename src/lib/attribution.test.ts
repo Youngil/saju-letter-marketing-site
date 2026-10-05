@@ -88,6 +88,23 @@ describe('captureAttribution', () => {
     expect(captureAttribution(NOW + 1000)?.source).toBe('instagram');
   });
 
+  it('진입 유입은 문서당 한 번만 뽑는다 — 사이트 안 이동 뒤 다시 불러도 처음 referrer로 UTM을 덮어쓰지 않는다', () => {
+    // tiktok.com에서 UTM을 달고 들어왔다가(진입) 클라이언트 이동으로 블로그로 — document.referrer는 그대로 tiktok.com.
+    stubBrowser('https://www.saju-letter.com/en?utm_source=tiktok&utm_medium=social&utm_campaign=bio', 'https://www.tiktok.com/');
+    expect(captureAttribution(NOW)).toMatchObject({ source: 'tiktok', campaign: 'bio' });
+
+    (globalThis as unknown as { window: { location: { href: string } } }).window.location.href = 'https://www.saju-letter.com/en/blog';
+    expect(captureAttribution(NOW + 1000)).toMatchObject({ source: 'tiktok', campaign: 'bio' });
+    expect(readStoredTouch(NOW + 1000)).toMatchObject({ source: 'tiktok', campaign: 'bio' });
+  });
+
+  it('웹메일에서 연 뉴스레터 UTM이 다음 호출에서 mail.google.com referral로 바뀌지 않는다', () => {
+    stubBrowser('https://www.saju-letter.com/en?utm_source=newsletter&utm_medium=email', 'https://mail.google.com/');
+    expect(captureAttribution(NOW)?.source).toBe('newsletter');
+    (globalThis as unknown as { window: { location: { href: string } } }).window.location.href = 'https://www.saju-letter.com/ko';
+    expect(captureAttribution(NOW + 1000)?.source).toBe('newsletter');
+  });
+
   it('30일이 지난 값은 버린다', () => {
     stubBrowser('https://www.saju-letter.com/en?utm_source=x');
     captureAttribution(NOW);

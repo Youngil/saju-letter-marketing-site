@@ -3,7 +3,7 @@
 import Image from 'next/image';
 import { ANDROID_APP_LIVE, IOS_APP_LIVE, GOOGLE_PLAY_URL, APP_STORE_URL } from '@/lib/appLinks';
 import { trackEvent } from '@/lib/analytics';
-import { buildPlayStoreUrl, captureAttribution } from '@/lib/attribution';
+import { buildPlayStoreUrl, readStoredTouch } from '@/lib/attribution';
 import type { MarketingLanguage } from '@/lib/languages';
 
 export interface AppDownloadLinksDict {
@@ -43,7 +43,9 @@ const GOOGLE_PLAY_BADGE_HEIGHT = 250;
  */
 function refreshPlayStoreHref(anchor: HTMLAnchorElement, context?: string) {
   if (!GOOGLE_PLAY_URL) return;
-  anchor.href = buildPlayStoreUrl(GOOGLE_PLAY_URL, captureAttribution(), context);
+  // 진입 때 `AttributionCapture`가 뽑아 둔 값만 읽는다(2026-10-07) — 여기서 다시 뽑으면 지금 주소와 처음 referrer로
+  // 진입 UTM을 덮어쓴다(`captureAttribution` 주석).
+  anchor.href = buildPlayStoreUrl(GOOGLE_PLAY_URL, readStoredTouch(), context);
 }
 
 

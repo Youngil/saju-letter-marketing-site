@@ -93,6 +93,8 @@ export function deriveTouch(href: string, referrer: string, now: number): Attrib
 
 /** 동의하지 않은 방문자용 — 이 페이지(탭)의 메모리에만 있는 유입 정보. */
 let inMemoryTouch: AttributionTouch | null = null;
+/** 이 문서(전체 페이지 로드)에서 진입 유입을 이미 뽑았는가 — 사이트 안 이동마다 다시 뽑지 않게(2026-10-07). */
+let landingCaptured = false;
 
 export function readStoredTouch(now: number = Date.now()): AttributionTouch | null {
   if (typeof window === 'undefined') return null;
@@ -111,11 +113,20 @@ export function readStoredTouch(now: number = Date.now()): AttributionTouch | nu
 /** 테스트 전용 — 모듈 메모리 상태 초기화. */
 export function resetAttributionMemoryForTest(): void {
   inMemoryTouch = null;
+  landingCaptured = false;
 }
 
-/** 페이지 진입 시 한 번 호출 — 새 유입이면 저장하고, 현재 유효한 유입을 돌려준다. 여러 번 불러도 안전. */
+/**
+ * 진입 유입을 뽑아 저장하고, 현재 유효한 유입을 돌려준다. **문서(전체 페이지 로드)당 처음 한 번만 뽑는다**(2026-10-07 전체
+ * 점검 7차) — 클라이언트 이동은 `document.referrer`를 바꾸지 않아서, 예전엔 배지를 누를 때마다 다시 뽑으며 "지금 주소(UTM
+ * 없음) + 처음 referrer"로 진입 UTM을 덮어썼다(`?utm_source=tiktok&utm_campaign=bio`로 들어와 다른 페이지로 옮긴 뒤 누르면
+ * `tiktok/social/none`, 웹메일로 연 뉴스레터 UTM은 `mail.google.com` referral). 두 번째부터는 저장된 값만 읽는다. 언어를
+ * 바꿔 레이아웃이 다시 마운트돼도 마찬가지.
+ */
 export function captureAttribution(now: number = Date.now()): AttributionTouch | null {
   if (typeof window === 'undefined') return null;
+  if (landingCaptured) return readStoredTouch(now);
+  landingCaptured = true;
   const touch = deriveTouch(window.location.href, typeof document !== 'undefined' ? document.referrer : '', now);
   if (touch) {
     inMemoryTouch = touch;
