@@ -12,7 +12,7 @@ vi.mock('next/navigation', () => ({
 }));
 // 관리자가 켠 언어(2026-10-06부터 랜딩이 이 값으로 새 결과를 받을 언어를 정한다) — 지금 운영과 같은 4개.
 vi.mock('@/lib/serviceLanguagesApi', () => ({
-  fetchActiveServiceLanguages: async () => ({ active: ['ko', 'en', 'ja', 'es'], default: 'en' }),
+  fetchActiveServiceLanguages: vi.fn(async () => ({ active: ['ko', 'en', 'ja', 'es'], default: 'en' })),
 }));
 vi.mock('@/lib/lunarNewYearApi', () => ({
   getCampaignWindow: async () => ({ active: true }),
@@ -48,6 +48,13 @@ describe('/[lang]/lunar-new-year 언어 게이트 — 6개 언어(MARKETING_LANG
       await expect(LunarNewYearPage({ params: Promise.resolve({ lang }) })).rejects.toThrow('/en/lunar-new-year');
     },
   );
+
+  it('관리자가 pt를 켜면 /pt/lunar-new-year가 열린다(2026-10-06 전체 점검 3차 — 언어 목록을 콘텐츠 축 4개로 거르던 회귀)', async () => {
+    const { fetchActiveServiceLanguages } = await import('@/lib/serviceLanguagesApi');
+    vi.mocked(fetchActiveServiceLanguages).mockResolvedValueOnce({ active: ['ko', 'en', 'ja', 'es', 'pt'], default: 'en' });
+    const { default: LunarNewYearPage } = await import('./page');
+    await expect(LunarNewYearPage({ params: Promise.resolve({ lang: 'pt' }) })).resolves.toBeTruthy();
+  });
 
   it('지원하지 않는 언어 코드는 여전히 notFound()로 404 처리한다', async () => {
     const pageModule = await import('./page');

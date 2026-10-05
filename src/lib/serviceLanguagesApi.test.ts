@@ -1,0 +1,61 @@
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import {
+  loadActiveServiceLanguages,
+  parseServiceLanguages,
+  resetServiceLanguagesMemoryForTest,
+  STATIC_SERVICE_LANGUAGES,
+} from './serviceLanguagesApi';
+
+function jsonResponse(status: number, body: unknown): Response {
+  return new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json' } });
+}
+
+beforeEach(() => {
+  resetServiceLanguagesMemoryForTest();
+  vi.spyOn(console, 'warn').mockImplementation(() => {});
+});
+
+afterEach(() => {
+  vi.unstubAllGlobals();
+  vi.unstubAllEnvs();
+  vi.restoreAllMocks();
+});
+
+describe('parseServiceLanguages — 관리자가 켠 언어 원본(6개 축)을 그대로', () => {
+  it('pt/vi도 콘텐츠 축으로 걸러내지 않는다(신년운세 랜딩·sitemap이 6개 언어 페이지라서)', () => {
+    expect(parseServiceLanguages({ languages: ['ko', 'en', 'pt', 'vi'], defaultLanguage: 'pt' })).toEqual({
+      active: ['ko', 'en', 'pt', 'vi'],
+      default: 'pt',
+    });
+  });
+
+  it('모르는 언어는 빼고, 기본 언어가 이상하면 en', () => {
+    expect(parseServiceLanguages({ languages: ['fr', 'ja'], defaultLanguage: 'fr' })).toEqual({ active: ['ja'], default: 'en' });
+  });
+
+  it('쓸 수 있는 언어가 없으면 null', () => {
+    expect(parseServiceLanguages({ languages: ['fr'] })).toBeNull();
+    expect(parseServiceLanguages({})).toBeNull();
+  });
+});
+
+describe('loadActiveServiceLanguages — 실패 처리', () => {
+  it('실패하면 마지막으로 성공한 값을 쓴다', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValueOnce(jsonResponse(200, { languages: ['ko', 'pt'], defaultLanguage: 'ko' })));
+    await expect(loadActiveServiceLanguages()).resolves.toEqual({ active: ['ko', 'pt'], default: 'ko' });
+
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(jsonResponse(503, { error: 'down' })));
+    await expect(loadActiveServiceLanguages()).resolves.toEqual({ active: ['ko', 'pt'], default: 'ko' });
+  });
+
+  it('한 번도 성공한 적 없으면 실행 중엔 던진다(ISR이 실패 값을 굳히지 않게)', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(jsonResponse(503, { error: 'down' })));
+    await expect(loadActiveServiceLanguages()).rejects.toMatchObject({ status: 503 });
+  });
+
+  it('빌드 중에는 정적 목록으로 흡수한다(백엔드 없이도 빌드돼야 한다)', async () => {
+    vi.stubEnv('NEXT_PHASE', 'phase-production-build');
+    vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new TypeError('fetch failed')));
+    await expect(loadActiveServiceLanguages()).resolves.toEqual(STATIC_SERVICE_LANGUAGES);
+  });
+});

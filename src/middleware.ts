@@ -1,20 +1,34 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { MARKETING_LANGUAGES, detectPreferredLaunchLanguage } from '@/lib/languages';
-import { fetchActiveServiceLanguages, type ActiveServiceLanguages } from '@/lib/serviceLanguagesApi';
+import {
+  DEFAULT_LANGUAGE,
+  MARKETING_LANGUAGES,
+  detectPreferredLaunchLanguage,
+  isLaunchContentLanguage,
+  type LaunchContentLanguage,
+} from '@/lib/languages';
+import { loadActiveServiceLanguages, STATIC_SERVICE_LANGUAGES, type ActiveServiceLanguages } from '@/lib/serviceLanguagesApi';
 
 /**
  * 관리자가 켠 언어·기본 언어(2026-10-06) — 예전엔 고정 4개 언어와 'en'으로만 감지해, 언어를 끄거나 기본 언어를
  * 바꿔도 첫 방문 리다이렉트에 반영되지 않았다. 요청마다 백엔드를 부르지 않게 인스턴스 메모리에 10분 둔다.
- * 조회 실패는 fetchActiveServiceLanguages가 정적 목록으로 흡수한다.
+ * 한 번도 조회에 성공하지 못해 정적 목록을 쓸 때는 30초만 둔다(2026-10-06 전체 점검 3차 — 예전엔 일시 실패의
+ * 정적 목록을 10분 동안 그대로 썼다). 한 번이라도 성공했으면 loadActiveServiceLanguages가 그 값을 대신 준다.
  */
 const LANGUAGE_CACHE_MS = 10 * 60_000;
-let languageCache: { at: number; value: ActiveServiceLanguages } | null = null;
+const FALLBACK_CACHE_MS = 30_000;
+let languageCache: { until: number; value: ActiveServiceLanguages } | null = null;
 
 async function activeLanguages(): Promise<ActiveServiceLanguages> {
-  if (languageCache && Date.now() - languageCache.at < LANGUAGE_CACHE_MS) return languageCache.value;
-  const value = await fetchActiveServiceLanguages();
-  languageCache = { at: Date.now(), value };
-  return value;
+  if (languageCache && Date.now() < languageCache.until) return languageCache.value;
+  try {
+    const value = await loadActiveServiceLanguages();
+    languageCache = { until: Date.now() + LANGUAGE_CACHE_MS, value };
+    return value;
+  } catch (error) {
+    console.warn('middleware: service languages unavailable — using static list briefly', error);
+    languageCache = { until: Date.now() + FALLBACK_CACHE_MS, value: STATIC_SERVICE_LANGUAGES };
+    return STATIC_SERVICE_LANGUAGES;
+  }
 }
 
 /**
@@ -48,8 +62,13 @@ export async function middleware(request: NextRequest) {
   // /pt나 /vi가 붙은 링크(신년운세 캠페인 등)는 위 hasLangPrefix에서 이미 걸러져 영향받지 않는다.
   // 실제 우선순위(q값) 파싱은 detectPreferredLaunchLanguage 참고(2026-09-03, 종합 버그 점검 —
   // 예전엔 헤더 전체에 대한 단순 부분 문자열 검사를 고정 배열 순서로만 돌아 우선순위를 무시했다).
+  // 자동 감지는 홈이 있는 콘텐츠 축 언어로만 — 관리자가 켠 언어 원본(6개 축)에서 여기서 좁힌다.
   const { active, default: defaultLanguage } = await activeLanguages();
-  const detected = detectPreferredLaunchLanguage(request.headers.get('accept-language') ?? '', active, defaultLanguage);
+  const candidates = active.filter(isLaunchContentLanguage);
+  const fallback: LaunchContentLanguage = isLaunchContentLanguage(defaultLanguage)
+    ? defaultLanguage
+    : (DEFAULT_LANGUAGE as LaunchContentLanguage);
+  const detected = detectPreferredLaunchLanguage(request.headers.get('accept-language') ?? '', candidates, fallback);
 
   const url = request.nextUrl.clone();
   url.pathname = `/${detected}${pathname === '/' ? '' : pathname}`;

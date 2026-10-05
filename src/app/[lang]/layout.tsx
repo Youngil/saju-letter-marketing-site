@@ -107,7 +107,8 @@ export default async function LangLayout({
   if (!isMarketingLanguage(rawLang)) notFound();
   const lang: MarketingLanguage = rawLang;
   const dict = await getDictionary(lang);
-  const { active: activeLanguages } = await fetchActiveServiceLanguages();
+  // 스위처는 콘텐츠 축(블로그·compare가 있는 언어)만 — 관리자가 켠 언어 원본(6개 축)에서 여기서 좁힌다.
+  const activeLanguages = (await fetchActiveServiceLanguages()).active.filter(isLaunchContentLanguage);
 
   return (
     <html
