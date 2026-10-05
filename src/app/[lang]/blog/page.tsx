@@ -10,7 +10,7 @@ import {
 } from '@/lib/languages';
 import { activeContentLanguages, fetchActiveServiceLanguages } from '@/lib/serviceLanguagesApi';
 import { getAllPostSummaries } from '@/lib/posts';
-import { WEB_BASE_URL, activeLanguageAlternates, buildSocialMetadata } from '@/lib/seo';
+import { WEB_BASE_URL, activeLanguageAlternates, buildSocialMetadata, NOINDEX_ROBOTS } from '@/lib/seo';
 import { BlogByline, categoryLabelFor } from '@/components/BlogByline';
 
 export async function generateStaticParams() {
@@ -28,14 +28,19 @@ export async function generateMetadata({ params }: { params: Promise<{ lang: str
   const path = (lang: LaunchContentLanguage) => `/${lang}/blog`;
   // hreflang은 지금 켠 콘텐츠 언어끼리만(sitemap.ts와 같은 계산, 2026-10-06 전체 점검 3차 후속).
   const serviceLanguages = await fetchActiveServiceLanguages();
+  const contentLanguages = activeContentLanguages(serviceLanguages);
+  // 관리자가 이 언어를 껐으면 홈([lang]/page.tsx)과 같이 noindex — hreflang·sitemap에서 빠진 페이지가 색인에 남지 않게
+  // (2026-10-06 전체 점검 5차).
+  const isActive = contentLanguages.includes(rawLang);
 
   return {
     title: dict.blog.title,
     description: dict.blog.subtitle,
     alternates: {
       canonical: `${WEB_BASE_URL}${path(rawLang)}`,
-      languages: activeLanguageAlternates(activeContentLanguages(serviceLanguages), path, serviceLanguages.default),
+      languages: activeLanguageAlternates(contentLanguages, path, serviceLanguages.default),
     },
+    ...(isActive ? {} : { robots: NOINDEX_ROBOTS }),
     ...buildSocialMetadata({
       title: dict.blog.title,
       description: dict.blog.subtitle,

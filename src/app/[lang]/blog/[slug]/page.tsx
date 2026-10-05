@@ -11,7 +11,7 @@ import { activeContentLanguages, fetchActiveServiceLanguages } from '@/lib/servi
 import { BLOG_LANGUAGES, getLanguagesForSlug, getPostContent, POST_SLUGS } from '@/lib/posts';
 import { jsonLdScript } from '@/lib/structuredData';
 import { SafeMdx } from '@/components/blog/SafeMdx';
-import { WEB_BASE_URL, activeLanguageAlternates, buildSocialMetadata } from '@/lib/seo';
+import { WEB_BASE_URL, activeLanguageAlternates, buildSocialMetadata, NOINDEX_ROBOTS } from '@/lib/seo';
 import { articleJsonLd } from '@/lib/structuredData';
 import { BlogByline, categoryLabelFor } from '@/components/BlogByline';
 import { SwitcherLanguageLimit } from '@/components/SwitcherLanguageLimit';
@@ -41,6 +41,9 @@ export async function generateMetadata({
   // 실제로 공개됐고 + 지금 켠 언어만 hreflang에 건다(sitemap.ts와 같은 계산, 켠 언어 필터는 2026-10-06 전체 점검 3차 후속).
   const [available, serviceLanguages] = await Promise.all([getLanguagesForSlug(slug), fetchActiveServiceLanguages()]);
   const alternateLanguages = activeContentLanguages(serviceLanguages, available.length > 0 ? available : [rawLang]);
+  // 관리자가 이 언어를 껐으면 홈([lang]/page.tsx)과 같이 noindex — 글이 있는지(available)와 무관하게 이 페이지 언어 자체를
+  // 본다(2026-10-06 전체 점검 5차).
+  const isActive = activeContentLanguages(serviceLanguages).includes(rawLang);
 
   return {
     title: content.meta.title,
@@ -49,6 +52,7 @@ export async function generateMetadata({
       canonical: `${WEB_BASE_URL}${path(rawLang)}`,
       languages: activeLanguageAlternates(alternateLanguages, path, serviceLanguages.default),
     },
+    ...(isActive ? {} : { robots: NOINDEX_ROBOTS }),
     ...buildSocialMetadata({
       title: content.meta.title,
       description: content.meta.description,
