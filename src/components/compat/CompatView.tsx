@@ -254,21 +254,29 @@ function PendingForm({
     }
     // 양력으로 돌아가면 음력 모듈이 필요 없다 — 받기 실패 안내가 남아 있으면 지운다(2026-10-06 전체 점검 3차 후속).
     if (next === 'solar') setError((prev) => (prev === content.loadError ? null : prev));
+    clearLeapHint();
     setCalendarType(next);
     setIsLeapMonth((prev) => (canBeLeapMonth(next, year, month) ? prev : false));
     clampDay(next, year, month);
   }
 
   function handleYearChange(nextYear: string) {
+    clearLeapHint();
     setYear(nextYear);
     setIsLeapMonth((prev) => (canBeLeapMonth(calendarType, nextYear, month) ? prev : false));
     clampDay(calendarType, nextYear, month);
   }
 
   function handleMonthChange(nextMonth: string) {
+    clearLeapHint();
     setMonth(nextMonth);
     setIsLeapMonth((prev) => (canBeLeapMonth(calendarType, year, nextMonth) ? prev : false));
     clampDay(calendarType, year, nextMonth);
+  }
+
+  function handleDayChange(nextDay: string) {
+    clearLeapHint();
+    setDay(nextDay);
   }
 
   const dayOptions = Array.from({ length: maxDayFor(calendarType, year, month) }, (_, i) => i + 1);
@@ -278,11 +286,22 @@ function PendingForm({
 
   // "윤달인지 확인해 주세요" 안내가 뜨면 방금 나타난 윤달 체크박스로 초점을 옮긴다(접근성, 2026-10-06 전체 점검 3차 후속) —
   // 안내 문단만 읽히고 무엇을 확인해야 하는지 화면 낭독기 사용자가 찾아 헤매지 않게.
+  // 옮기는 건 handleSubmit이 안내를 띄운 직후 **한 번만**(2026-10-06 전체 점검 5차) — 예전엔 "안내가 떠 있고 윤달인 달"이면
+  // 언제든 다시 옮겨, 안내가 남은 채 연·월을 바꿔 윤달 여부가 뒤집힐 때마다 고르던 목록에서 초점을 빼앗았다. 날짜·양음력을
+  // 바꾸면 안내 자체도 지운다(그 날짜에 대한 안내였다).
   const leapCheckboxRef = useRef<HTMLInputElement>(null);
+  const focusLeapCheckboxPending = useRef(false);
   const showingLeapHint = error === content.leapMonthCheckHint;
   useEffect(() => {
-    if (showingLeapHint && leapMonthApplies) leapCheckboxRef.current?.focus();
+    if (!focusLeapCheckboxPending.current || !showingLeapHint || !leapMonthApplies) return;
+    focusLeapCheckboxPending.current = false;
+    leapCheckboxRef.current?.focus();
   }, [showingLeapHint, leapMonthApplies]);
+
+  function clearLeapHint() {
+    focusLeapCheckboxPending.current = false;
+    setError((prev) => (prev === content.leapMonthCheckHint ? null : prev));
+  }
 
   const [turnstileToken, setTurnstileToken] = useState<string | undefined>(undefined);
   const turnstileRef = useRef<TurnstileHandle>(null);
@@ -311,6 +330,7 @@ function PendingForm({
     submittingRef.current = true;
     setIsSubmitting(true);
     setError(null);
+    focusLeapCheckboxPending.current = false;
     try {
       let sajuModule = saju;
       if (!sajuModule) {
@@ -331,6 +351,7 @@ function PendingForm({
           // 판정이 안 되는 연도면 아래 계산이 calcError로 안내한다.
         }
         if (leapMonth === monthNum) {
+          focusLeapCheckboxPending.current = true;
           setError(content.leapMonthCheckHint);
           return;
         }
@@ -436,7 +457,7 @@ function PendingForm({
           <div className="flex gap-1.5 sm:gap-2">
             <DateSelect id="guest-year" label={content.yearLabel} value={year} onChange={handleYearChange} options={yearOptions} />
             <DateSelect id="guest-month" label={content.monthLabel} value={month} onChange={handleMonthChange} options={MONTH_OPTIONS} />
-            <DateSelect id="guest-day" label={content.dayLabel} value={day} onChange={setDay} options={dayOptions} />
+            <DateSelect id="guest-day" label={content.dayLabel} value={day} onChange={handleDayChange} options={dayOptions} />
           </div>
 
           {leapMonthApplies && (
