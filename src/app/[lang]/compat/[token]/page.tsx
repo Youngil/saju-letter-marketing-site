@@ -67,7 +67,8 @@ export default async function CompatPage({ params }: PageProps) {
 
   return (
     <div className="mx-auto max-w-lg px-4 py-12">
-      <CompatView token={token} language={lang} initialView={view} appLinksDict={dict.appLinks} />
+      {/* 연도 목록 기준 해는 서버가 정해 넘긴다 — 서버·브라우저가 같은 목록을 그리게(2026-10-06 전체 점검 3차). */}
+      <CompatView token={token} language={lang} initialView={view} appLinksDict={dict.appLinks} currentYear={new Date().getFullYear()} />
     </div>
   );
 }

@@ -155,6 +155,7 @@ export const dictionary: MarketingDictionary = {
       errors: {
         name: 'お名前を入力してください。',
         date: '正しい生年月日を入力してください。',
+        time: '出生時刻は0〜23時、0〜59分の数字で入力してください。',
         memorableEvent: '今年の出来事を一言で入力してください(300文字まで)。',
         age: '続けるには16歳以上であることの確認が必要です。',
         underage: '本サービスは満16歳以上の方のみご利用いただけます。',

@@ -4,12 +4,11 @@ import { useRouter } from 'next/navigation';
 import { useRef, useState } from 'react';
 import type { MarketingDictionary } from '@/dictionaries/types';
 import type { MarketingLanguage } from '@/lib/languages';
-import { calculateSaju } from '@/lib/saju';
 import { isOldEnough } from '@/lib/age';
 import { createReading } from '@/lib/lunarNewYearApi';
 import { ApiError } from '@/lib/apiClient';
 import { Turnstile, TURNSTILE_ENABLED, type TurnstileHandle } from '@/components/Turnstile';
-import { isValidBirthDate } from '@/lib/birthDate';
+import { isValidBirthDate, parseBirthTime } from '@/lib/birthDate';
 
 const MEMORABLE_EVENT_MAX_LENGTH = 300;
 
@@ -61,6 +60,13 @@ export function ReadingForm({
       setError(t.errors.underage);
       return;
     }
+    // 시 0~23·분 0~59 정수만 — 예전엔 24시·75분이 사주 계산에서 예외가 나 일반 오류와 함께 1회용 Turnstile 토큰까지
+    // 버려졌다(2026-10-06 전체 점검 3차).
+    const birthTime = parseBirthTime(timeKnown, hour, minute);
+    if (birthTime === 'invalid') {
+      setError(t.errors.time);
+      return;
+    }
     if (memorableEvent.trim().length === 0 || memorableEvent.length > MEMORABLE_EVENT_MAX_LENGTH) {
       setError(t.errors.memorableEvent);
       return;
@@ -72,14 +78,15 @@ export function ReadingForm({
 
     setIsSubmitting(true);
     try {
-      const hourNum = timeKnown && hour !== '' ? Number(hour) : undefined;
+      // 사주 계산 라이브러리(lunar-javascript, 수백 KB)는 제출할 때만 받는다 — 랜딩 첫 화면 JS에서 뺐다(DemoForm과 같은 방식).
+      const { calculateSaju } = await import('@/lib/saju');
       const chart = calculateSaju({
         calendarType: 'solar',
         year: yearNum,
         month: monthNum,
         day: dayNum,
-        hour: hourNum,
-        minute: hourNum !== undefined ? Number(minute) : undefined,
+        hour: birthTime.hour,
+        minute: birthTime.minute,
       });
 
       const result = await createReading({

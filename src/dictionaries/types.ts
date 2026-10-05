@@ -196,6 +196,8 @@ export interface MarketingDictionary {
       errors: {
         name: string;
         date: string;
+        /** 출생 시각(시 0~23·분 0~59)이 잘못됐을 때(2026-10-06). */
+        time: string;
         memorableEvent: string;
         age: string;
         underage: string;

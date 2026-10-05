@@ -42,7 +42,7 @@
 ## 4. 페이지별 현재 동작
 
 - **홈 `/[lang]`**(4개 언어, ISR 3600): 히어로 + `DainHomeMark` + `AppDownloadLinks` + `DemoForm` + 최신 글 배너(`getLatestPostSummary`). **`<LeadCaptureForm>`은 주석 처리로 임시 비노출**(쿠폰 개념 재정립 중; 컴포넌트·`dict.leadCapture` 유지, 주석 안 예시에 `showContentLinks` 게이트 포함).
-- **미니 데모**: `src/lib/saju.ts`가 `lunar-javascript`로 **브라우저에서 사주 계산**(백엔드는 계산 안 함)해 천간/지지를 `POST /marketing-site/demo-readings`로. 만 16세 확인용 양력 년/월/일은 서버가 검증만 하고 저장 안 함. 결과(`teaser`)는 DB 미저장.
+- **미니 데모**: `src/lib/saju.ts`가 `lunar-javascript`로 **브라우저에서 사주 계산**(백엔드는 계산 안 함 — 데모·궁합·신년운세 폼 모두 `await import('@/lib/saju')`로 지연 로드, 정적 import 금지)해 천간/지지를 `POST /marketing-site/demo-readings`로. 만 16세 확인용 양력 년/월/일은 서버가 검증만 하고 저장 안 함. 결과(`teaser`)는 DB 미저장.
 - **블로그**(4개 언어, ISR 3600) — 하이브리드:
   - 파일 글: `content-posts/{slug}.{lang}.mdx` + `POST_SLUGS`(`@next/mdx`, `export const meta = {...}`, `meta.category` = `observation`/`explainer`/`behind`/`season`).
   - DB 글(백엔드 `MarketingSiteBlogPost`): admin-panel UI 없이 `saju-letter-admin-backend`의 `POST /marketing-site/blog-posts`로 발행. `next-mdx-remote/rsc` 런타임 컴파일 — **`import` 불가**, 태그는 `blogMdxComponents`(`RitualFlowDiagram`/`FixedVsChangingDiagram`/`NewYearTimelineDiagram`)만. 이미지는 `public/`에 git 커밋.
@@ -50,7 +50,7 @@
   - `blogApi.ts`는 **네트워크 포함 모든 예외를 흡수**(빈 배열/null) — 백엔드 없이도 빌드 성공해야 함.
   - 주간 칼럼은 **수동 편집**(자동 생성 없음): 화요일, EN 원문 → ko/ja/es(백로그: realignment 문서 §4.5–4.6). `what-is-saju`(입문, ko와 en/ja/es 구조 다름)는 별도 트랙.
 - **compare**(+OG, 4개 언어): 별자리 12 vs 일간 10 정적 비교(1:1 매칭표 없음), `CompareInfographic` + `dict.compare.*`. 다이어그램은 인라인 SVG/HTML, 절대 위치 대신 flex 흐름.
-- **`compat/[token]`**(+OG, 6개 언어, 동적): 공유 URL엔 언어 없음(middleware가 리다이렉트). 백엔드 `compatibilityPublicRouter`를 `compatApi.ts`/`CompatView.tsx`로 호출. 게스트는 이름+생년월일만 입력, 일간 + `yearStem`/`yearBranch`/`monthStem`/`monthBranch`/`dayBranch` 전송. 음력/윤달 지원(연/월/양음력 변경 시 `getLunarLeapMonth()`로 `isLeapMonth` 리셋). **"OOO님과의 궁합"·OG 제목은 발신자 `requesterName`**(없으면 "a friend" 계열). `logCompatEvent`와 GA 이벤트 병행.
+- **`compat/[token]`**(+OG, 6개 언어, 동적): 공유 URL엔 언어 없음(middleware가 리다이렉트). 백엔드 `compatibilityPublicRouter`를 `compatApi.ts`/`CompatView.tsx`로 호출. 게스트는 이름+생년월일만 입력, 일간 + `yearStem`/`yearBranch`/`monthStem`/`monthBranch`/`dayBranch` 전송. 음력/윤달 지원(윤달 체크박스는 그해 윤달인 달에만, 연/월/양음력 변경 시 `getLunarLeapMonth()`로 `isLeapMonth` 리셋). 연도 목록은 서버 페이지가 넘긴 `currentYear` 기준(`birthYearOptions`, 하이드레이션 일치). **"OOO님과의 궁합"·OG 제목은 발신자 `requesterName`**(없으면 "a friend" 계열). `logCompatEvent`와 GA 이벤트 병행.
 - **`lunar-new-year`**(+`r/[id]`+OG, `unsubscribe`; 6개 언어): 옛 캠페인 이관분, Fortune 톤 유지, 결과(`appBridgeTitle`/`Body`)·오프시즌(`offSeason.cta`)에서만 `AppDownloadLinks`. 백엔드 `/newyear-campaign/*`. `OffSeasonPlaceholder`의 `INTL_LOCALE`은 6개 언어 필수. `EmailSignupForm`(신년운세 드립)은 리드 캡처와 별개.
 - **`privacy`**(6개 언어, `privacyPolicy.ts`, 모바일 `buildPrivacyPolicyUrl`이 직접 링크): ⚠️ AI 초안, 법률 검토 전. **수집·전송(분석 이벤트, 제3자, AI 호출 경로)이 바뀌면 같은 작업에서 6개 언어 §1/§2/§4 + effectiveDate/§10 갱신**, 파일 상단 개정 주석 기록. 데모·신년운세(동기 AI)는 §4 AI 제공업체에 포함, 궁합 공유(배치 캐시)는 제외.
 - **`disclaimer`**(6개 언어, `disclaimer.ts` = 모바일 문구 그대로): 로그인 없이 AI 결과를 보는 세 곳(데모, 궁합 `CompletedResult`, 신년운세 결과)에 `DISCLAIMER_CONTENT[language].short` 표시.

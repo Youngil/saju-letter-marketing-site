@@ -1,7 +1,7 @@
 'use client';
 
 import Image from 'next/image';
-import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import type { MarketingLanguage } from '@/lib/languages';
 import type { MarketingDictionary } from '@/dictionaries/types';
 import { COMPAT_CONTENT, type CompatContent } from '@/content/compatContent';
@@ -9,16 +9,27 @@ import type { InviteView } from '@/lib/compatApi';
 import { logCompatEvent, submitGuestInvite } from '@/lib/compatApi';
 import { ApiError } from '@/lib/apiClient';
 import { DISCLAIMER_CONTENT } from '@/content/disclaimer';
-import { calculateSaju, getLunarLeapMonth, resolveSolarBirthDate } from '@/lib/saju';
 import { isOldEnough } from '@/lib/age';
 import { Turnstile, TURNSTILE_ENABLED, type TurnstileHandle } from '../Turnstile';
 import { AppDownloadLinks } from '../AppDownloadLinks';
 import { trackEvent } from '@/lib/analytics';
-import { CURRENT_YEAR } from '@/lib/birthDate';
+import { birthYearOptions } from '@/lib/birthDate';
 
-/** 선택형 연도 목록 — 만 16세 미만은 어차피 막히지만(isOldEnough) 목록에서 미리 빼 두면 고르기 쉽다. */
-const YEAR_OPTIONS = Array.from({ length: CURRENT_YEAR - 16 - 1920 + 1 }, (_, i) => CURRENT_YEAR - 16 - i);
 const MONTH_OPTIONS = Array.from({ length: 12 }, (_, i) => i + 1);
+
+/**
+ * 사주 계산 라이브러리(lunar-javascript, 수백 KB)는 필요할 때만 받는다(2026-10-06 전체 점검 3차, DemoForm과 같은 방식) —
+ * 예전엔 정적 import라 궁합 링크 첫 화면 JS에 통째로 실렸다. 음력을 고르는 순간(윤달 판정) 또는 제출할 때 받는다.
+ */
+type SajuModule = typeof import('@/lib/saju');
+let sajuModulePromise: Promise<SajuModule> | null = null;
+function loadSaju(): Promise<SajuModule> {
+  sajuModulePromise ??= import('@/lib/saju').catch((error: unknown) => {
+    sajuModulePromise = null; // 청크 로드 실패는 다음 시도에서 다시 받는다.
+    throw error;
+  });
+  return sajuModulePromise;
+}
 
 /**
  * saju-letter-backend/public/compat.js + guest-day-master.js를 포팅한 클라이언트 컴포넌트
@@ -43,11 +54,14 @@ export function CompatView({
   language,
   initialView,
   appLinksDict,
+  currentYear,
 }: {
   token: string;
   language: MarketingLanguage;
   initialView: InviteView;
   appLinksDict: MarketingDictionary['appLinks'];
+  /** 연도 목록 기준 — 서버 페이지가 정해 넘긴다(모듈에서 계산하면 서버·브라우저 값이 갈려 하이드레이션이 어긋났다). */
+  currentYear: number;
 }) {
   const content = COMPAT_CONTENT[language];
   const [view, setView] = useState<InviteView>(initialView);
@@ -75,6 +89,7 @@ export function CompatView({
         content={content}
         requesterName={view.requesterName ?? null}
         onSubmitted={setView}
+        currentYear={currentYear}
       />
     );
   }
@@ -175,19 +190,24 @@ function PendingForm({
   content,
   requesterName,
   onSubmitted,
+  currentYear,
 }: {
   token: string;
   language: MarketingLanguage;
   content: CompatContent;
   requesterName: string | null;
   onSubmitted: (view: InviteView) => void;
+  currentYear: number;
 }) {
+  const yearOptions = useMemo(() => birthYearOptions(currentYear), [currentYear]);
   const [name, setName] = useState('');
   const [calendarType, setCalendarType] = useState<'solar' | 'lunar'>('solar');
   const [year, setYear] = useState('');
   const [month, setMonth] = useState('');
   const [day, setDay] = useState('');
   const [isLeapMonth, setIsLeapMonth] = useState(false);
+  // 음력을 고르면 받아 두는 사주 모듈 — 윤달 판정(getLunarLeapMonth)에 쓴다. 받기 전엔 윤달 체크박스를 그리지 않는다.
+  const [saju, setSaju] = useState<SajuModule | null>(null);
 
   // 연/월/양음력 변경 시 isLeapMonth를 리셋한다(2026-09-04) — 윤달 선택 후 다른 월/연도로 바꿔도 내부
   // 상태가 남아 존재하지 않는 (연,월,윤달) 조합으로 제출이 계속 실패하던 문제.
@@ -201,8 +221,8 @@ function PendingForm({
     if (nextCalendarType !== 'lunar') return false;
     const y = parseIntOrNull(yearStr);
     const m = parseIntOrNull(monthStr);
-    if (y === null || m === null) return false;
-    return getLunarLeapMonth(y) === m;
+    if (y === null || m === null || !saju) return false;
+    return saju.getLunarLeapMonth(y) === m;
   }
 
   // 일 목록은 고른 달의 날 수만큼(음력은 최대 30일). 고른 날이 그 달에 없으면(31일 → 2월) 비운다.
@@ -218,6 +238,9 @@ function PendingForm({
   }
 
   function handleCalendarTypeChange(next: 'solar' | 'lunar') {
+    if (next === 'lunar' && !saju) {
+      loadSaju().then(setSaju, (error: unknown) => console.warn('saju module load failed', error));
+    }
     setCalendarType(next);
     setIsLeapMonth((prev) => (canBeLeapMonth(next, year, month) ? prev : false));
     clampDay(next, year, month);
@@ -236,6 +259,9 @@ function PendingForm({
   }
 
   const dayOptions = Array.from({ length: maxDayFor(calendarType, year, month) }, (_, i) => i + 1);
+  // 윤달 체크박스는 그해 윤달인 달에만(2026-10-06 전체 점검 3차) — 예전엔 음력이면 늘 보여, 윤달이 없는 달에 체크하면
+  // 사주 계산이 예외를 던져 일반 계산 오류만 떴다. 제출 값도 지금 해당될 때만 true로 보낸다.
+  const leapMonthApplies = canBeLeapMonth(calendarType, year, month);
 
   const [turnstileToken, setTurnstileToken] = useState<string | undefined>(undefined);
   const turnstileRef = useRef<TurnstileHandle>(null);
@@ -255,12 +281,20 @@ function PendingForm({
       return;
     }
 
+    let sajuModule: SajuModule;
+    try {
+      sajuModule = saju ?? (await loadSaju());
+    } catch {
+      setError(content.submitError);
+      return;
+    }
+
     let chart;
     let solar;
     try {
-      const input = { calendarType, year: yearNum, month: monthNum, day: dayNum, isLeapMonth };
-      chart = calculateSaju(input);
-      solar = resolveSolarBirthDate(input);
+      const input = { calendarType, year: yearNum, month: monthNum, day: dayNum, isLeapMonth: isLeapMonth && leapMonthApplies };
+      chart = sajuModule.calculateSaju(input);
+      solar = sajuModule.resolveSolarBirthDate(input);
     } catch {
       setError(content.calcError);
       return;
@@ -358,12 +392,12 @@ function PendingForm({
           {/* 연·월·일을 고르는 목록으로(2026-10-02) — 숫자 입력칸 셋은 휴대폰에서 키보드가 올라오며 화면이
               밀려 입력이 엉키기 쉬웠다. */}
           <div className="flex gap-1.5 sm:gap-2">
-            <DateSelect id="guest-year" label={content.yearLabel} value={year} onChange={handleYearChange} options={YEAR_OPTIONS} />
+            <DateSelect id="guest-year" label={content.yearLabel} value={year} onChange={handleYearChange} options={yearOptions} />
             <DateSelect id="guest-month" label={content.monthLabel} value={month} onChange={handleMonthChange} options={MONTH_OPTIONS} />
             <DateSelect id="guest-day" label={content.dayLabel} value={day} onChange={setDay} options={dayOptions} />
           </div>
 
-          {calendarType === 'lunar' && (
+          {leapMonthApplies && (
             <label className="flex items-center gap-2 text-sm text-foreground/70">
               <input type="checkbox" checked={isLeapMonth} onChange={(e) => setIsLeapMonth(e.target.checked)} className="accent-accent-warm" />
               {content.leapMonthLabel}
