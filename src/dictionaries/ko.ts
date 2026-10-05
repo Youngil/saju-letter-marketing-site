@@ -163,6 +163,7 @@ export const dictionary: MarketingDictionary = {
       errors: {
         name: '이름을 입력해주세요.',
         date: '올바른 생년월일을 입력해주세요.',
+        time: '출생 시각은 0~23시, 0~59분 사이의 숫자로 입력해주세요.',
         memorableEvent: '올 한 해에 대해 한 줄만 적어주세요(최대 300자).',
         age: '계속하려면 만 16세 이상임을 확인해주세요.',
         underage: '이 서비스는 만 16세 이상만 이용할 수 있어요.',

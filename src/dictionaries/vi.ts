@@ -158,6 +158,7 @@ export const dictionary: MarketingDictionary = {
       errors: {
         name: 'Vui lòng nhập tên của bạn.',
         date: 'Vui lòng nhập ngày sinh hợp lệ.',
+        time: 'Vui lòng nhập giờ sinh hợp lệ (0–23 giờ và 0–59 phút).',
         memorableEvent: 'Vui lòng chia sẻ một dòng về năm của bạn (tối đa 300 ký tự).',
         age: 'Vui lòng xác nhận bạn từ 16 tuổi trở lên để tiếp tục.',
         underage: 'Dịch vụ này chỉ dành cho người dùng từ 16 tuổi trở lên.',

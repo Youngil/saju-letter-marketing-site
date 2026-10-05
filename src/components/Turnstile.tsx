@@ -109,8 +109,9 @@ export const Turnstile = forwardRef<TurnstileHandle, { onVerify: (token: string)
       if (widgetIdRef.current !== undefined) window.turnstile?.remove(widgetIdRef.current);
       widgetIdRef.current = undefined;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- onVerify는 각 폼에서 setState 함수를
-    // 그대로 넘겨 참조가 안정적이다; containerId는 useId 기반이라 이 컴포넌트 생애 동안 불변.
+    // onVerify는 각 폼에서 setState 함수를 그대로 넘겨 참조가 안정적이다; containerId는 useId 기반이라 이 컴포넌트
+    // 생애 동안 불변. (예전엔 이 설명 위에 disable 지시문이 있어 실제로는 아무것도 끄지 못했다 — 바로 위 줄이어야 한다.)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [scriptLoaded]);
 
   useImperativeHandle(ref, () => ({

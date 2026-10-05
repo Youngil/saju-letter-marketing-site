@@ -1,24 +1,35 @@
 'use client';
 
 import Image from 'next/image';
-import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import type { MarketingLanguage } from '@/lib/languages';
 import type { MarketingDictionary } from '@/dictionaries/types';
 import { COMPAT_CONTENT, type CompatContent } from '@/content/compatContent';
 import type { InviteView } from '@/lib/compatApi';
 import { logCompatEvent, submitGuestInvite } from '@/lib/compatApi';
-import { ApiError } from '@/lib/apiClient';
 import { DISCLAIMER_CONTENT } from '@/content/disclaimer';
-import { calculateSaju, getLunarLeapMonth, resolveSolarBirthDate } from '@/lib/saju';
 import { isOldEnough } from '@/lib/age';
 import { Turnstile, TURNSTILE_ENABLED, type TurnstileHandle } from '../Turnstile';
 import { AppDownloadLinks } from '../AppDownloadLinks';
 import { trackEvent } from '@/lib/analytics';
-import { CURRENT_YEAR } from '@/lib/birthDate';
+import { mapPublicFormError } from '@/lib/publicForm';
+import { birthYearOptions } from '@/lib/birthDate';
 
-/** 선택형 연도 목록 — 만 16세 미만은 어차피 막히지만(isOldEnough) 목록에서 미리 빼 두면 고르기 쉽다. */
-const YEAR_OPTIONS = Array.from({ length: CURRENT_YEAR - 16 - 1920 + 1 }, (_, i) => CURRENT_YEAR - 16 - i);
 const MONTH_OPTIONS = Array.from({ length: 12 }, (_, i) => i + 1);
+
+/**
+ * 사주 계산 라이브러리(lunar-javascript, 수백 KB)는 필요할 때만 받는다(2026-10-06 전체 점검 3차, DemoForm과 같은 방식) —
+ * 예전엔 정적 import라 궁합 링크 첫 화면 JS에 통째로 실렸다. 음력을 고르는 순간(윤달 판정) 또는 제출할 때 받는다.
+ */
+type SajuModule = typeof import('@/lib/saju');
+let sajuModulePromise: Promise<SajuModule> | null = null;
+function loadSaju(): Promise<SajuModule> {
+  sajuModulePromise ??= import('@/lib/saju').catch((error: unknown) => {
+    sajuModulePromise = null; // 청크 로드 실패는 다음 시도에서 다시 받는다.
+    throw error;
+  });
+  return sajuModulePromise;
+}
 
 /**
  * saju-letter-backend/public/compat.js + guest-day-master.js를 포팅한 클라이언트 컴포넌트
@@ -43,11 +54,14 @@ export function CompatView({
   language,
   initialView,
   appLinksDict,
+  currentYear,
 }: {
   token: string;
   language: MarketingLanguage;
   initialView: InviteView;
   appLinksDict: MarketingDictionary['appLinks'];
+  /** 연도 목록 기준 — 서버 페이지가 정해 넘긴다(모듈에서 계산하면 서버·브라우저 값이 갈려 하이드레이션이 어긋났다). */
+  currentYear: number;
 }) {
   const content = COMPAT_CONTENT[language];
   const [view, setView] = useState<InviteView>(initialView);
@@ -75,6 +89,7 @@ export function CompatView({
         content={content}
         requesterName={view.requesterName ?? null}
         onSubmitted={setView}
+        currentYear={currentYear}
       />
     );
   }
@@ -175,19 +190,25 @@ function PendingForm({
   content,
   requesterName,
   onSubmitted,
+  currentYear,
 }: {
   token: string;
   language: MarketingLanguage;
   content: CompatContent;
   requesterName: string | null;
   onSubmitted: (view: InviteView) => void;
+  currentYear: number;
 }) {
+  const yearOptions = useMemo(() => birthYearOptions(currentYear), [currentYear]);
   const [name, setName] = useState('');
   const [calendarType, setCalendarType] = useState<'solar' | 'lunar'>('solar');
   const [year, setYear] = useState('');
   const [month, setMonth] = useState('');
   const [day, setDay] = useState('');
   const [isLeapMonth, setIsLeapMonth] = useState(false);
+  // 음력을 고르면 받아 두는 사주 모듈 — 윤달 판정(getLunarLeapMonth)에 쓴다. 받기 전엔 윤달 체크박스를 그리지 않는다.
+  const [saju, setSaju] = useState<SajuModule | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   // 연/월/양음력 변경 시 isLeapMonth를 리셋한다(2026-09-04) — 윤달 선택 후 다른 월/연도로 바꿔도 내부
   // 상태가 남아 존재하지 않는 (연,월,윤달) 조합으로 제출이 계속 실패하던 문제.
@@ -201,8 +222,8 @@ function PendingForm({
     if (nextCalendarType !== 'lunar') return false;
     const y = parseIntOrNull(yearStr);
     const m = parseIntOrNull(monthStr);
-    if (y === null || m === null) return false;
-    return getLunarLeapMonth(y) === m;
+    if (y === null || m === null || !saju) return false;
+    return saju.getLunarLeapMonth(y) === m;
   }
 
   // 일 목록은 고른 달의 날 수만큼(음력은 최대 30일). 고른 날이 그 달에 없으면(31일 → 2월) 비운다.
@@ -218,32 +239,81 @@ function PendingForm({
   }
 
   function handleCalendarTypeChange(next: 'solar' | 'lunar') {
+    if (next === 'lunar' && !saju) {
+      // 받지 못하면 윤달 체크박스가 끝내 안 나타나므로 조용히 넘기지 않고 새로고침을 안내한다(2026-10-06 전체 점검 3차).
+      loadSaju().then(
+        (mod) => {
+          setSaju(mod);
+          setError((prev) => (prev === content.loadError ? null : prev));
+        },
+        (loadFailure: unknown) => {
+          console.warn('saju module load failed', loadFailure);
+          setError(content.loadError);
+        },
+      );
+    }
+    // 양력으로 돌아가면 음력 모듈이 필요 없다 — 받기 실패 안내가 남아 있으면 지운다(2026-10-06 전체 점검 3차 후속).
+    if (next === 'solar') setError((prev) => (prev === content.loadError ? null : prev));
+    clearLeapHint();
     setCalendarType(next);
     setIsLeapMonth((prev) => (canBeLeapMonth(next, year, month) ? prev : false));
     clampDay(next, year, month);
   }
 
   function handleYearChange(nextYear: string) {
+    clearLeapHint();
     setYear(nextYear);
     setIsLeapMonth((prev) => (canBeLeapMonth(calendarType, nextYear, month) ? prev : false));
     clampDay(calendarType, nextYear, month);
   }
 
   function handleMonthChange(nextMonth: string) {
+    clearLeapHint();
     setMonth(nextMonth);
     setIsLeapMonth((prev) => (canBeLeapMonth(calendarType, year, nextMonth) ? prev : false));
     clampDay(calendarType, year, nextMonth);
   }
 
+  function handleDayChange(nextDay: string) {
+    clearLeapHint();
+    setDay(nextDay);
+  }
+
   const dayOptions = Array.from({ length: maxDayFor(calendarType, year, month) }, (_, i) => i + 1);
+  // 윤달 체크박스는 그해 윤달인 달에만(2026-10-06 전체 점검 3차) — 예전엔 음력이면 늘 보여, 윤달이 없는 달에 체크하면
+  // 사주 계산이 예외를 던져 일반 계산 오류만 떴다. 제출 값도 지금 해당될 때만 true로 보낸다.
+  const leapMonthApplies = canBeLeapMonth(calendarType, year, month);
+
+  // "윤달인지 확인해 주세요" 안내가 뜨면 방금 나타난 윤달 체크박스로 초점을 옮긴다(접근성, 2026-10-06 전체 점검 3차 후속) —
+  // 안내 문단만 읽히고 무엇을 확인해야 하는지 화면 낭독기 사용자가 찾아 헤매지 않게.
+  // 옮기는 건 handleSubmit이 안내를 띄운 직후 **한 번만**(2026-10-06 전체 점검 5차) — 예전엔 "안내가 떠 있고 윤달인 달"이면
+  // 언제든 다시 옮겨, 안내가 남은 채 연·월을 바꿔 윤달 여부가 뒤집힐 때마다 고르던 목록에서 초점을 빼앗았다. 날짜·양음력을
+  // 바꾸면 안내 자체도 지운다(그 날짜에 대한 안내였다).
+  const leapCheckboxRef = useRef<HTMLInputElement>(null);
+  const focusLeapCheckboxPending = useRef(false);
+  const showingLeapHint = error === content.leapMonthCheckHint;
+  useEffect(() => {
+    if (!focusLeapCheckboxPending.current || !showingLeapHint || !leapMonthApplies) return;
+    focusLeapCheckboxPending.current = false;
+    leapCheckboxRef.current?.focus();
+  }, [showingLeapHint, leapMonthApplies]);
+
+  function clearLeapHint() {
+    focusLeapCheckboxPending.current = false;
+    setError((prev) => (prev === content.leapMonthCheckHint ? null : prev));
+  }
 
   const [turnstileToken, setTurnstileToken] = useState<string | undefined>(undefined);
   const turnstileRef = useRef<TurnstileHandle>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  // 같은 프레임의 두 번째 탭은 아직 isSubmitting(state)을 못 본다 — 동기적으로 막는 잠금(2026-10-06 전체 점검 3차).
+  // 예전엔 모듈을 받는 await 뒤에야 제출 중 표시를 켜, 두 번 누르면 1회용 Turnstile 토큰으로 두 번 보내졌고
+  // 두 번째 403이 진행 중인 첫 제출의 화면을 되돌렸다.
+  const submittingRef = useRef(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (submittingRef.current) return;
 
     const trimmedName = name.trim();
     const yearNum = Number(year);
@@ -254,26 +324,55 @@ function PendingForm({
       setError(content.formError);
       return;
     }
-
-    let chart;
-    let solar;
-    try {
-      const input = { calendarType, year: yearNum, month: monthNum, day: dayNum, isLeapMonth };
-      chart = calculateSaju(input);
-      solar = resolveSolarBirthDate(input);
-    } catch {
-      setError(content.calcError);
-      return;
-    }
-    if (!isOldEnough(solar.year, solar.month, solar.day)) {
-      setError(content.underageError);
-      return;
-    }
     if (TURNSTILE_ENABLED && !turnstileToken) return;
 
-    setError(null);
+    // 모듈을 받기 전부터 제출 중으로 — 아래의 모든 조기 return은 finally가 풀어 준다.
+    submittingRef.current = true;
     setIsSubmitting(true);
+    setError(null);
+    focusLeapCheckboxPending.current = false;
     try {
+      let sajuModule = saju;
+      if (!sajuModule) {
+        try {
+          sajuModule = await loadSaju();
+        } catch (loadFailure) {
+          console.warn('saju module load failed', loadFailure);
+          setError(content.loadError);
+          return;
+        }
+        setSaju(sajuModule);
+        // 모듈이 이제 막 도착해 윤달 체크박스를 한 번도 못 본 상태 — 고른 달이 그해 윤달인 달이면 평달로 계산해
+        // 보내지 말고 멈춰서, 나타난 체크박스를 확인하게 한다(다시 누르면 그대로 진행된다).
+        let leapMonth: number | null = null;
+        try {
+          leapMonth = calendarType === 'lunar' ? sajuModule.getLunarLeapMonth(yearNum) : null;
+        } catch {
+          // 판정이 안 되는 연도면 아래 계산이 calcError로 안내한다.
+        }
+        if (leapMonth === monthNum) {
+          focusLeapCheckboxPending.current = true;
+          setError(content.leapMonthCheckHint);
+          return;
+        }
+      }
+
+      let chart;
+      let solar;
+      try {
+        // 모듈이 방금 도착했다면 leapMonthApplies·isLeapMonth 둘 다 false — 위에서 윤달인 달은 이미 멈췄으니 평달이 맞다.
+        const input = { calendarType, year: yearNum, month: monthNum, day: dayNum, isLeapMonth: isLeapMonth && leapMonthApplies };
+        chart = sajuModule.calculateSaju(input);
+        solar = sajuModule.resolveSolarBirthDate(input);
+      } catch {
+        setError(content.calcError);
+        return;
+      }
+      if (!isOldEnough(solar.year, solar.month, solar.day)) {
+        setError(content.underageError);
+        return;
+      }
+
       const result = await submitGuestInvite(token, {
         name: trimmedName,
         dayMaster: chart.dayPillar.stem,
@@ -296,15 +395,13 @@ function PendingForm({
         onSubmitted({ status: 'not_found' });
       }
     } catch (err) {
-      if (err instanceof ApiError && (err.reason === 'underage' || err.reason === 'birth_date_required')) {
-        setError(err.reason === 'underage' ? content.underageError : content.formError);
-      } else {
-        setError(content.submitError);
-      }
+      // 429는 따로 안내하지 않는다(rateLimited 없음 → submitError).
+      setError(mapPublicFormError(err, { underage: content.underageError, date: content.formError, generic: content.submitError }));
       // Turnstile 토큰은 1회용이라 실패한 시도의 토큰을 그대로 두면 재제출도 막힌다(2026-09-03).
       setTurnstileToken(undefined);
       turnstileRef.current?.reset();
     } finally {
+      submittingRef.current = false;
       setIsSubmitting(false);
     }
   }
@@ -358,21 +455,31 @@ function PendingForm({
           {/* 연·월·일을 고르는 목록으로(2026-10-02) — 숫자 입력칸 셋은 휴대폰에서 키보드가 올라오며 화면이
               밀려 입력이 엉키기 쉬웠다. */}
           <div className="flex gap-1.5 sm:gap-2">
-            <DateSelect id="guest-year" label={content.yearLabel} value={year} onChange={handleYearChange} options={YEAR_OPTIONS} />
+            <DateSelect id="guest-year" label={content.yearLabel} value={year} onChange={handleYearChange} options={yearOptions} />
             <DateSelect id="guest-month" label={content.monthLabel} value={month} onChange={handleMonthChange} options={MONTH_OPTIONS} />
-            <DateSelect id="guest-day" label={content.dayLabel} value={day} onChange={setDay} options={dayOptions} />
+            <DateSelect id="guest-day" label={content.dayLabel} value={day} onChange={handleDayChange} options={dayOptions} />
           </div>
 
-          {calendarType === 'lunar' && (
+          {leapMonthApplies && (
             <label className="flex items-center gap-2 text-sm text-foreground/70">
-              <input type="checkbox" checked={isLeapMonth} onChange={(e) => setIsLeapMonth(e.target.checked)} className="accent-accent-warm" />
+              <input
+                ref={leapCheckboxRef}
+                type="checkbox"
+                checked={isLeapMonth}
+                onChange={(e) => setIsLeapMonth(e.target.checked)}
+                className="accent-accent-warm"
+              />
               {content.leapMonthLabel}
             </label>
           )}
 
           <Turnstile ref={turnstileRef} onVerify={setTurnstileToken} />
 
-          {error && <p className="text-sm text-red-600">{error}</p>}
+          {error && (
+            <p role="alert" className="text-sm text-red-600">
+              {error}
+            </p>
+          )}
 
           <button
             type="submit"

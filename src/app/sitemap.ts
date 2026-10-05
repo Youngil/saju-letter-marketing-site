@@ -1,18 +1,8 @@
 import type { MetadataRoute } from 'next';
-import {
-  LAUNCH_CONTENT_LANGUAGES,
-  MARKETING_LANGUAGES,
-  DEFAULT_LANGUAGE,
-  type MarketingLanguage,
-  type LaunchContentLanguage,
-} from '@/lib/languages';
-import { BLOG_LANGUAGES, getAllPostSummaries } from '@/lib/posts';
-import { WEB_BASE_URL, languageAlternates } from '@/lib/seo';
-import { fetchActiveServiceLanguages } from '@/lib/serviceLanguagesApi';
-
-// DEFAULT_LANGUAGE('en')는 항상 모든 언어 부분집합 안에 있지만, languages.ts에서 더 넓은
-// MarketingLanguage로 선언돼 있어(호출부마다 다시 캐스팅하지 않도록) 여기서 한 번만 좁힌다.
-const DEFAULT_BLOG_LANGUAGE = DEFAULT_LANGUAGE as LaunchContentLanguage;
+import { MARKETING_LANGUAGES, DEFAULT_LANGUAGE, type MarketingLanguage } from '@/lib/languages';
+import { BLOG_LANGUAGES, getSlugLanguageMap } from '@/lib/posts';
+import { WEB_BASE_URL, activeLanguageAlternates, languageAlternates } from '@/lib/seo';
+import { activeContentLanguages, fetchActiveServiceLanguages } from '@/lib/serviceLanguagesApi';
 
 // 2026-09-08 3차 종합 버그 점검(항목 1) — `[lang]/page.tsx`/`blog/page.tsx`/`blog/[slug]/page.tsx`가
 // 2026-09-06 블로그 DB 하이브리드 전환 때 "이게 없으면 DB에 새로 발행한 글이 다음 배포 전까지
@@ -22,56 +12,48 @@ const DEFAULT_BLOG_LANGUAGE = DEFAULT_LANGUAGE as LaunchContentLanguage;
 // 보였지만 sitemap은 무기한 캐시). 위 세 파일과 같은 값(1시간)으로 맞춘다.
 export const revalidate = 3600;
 
+// `lastModified`(2026-10-06 전체 점검 3차): 예전엔 모든 항목에 `new Date()`를 넣어 sitemap을 만들 때마다 전부 "방금
+// 바뀜"으로 보였다(검색엔진이 신호를 무시하게 된다). 블로그 글은 그 언어판의 글 날짜를 쓰고, 정적 페이지는 뺀다.
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  // 2026-09-07 — "모든 서비스를 1차 출시 4개 언어로 좁힌다"는 결정에 따라 홈도
-  // MARKETING_LANGUAGES(6) 대신 LAUNCH_CONTENT_LANGUAGES(4)만 사이트맵에 올린다 — pt/vi는
-  // 이제 [lang]/layout.tsx 게이트에서 404가 나므로 사이트맵에 올려봐야 죽은 링크다.
+  // 관리자가 켠 언어(2026-10-06 전체 점검 3차 후속) — 홈·블로그·compare도 콘텐츠 축(ko/en/ja/es) 중 지금 켠 언어만 올리고
+  // hreflang도 그 언어끼리만 건다. 예전엔 정적 4개 언어를 그대로 써, 관리자가 언어를 꺼도(홈은 데모·링크를 숨긴 noindex
+  // 상태) sitemap은 계속 그 언어판을 알렸다. x-default는 관리자가 정한 기본 언어(middleware 자동 감지 폴백과 같다).
+  const serviceLanguages = await fetchActiveServiceLanguages();
+  const { active: activeLanguages, default: activeDefault } = serviceLanguages;
+  const contentLanguages = activeContentLanguages(serviceLanguages, BLOG_LANGUAGES);
+
+  // pt/vi는 홈·블로그·compare가 없다(콘텐츠 축 밖, [lang]/page.tsx 등이 404) — 올려 봐야 죽은 링크다.
   const homePath = (lang: MarketingLanguage) => `/${lang}`;
-  const homeEntries = LAUNCH_CONTENT_LANGUAGES.map((lang) => ({
+  const homeEntries = contentLanguages.map((lang) => ({
     url: `${WEB_BASE_URL}${homePath(lang)}`,
-    lastModified: new Date(),
-    alternates: { languages: languageAlternates(LAUNCH_CONTENT_LANGUAGES, homePath, DEFAULT_LANGUAGE) },
+    alternates: { languages: activeLanguageAlternates(contentLanguages, homePath, activeDefault) },
   }));
 
-  // 블로그/compare는 1차 출시 타겟 언어(ko/en/ja/es)에만 존재한다(languages.ts의
-  // LAUNCH_CONTENT_LANGUAGES, posts.ts의 BLOG_LANGUAGES 참고 — pt/vi는 1차 출시 이후 추가 예정).
   const blogIndexPath = (lang: (typeof BLOG_LANGUAGES)[number]) => `/${lang}/blog`;
-  const blogIndexEntries = BLOG_LANGUAGES.map((lang) => ({
+  const blogIndexEntries = contentLanguages.map((lang) => ({
     url: `${WEB_BASE_URL}${blogIndexPath(lang)}`,
-    lastModified: new Date(),
-    alternates: { languages: languageAlternates(BLOG_LANGUAGES, blogIndexPath, DEFAULT_BLOG_LANGUAGE) },
+    alternates: { languages: activeLanguageAlternates(contentLanguages, blogIndexPath, activeDefault) },
   }));
   // 2026-09-06부터 slug 목록이 코드 상수(POST_SLUGS)만으로 안 끝난다 — DB 저장 글(코드 배포
   // 없이 발행)이 언어별로 다른 조합으로 존재할 수 있어, 언어마다 실제 발행된 글을 직접 조회해
   // slug→가능한 언어 집합을 구성한다(각 slug가 실제로 번역된 언어에만 alternates를 건다).
-  const summariesByLanguage = await Promise.all(
-    BLOG_LANGUAGES.map(async (lang) => ({ lang, slugs: (await getAllPostSummaries(lang)).map((post) => post.slug) })),
-  );
-  const languagesBySlug = new Map<string, (typeof BLOG_LANGUAGES)[number][]>();
-  for (const { lang, slugs } of summariesByLanguage) {
-    for (const slug of slugs) {
-      languagesBySlug.set(slug, [...(languagesBySlug.get(slug) ?? []), lang]);
-    }
-  }
+  const languagesBySlug = await getSlugLanguageMap();
   const blogPostPath = (slug: string) => (lang: (typeof BLOG_LANGUAGES)[number]) => `/${lang}/blog/${slug}`;
-  const blogPostEntries = Array.from(languagesBySlug.entries()).flatMap(([slug, availableLangs]) =>
-    availableLangs.map((lang) => ({
+  // 글도 켠 언어판만(글이 그 언어로 발행됐고 + 그 언어가 켜져 있어야).
+  const blogPostEntries = Array.from(languagesBySlug.entries()).flatMap(([slug, entries]) => {
+    const activeEntries = entries.filter((entry) => contentLanguages.includes(entry.lang));
+    const availableLangs = activeEntries.map((entry) => entry.lang);
+    return activeEntries.map(({ lang, date }) => ({
       url: `${WEB_BASE_URL}${blogPostPath(slug)(lang)}`,
-      lastModified: new Date(),
-      alternates: {
-        languages: languageAlternates(
-          availableLangs,
-          blogPostPath(slug),
-          availableLangs.includes(DEFAULT_BLOG_LANGUAGE) ? DEFAULT_BLOG_LANGUAGE : availableLangs[0]!,
-        ),
-      },
-    })),
-  );
+      lastModified: date,
+      alternates: { languages: activeLanguageAlternates(availableLangs, blogPostPath(slug), activeDefault) },
+    }));
+  });
   const comparePath = (lang: (typeof BLOG_LANGUAGES)[number]) => `/${lang}/compare`;
-  const compareEntries = BLOG_LANGUAGES.map((lang) => ({
+  const compareEntries = contentLanguages.map((lang) => ({
     url: `${WEB_BASE_URL}${comparePath(lang)}`,
-    lastModified: new Date(),
-    alternates: { languages: languageAlternates(BLOG_LANGUAGES, comparePath, DEFAULT_BLOG_LANGUAGE) },
+    alternates: { languages: activeLanguageAlternates(contentLanguages, comparePath, activeDefault) },
   }));
 
   // 신년운세 캠페인(2026-08-07 이관) — 2026-09-08 3차 종합 버그 점검(항목 1)으로
@@ -80,11 +62,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // 4개만 올리고 있었다 — `lunar-new-year/page.tsx`/`r/[id]/page.tsx`/`unsubscribe/page.tsx`가
   // 전부 6개 언어로 복원됐으므로 sitemap도 실제 라우팅과 다시 맞춘다.
   // 2026-10-06: 랜딩은 지금 서비스 중인 언어만 열리므로(비활성 언어는 기본 언어로 리다이렉트) sitemap도 그 언어만 올린다.
-  const { active: activeLanguages, default: activeDefault } = await fetchActiveServiceLanguages();
   const lunarNewYearPath = (lang: MarketingLanguage) => `/${lang}/lunar-new-year`;
   const lunarNewYearEntries = activeLanguages.map((lang) => ({
     url: `${WEB_BASE_URL}${lunarNewYearPath(lang)}`,
-    lastModified: new Date(),
     alternates: { languages: languageAlternates(activeLanguages, lunarNewYearPath, activeDefault) },
   }));
 
@@ -97,7 +77,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const privacyPath = (lang: MarketingLanguage) => `/${lang}/privacy`;
   const privacyEntries = MARKETING_LANGUAGES.map((lang) => ({
     url: `${WEB_BASE_URL}${privacyPath(lang)}`,
-    lastModified: new Date(),
     alternates: { languages: languageAlternates(MARKETING_LANGUAGES, privacyPath, DEFAULT_LANGUAGE) },
   }));
 
@@ -107,7 +86,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const disclaimerPath = (lang: MarketingLanguage) => `/${lang}/disclaimer`;
   const disclaimerEntries = MARKETING_LANGUAGES.map((lang) => ({
     url: `${WEB_BASE_URL}${disclaimerPath(lang)}`,
-    lastModified: new Date(),
     alternates: { languages: languageAlternates(MARKETING_LANGUAGES, disclaimerPath, DEFAULT_LANGUAGE) },
   }));
 

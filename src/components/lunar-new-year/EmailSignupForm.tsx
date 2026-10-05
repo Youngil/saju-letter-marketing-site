@@ -5,6 +5,7 @@ import type { MarketingDictionary } from '@/dictionaries/types';
 import { subscribeForDrip, logCampaignEvent } from '@/lib/lunarNewYearApi';
 import { ApiError } from '@/lib/apiClient';
 import { Turnstile, TURNSTILE_ENABLED, type TurnstileHandle } from '@/components/Turnstile';
+import { EMAIL_REGEX } from '@/lib/publicForm';
 
 type ResultDict = NonNullable<MarketingDictionary['lunarNewYear']>['result'];
 
@@ -30,8 +31,6 @@ export function EmailSignupForm({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [subscribed, setSubscribed] = useState(alreadySubscribed);
-
-  const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -86,7 +85,11 @@ export function EmailSignupForm({
         <span>{t.consentLabel}</span>
       </label>
       <Turnstile ref={turnstileRef} onVerify={setTurnstileToken} />
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {error && (
+        <p role="alert" className="text-sm text-red-600">
+          {error}
+        </p>
+      )}
       <button
         type="submit"
         disabled={isSubmitting || (TURNSTILE_ENABLED && !turnstileToken)}

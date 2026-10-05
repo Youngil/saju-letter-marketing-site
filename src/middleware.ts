@@ -1,21 +1,33 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { MARKETING_LANGUAGES, detectPreferredLaunchLanguage } from '@/lib/languages';
-import { fetchActiveServiceLanguages, type ActiveServiceLanguages } from '@/lib/serviceLanguagesApi';
+import { NextResponse, type NextFetchEvent, type NextRequest } from 'next/server';
+import {
+  DEFAULT_LANGUAGE,
+  MARKETING_LANGUAGES,
+  detectPreferredLaunchLanguage,
+  isLaunchContentLanguage,
+  type LaunchContentLanguage,
+} from '@/lib/languages';
+import { fetchServiceLanguagesOnce, STATIC_SERVICE_LANGUAGES } from '@/lib/serviceLanguagesApi';
+import { createStaleWhileRevalidate } from '@/lib/staleWhileRevalidate';
 
 /**
  * 관리자가 켠 언어·기본 언어(2026-10-06) — 예전엔 고정 4개 언어와 'en'으로만 감지해, 언어를 끄거나 기본 언어를
  * 바꿔도 첫 방문 리다이렉트에 반영되지 않았다. 요청마다 백엔드를 부르지 않게 인스턴스 메모리에 10분 둔다.
- * 조회 실패는 fetchActiveServiceLanguages가 정적 목록으로 흡수한다.
+ *
+ * **리다이렉트가 백엔드를 기다리지 않게**(2026-10-06 전체 점검 3차 후속) — 예전엔 캐시가 만료된 순간 들어온 요청마다
+ * 최대 10초짜리 조회를 각자 기다렸다. 이제 만료된 값이라도 바로 쓰고 새로 받기는 하나만 뒤에서(`waitUntil`) 돌린다.
+ * 값이 하나도 없는 콜드 스타트에만 2초 제한으로 한 번 기다리고, 실패하면 마지막 값(없으면 정적 목록)을 30초만 쓴다.
  */
 const LANGUAGE_CACHE_MS = 10 * 60_000;
-let languageCache: { at: number; value: ActiveServiceLanguages } | null = null;
+const FAILURE_CACHE_MS = 30_000;
+const MIDDLEWARE_FETCH_TIMEOUT_MS = 2_000;
 
-async function activeLanguages(): Promise<ActiveServiceLanguages> {
-  if (languageCache && Date.now() - languageCache.at < LANGUAGE_CACHE_MS) return languageCache.value;
-  const value = await fetchActiveServiceLanguages();
-  languageCache = { at: Date.now(), value };
-  return value;
-}
+const activeLanguages = createStaleWhileRevalidate({
+  load: () => fetchServiceLanguagesOnce({ timeoutMs: MIDDLEWARE_FETCH_TIMEOUT_MS }),
+  ttlMs: LANGUAGE_CACHE_MS,
+  failureTtlMs: FAILURE_CACHE_MS,
+  fallback: STATIC_SERVICE_LANGUAGES,
+  onError: (error) => console.warn('middleware: service languages unavailable — using last/static list briefly', error),
+});
 
 /**
  * saju-letter-newyear-campaign은 URL 세그먼트 없이 브라우저 언어 감지+localStorage만 썼다
@@ -23,7 +35,7 @@ async function activeLanguages(): Promise<ActiveServiceLanguages> {
  * 인덱싱돼야 해서 URL 세그먼트가 필수다 — 그래서 언어 감지는 여기(최초 진입 시 리다이렉트)
  * 한 번뿐이고, 이후로는 URL이 언어를 그대로 들고 다닌다(src/lib/languages.ts 참고).
  */
-export async function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest, event: NextFetchEvent) {
   const { pathname } = request.nextUrl;
 
   // apex 도메인(saju-letter.com, www 없음)은 GCP 배포(2026-08-09) 이후 DNS 자체가 없다가
@@ -48,8 +60,16 @@ export async function middleware(request: NextRequest) {
   // /pt나 /vi가 붙은 링크(신년운세 캠페인 등)는 위 hasLangPrefix에서 이미 걸러져 영향받지 않는다.
   // 실제 우선순위(q값) 파싱은 detectPreferredLaunchLanguage 참고(2026-09-03, 종합 버그 점검 —
   // 예전엔 헤더 전체에 대한 단순 부분 문자열 검사를 고정 배열 순서로만 돌아 우선순위를 무시했다).
-  const { active, default: defaultLanguage } = await activeLanguages();
-  const detected = detectPreferredLaunchLanguage(request.headers.get('accept-language') ?? '', active, defaultLanguage);
+  // 자동 감지는 홈이 있는 콘텐츠 축 언어로만 — 관리자가 켠 언어 원본(6개 축)에서 여기서 좁힌다.
+  const { value, background } = await activeLanguages.get();
+  // 뒤에서 새로 받는 조회가 응답을 보낸 뒤에도 끝까지 돌도록.
+  if (background) event.waitUntil(background);
+  const { active, default: defaultLanguage } = value;
+  const candidates = active.filter(isLaunchContentLanguage);
+  const fallback: LaunchContentLanguage = isLaunchContentLanguage(defaultLanguage)
+    ? defaultLanguage
+    : (DEFAULT_LANGUAGE as LaunchContentLanguage);
+  const detected = detectPreferredLaunchLanguage(request.headers.get('accept-language') ?? '', candidates, fallback);
 
   const url = request.nextUrl.clone();
   url.pathname = `/${detected}${pathname === '/' ? '' : pathname}`;

@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { availableSwitcherLanguages, buildLanguageSwitchPath, detectPreferredLaunchLanguage } from './languages';
+import {
+  availableSwitcherLanguages,
+  buildLanguageSwitchPath,
+  detectPreferredLaunchLanguage,
+  isTransactionalPath,
+  resolveLanguageSwitchPath,
+  type MarketingLanguage,
+} from './languages';
 
 describe('detectPreferredLaunchLanguage (2026-09-03, 종합 버그 점검 — Accept-Language 우선순위 무시 버그 수정)', () => {
   it('q값 없이 하나만 오면 그 언어를 고른다', () => {
@@ -39,16 +46,47 @@ describe('detectPreferredLaunchLanguage (2026-09-03, 종합 버그 점검 — Ac
   });
 });
 
-describe('availableSwitcherLanguages (2026-09-07부터 신년운세 캠페인도 서비스 언어 통합 관리를 그대로 따라 ko를 포함한다 — 이전엔 그 캠페인 경로에서만 ko를 빼는 특수 분기가 있었다, meta 저장소 CLAUDE.md §9 참고)', () => {
-  it('일반 경로에서는 LAUNCH_CONTENT_LANGUAGES 4개(ko 포함)를 그대로 보여준다', () => {
-    expect(availableSwitcherLanguages('/blog/what-is-saju')).toEqual(['ko', 'en', 'ja', 'es']);
-    expect(availableSwitcherLanguages('')).toEqual(['ko', 'en', 'ja', 'es']);
+describe('availableSwitcherLanguages — 경로별 언어 목록(2026-10-06 전체 점검 3차)', () => {
+  const ALL: MarketingLanguage[] = ['ko', 'en', 'es', 'pt', 'ja', 'vi'];
+
+  it('콘텐츠 경로(홈·블로그·compare)는 켠 언어 중 콘텐츠 축(ko/en/ja/es)만 보여준다', () => {
+    expect(availableSwitcherLanguages('/blog/what-is-saju', ALL)).toEqual(['ko', 'en', 'ja', 'es']);
+    expect(availableSwitcherLanguages('', ALL)).toEqual(['ko', 'en', 'ja', 'es']);
+    expect(availableSwitcherLanguages('/compare', ALL)).toEqual(['ko', 'en', 'ja', 'es']);
   });
 
-  it('신년운세 캠페인 경로(루트/하위)에서도 이제 ko를 포함해 4개 전부 보여준다', () => {
-    expect(availableSwitcherLanguages('/lunar-new-year')).toEqual(['ko', 'en', 'ja', 'es']);
-    expect(availableSwitcherLanguages('/lunar-new-year/r/abc123')).toEqual(['ko', 'en', 'ja', 'es']);
-    expect(availableSwitcherLanguages('/lunar-new-year/unsubscribe')).toEqual(['ko', 'en', 'ja', 'es']);
+  it('트랜잭션 경로(신년운세·궁합·개인정보처리방침 등)는 켠 언어 그대로(pt/vi 포함)', () => {
+    expect(availableSwitcherLanguages('/lunar-new-year', ALL)).toEqual(['ko', 'en', 'ja', 'es', 'pt', 'vi']);
+    expect(availableSwitcherLanguages('/lunar-new-year/r/abc123', ALL)).toEqual(['ko', 'en', 'ja', 'es', 'pt', 'vi']);
+    expect(availableSwitcherLanguages('/compat/tok', ALL)).toEqual(['ko', 'en', 'ja', 'es', 'pt', 'vi']);
+    expect(availableSwitcherLanguages('/privacy', ALL)).toEqual(['ko', 'en', 'ja', 'es', 'pt', 'vi']);
+  });
+
+  it('끈 언어는 어느 경로에서도 빠진다', () => {
+    expect(availableSwitcherLanguages('/lunar-new-year', ['en', 'ko', 'pt'])).toEqual(['ko', 'en', 'pt']);
+    expect(availableSwitcherLanguages('/blog', ['en', 'ko', 'pt'])).toEqual(['ko', 'en']);
+  });
+
+  it('트랜잭션 경로 이름으로 시작할 뿐인 다른 경로는 콘텐츠 경로로 본다', () => {
+    expect(isTransactionalPath('/privacy-notes')).toBe(false);
+    expect(isTransactionalPath('/blog/privacy')).toBe(false);
+  });
+});
+
+describe('resolveLanguageSwitchPath — 블로그 글이 없는 언어는 블로그 목록으로(2026-10-06 전체 점검 3차)', () => {
+  const limit = { restOfPath: '/blog/hello', languages: ['en', 'ja'] as MarketingLanguage[], fallbackRestOfPath: '/blog' };
+
+  it('그 글이 있는 언어는 같은 글로(쿼리 보존)', () => {
+    expect(resolveLanguageSwitchPath('/blog/hello', 'ja', 'a=1', limit)).toBe('/ja/blog/hello?a=1');
+  });
+
+  it('그 글이 없는 언어는 그 언어의 블로그 목록으로', () => {
+    expect(resolveLanguageSwitchPath('/blog/hello', 'ko', 'a=1', limit)).toBe('/ko/blog');
+  });
+
+  it('제한이 다른 경로 것이면 무시한다', () => {
+    expect(resolveLanguageSwitchPath('/blog/other', 'ko', '', limit)).toBe('/ko/blog/other');
+    expect(resolveLanguageSwitchPath('/blog/hello', 'ko', '', null)).toBe('/ko/blog/hello');
   });
 });
 

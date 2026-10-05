@@ -4,12 +4,11 @@ import { useRouter } from 'next/navigation';
 import { useRef, useState } from 'react';
 import type { MarketingDictionary } from '@/dictionaries/types';
 import type { MarketingLanguage } from '@/lib/languages';
-import { calculateSaju } from '@/lib/saju';
 import { isOldEnough } from '@/lib/age';
 import { createReading } from '@/lib/lunarNewYearApi';
-import { ApiError } from '@/lib/apiClient';
 import { Turnstile, TURNSTILE_ENABLED, type TurnstileHandle } from '@/components/Turnstile';
-import { isValidBirthDate } from '@/lib/birthDate';
+import { isValidBirthDate, parseBirthTime } from '@/lib/birthDate';
+import { mapPublicFormError } from '@/lib/publicForm';
 
 const MEMORABLE_EVENT_MAX_LENGTH = 300;
 
@@ -61,6 +60,13 @@ export function ReadingForm({
       setError(t.errors.underage);
       return;
     }
+    // 시 0~23·분 0~59 정수만 — 예전엔 24시·75분이 사주 계산에서 예외가 나 일반 오류와 함께 1회용 Turnstile 토큰까지
+    // 버려졌다(2026-10-06 전체 점검 3차).
+    const birthTime = parseBirthTime(timeKnown, hour, minute);
+    if (birthTime === 'invalid') {
+      setError(t.errors.time);
+      return;
+    }
     if (memorableEvent.trim().length === 0 || memorableEvent.length > MEMORABLE_EVENT_MAX_LENGTH) {
       setError(t.errors.memorableEvent);
       return;
@@ -72,14 +78,15 @@ export function ReadingForm({
 
     setIsSubmitting(true);
     try {
-      const hourNum = timeKnown && hour !== '' ? Number(hour) : undefined;
+      // 사주 계산 라이브러리(lunar-javascript, 수백 KB)는 제출할 때만 받는다 — 랜딩 첫 화면 JS에서 뺐다(DemoForm과 같은 방식).
+      const { calculateSaju } = await import('@/lib/saju');
       const chart = calculateSaju({
         calendarType: 'solar',
         year: yearNum,
         month: monthNum,
         day: dayNum,
-        hour: hourNum,
-        minute: hourNum !== undefined ? Number(minute) : undefined,
+        hour: birthTime.hour,
+        minute: birthTime.minute,
       });
 
       const result = await createReading({
@@ -99,15 +106,15 @@ export function ReadingForm({
 
       router.push(`/${language}/lunar-new-year/r/${result.readingId}`);
     } catch (err) {
-      if (err instanceof ApiError && (err.reason === 'underage' || err.reason === 'birth_date_required')) {
-        setError(err.reason === 'underage' ? t.errors.underage : t.errors.date);
-      } else if (err instanceof ApiError && err.status === 429) {
-        setError(t.errors.rateLimited);
-      } else if (err instanceof ApiError && err.reason === 'campaign_not_active') {
-        setError(offSeasonMessage);
-      } else {
-        setError(t.errors.generic);
-      }
+      setError(
+        mapPublicFormError(err, {
+          underage: t.errors.underage,
+          date: t.errors.date,
+          rateLimited: t.errors.rateLimited,
+          byReason: { campaign_not_active: offSeasonMessage },
+          generic: t.errors.generic,
+        }),
+      );
       // Turnstile 토큰은 1회용이라, 실패한 시도에 쓰인 토큰을 그대로 두면 재제출도 항상 403으로
       // 막힌다(2026-09-03, 종합 버그 점검으로 발견) — 이 폼은 실패해도 언마운트되지 않으므로
       // 새 토큰을 명시적으로 요청한다.
@@ -226,7 +233,11 @@ export function ReadingForm({
 
       <Turnstile ref={turnstileRef} onVerify={setTurnstileToken} />
 
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {error && (
+        <p role="alert" className="text-sm text-red-600">
+          {error}
+        </p>
+      )}
 
       <button
         type="submit"

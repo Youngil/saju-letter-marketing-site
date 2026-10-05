@@ -569,3 +569,15 @@ npm run build   # 프로덕션 빌드 — App Router 라우트/타입 검증 + M
 - **P1** — 히어로에 실제 앱 화면(봉인된 봉투+펼친 편지, 언어별 실기기 캡처를 `public/home/app-preview-<lang>.webp`로; 원본·생성 스크립트는 모바일 `store-assets/site_hero.py`, git 미관리), 홈 컨테이너 max-w-5xl·데스크톱 두 단. 데모 결과를 앱 편지 형식으로(발신자+`Postmark` 날짜 도장 → 첫 문장 세리프 → 본문 → "— 다인" 서명, 면책·앱 안내는 종이 밖). 데모 섹션 제목을 히어로 버튼과 다른 말로. 비활성 버튼은 중립 회색. Turnstile `appearance: 'interaction-only'`. 리드 폼 신청 수는 절반 찰 때까지 "선착순 N명"(`limitedSlots`).
 - **P2** — 라틴 디스플레이 Playfair → Lora(앱과 통일), es 히어로 버튼 축약.
 - 확인: 로컬(백엔드 4000 + 사이트 3200 — 백엔드 CORS가 `MARKETING_SITE_WEB_ORIGIN=http://localhost:3200`)에서 4개 언어 화면·데모 결과 실제 생성, 타입체크·테스트 166개·프로덕션 빌드 통과. 운영 Turnstile은 헤드리스 브라우저를 막아 운영 데모 결과는 자동 확인 불가.
+
+## 2026-10-06 — 홈 리드 캡처 폼은 노출 유지(사용자 확인)
+
+- 전체 점검 3차에서 CLAUDE.md §4/§5가 `<LeadCaptureForm>`을 "주석 처리로 임시 비노출"로 적고 있었지만, 실제 홈은 2026-09-08 재개 이후 계속 렌더하고 있었다(`showContentLinks` 게이트 안). 사용자가 **30일 체험 코드 안내까지 포함해 의도적으로 노출 중**임을 확인해, 코드는 그대로 두고 문서만 현재 상태로 고쳤다.
+
+## 2026-10-06 — 전체 점검 3차 후속(브랜치 `fix/full-review-3`)
+
+- **GA4 page_view 토큰 유출** — `gtag('config', ID)`의 자동 page_view가 주소 전체(궁합 토큰, 신년운세 결과 id, 수신거부 `?token=`)를 보내 "토큰을 GA 파라미터에 넣지 않는다" 규칙을 어기고 있었다. `send_page_view: false`로 끄고 `GoogleAnalyticsPageView`가 `pageLocation.ts`로 다듬은 위치(자리표시자 경로, 쿼리는 `utm_*`만, referrer·이름이 든 제목도 다듬음)로 직접 보낸다. 첫 로드의 `config`도 같은 규칙(인라인 JS 원문, 테스트로 일치 확인)으로 동의 기본값 바로 뒤에서 부른다. **GA4 콘솔의 "브라우저 기록 이벤트 기반 페이지 변경"은 꺼야 한다**(사용자가 직접). 쿼리만 바뀌는 이동은 page_view를 보내지 않는다(`useSearchParams`의 Suspense 경계가 effect 순서를 뒤로 미루는 것을 피함).
+- **middleware 언어 목록** — 캐시가 만료된 순간의 요청마다 최대 10초 조회를 각자 기다렸다. `staleWhileRevalidate.ts`(만료 값 즉시 + 공유 promise 하나로 뒤에서 새로 받기, `event.waitUntil`) + `fetchServiceLanguagesOnce`(2초 제한, 폴백 없이 던짐 — `loadActiveServiceLanguages`의 마지막 성공 값 폴백을 거치면 실패가 10분 동안 성공처럼 굳는다). 콜드 스타트만 한 번 기다리고 실패하면 마지막 값/정적 목록을 30초.
+- **SEO** — sitemap·hreflang의 홈/블로그(목록·글)/compare를 콘텐츠 축 ∩ 관리자가 켠 언어로(`activeContentLanguages`, `activeLanguageAlternates`, x-default = 관리자 기본 언어 → en → 첫 언어). 꺼진 언어의 홈은 `noindex`. 블로그·compare 페이지 자체의 noindex는 범위 밖(지금은 꺼도 콘텐츠가 그대로 보인다).
+- **접근성** — 5개 공개 폼의 오류 문단에 `role="alert"`, 궁합 폼의 윤달 확인 안내가 뜨면 윤달 체크박스로 초점 이동, 양력으로 돌아가면 사주 모듈 받기 실패 안내를 지움. 언어 스위처는 `aria-expanded`/`aria-controls` + Escape(초점은 버튼으로)·바깥 클릭으로 닫기. `aria-haspopup`은 붙이지 않았다 — 값이 `role="menu"`(화살표 키 탐색)를 약속하는데 이 목록은 평범한 링크 목록(공개 패턴)이다.
+- **내부 키 헤더** — 서버 렌더가 한 IP로 보여 방문자 전체가 백엔드의 IP별 한도 하나를 나눠 쓰는 문제에 대비해, `apiClient.request()`가 서버에서만(`typeof window === 'undefined'`) 런타임 시크릿 `MARKETING_INTERNAL_KEY`가 있으면 `X-Marketing-Internal-Key`를 붙인다. 백엔드 수용·Secret Manager 설정·Cloud Run `--update-secrets`는 별도 작업(NEXT_PUBLIC_ 금지).

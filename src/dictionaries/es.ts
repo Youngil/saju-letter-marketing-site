@@ -156,6 +156,7 @@ export const dictionary: MarketingDictionary = {
       errors: {
         name: 'Por favor, ingresa tu nombre.',
         date: 'Por favor, ingresa una fecha de nacimiento válida.',
+        time: 'Por favor, ingresa una hora de nacimiento válida (0–23 horas y 0–59 minutos).',
         memorableEvent: 'Por favor, comparte una línea sobre tu año (hasta 300 caracteres).',
         age: 'Por favor, confirma que tienes 16 años o más para continuar.',
         underage: 'Este servicio solo está disponible para usuarios de 16 años o más.',

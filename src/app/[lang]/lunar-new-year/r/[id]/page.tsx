@@ -24,7 +24,8 @@ interface PageProps {
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { lang: rawLang, id } = await params;
   if (!isMarketingLanguage(rawLang)) return {};
-  const reading = await getReading(id);
+  // 일시 오류면 메타데이터만 비운다 — 본문은 페이지가 같은 오류로 다시 시도 화면을 그린다.
+  const reading = await getReading(id).catch(() => null);
   if (!reading) return {};
 
   return {
@@ -47,6 +48,7 @@ export default async function LunarNewYearResultPage({ params }: PageProps) {
   if (!isMarketingLanguage(rawLang)) notFound();
   const language: MarketingLanguage = rawLang;
 
+  // 일시 오류(429·5xx)는 던져 [lang]/error.tsx의 "다시 시도"로 — 404는 정말 없는 결과일 때만.
   const reading = await getReading(id);
   if (!reading) notFound();
 

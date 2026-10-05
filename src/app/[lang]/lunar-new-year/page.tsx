@@ -62,9 +62,9 @@ export default async function LunarNewYearPage({ params }: { params: Promise<{ l
 
   // 새 결과를 만드는 랜딩은 지금 서비스 중인 언어만 연다(2026-10-06) — 백엔드는 활성 언어로만 결과를 만들어,
   // 비활성 언어(pt/vi) 방문자는 폼을 끝까지 채운 뒤 400을 받았다. 기존 결과·수신거부 링크(r/[id], unsubscribe)는
-  // 6개 언어 그대로 둔다.
+  // 6개 언어 그대로 둔다. `active`는 6개 축 원본이라 관리자가 pt/vi를 켜면 바로 열린다(2026-10-06 전체 점검 3차).
   const { active, default: defaultLanguage } = await fetchActiveServiceLanguages();
-  if (!(active as string[]).includes(language)) redirect(`/${defaultLanguage}/lunar-new-year`);
+  if (!active.includes(language)) redirect(`/${defaultLanguage}/lunar-new-year`);
 
   const windowStatus: CampaignWindowStatus | null = await getCampaignWindow().catch((error) => {
     console.warn('getCampaignWindow failed', error);

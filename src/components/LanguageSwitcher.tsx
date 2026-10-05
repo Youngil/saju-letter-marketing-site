@@ -2,8 +2,9 @@
 
 import Link from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation';
-import { Suspense, useState } from 'react';
-import { availableSwitcherLanguages, buildLanguageSwitchPath, type LaunchContentLanguage, type MarketingLanguage } from '@/lib/languages';
+import { Suspense, useEffect, useId, useRef, useState, type Ref } from 'react';
+import { availableSwitcherLanguages, resolveLanguageSwitchPath, type MarketingLanguage } from '@/lib/languages';
+import { useSwitcherPathLimit } from './SwitcherLanguageLimit';
 
 const LANGUAGE_LABELS: Record<MarketingLanguage, string> = {
   ko: '한국어',
@@ -29,11 +30,10 @@ const LANGUAGE_CODES: Record<MarketingLanguage, string> = {
  * StorageEvent를 dispatch하는 방식이었다 — 이 사이트는 URL이 언어를 들고 다니므로, 그냥
  * 현재 pathname의 언어 세그먼트만 바꿔치기한 새 경로로 이동하면 된다.
  *
- * 드롭다운에는 MARKETING_LANGUAGES(6개) 전부가 아니라 LAUNCH_CONTENT_LANGUAGES(ko/en/ja/es)만
- * 보여준다(2026-08-08, 사용자 결정) — pt/vi는 홈/데모/리드캡처는 이미 열려 있지만 블로그/compare
- * 는 아직 없어서, 스위처로 노출하면 pt/vi로 바꾼 뒤 블로그/compare 내비게이션을 누르면 404가
- * 나는 어중간한 경험이 된다. 라우트 자체는 안 건드렸으므로 직접 링크(예: 신년운세 캠페인의
- * pt/vi 지원)는 그대로 동작한다 — 여기서는 "발견 가능성"만 숨긴다.
+ * 드롭다운 언어는 경로별로 정한다(`availableSwitcherLanguages`, 2026-10-06 전체 점검 3차) — 홈·블로그·compare는
+ * 콘텐츠 축(ko/en/ja/es) 중 켠 언어만(pt/vi는 블로그/compare가 없어 404가 난다, 2026-08-08 결정), 신년운세·궁합·
+ * 개인정보처리방침 같은 6개 언어 트랜잭션 페이지는 켠 언어 그대로. 블로그 글은 그 글이 없는 언어를 고르면
+ * 그 언어의 블로그 목록으로 보낸다(`SwitcherLanguageLimit`).
  *
  * `activeLanguages`(2026-09-07, 서비스 언어 통합 관리)는 관리자 패널에서 실시간으로 켜고 끄는
  * 값이다 — `[lang]/layout.tsx`(서버 컴포넌트)가 `fetchActiveServiceLanguages()`로 최대 1시간
@@ -49,11 +49,31 @@ const LANGUAGE_CODES: Record<MarketingLanguage, string> = {
  * `LanguageSwitcherFallback`을 폴백으로 둔다(정적 셸에 잠깐 보일 뿐, 하이드레이션 후 곧바로
  * 실제 컴포넌트로 교체된다).
  */
-function LanguageSwitcherButton({ current, onClick }: { current: MarketingLanguage; onClick?: () => void }) {
+/**
+ * 펼침 상태는 공개(disclosure) 패턴으로 알린다(2026-10-06 전체 점검 3차 후속, 접근성) — `aria-expanded` + `aria-controls`.
+ * `aria-haspopup`은 붙이지 않는다: 그 값(true=menu)은 화살표 키로 움직이는 `role="menu"`를 약속하는데, 이 목록은
+ * 평범한 링크 목록이라 탭 키로 움직인다(W3C APG가 사이트 내비게이션에 menu 역할 대신 권하는 방식).
+ */
+function LanguageSwitcherButton({
+  current,
+  onClick,
+  expanded,
+  controls,
+  buttonRef,
+}: {
+  current: MarketingLanguage;
+  onClick?: () => void;
+  expanded?: boolean;
+  controls?: string;
+  buttonRef?: Ref<HTMLButtonElement>;
+}) {
   return (
     <button
+      ref={buttonRef}
       type="button"
       onClick={onClick}
+      aria-expanded={expanded ?? false}
+      aria-controls={expanded ? controls : undefined}
       className="rounded-full border border-foreground/15 px-2.5 py-1 text-sm font-medium text-foreground/70 hover:text-foreground sm:border-0 sm:px-0 sm:py-0"
     >
       <span className="sm:hidden">{LANGUAGE_CODES[current]}</span>
@@ -70,25 +90,55 @@ function LanguageSwitcherFallback({ current }: { current: MarketingLanguage }) {
   );
 }
 
-function LanguageSwitcherInner({ current, activeLanguages }: { current: MarketingLanguage; activeLanguages: LaunchContentLanguage[] }) {
+function LanguageSwitcherInner({ current, activeLanguages }: { current: MarketingLanguage; activeLanguages: MarketingLanguage[] }) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [open, setOpen] = useState(false);
+  const pathLimit = useSwitcherPathLimit();
+  const listId = useId();
+  const containerRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+
+  // 열려 있을 때만 — Escape로 닫고 초점을 버튼으로 돌려주며, 목록 바깥을 누르면 닫는다(접근성, 2026-10-06 전체 점검 3차 후속).
+  useEffect(() => {
+    if (!open) return;
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key !== 'Escape') return;
+      setOpen(false);
+      buttonRef.current?.focus();
+    }
+    function handlePointerDown(event: PointerEvent) {
+      if (event.target instanceof Node && containerRef.current?.contains(event.target)) return;
+      setOpen(false);
+    }
+    document.addEventListener('keydown', handleKeyDown);
+    document.addEventListener('pointerdown', handlePointerDown);
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      document.removeEventListener('pointerdown', handlePointerDown);
+    };
+  }, [open]);
 
   const rest = pathname.replace(new RegExp(`^/${current}`), '');
   const queryString = searchParams.toString();
 
   function pathForLanguage(lang: MarketingLanguage): string {
-    return buildLanguageSwitchPath(rest, lang, queryString);
+    return resolveLanguageSwitchPath(rest, lang, queryString, pathLimit);
   }
 
-  const availableLanguages = availableSwitcherLanguages(rest).filter((lang) => activeLanguages.includes(lang));
+  const availableLanguages = availableSwitcherLanguages(rest, activeLanguages);
 
   return (
-    <div className="relative">
-      <LanguageSwitcherButton current={current} onClick={() => setOpen((v) => !v)} />
+    <div ref={containerRef} className="relative">
+      <LanguageSwitcherButton
+        current={current}
+        onClick={() => setOpen((v) => !v)}
+        expanded={open}
+        controls={listId}
+        buttonRef={buttonRef}
+      />
       {open && (
-        <ul className="absolute right-0 mt-2 w-36 rounded-lg border border-foreground/10 bg-background py-1 shadow-lg z-50">
+        <ul id={listId} className="absolute right-0 mt-2 w-36 rounded-lg border border-foreground/10 bg-background py-1 shadow-lg z-50">
           {availableLanguages.map((lang) => (
             <li key={lang}>
               <Link
@@ -106,7 +156,8 @@ function LanguageSwitcherInner({ current, activeLanguages }: { current: Marketin
   );
 }
 
-export function LanguageSwitcher({ current, activeLanguages }: { current: MarketingLanguage; activeLanguages: LaunchContentLanguage[] }) {
+/** `activeLanguages`는 관리자가 켠 언어 원본(6개 축) — 경로별로 좁히는 일은 이 컴포넌트가 한다. */
+export function LanguageSwitcher({ current, activeLanguages }: { current: MarketingLanguage; activeLanguages: MarketingLanguage[] }) {
   return (
     <Suspense fallback={<LanguageSwitcherFallback current={current} />}>
       <LanguageSwitcherInner current={current} activeLanguages={activeLanguages} />

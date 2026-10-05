@@ -31,11 +31,36 @@ export class ApiError extends Error {
 }
 
 /**
+ * 다시 시도하면 나을 수 있는 실패인가(2026-10-06 전체 점검 3차) — 429·408·5xx. 그 밖의 4xx(404 없음, 400 잘못된
+ * 요청)는 다시 불러도 같으니 "없음"으로 봐도 된다. ApiError가 아닌 예외(네트워크·시간 초과)는 호출부가 그대로 던진다.
+ */
+export function isRetryableApiError(error: ApiError): boolean {
+  return error.status === 429 || error.status === 408 || error.status >= 500;
+}
+
+/**
  * 시간 제한(2026-10-06 전체 점검) — 예전엔 없어서 백엔드가 멈추면 레이아웃(언어 목록 조회)까지 함께 멈췄다.
  * 조회는 짧게, 제출(POST)은 AI 동기 생성(데모·신년운세·궁합)을 기다려야 해서 길게 둔다.
  */
 const GET_TIMEOUT_MS = 10_000;
 const SUBMIT_TIMEOUT_MS = 120_000;
+
+/**
+ * 서버 내부 호출 표시 헤더(2026-10-06 전체 점검 3차 후속) — `compat/[token]`·`r/[id]` 같은 서버 렌더는 Next 서버 한
+ * IP에서 백엔드를 부르므로, 방문자 모두가 백엔드의 IP별 한도 하나를 나눠 쓴다. 백엔드는 이 헤더 값이 자기
+ * `MARKETING_INTERNAL_KEY`와 같으면 그 한도에서 뺀다.
+ *
+ * **서버에서만, 그리고 키가 있을 때만 붙인다.** 값은 런타임 환경변수 `MARKETING_INTERNAL_KEY`(Secret Manager) —
+ * `NEXT_PUBLIC_` 접두사를 절대 붙이지 않는다(붙이면 클라이언트 번들에 인라인돼 누구나 한도를 우회한다). 브라우저
+ * 번들에선 `process.env.MARKETING_INTERNAL_KEY`가 비어 있지만, `typeof window` 검사로 한 번 더 막는다.
+ */
+export const INTERNAL_KEY_HEADER = 'X-Marketing-Internal-Key';
+
+export function internalKeyHeaders(): Record<string, string> {
+  if (typeof window !== 'undefined') return {};
+  const key = process.env.MARKETING_INTERNAL_KEY?.trim();
+  return key ? { [INTERNAL_KEY_HEADER]: key } : {};
+}
 
 export async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const isSubmit = Boolean(init?.method && init.method.toUpperCase() !== 'GET');
@@ -43,7 +68,11 @@ export async function request<T>(path: string, init?: RequestInit): Promise<T> {
     ...init,
     signal: init?.signal ?? AbortSignal.timeout(isSubmit ? SUBMIT_TIMEOUT_MS : GET_TIMEOUT_MS),
     // 본문이 있을 때만 Content-Type을 붙인다 — GET에 붙이면 브라우저가 매번 CORS 사전 요청(OPTIONS)을 보낸다.
-    headers: { ...(init?.body != null ? { 'Content-Type': 'application/json' } : {}), ...(init?.headers ?? {}) },
+    headers: {
+      ...(init?.body != null ? { 'Content-Type': 'application/json' } : {}),
+      ...internalKeyHeaders(),
+      ...(init?.headers ?? {}),
+    },
   });
 
   const contentType = response.headers.get('content-type') ?? '';

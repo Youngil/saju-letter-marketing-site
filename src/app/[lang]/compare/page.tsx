@@ -6,12 +6,12 @@ import {
   isMarketingLanguage,
   isLaunchContentLanguage,
   LAUNCH_CONTENT_LANGUAGES,
-  DEFAULT_LANGUAGE,
   type LaunchContentLanguage,
 } from '@/lib/languages';
+import { activeContentLanguages, fetchActiveServiceLanguages } from '@/lib/serviceLanguagesApi';
 import { DAY_MASTER_ROMANIZATIONS, ZODIAC_ROWS } from '@/content/compareZodiac';
 import { HEAVENLY_STEMS } from '@/lib/sajuVocabulary';
-import { WEB_BASE_URL, languageAlternates } from '@/lib/seo';
+import { WEB_BASE_URL, activeLanguageAlternates, NOINDEX_ROBOTS } from '@/lib/seo';
 import { CompareInfographic } from '@/components/CompareInfographic';
 
 /** 한국어/일본어는 로마자 표기(Gap 등)만으로는 어색해서 한자를 함께 보여준다(2026-08-08,
@@ -39,13 +39,20 @@ export async function generateMetadata({ params }: { params: Promise<{ lang: str
   if (!isMarketingLanguage(rawLang) || !isLaunchContentLanguage(rawLang)) return {};
   const dict = await getDictionary(rawLang);
   const path = (lang: LaunchContentLanguage) => `/${lang}/compare`;
+  // hreflang은 지금 켠 콘텐츠 언어끼리만(sitemap.ts와 같은 계산, 2026-10-06 전체 점검 3차 후속).
+  const serviceLanguages = await fetchActiveServiceLanguages();
+  const contentLanguages = activeContentLanguages(serviceLanguages);
+  // 관리자가 이 언어를 껐으면 홈([lang]/page.tsx)과 같이 noindex — hreflang·sitemap에서 빠진 페이지가 색인에 남지 않게
+  // (2026-10-06 전체 점검 5차).
+  const isActive = contentLanguages.includes(rawLang);
   return {
     title: dict.compare.ogTitle,
     description: dict.compare.ogDescription,
     alternates: {
       canonical: `${WEB_BASE_URL}${path(rawLang)}`,
-      languages: languageAlternates(LAUNCH_CONTENT_LANGUAGES, path, DEFAULT_LANGUAGE as LaunchContentLanguage),
+      languages: activeLanguageAlternates(contentLanguages, path, serviceLanguages.default),
     },
+    ...(isActive ? {} : { robots: NOINDEX_ROBOTS }),
     openGraph: { title: dict.compare.ogTitle, description: dict.compare.ogDescription, url: `${WEB_BASE_URL}${path(rawLang)}` },
     twitter: { card: 'summary_large_image', title: dict.compare.ogTitle, description: dict.compare.ogDescription },
   };
