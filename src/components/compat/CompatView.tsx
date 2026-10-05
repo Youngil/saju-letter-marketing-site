@@ -208,6 +208,7 @@ function PendingForm({
   const [isLeapMonth, setIsLeapMonth] = useState(false);
   // 음력을 고르면 받아 두는 사주 모듈 — 윤달 판정(getLunarLeapMonth)에 쓴다. 받기 전엔 윤달 체크박스를 그리지 않는다.
   const [saju, setSaju] = useState<SajuModule | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   // 연/월/양음력 변경 시 isLeapMonth를 리셋한다(2026-09-04) — 윤달 선택 후 다른 월/연도로 바꿔도 내부
   // 상태가 남아 존재하지 않는 (연,월,윤달) 조합으로 제출이 계속 실패하던 문제.
@@ -239,7 +240,17 @@ function PendingForm({
 
   function handleCalendarTypeChange(next: 'solar' | 'lunar') {
     if (next === 'lunar' && !saju) {
-      loadSaju().then(setSaju, (error: unknown) => console.warn('saju module load failed', error));
+      // 받지 못하면 윤달 체크박스가 끝내 안 나타나므로 조용히 넘기지 않고 새로고침을 안내한다(2026-10-06 전체 점검 3차).
+      loadSaju().then(
+        (mod) => {
+          setSaju(mod);
+          setError((prev) => (prev === content.loadError ? null : prev));
+        },
+        (loadFailure: unknown) => {
+          console.warn('saju module load failed', loadFailure);
+          setError(content.loadError);
+        },
+      );
     }
     setCalendarType(next);
     setIsLeapMonth((prev) => (canBeLeapMonth(next, year, month) ? prev : false));
@@ -266,10 +277,14 @@ function PendingForm({
   const [turnstileToken, setTurnstileToken] = useState<string | undefined>(undefined);
   const turnstileRef = useRef<TurnstileHandle>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  // 같은 프레임의 두 번째 탭은 아직 isSubmitting(state)을 못 본다 — 동기적으로 막는 잠금(2026-10-06 전체 점검 3차).
+  // 예전엔 모듈을 받는 await 뒤에야 제출 중 표시를 켜, 두 번 누르면 1회용 Turnstile 토큰으로 두 번 보내졌고
+  // 두 번째 403이 진행 중인 첫 제출의 화면을 되돌렸다.
+  const submittingRef = useRef(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (submittingRef.current) return;
 
     const trimmedName = name.trim();
     const yearNum = Number(year);
@@ -280,34 +295,53 @@ function PendingForm({
       setError(content.formError);
       return;
     }
-
-    let sajuModule: SajuModule;
-    try {
-      sajuModule = saju ?? (await loadSaju());
-    } catch {
-      setError(content.submitError);
-      return;
-    }
-
-    let chart;
-    let solar;
-    try {
-      const input = { calendarType, year: yearNum, month: monthNum, day: dayNum, isLeapMonth: isLeapMonth && leapMonthApplies };
-      chart = sajuModule.calculateSaju(input);
-      solar = sajuModule.resolveSolarBirthDate(input);
-    } catch {
-      setError(content.calcError);
-      return;
-    }
-    if (!isOldEnough(solar.year, solar.month, solar.day)) {
-      setError(content.underageError);
-      return;
-    }
     if (TURNSTILE_ENABLED && !turnstileToken) return;
 
-    setError(null);
+    // 모듈을 받기 전부터 제출 중으로 — 아래의 모든 조기 return은 finally가 풀어 준다.
+    submittingRef.current = true;
     setIsSubmitting(true);
+    setError(null);
     try {
+      let sajuModule = saju;
+      if (!sajuModule) {
+        try {
+          sajuModule = await loadSaju();
+        } catch (loadFailure) {
+          console.warn('saju module load failed', loadFailure);
+          setError(content.loadError);
+          return;
+        }
+        setSaju(sajuModule);
+        // 모듈이 이제 막 도착해 윤달 체크박스를 한 번도 못 본 상태 — 고른 달이 그해 윤달인 달이면 평달로 계산해
+        // 보내지 말고 멈춰서, 나타난 체크박스를 확인하게 한다(다시 누르면 그대로 진행된다).
+        let leapMonth: number | null = null;
+        try {
+          leapMonth = calendarType === 'lunar' ? sajuModule.getLunarLeapMonth(yearNum) : null;
+        } catch {
+          // 판정이 안 되는 연도면 아래 계산이 calcError로 안내한다.
+        }
+        if (leapMonth === monthNum) {
+          setError(content.leapMonthCheckHint);
+          return;
+        }
+      }
+
+      let chart;
+      let solar;
+      try {
+        // 모듈이 방금 도착했다면 leapMonthApplies·isLeapMonth 둘 다 false — 위에서 윤달인 달은 이미 멈췄으니 평달이 맞다.
+        const input = { calendarType, year: yearNum, month: monthNum, day: dayNum, isLeapMonth: isLeapMonth && leapMonthApplies };
+        chart = sajuModule.calculateSaju(input);
+        solar = sajuModule.resolveSolarBirthDate(input);
+      } catch {
+        setError(content.calcError);
+        return;
+      }
+      if (!isOldEnough(solar.year, solar.month, solar.day)) {
+        setError(content.underageError);
+        return;
+      }
+
       const result = await submitGuestInvite(token, {
         name: trimmedName,
         dayMaster: chart.dayPillar.stem,
@@ -336,6 +370,7 @@ function PendingForm({
       setTurnstileToken(undefined);
       turnstileRef.current?.reset();
     } finally {
+      submittingRef.current = false;
       setIsSubmitting(false);
     }
   }

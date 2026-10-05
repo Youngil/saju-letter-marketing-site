@@ -41,6 +41,11 @@ export interface CompatContent {
   calcError: string;
   underageError: string;
   submitError: string;
+  /** 음력 윤달 판정 모듈이 제출 때 처음 도착했고 고른 달이 그해 윤달인 달일 때(2026-10-06 전체 점검 3차) —
+   *  체크박스가 이제 막 나타났으니 확인하고 다시 누르라고 안내한다. */
+  leapMonthCheckHint: string;
+  /** 사주 계산 모듈(지연 로드)을 받지 못했을 때 — 새로고침을 권한다. */
+  loadError: string;
   /** 링크를 보낸 회원의 이름을 받는다(2026-09-02) — 이 화면은 항상 게스트만 보므로 "OOO님과의
    *  궁합"의 OOO은 게스트 자신이 아니라 초대를 보낸 사람이어야 한다. */
   pairLine: (requesterName: string | null) => string;
@@ -84,6 +89,8 @@ export const COMPAT_CONTENT: Record<MarketingLanguage, CompatContent> = {
     calcError: '입력하신 날짜를 계산할 수 없어요. 날짜를 다시 확인해주세요.',
     underageError: '이 서비스는 만 16세 이상만 이용할 수 있어요.',
     submitError: '문제가 발생했어요. 잠시 후 다시 시도해주세요.',
+    leapMonthCheckHint: '그해에는 고른 달에 윤달이 있어요. 윤달에 태어났다면 아래에 체크하고, 아니면 그대로 다시 눌러주세요.',
+    loadError: '화면 일부를 불러오지 못했어요. 페이지를 새로고침한 뒤 다시 시도해주세요.',
     pairLine: (requesterName) => (requesterName ? `${requesterName}님과의 궁합` : '친구와의 궁합'),
     cta: '사주편지에서 나만의 편지도 받아보기',
     pendingTitleFor: (requesterName) => (requesterName ? `${requesterName}님이 궁합 편지를 보냈어요` : '궁합 편지가 도착했어요'),
@@ -127,6 +134,8 @@ export const COMPAT_CONTENT: Record<MarketingLanguage, CompatContent> = {
     calcError: "We couldn't calculate that date. Please double-check it.",
     underageError: 'This service is only available to users aged 16 and older.',
     submitError: 'Something went wrong — please try again shortly.',
+    leapMonthCheckHint: 'The month you picked has a leap month that year. If you were born in the leap month, tick the box below; otherwise just tap the button again.',
+    loadError: "Part of this page didn't load. Please refresh the page and try again.",
     pairLine: (requesterName) => `Compatibility with ${requesterName || 'a friend'}`,
     cta: 'Get your own daily letter from Saju Letter',
     pendingTitleFor: (requesterName) => (requesterName ? `${requesterName} sent you a compatibility letter` : 'A compatibility letter for you'),
@@ -170,6 +179,8 @@ export const COMPAT_CONTENT: Record<MarketingLanguage, CompatContent> = {
     calcError: 'その日付を計算できませんでした。もう一度ご確認ください。',
     underageError: '本サービスは満16歳以上の方のみご利用いただけます。',
     submitError: '問題が発生しました。しばらくしてからもう一度お試しください。',
+    leapMonthCheckHint: '選んだ月は、その年に閏月がある月です。閏月生まれなら下のチェックを入れ、そうでなければそのままもう一度押してください。',
+    loadError: 'ページの一部を読み込めませんでした。ページを再読み込みしてから、もう一度お試しください。',
     pairLine: (requesterName) => (requesterName ? `${requesterName}さんとの相性` : '友達との相性'),
     cta: 'サジュレターで毎日の手紙を受け取る',
     pendingTitleFor: (requesterName) => (requesterName ? `${requesterName}さんから相性の手紙が届きました` : '相性の手紙が届きました'),
@@ -213,6 +224,8 @@ export const COMPAT_CONTENT: Record<MarketingLanguage, CompatContent> = {
     calcError: 'No pudimos calcular esa fecha. Por favor, verifícala de nuevo.',
     underageError: 'Este servicio solo está disponible para usuarios de 16 años o más.',
     submitError: 'Algo salió mal — inténtalo de nuevo en un momento.',
+    leapMonthCheckHint: 'Ese año, el mes que elegiste tiene un mes bisiesto. Si naciste en el mes bisiesto, marca la casilla de abajo; si no, vuelve a pulsar el botón.',
+    loadError: 'No se pudo cargar parte de la página. Recárgala e inténtalo de nuevo.',
     pairLine: (requesterName) => `Compatibilidad con ${requesterName || 'un amigo'}`,
     cta: 'Recibe tu propia carta diaria de Saju Letter',
     pendingTitleFor: (requesterName) => (requesterName ? `${requesterName} te envió una carta de compatibilidad` : 'Tienes una carta de compatibilidad'),
@@ -256,6 +269,8 @@ export const COMPAT_CONTENT: Record<MarketingLanguage, CompatContent> = {
     calcError: 'Não conseguimos calcular essa data. Verifique novamente.',
     underageError: 'Este serviço está disponível apenas para usuários com 16 anos ou mais.',
     submitError: 'Algo deu errado — tente novamente em instantes.',
+    leapMonthCheckHint: 'Nesse ano, o mês escolhido tem um mês bissexto. Se você nasceu no mês bissexto, marque a caixa abaixo; se não, toque no botão de novo.',
+    loadError: 'Não foi possível carregar parte da página. Recarregue a página e tente novamente.',
     pairLine: (requesterName) => `Compatibilidade com ${requesterName || 'um amigo'}`,
     cta: 'Receba sua própria carta diária do Saju Letter',
     pendingTitleFor: (requesterName) => (requesterName ? `${requesterName} te enviou uma carta de compatibilidade` : 'Você recebeu uma carta de compatibilidade'),
@@ -299,6 +314,8 @@ export const COMPAT_CONTENT: Record<MarketingLanguage, CompatContent> = {
     calcError: 'Chúng tôi không thể tính toán ngày này. Vui lòng kiểm tra lại.',
     underageError: 'Dịch vụ này chỉ dành cho người dùng từ 16 tuổi trở lên.',
     submitError: 'Đã xảy ra lỗi — vui lòng thử lại sau giây lát.',
+    leapMonthCheckHint: 'Năm đó, tháng bạn chọn có tháng nhuận. Nếu bạn sinh vào tháng nhuận, hãy đánh dấu ô bên dưới; nếu không, chỉ cần bấm nút lần nữa.',
+    loadError: 'Không tải được một phần trang. Vui lòng tải lại trang rồi thử lại.',
     pairLine: (requesterName) => `Mức độ hợp nhau với ${requesterName || 'một người bạn'}`,
     cta: 'Nhận lá thư hằng ngày của riêng bạn từ Saju Letter',
     pendingTitleFor: (requesterName) => (requesterName ? `${requesterName} đã gửi bạn một lá thư hợp nhau` : 'Bạn có một lá thư hợp nhau'),
