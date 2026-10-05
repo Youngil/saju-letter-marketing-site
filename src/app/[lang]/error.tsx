@@ -2,16 +2,7 @@
 
 import { useEffect } from 'react';
 import { useParams } from 'next/navigation';
-
-/** 사전 없이 짧게 6개 언어(2026-10-07 전체 점검 7차 — 예전엔 영어·한국어를 섞어 한 줄에 같이 보였다). */
-const ERROR_COPY: Record<string, { title: string; body: string; retry: string }> = {
-  ko: { title: '잠시 문제가 생겼어요', body: '잠시 후 다시 시도해 주세요.', retry: '다시 시도' },
-  en: { title: 'Something went wrong', body: 'Please try again in a moment.', retry: 'Try again' },
-  ja: { title: '問題が発生しました', body: 'しばらくしてからもう一度お試しください。', retry: 'もう一度試す' },
-  es: { title: 'Algo salió mal', body: 'Inténtalo de nuevo en un momento.', retry: 'Intentar de nuevo' },
-  pt: { title: 'Algo deu errado', body: 'Tente novamente em instantes.', retry: 'Tentar novamente' },
-  vi: { title: 'Đã có lỗi xảy ra', body: 'Vui lòng thử lại sau giây lát.', retry: 'Thử lại' },
-};
+import { errorCopyFor } from '@/content/errorCopy';
 
 /**
  * 페이지 언어 — 주소의 `[lang]`(서버 렌더·하이드레이션이 같은 값을 보도록 먼저), 없으면 `<html lang>`(`Turnstile.tsx`와
@@ -21,7 +12,7 @@ function useErrorCopy() {
   const params = useParams<{ lang?: string }>();
   const fromPath = typeof params?.lang === 'string' ? params.lang : undefined;
   const lang = fromPath ?? (typeof document === 'undefined' ? 'en' : document.documentElement.lang);
-  return ERROR_COPY[lang] ?? ERROR_COPY.en!;
+  return errorCopyFor(lang).copy;
 }
 
 /**
