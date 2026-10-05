@@ -581,3 +581,11 @@ npm run build   # 프로덕션 빌드 — App Router 라우트/타입 검증 + M
 - **SEO** — sitemap·hreflang의 홈/블로그(목록·글)/compare를 콘텐츠 축 ∩ 관리자가 켠 언어로(`activeContentLanguages`, `activeLanguageAlternates`, x-default = 관리자 기본 언어 → en → 첫 언어). 꺼진 언어의 홈은 `noindex`. 블로그·compare 페이지 자체의 noindex는 범위 밖(지금은 꺼도 콘텐츠가 그대로 보인다).
 - **접근성** — 5개 공개 폼의 오류 문단에 `role="alert"`, 궁합 폼의 윤달 확인 안내가 뜨면 윤달 체크박스로 초점 이동, 양력으로 돌아가면 사주 모듈 받기 실패 안내를 지움. 언어 스위처는 `aria-expanded`/`aria-controls` + Escape(초점은 버튼으로)·바깥 클릭으로 닫기. `aria-haspopup`은 붙이지 않았다 — 값이 `role="menu"`(화살표 키 탐색)를 약속하는데 이 목록은 평범한 링크 목록(공개 패턴)이다.
 - **내부 키 헤더** — 서버 렌더가 한 IP로 보여 방문자 전체가 백엔드의 IP별 한도 하나를 나눠 쓰는 문제에 대비해, `apiClient.request()`가 서버에서만(`typeof window === 'undefined'`) 런타임 시크릿 `MARKETING_INTERNAL_KEY`가 있으면 `X-Marketing-Internal-Key`를 붙인다. 백엔드 수용·Secret Manager 설정·Cloud Run `--update-secrets`는 별도 작업(NEXT_PUBLIC_ 금지).
+
+## 2026-10-07 — 전체 점검 7차(브랜치 `fix/full-review-7`)
+
+- **신년운세 공유 링크 = 공개 화면(사용자 결정)** — 결과를 만든 사람과 링크를 받은 사람이 같은 `r/[id]`를 열어, 받은 사람이 자기 이메일로 구독하면 원래 주인의 이름·사연(`memorableEvent`)으로 쓴 12일 메일을 받아 가고 주인은 "이미 구독됨"만 봤다. 백엔드가 생성 시 비공개 `ownerToken`(해시 저장)을 한 번 내주고 구독·구독 상태는 그 토큰이 있을 때만 준다. 사이트는 토큰을 만든 브라우저의 httpOnly 쿠키(`nyo_<id>`, Secure·SameSite=Lax, 90일)에만 둔다 — 결과 생성은 방문자 IP 한도·Turnstile 때문에 브라우저가 백엔드를 직접 부르므로, 받은 토큰을 같은 사이트 라우트 `/api/lunar-new-year/owner-token`이 쿠키로 바꿔 심는다(미들웨어 matcher에서 `api/` 제외, JSON 본문만·cross-site 거절). 구독 POST도 Turnstile `remoteip`·IP 한도 때문에 브라우저에서 보내야 해서, 소유자로 확인된 페이지에서만 토큰을 폼 prop으로 넘긴다(주소·GA엔 없음). 다른 브라우저에서 열면 주인도 공개 화면 — 의도된 한계. 위기 대체 결과(`subscriptionAvailable: false`)는 주인에게도 폼 없음. 구 백엔드(`isOwner` 없음)면 모두 공개 화면이므로 **백엔드 먼저 배포**.
+- **GA4 양식 이벤트** — `action` 없는 폼은 현재 주소(토큰 포함)가 `form_destination`으로 나간다. 궁합 `PendingForm`은 `/`, 신년운세 메일 폼은 `/{lang}/lunar-new-year`로. 수신거부 확인 버튼은 `<form>` 없이.
+- **블로그 DB 글** — `compileMDX`가 `mdx-components.tsx`를 읽지 않아 DB 글엔 서식이 하나도 없었다(공용 `mdxElements`). `blockJS`는 `{}` 식만 지워 `<script>`·`<iframe>`·`<img onerror>`가 렌더됐다 — 관리자 API가 공개(토큰 탈취 위험 감수)라 저장형 XSS 경로. 허용 목록 remark 플러그인(`mdxSanitize.ts`)으로 막았다. 남은 갭: `blockJS`가 배열 prop을 지워 `RitualFlowDiagram`은 DB 글에서 렌더 중 예외가 난다(쓰지 말 것).
+- **유입 귀속** — 배지 클릭마다 다시 뽑아 진입 UTM을 처음 referrer로 덮어썼다. 문서당 한 번만 뽑고 배지는 저장값만.
+- 그 밖: Noto Serif KR/JP `preload: false`, 날짜·시간·이메일 입력칸 접근성 이름(`emailLabel` 새 키), 오류 화면 6개 언어, 수신거부 확인 버튼, 신년운세 랜딩 revalidate 주석 정정(활성 언어는 최대 1시간 캐시 — 짧게 하지 않고 백엔드 거절에 맡김).

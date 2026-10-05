@@ -1,11 +1,11 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useRef, useState } from 'react';
+import { useId, useRef, useState } from 'react';
 import type { MarketingDictionary } from '@/dictionaries/types';
 import type { MarketingLanguage } from '@/lib/languages';
 import { isOldEnough } from '@/lib/age';
-import { createReading } from '@/lib/lunarNewYearApi';
+import { createReading, rememberReadingOwner } from '@/lib/lunarNewYearApi';
 import { Turnstile, TURNSTILE_ENABLED, type TurnstileHandle } from '@/components/Turnstile';
 import { isValidBirthDate, parseBirthTime } from '@/lib/birthDate';
 import { mapPublicFormError } from '@/lib/publicForm';
@@ -25,6 +25,7 @@ export function ReadingForm({
   offSeasonMessage: string;
 }) {
   const router = useRouter();
+  const dateLabelId = useId();
 
   const [name, setName] = useState('');
   const [year, setYear] = useState('');
@@ -104,6 +105,9 @@ export function ReadingForm({
         turnstileToken,
       });
 
+      // 만든 사람만 메일 구독을 할 수 있게 소유자 토큰을 이 브라우저의 httpOnly 쿠키로 남긴 뒤 넘어간다(2026-10-07) —
+      // 주소에는 절대 넣지 않는다(공유 링크·GA로 샌다). 저장에 실패해도 결과는 보여 준다(구독 폼만 안 보인다).
+      if (result.ownerToken) await rememberReadingOwner(result.readingId, result.ownerToken);
       router.push(`/${language}/lunar-new-year/r/${result.readingId}`);
     } catch (err) {
       setError(
@@ -141,14 +145,18 @@ export function ReadingForm({
       </div>
 
       <div>
-        <span className="mb-1 block text-sm font-medium">{t.dateLabel}</span>
+        {/* 세 칸은 자리표시자로만 이름이 붙어 있었다(2026-10-07) — 묶음 이름은 위 라벨, 칸마다 연/월/일 aria-label. */}
+        <span id={dateLabelId} className="mb-1 block text-sm font-medium">
+          {t.dateLabel}
+        </span>
         {/* 고정폭(w-24/w-20)이라 카드 폭을 못 채우고 왼쪽에 몰려 붙어 보이던 것을 DemoForm.tsx/
          * CompatView.tsx와 같은 방식(flex-1 균등 분할)으로 맞췄다(2026-08-26). */}
-        <div className="flex gap-2">
+        <div role="group" aria-labelledby={dateLabelId} className="flex gap-2">
           <input
             type="number"
             inputMode="numeric"
             placeholder={t.yearLabel}
+            aria-label={t.yearLabel}
             value={year}
             onChange={(e) => setYear(e.target.value)}
             className="min-w-0 flex-1 rounded-lg border border-stone-300 bg-white px-3 py-2"
@@ -157,6 +165,7 @@ export function ReadingForm({
             type="number"
             inputMode="numeric"
             placeholder={t.monthLabel}
+            aria-label={t.monthLabel}
             value={month}
             onChange={(e) => setMonth(e.target.value)}
             min={1}
@@ -167,6 +176,7 @@ export function ReadingForm({
             type="number"
             inputMode="numeric"
             placeholder={t.dayLabel}
+            aria-label={t.dayLabel}
             value={day}
             onChange={(e) => setDay(e.target.value)}
             min={1}
@@ -182,11 +192,12 @@ export function ReadingForm({
           {t.timeUnknownLabel}
         </label>
         {timeKnown && (
-          <div className="mt-2 flex gap-2">
+          <div role="group" aria-label={t.timeLabel} className="mt-2 flex gap-2">
             <input
               type="number"
               inputMode="numeric"
               placeholder={t.hourLabel}
+              aria-label={t.hourLabel}
               value={hour}
               onChange={(e) => setHour(e.target.value)}
               min={0}
@@ -197,6 +208,7 @@ export function ReadingForm({
               type="number"
               inputMode="numeric"
               placeholder={t.minuteLabel}
+              aria-label={t.minuteLabel}
               value={minute}
               onChange={(e) => setMinute(e.target.value)}
               min={0}

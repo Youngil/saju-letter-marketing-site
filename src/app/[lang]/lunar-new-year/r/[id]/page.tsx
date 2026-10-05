@@ -1,4 +1,6 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
+import { cookies } from 'next/headers';
 import { notFound } from 'next/navigation';
 import { isMarketingLanguage, type MarketingLanguage } from '@/lib/languages';
 import { getDictionary } from '@/dictionaries';
@@ -8,9 +10,18 @@ import { EmailSignupForm } from '@/components/lunar-new-year/EmailSignupForm';
 import { ShareButton } from '@/components/lunar-new-year/ShareButton';
 import { AppDownloadLinks } from '@/components/AppDownloadLinks';
 import { WEB_BASE_URL, NOINDEX_ROBOTS } from '@/lib/seo';
+import { readOwnerToken } from '@/lib/readingOwner';
 
 interface PageProps {
   params: Promise<{ lang: string; id: string }>;
+}
+
+/**
+ * 이 결과를 만든 브라우저면 httpOnly 쿠키에 소유자 토큰이 있다(2026-10-07 전체 점검 7차 항목 1, `lib/readingOwner.ts`).
+ * 메타데이터와 본문이 같은 인자로 `getReading`을 불러야 `cache()`가 한 번으로 묶는다.
+ */
+async function ownerTokenFor(id: string): Promise<string | undefined> {
+  return readOwnerToken(id, await cookies());
 }
 
 /**
@@ -25,7 +36,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const { lang: rawLang, id } = await params;
   if (!isMarketingLanguage(rawLang)) return {};
   // 일시 오류면 메타데이터만 비운다 — 본문은 페이지가 같은 오류로 다시 시도 화면을 그린다.
-  const reading = await getReading(id).catch(() => null);
+  const reading = await getReading(id, await ownerTokenFor(id)).catch(() => null);
   if (!reading) return {};
 
   return {
@@ -49,12 +60,19 @@ export default async function LunarNewYearResultPage({ params }: PageProps) {
   const language: MarketingLanguage = rawLang;
 
   // 일시 오류(429·5xx)는 던져 [lang]/error.tsx의 "다시 시도"로 — 404는 정말 없는 결과일 때만.
-  const reading = await getReading(id);
+  const ownerToken = await ownerTokenFor(id);
+  const reading = await getReading(id, ownerToken);
   if (!reading) notFound();
 
   const dict = await getDictionary(language);
   if (!dict.lunarNewYear) notFound();
   const t = dict.lunarNewYear.result;
+
+  // 공유 링크는 만든 사람과 받은 사람이 같은 주소를 연다 — 메일 구독 폼·구독 상태는 백엔드가 소유자 토큰을 확인해 준
+  // 사람(isOwner)에게만(2026-10-07). 예전엔 링크를 받은 친구가 자기 이메일로 구독해 주인의 사연으로 쓴 메일을 받아 갔다.
+  // 위기 신호로 대체된 결과(subscriptionAvailable === false)는 주인에게도 폼을 보이지 않는다.
+  const isOwner = reading.isOwner === true && ownerToken !== undefined;
+  const showSignup = isOwner && reading.subscriptionAvailable !== false;
 
   return (
     <div className="mx-auto flex w-full max-w-lg flex-1 flex-col gap-6 px-4 py-10">
@@ -76,13 +94,33 @@ export default async function LunarNewYearResultPage({ params }: PageProps) {
         />
       </div>
 
-      <section className="rounded-2xl border border-amber-200 bg-amber-50 p-6">
-        <h2 className="font-semibold">{t.emailSectionTitle}</h2>
-        <p className="mt-1 text-sm text-stone-600">{t.emailSectionSubtitle}</p>
-        <div className="mt-4">
-          <EmailSignupForm readingId={id} dict={t} alreadySubscribed={reading.hasEmailSubscription} />
-        </div>
-      </section>
+      {showSignup && ownerToken ? (
+        <section className="rounded-2xl border border-amber-200 bg-amber-50 p-6">
+          <h2 className="font-semibold">{t.emailSectionTitle}</h2>
+          <p className="mt-1 text-sm text-stone-600">{t.emailSectionSubtitle}</p>
+          <div className="mt-4">
+            <EmailSignupForm
+              readingId={id}
+              ownerToken={ownerToken}
+              language={language}
+              dict={t}
+              alreadySubscribed={reading.hasEmailSubscription === true}
+            />
+          </div>
+        </section>
+      ) : !isOwner ? (
+        // 공유 링크로 연 사람 — 자기 신년운세를 만들어 보도록 랜딩으로.
+        <section className="flex flex-col items-center gap-3 rounded-2xl border border-amber-200 bg-amber-50 p-6 text-center">
+          <h2 className="font-semibold">{t.publicCtaTitle}</h2>
+          <p className="text-sm text-stone-600">{t.publicCtaBody}</p>
+          <Link
+            href={`/${language}/lunar-new-year`}
+            className="rounded-full bg-amber-800 px-6 py-2.5 font-medium text-white transition hover:bg-amber-900"
+          >
+            {t.publicCtaButton}
+          </Link>
+        </section>
+      ) : null}
 
       {/* Phase 6 soft connect — 캠페인 본문과 분리된 아침 편지/앱 안내. 다인 초상 없음. */}
       <section className="flex flex-col items-center gap-3 rounded-2xl border border-stone-200 bg-white p-6 text-center">

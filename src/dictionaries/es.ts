@@ -92,6 +92,7 @@ export const dictionary: MarketingDictionary = {
     subtitle:
       'Déjanos tu correo y Dain te enviará ahora mismo una breve nota de bienvenida — incluida una carta matutina de ejemplo y un código para una prueba gratuita de 30 días (en vez de los 7 habituales).',
     emailPlaceholder: 'tu@ejemplo.com',
+    emailLabel: 'Correo electrónico',
     consentLabel: 'Acepto recibir este correo de bienvenida (puedes darte de baja cuando quieras)',
     submitButton: 'Enviarme la nota',
     submitting: 'Registrando…',
@@ -114,6 +115,8 @@ export const dictionary: MarketingDictionary = {
     notFound: 'No pudimos encontrar esa suscripción.',
     error: 'No pudimos procesarlo en este momento. Inténtalo de nuevo.',
     retry: 'Intentar de nuevo',
+    confirmPrompt: 'Pulsa el botón de abajo para dejar de recibir los correos de Saju Letter.',
+    confirmButton: 'Darme de baja',
   },
   footer: {
     privacyNote: 'Enviamos tu fecha de nacimiento gregoriana solo para confirmar que tienes 16 años o más — no la almacenamos. Tu carta se calcula en el navegador.',
@@ -179,6 +182,7 @@ export const dictionary: MarketingDictionary = {
       emailSectionSubtitle:
         'Déjanos tu correo electrónico y te enviaremos una lectura corta cada día durante los próximos 12 días — un lado diferente de tu carta cada vez.',
       emailPlaceholder: 'tu@ejemplo.com',
+      emailLabel: 'Correo electrónico',
       consentLabel: 'Me gustaría recibir esta serie de correos de 12 días (puedes darte de baja en cualquier momento)',
       subscribeButton: 'Envíame la serie',
       subscribing: 'Registrándote…',
@@ -186,11 +190,16 @@ export const dictionary: MarketingDictionary = {
       appBridgeTitle: '¿Quieres una carta corta cada mañana?',
       appBridgeBody:
         'Aparte de esta lectura de Año Nuevo, Dain escribe una nota breve cada mañana en la app de Saju Letter — cálida, personal, y nunca un informe de fortuna largo.',
+      publicCtaTitle: '¿Te da curiosidad tu propio año?',
+      publicCtaBody: 'Recibe tu propia lectura breve de Año Nuevo, basada en tu carta de nacimiento.',
+      publicCtaButton: 'Quiero mi lectura',
       errors: {
         email: 'Por favor, ingresa una dirección de correo electrónico válida.',
         consent: 'Por favor, marca la casilla para recibir la serie de correos.',
         generic: 'Algo salió mal — por favor, inténtalo de nuevo.',
         already: 'Esta lectura ya está registrada en la serie.',
+        notOwner: 'Solo quien creó esta lectura puede suscribirse a su serie de correos. Ábrela en el mismo navegador que usaste para crearla.',
+        unavailable: 'La serie de correos no está disponible para esta lectura.',
       },
     },
     unsubscribe: {
@@ -201,6 +210,8 @@ export const dictionary: MarketingDictionary = {
       notFound: 'No pudimos encontrar esa suscripción.',
       error: 'No pudimos procesarlo en este momento. Inténtalo de nuevo.',
       retry: 'Intentar de nuevo',
+      confirmPrompt: 'Pulsa el botón de abajo para dejar de recibir la serie de correos de Año Nuevo.',
+      confirmButton: 'Darme de baja',
     },
     footerPrivacy:
       'Esta es una experiencia promocional de Saju Letter. Tu fecha y hora de nacimiento nunca salen de tu navegador — solo se envía la carta calculada.',

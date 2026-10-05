@@ -115,6 +115,7 @@ export function LeadCaptureForm({ language, dict }: { language: LaunchContentLan
         value={email}
         onChange={(e) => setEmail(e.target.value)}
         placeholder={dict.emailPlaceholder}
+        aria-label={dict.emailLabel}
         className="rounded-lg border border-foreground/15 bg-white px-3 py-2.5 transition focus-visible:border-accent-warm"
       />
       <label className="flex items-start gap-2 text-sm text-foreground/70">

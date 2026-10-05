@@ -92,6 +92,7 @@ export const dictionary: MarketingDictionary = {
     subtitle:
       'Deixe seu e-mail e Dain enviará agora mesmo uma breve nota de boas-vindas — incluindo uma carta matinal de exemplo e um código para um teste grátis de 30 dias (em vez dos 7 de costume).',
     emailPlaceholder: 'voce@exemplo.com',
+    emailLabel: 'Endereço de e-mail',
     consentLabel: 'Aceito receber este e-mail de boas-vindas (você pode cancelar quando quiser)',
     submitButton: 'Enviar a nota',
     submitting: 'Cadastrando…',
@@ -114,6 +115,8 @@ export const dictionary: MarketingDictionary = {
     notFound: 'Não encontramos essa inscrição.',
     error: 'Não foi possível concluir agora. Tente novamente.',
     retry: 'Tentar novamente',
+    confirmPrompt: 'Toque no botão abaixo para deixar de receber os e-mails do Saju Letter.',
+    confirmButton: 'Cancelar inscrição',
   },
   footer: {
     privacyNote: 'Enviamos sua data de nascimento gregoriana só para confirmar que você tem 16 anos ou mais — não a armazenamos. Seu mapa é calculado no navegador.',
@@ -179,6 +182,7 @@ export const dictionary: MarketingDictionary = {
       emailSectionSubtitle:
         'Deixe seu e-mail e enviaremos uma leitura curta todos os dias pelos próximos 12 dias — um lado diferente do seu mapa a cada vez.',
       emailPlaceholder: 'voce@exemplo.com',
+      emailLabel: 'Endereço de e-mail',
       consentLabel: 'Gostaria de receber essa série de e-mails de 12 dias (você pode cancelar a qualquer momento)',
       subscribeButton: 'Enviar a série para mim',
       subscribing: 'Cadastrando você…',
@@ -186,11 +190,16 @@ export const dictionary: MarketingDictionary = {
       appBridgeTitle: 'Quer uma carta curta todas as manhãs?',
       appBridgeBody:
         'Separado desta leitura de Ano Novo, Dain escreve uma nota breve todas as manhãs no app do Saju Letter — acolhedora, pessoal, e nunca um relatório longo de fortuna.',
+      publicCtaTitle: 'Curiosidade sobre o seu próprio ano?',
+      publicCtaBody: 'Receba sua própria leitura curta de Ano Novo, baseada no seu mapa de nascimento.',
+      publicCtaButton: 'Quero minha leitura',
       errors: {
         email: 'Por favor, digite um endereço de e-mail válido.',
         consent: 'Por favor, marque a caixa para receber a série de e-mails.',
         generic: 'Algo deu errado — por favor, tente novamente.',
         already: 'Esta leitura já está cadastrada na série.',
+        notOwner: 'Só quem criou esta leitura pode se inscrever na série de e-mails. Abra-a no mesmo navegador que você usou para criá-la.',
+        unavailable: 'A série de e-mails não está disponível para esta leitura.',
       },
     },
     unsubscribe: {
@@ -201,6 +210,8 @@ export const dictionary: MarketingDictionary = {
       notFound: 'Não conseguimos encontrar essa inscrição.',
       error: 'Não foi possível concluir agora. Tente novamente.',
       retry: 'Tentar novamente',
+      confirmPrompt: 'Toque no botão abaixo para deixar de receber a série de e-mails de Ano Novo.',
+      confirmButton: 'Cancelar inscrição',
     },
     footerPrivacy:
       'Esta é uma experiência promocional do Saju Letter. Sua data e hora de nascimento nunca saem do seu navegador — apenas o mapa calculado é enviado.',

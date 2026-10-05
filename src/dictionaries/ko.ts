@@ -97,6 +97,7 @@ export const dictionary: MarketingDictionary = {
     subtitle:
       '이메일을 남겨주시면 다인이 짧은 소개 편지를 바로 보내드려요. 실제 아침 편지 예시도 들어 있고, 앱에서 쓸 수 있는 30일 무료체험 쿠폰(원래 7일 대신)도 함께 드려요.',
     emailPlaceholder: 'you@example.com',
+    emailLabel: '이메일 주소',
     consentLabel: '이 소개 편지 이메일 수신에 동의해요 (언제든 수신거부 가능)',
     submitButton: '소개 편지 받기',
     submitting: '등록하는 중…',
@@ -119,6 +120,8 @@ export const dictionary: MarketingDictionary = {
     notFound: '해당 구독 정보를 찾을 수 없어요.',
     error: '잠시 연결이 원활하지 않아 처리하지 못했어요. 다시 시도해 주세요.',
     retry: '다시 시도',
+    confirmPrompt: '아래 버튼을 누르면 사주편지 이메일 수신을 멈춰요.',
+    confirmButton: '수신거부하기',
   },
   footer: {
     privacyNote: '만 16세 확인을 위해 양력 생년월일을 서버로 보내지만 저장하지는 않아요. 사주 계산은 브라우저에서 이뤄집니다.',
@@ -185,6 +188,7 @@ export const dictionary: MarketingDictionary = {
       emailSectionTitle: '앞으로 11일 더, 신년 이야기가 이어져요',
       emailSectionSubtitle: '이메일을 남기시면 앞으로 12일 동안 매일 짧은 풀이를 보내드려요 — 매번 사주의 다른 면을 살펴봐요.',
       emailPlaceholder: 'you@example.com',
+      emailLabel: '이메일 주소',
       consentLabel: '12일 이메일 시리즈를 받고 싶어요 (언제든 수신거부 가능)',
       subscribeButton: '시리즈 받기',
       subscribing: '등록하는 중…',
@@ -192,11 +196,16 @@ export const dictionary: MarketingDictionary = {
       appBridgeTitle: '매일 아침 짧은 편지도 받아보실래요?',
       appBridgeBody:
         '이번 신년운세와는 별개로, 사주편지 앱에서는 다인이 짧은 아침 노트를 보내드려요 — 따뜻하고 개인적인, 긴 운세 리포트가 아닌 편지예요.',
+      publicCtaTitle: '내 신년운세도 궁금하다면',
+      publicCtaBody: '생년월일로 나만의 짧은 신년운세를 받아 보세요.',
+      publicCtaButton: '내 신년운세 보기',
       errors: {
         email: '올바른 이메일 주소를 입력해주세요.',
         consent: '이메일 시리즈를 받으려면 동의해주세요.',
         generic: '문제가 발생했어요. 다시 시도해주세요.',
         already: '이미 이 운세로 시리즈를 신청하셨어요.',
+        notOwner: '이 운세를 만든 분만 이메일 시리즈를 신청할 수 있어요. 운세를 만들 때 쓴 브라우저에서 열어 주세요.',
+        unavailable: '이 운세로는 이메일 시리즈를 신청할 수 없어요.',
       },
     },
     unsubscribe: {
@@ -207,6 +216,8 @@ export const dictionary: MarketingDictionary = {
       notFound: '해당 구독 정보를 찾을 수 없어요.',
       error: '잠시 연결이 원활하지 않아 처리하지 못했어요. 다시 시도해 주세요.',
       retry: '다시 시도',
+      confirmPrompt: '아래 버튼을 누르면 신년 이메일 시리즈 수신을 멈춰요.',
+      confirmButton: '수신거부하기',
     },
     footerPrivacy: '이 페이지는 사주편지가 제공하는 프로모션 체험이에요. 생년월일시는 브라우저 밖으로 전송되지 않고, 계산된 사주 값만 서버로 전달돼요.',
   },

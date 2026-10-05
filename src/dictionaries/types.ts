@@ -104,6 +104,8 @@ export interface MarketingDictionary {
     title: string;
     subtitle: string;
     emailPlaceholder: string;
+    /** 이메일 입력칸의 접근성 이름(aria-label) — 자리표시자(you@example.com)는 이름이 아니다(2026-10-07). */
+    emailLabel: string;
     consentLabel: string;
     submitButton: string;
     submitting: string;
@@ -132,6 +134,9 @@ export interface MarketingDictionary {
     /** 일시 오류(네트워크·429·5xx) — "링크 없음"과 구분한다(2026-10-06). */
     error: string;
     retry: string;
+    /** 버튼을 누르기 전 안내·버튼(2026-10-07) — 페이지를 여는 것만으로는 수신거부하지 않는다(메일 보안 검사기 오작동 방지). */
+    confirmPrompt: string;
+    confirmButton: string;
   };
   footer: {
     privacyNote: string;
@@ -219,6 +224,8 @@ export interface MarketingDictionary {
       emailSectionTitle: string;
       emailSectionSubtitle: string;
       emailPlaceholder: string;
+      /** 이메일 입력칸의 접근성 이름(aria-label, 2026-10-07). */
+      emailLabel: string;
       consentLabel: string;
       subscribeButton: string;
       subscribing: string;
@@ -226,11 +233,22 @@ export interface MarketingDictionary {
       /** 결과 하단 soft connect — 캠페인 Fortune 톤과 별도로 아침 편지/앱 안내. */
       appBridgeTitle: string;
       appBridgeBody: string;
+      /**
+       * 공유 링크로 연 사람(결과를 만든 사람이 아님)에게 메일 구독 폼 대신 보여 주는 "나도 해 보기" 안내(2026-10-07) —
+       * 신년운세 랜딩으로 보낸다.
+       */
+      publicCtaTitle: string;
+      publicCtaBody: string;
+      publicCtaButton: string;
       errors: {
         email: string;
         consent: string;
         generic: string;
         already: string;
+        /** 백엔드 403 `not_reading_owner` — 소유자 토큰이 없거나 틀림(다른 브라우저 등). 2026-10-07. */
+        notOwner: string;
+        /** 백엔드 409 `subscription_unavailable` — 이 결과는 메일 구독을 받지 않음. 2026-10-07. */
+        unavailable: string;
       };
     };
     unsubscribe: {
@@ -242,6 +260,9 @@ export interface MarketingDictionary {
       /** 일시 오류(네트워크·429·5xx) — "링크 없음"과 구분한다(2026-10-06). */
       error: string;
       retry: string;
+      /** 버튼을 누르기 전 안내·버튼(2026-10-07). */
+      confirmPrompt: string;
+      confirmButton: string;
     };
     footerPrivacy: string;
   };

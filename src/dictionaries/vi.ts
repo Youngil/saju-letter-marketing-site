@@ -94,6 +94,7 @@ export const dictionary: MarketingDictionary = {
     subtitle:
       'Để lại email và Dain sẽ gửi ngay một ghi chú chào mừng ngắn — kèm một lá thư buổi sáng mẫu và mã dùng thử miễn phí 30 ngày (thay vì 7 ngày như thường lệ).',
     emailPlaceholder: 'ban@example.com',
+    emailLabel: 'Địa chỉ email',
     consentLabel: 'Tôi đồng ý nhận email chào mừng này (có thể hủy bất cứ lúc nào)',
     submitButton: 'Gửi ghi chú cho tôi',
     submitting: 'Đang đăng ký…',
@@ -116,6 +117,8 @@ export const dictionary: MarketingDictionary = {
     notFound: 'Không tìm thấy đăng ký này.',
     error: 'Hiện chưa thể xử lý. Vui lòng thử lại.',
     retry: 'Thử lại',
+    confirmPrompt: 'Nhấn nút bên dưới để ngừng nhận email từ Saju Letter.',
+    confirmButton: 'Hủy đăng ký',
   },
   footer: {
     privacyNote: 'Chúng tôi gửi ngày sinh dương lịch chỉ để xác nhận bạn từ 16 tuổi trở lên — không lưu trữ. Lá số được tính trên trình duyệt.',
@@ -181,6 +184,7 @@ export const dictionary: MarketingDictionary = {
       emailSectionSubtitle:
         'Để lại email của bạn và chúng tôi sẽ gửi một bài đọc ngắn mỗi ngày trong 12 ngày tới — mỗi lần một góc nhìn khác về lá số của bạn.',
       emailPlaceholder: 'ban@vidu.com',
+      emailLabel: 'Địa chỉ email',
       consentLabel: 'Tôi muốn nhận chuỗi email 12 ngày này (bạn có thể hủy đăng ký bất cứ lúc nào)',
       subscribeButton: 'Gửi chuỗi email cho tôi',
       subscribing: 'Đang đăng ký cho bạn…',
@@ -188,11 +192,16 @@ export const dictionary: MarketingDictionary = {
       appBridgeTitle: 'Bạn muốn một lá thư ngắn mỗi sáng?',
       appBridgeBody:
         'Tách biệt với bài đọc năm mới này, Dain viết một ghi chú ngắn mỗi sáng trong ứng dụng Saju Letter — ấm áp, riêng tư, và không bao giờ là một báo cáo vận mệnh dài.',
+      publicCtaTitle: 'Bạn tò mò về năm mới của chính mình?',
+      publicCtaBody: 'Nhận một bài đọc năm mới ngắn dành riêng cho bạn, dựa trên lá số của bạn.',
+      publicCtaButton: 'Xem bài đọc của tôi',
       errors: {
         email: 'Vui lòng nhập một địa chỉ email hợp lệ.',
         consent: 'Vui lòng đánh dấu vào ô để nhận chuỗi email.',
         generic: 'Đã có lỗi xảy ra — vui lòng thử lại.',
         already: 'Bài đọc này đã được đăng ký vào chuỗi email rồi.',
+        notOwner: 'Chỉ người đã tạo bài đọc này mới có thể đăng ký chuỗi email. Vui lòng mở bài đọc trên trình duyệt bạn đã dùng để tạo.',
+        unavailable: 'Chuỗi email không khả dụng cho bài đọc này.',
       },
     },
     unsubscribe: {
@@ -203,6 +212,8 @@ export const dictionary: MarketingDictionary = {
       notFound: 'Chúng tôi không tìm thấy đăng ký đó.',
       error: 'Hiện chưa thể xử lý. Vui lòng thử lại.',
       retry: 'Thử lại',
+      confirmPrompt: 'Nhấn nút bên dưới để ngừng nhận chuỗi email năm mới.',
+      confirmButton: 'Hủy đăng ký',
     },
     footerPrivacy:
       'Đây là trải nghiệm quảng bá của Saju Letter. Ngày và giờ sinh của bạn không bao giờ rời khỏi trình duyệt của bạn — chỉ lá số đã tính toán được gửi đi.',

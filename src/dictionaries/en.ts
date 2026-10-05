@@ -91,6 +91,7 @@ export const dictionary: MarketingDictionary = {
     subtitle:
       "Leave your email and Dain will send you a short welcome note right away — including a sample morning letter and a code for a 30-day free trial (instead of the usual 7).",
     emailPlaceholder: 'you@example.com',
+    emailLabel: 'Email address',
     consentLabel: 'I consent to receiving this welcome email (you can unsubscribe anytime)',
     submitButton: 'Send me the note',
     submitting: 'Signing you up…',
@@ -113,6 +114,8 @@ export const dictionary: MarketingDictionary = {
     notFound: "We couldn't find that subscription.",
     error: "We couldn't process this right now. Please try again.",
     retry: 'Try again',
+    confirmPrompt: 'Press the button below to stop receiving Saju Letter emails.',
+    confirmButton: 'Unsubscribe',
   },
   footer: {
     privacyNote: 'We send your Gregorian date of birth only to confirm you are 16 or older — we do not store it. Your chart is calculated in the browser.',
@@ -178,6 +181,7 @@ export const dictionary: MarketingDictionary = {
       emailSectionSubtitle:
         "Leave your email and we'll send you a short reading each day for the next 12 days — a different side of your chart each time.",
       emailPlaceholder: 'you@example.com',
+      emailLabel: 'Email address',
       consentLabel: "I'd like to receive this 12-day email series (you can unsubscribe anytime)",
       subscribeButton: 'Send me the series',
       subscribing: 'Signing you up…',
@@ -185,11 +189,16 @@ export const dictionary: MarketingDictionary = {
       appBridgeTitle: 'Want a short letter every morning?',
       appBridgeBody:
         'Separate from this New Year reading, Dain writes a brief morning note in the Saju Letter app — warm, personal, and never a long fortune report.',
+      publicCtaTitle: 'Curious about your own year?',
+      publicCtaBody: 'Get a short New Year reading of your own, based on your birth chart.',
+      publicCtaButton: 'Get my own reading',
       errors: {
         email: 'Please enter a valid email address.',
         consent: 'Please check the box to receive the email series.',
         generic: 'Something went wrong — please try again.',
         already: "This reading's already signed up for the series.",
+        notOwner: 'Only the person who created this reading can sign up for its email series. Please open it in the browser you used to create it.',
+        unavailable: "The email series isn't available for this reading.",
       },
     },
     unsubscribe: {
@@ -200,6 +209,8 @@ export const dictionary: MarketingDictionary = {
       notFound: "We couldn't find that subscription.",
       error: "We couldn't process this right now. Please try again.",
       retry: 'Try again',
+      confirmPrompt: 'Press the button below to stop the New Year email series.',
+      confirmButton: 'Unsubscribe',
     },
     footerPrivacy:
       'This is a promotional experience by Saju Letter. Your birth date and time never leave your browser — only the calculated chart is sent.',
