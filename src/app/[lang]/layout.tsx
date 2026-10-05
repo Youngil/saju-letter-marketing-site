@@ -107,8 +107,9 @@ export default async function LangLayout({
   if (!isMarketingLanguage(rawLang)) notFound();
   const lang: MarketingLanguage = rawLang;
   const dict = await getDictionary(lang);
-  // 스위처는 콘텐츠 축(블로그·compare가 있는 언어)만 — 관리자가 켠 언어 원본(6개 축)에서 여기서 좁힌다.
-  const activeLanguages = (await fetchActiveServiceLanguages()).active.filter(isLaunchContentLanguage);
+  // 관리자가 켠 언어 원본(6개 축) 그대로 넘긴다 — 레이아웃은 하위 경로를 모르므로, 콘텐츠 축(블로그·compare가 있는
+  // 언어)으로 좁힐지는 스위처가 경로를 보고 정한다(2026-10-06 전체 점검 3차, 신년운세 등 6개 언어 페이지에서 pt/vi 누락).
+  const activeLanguages = (await fetchActiveServiceLanguages()).active;
 
   return (
     <html

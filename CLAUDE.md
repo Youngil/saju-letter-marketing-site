@@ -21,12 +21,12 @@
 ## 2. 언어 — 두 개의 축 (`src/lib/languages.ts`)
 
 - **트랜잭션·법적 축** `MARKETING_LANGUAGES`/`isMarketingLanguage`(ko/en/es/pt/ja/vi): `privacy`, `disclaimer`, `unsubscribe`, `compat/[token]`, `lunar-new-year`(+`r/[id]`, `unsubscribe`), `[lang]/layout.tsx` 게이트, `[lang]/opengraph-image.tsx`(privacy/disclaimer가 폴백 OG로 참조).
-- **콘텐츠 축** `LAUNCH_CONTENT_LANGUAGES`/`isLaunchContentLanguage`(ko/en/ja/es): 홈, `blog`, `blog/[slug]`, `compare`(+OG), middleware 자동 감지, 언어 스위처.
+- **콘텐츠 축** `LAUNCH_CONTENT_LANGUAGES`/`isLaunchContentLanguage`(ko/en/ja/es): 홈, `blog`, `blog/[slug]`, `compare`(+OG), middleware 자동 감지, 언어 스위처(콘텐츠 경로에서만 — 트랜잭션 경로는 켠 언어 그대로, §3).
 - 레이아웃은 합집합(6)만 통과시키고 리프 페이지가 세부 판정(레이아웃은 하위 pathname을 모름). 콘텐츠 축 페이지는 pt/vi를 `notFound()`.
 - **이미 발급된 링크(드립 수신거부·궁합 공유·신년운세 결과)는 언어 무관하게 열려야 한다 — 트랜잭션 축을 4개로 좁히지 말 것.** 게이트를 바꾸면 `generateStaticParams`·`languageAlternates`·`sitemap.ts`·prop 타입·OG 참조·`INTL_LOCALE` 맵 등 **형제 코드를 함께** 맞출 것(반복된 회귀 패턴).
 - 레이아웃: 헤더 Blog/Compare 링크는 콘텐츠 축일 때만, 로고는 pt/vi에서 비클릭 `<span>`. 푸터 privacy/disclaimer 링크는 항상.
 - pt/vi 블로그·compare 오픈: `LAUNCH_CONTENT_LANGUAGES`에 추가 + `content-posts/*.{pt,vi}.mdx` 작성(dictionary·`compareZodiac.ts`는 6개 언어 준비됨, 단 2026-08-25 블로그/compare 보강분은 pt/vi MDX에 미반영).
-- **서비스 언어 실시간 반영**: `serviceLanguagesApi.ts::fetchActiveServiceLanguages()` → 백엔드 `GET /marketing-site/service-languages`(공유 `ServiceLanguage` 테이블). **반환은 6개 축 원본**(`MarketingLanguage[]`) — 신년운세 랜딩·hreflang·sitemap은 그대로 쓰고, 콘텐츠 축 소비처(레이아웃→`LanguageSwitcher`, 홈, middleware)가 `isLaunchContentLanguage`로 좁힌다. 실패 시 마지막 성공 값 → 한 번도 성공 못 했으면 빌드 중에만 정적 목록, 실행 중엔 던진다(ISR이 폴백을 굳히지 않게; middleware는 잡아서 정적 목록을 30초만). 홈은 `showContentLinks = isLaunchContentLanguage(lang) && activeLanguages.includes(lang)`로 데모 CTA/섹션·소개/compare 링크·"이번 주 다인의 글" 배너를 게이트. `generateStaticParams`는 정적 상수 그대로.
+- **서비스 언어 실시간 반영**: `serviceLanguagesApi.ts::fetchActiveServiceLanguages()` → 백엔드 `GET /marketing-site/service-languages`(공유 `ServiceLanguage` 테이블). **반환은 6개 축 원본**(`MarketingLanguage[]`) — 신년운세 랜딩·hreflang·sitemap은 그대로 쓰고, 콘텐츠 축 소비처(홈, middleware)가 `isLaunchContentLanguage`로 좁히고, 레이아웃은 원본을 `LanguageSwitcher`에 넘겨 스위처가 경로별로 좁힌다. 실패 시 마지막 성공 값 → 한 번도 성공 못 했으면 빌드 중에만 정적 목록, 실행 중엔 던진다(ISR이 폴백을 굳히지 않게; middleware는 잡아서 정적 목록을 30초만). 홈은 `showContentLinks = isLaunchContentLanguage(lang) && activeLanguages.includes(lang)`로 데모 CTA/섹션·소개/compare 링크·"이번 주 다인의 글" 배너를 게이트. `generateStaticParams`는 정적 상수 그대로.
 - `DemoForm`/`LeadCaptureForm`의 `language`와 `api.ts`의 `DemoReadingInput`/`SubscribeLeadInput.language`는 `LaunchContentLanguage` 타입.
 - 신년운세: 라우트는 6개 언어(ko 포함), 신규 제출 언어는 백엔드 `getActiveServiceLanguages()`가 제한(`unsupported_language` → 일반 에러).
 - **톤 2그룹 `TONE_GROUP`**: en/es=`explain-from-scratch`(별자리에 빗대 개념부터), ko/ja=`lean-into-tradition`(사주/四柱推命과의 유사성), pt/vi 값만 유지. **compare·블로그 카피에만** 적용, dictionary 문구 차이로 구현. 백엔드 AI 콘텐츠의 "전 언어 오행명/전문용어 금지" 원칙과는 다른 층.
@@ -36,7 +36,7 @@
 - `/[lang]` 세그먼트 라우팅(언어별 SEO 인덱싱). `src/middleware.ts`: 프리픽스 없는 요청을 `detectPreferredLaunchLanguage()`(Accept-Language q값 순)로 리다이렉트, apex `saju-letter.com` → `www` 308.
 - `src/app/[lang]/layout.tsx`가 실질적 루트 레이아웃(별도 `app/layout.tsx` 없음) — `metadataBase`, Organization JSON-LD, `AttributionCapture`, GA·동의 배너.
 - 사전 `src/dictionaries/{lang}.ts`+`types.ts`, 장문 콘텐츠 `src/content/`.
-- `LanguageSwitcher.tsx`: `availableSwitcherLanguages()`를 `activeLanguages`로 필터, `buildLanguageSwitchPath()`로 **쿼리스트링(`?token=`) 보존**. `useSearchParams()` 때문에 Suspense 래퍼(`LanguageSwitcherInner`/`LanguageSwitcherFallback`) 필수 — 없으면 정적 생성 깨짐.
+- `LanguageSwitcher.tsx`: `availableSwitcherLanguages(rest, activeLanguages)`가 **경로별로** 고른다 — 트랜잭션 경로(`isTransactionalPath`: lunar-new-year·compat·privacy·disclaimer·unsubscribe)는 켠 언어 그대로, 나머지는 콘텐츠 축만. 블로그 글은 `SwitcherLanguageLimit`(글 페이지가 그 글이 있는 언어를 알림)으로 글이 없는 언어를 `/{lang}/blog`로 보낸다. `buildLanguageSwitchPath()`로 **쿼리스트링(`?token=`) 보존**. `useSearchParams()` 때문에 Suspense 래퍼(`LanguageSwitcherInner`/`LanguageSwitcherFallback`) 필수 — 없으면 정적 생성 깨짐.
 - **RSC 경계**: 함수 필드가 있는 객체(예: `COMPAT_CONTENT[lang]`)를 클라이언트 컴포넌트 prop으로 넘기지 말 것 — 클라이언트가 `language`로 직접 조회. 핸들러가 필요한 공용 컴포넌트는 `'use client'`.
 
 ## 4. 페이지별 현재 동작

@@ -3,7 +3,8 @@
 import Link from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { Suspense, useState } from 'react';
-import { availableSwitcherLanguages, buildLanguageSwitchPath, type LaunchContentLanguage, type MarketingLanguage } from '@/lib/languages';
+import { availableSwitcherLanguages, resolveLanguageSwitchPath, type MarketingLanguage } from '@/lib/languages';
+import { useSwitcherPathLimit } from './SwitcherLanguageLimit';
 
 const LANGUAGE_LABELS: Record<MarketingLanguage, string> = {
   ko: '한국어',
@@ -29,11 +30,10 @@ const LANGUAGE_CODES: Record<MarketingLanguage, string> = {
  * StorageEvent를 dispatch하는 방식이었다 — 이 사이트는 URL이 언어를 들고 다니므로, 그냥
  * 현재 pathname의 언어 세그먼트만 바꿔치기한 새 경로로 이동하면 된다.
  *
- * 드롭다운에는 MARKETING_LANGUAGES(6개) 전부가 아니라 LAUNCH_CONTENT_LANGUAGES(ko/en/ja/es)만
- * 보여준다(2026-08-08, 사용자 결정) — pt/vi는 홈/데모/리드캡처는 이미 열려 있지만 블로그/compare
- * 는 아직 없어서, 스위처로 노출하면 pt/vi로 바꾼 뒤 블로그/compare 내비게이션을 누르면 404가
- * 나는 어중간한 경험이 된다. 라우트 자체는 안 건드렸으므로 직접 링크(예: 신년운세 캠페인의
- * pt/vi 지원)는 그대로 동작한다 — 여기서는 "발견 가능성"만 숨긴다.
+ * 드롭다운 언어는 경로별로 정한다(`availableSwitcherLanguages`, 2026-10-06 전체 점검 3차) — 홈·블로그·compare는
+ * 콘텐츠 축(ko/en/ja/es) 중 켠 언어만(pt/vi는 블로그/compare가 없어 404가 난다, 2026-08-08 결정), 신년운세·궁합·
+ * 개인정보처리방침 같은 6개 언어 트랜잭션 페이지는 켠 언어 그대로. 블로그 글은 그 글이 없는 언어를 고르면
+ * 그 언어의 블로그 목록으로 보낸다(`SwitcherLanguageLimit`).
  *
  * `activeLanguages`(2026-09-07, 서비스 언어 통합 관리)는 관리자 패널에서 실시간으로 켜고 끄는
  * 값이다 — `[lang]/layout.tsx`(서버 컴포넌트)가 `fetchActiveServiceLanguages()`로 최대 1시간
@@ -70,19 +70,20 @@ function LanguageSwitcherFallback({ current }: { current: MarketingLanguage }) {
   );
 }
 
-function LanguageSwitcherInner({ current, activeLanguages }: { current: MarketingLanguage; activeLanguages: LaunchContentLanguage[] }) {
+function LanguageSwitcherInner({ current, activeLanguages }: { current: MarketingLanguage; activeLanguages: MarketingLanguage[] }) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [open, setOpen] = useState(false);
+  const pathLimit = useSwitcherPathLimit();
 
   const rest = pathname.replace(new RegExp(`^/${current}`), '');
   const queryString = searchParams.toString();
 
   function pathForLanguage(lang: MarketingLanguage): string {
-    return buildLanguageSwitchPath(rest, lang, queryString);
+    return resolveLanguageSwitchPath(rest, lang, queryString, pathLimit);
   }
 
-  const availableLanguages = availableSwitcherLanguages(rest).filter((lang) => activeLanguages.includes(lang));
+  const availableLanguages = availableSwitcherLanguages(rest, activeLanguages);
 
   return (
     <div className="relative">
@@ -106,7 +107,8 @@ function LanguageSwitcherInner({ current, activeLanguages }: { current: Marketin
   );
 }
 
-export function LanguageSwitcher({ current, activeLanguages }: { current: MarketingLanguage; activeLanguages: LaunchContentLanguage[] }) {
+/** `activeLanguages`는 관리자가 켠 언어 원본(6개 축) — 경로별로 좁히는 일은 이 컴포넌트가 한다. */
+export function LanguageSwitcher({ current, activeLanguages }: { current: MarketingLanguage; activeLanguages: MarketingLanguage[] }) {
   return (
     <Suspense fallback={<LanguageSwitcherFallback current={current} />}>
       <LanguageSwitcherInner current={current} activeLanguages={activeLanguages} />

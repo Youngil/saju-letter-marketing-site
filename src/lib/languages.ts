@@ -42,22 +42,30 @@ export function isLaunchContentLanguage(lang: MarketingLanguage): lang is Launch
 }
 
 /**
- * `LanguageSwitcher.tsx`가 드롭다운에 보여줄 언어 목록을 정한다.
- *
- * **2026-09-07부터 신년운세 캠페인(`/lunar-new-year/...`)도 서비스 언어 통합 관리를 그대로
- * 따라 한국어를 포함한다** — `saju-letter-backend`가 `CAMPAIGN_LANGUAGES` 독립 하드코딩을
- * 폐기하고 `getActiveServiceLanguages()`(한국어 포함)를 그대로 쓰도록 뒤집은 것과 짝을 이룬다
- * (meta 저장소 CLAUDE.md §9 참고). 이전엔 이 함수가 `/lunar-new-year` 경로에서만 ko를 빼는
- * 특수 분기를 갖고 있었다(2026-09-04, 종합 버그 점검 2회차로 발견한 404 버그 대응) — 이제
- * 그 캠페인도 ko를 지원하므로 이 분기 자체가 필요 없어져 제거했다. `restOfPath`는 언어
- * 세그먼트를 뺀 나머지 경로 — 더 이상 쓰이지 않지만, `LanguageSwitcher`가 이미 계산해두는
- * 값을 그대로 넘기는 시그니처는 유지한다(호출부 변경 최소화).
- *
- * pt/vi는 여전히 블로그/compare/신년운세 어디서도 콘텐츠가 없어(`isLaunchContentLanguage`)
- * 드롭다운에서 계속 숨긴다.
+ * 6개 언어 트랜잭션 축 경로(언어 세그먼트를 뺀 나머지 경로의 첫 조각) — 신년운세(+결과 `r/[id]`·수신거부)·
+ * 궁합 공유·개인정보처리방침·서비스 이용 안내·수신거부. 페이지 자체가 6개 언어로 열리는 곳들이다.
  */
-export function availableSwitcherLanguages(_restOfPath: string): LaunchContentLanguage[] {
-  return LAUNCH_CONTENT_LANGUAGES;
+const TRANSACTIONAL_ROUTE_ROOTS = ['lunar-new-year', 'compat', 'privacy', 'disclaimer', 'unsubscribe'];
+
+export function isTransactionalPath(restOfPath: string): boolean {
+  const firstSegment = restOfPath.split('/')[1] ?? '';
+  return TRANSACTIONAL_ROUTE_ROOTS.includes(firstSegment);
+}
+
+/** 스위처에 보이는 순서 — 1차 출시 4개 언어 다음에 pt/vi. */
+const SWITCHER_ORDER: MarketingLanguage[] = ['ko', 'en', 'ja', 'es', 'pt', 'vi'];
+
+/**
+ * `LanguageSwitcher.tsx`가 드롭다운에 보여줄 언어 목록을 정한다. `activeLanguages`는 관리자가 켠 언어 원본(6개 축).
+ *
+ * **경로별로 나눈다(2026-10-06 전체 점검 3차)** — 예전엔 레이아웃이 늘 콘텐츠 축(ko/en/ja/es)으로 좁혀 넘겨, pt/vi를
+ * 켜면 신년운세 랜딩·hreflang·sitemap에는 pt/vi가 실리는데 그 페이지의 스위처에는 안 보였다. 이제 트랜잭션 축 경로
+ * (`isTransactionalPath`)는 켠 언어 그대로, 나머지(홈·블로그·compare — pt/vi 콘텐츠가 없다)는 콘텐츠 축으로 좁힌다.
+ * middleware 자동 감지가 콘텐츠 축으로만 보내는 것과 같은 나눔이다.
+ */
+export function availableSwitcherLanguages(restOfPath: string, activeLanguages: readonly MarketingLanguage[]): MarketingLanguage[] {
+  const transactional = isTransactionalPath(restOfPath);
+  return SWITCHER_ORDER.filter((lang) => activeLanguages.includes(lang) && (transactional || isLaunchContentLanguage(lang)));
 }
 
 /**
@@ -116,6 +124,37 @@ export function detectPreferredLaunchLanguage(
 export function buildLanguageSwitchPath(restOfPath: string, lang: MarketingLanguage, queryString: string): string {
   const base = `/${lang}${restOfPath}`;
   return queryString ? `${base}?${queryString}` : base;
+}
+
+/**
+ * 언어마다 있는지가 다른 페이지(블로그 글)의 스위처 제한(2026-10-06 전체 점검 3차) — 글 페이지가 `SwitcherLanguageLimit`
+ * 으로 알려 준다. 그 글이 없는 언어를 고르면 404 대신 그 언어의 `fallbackRestOfPath`(블로그 목록)로 보낸다.
+ */
+export interface SwitcherPathLimit {
+  /** 이 제한이 적용되는 경로(언어 세그먼트 제외, 디코드된 값). */
+  restOfPath: string;
+  languages: readonly MarketingLanguage[];
+  fallbackRestOfPath: string;
+}
+
+function safeDecodePath(path: string): string {
+  try {
+    return decodeURI(path);
+  } catch {
+    return path;
+  }
+}
+
+export function resolveLanguageSwitchPath(
+  restOfPath: string,
+  lang: MarketingLanguage,
+  queryString: string,
+  limit: SwitcherPathLimit | null,
+): string {
+  if (limit && safeDecodePath(restOfPath) === limit.restOfPath && !limit.languages.includes(lang)) {
+    return buildLanguageSwitchPath(limit.fallbackRestOfPath, lang, '');
+  }
+  return buildLanguageSwitchPath(restOfPath, lang, queryString);
 }
 
 /**
