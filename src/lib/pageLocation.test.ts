@@ -22,89 +22,78 @@ describe('sanitizePagePath — 토큰·id 경로 조각을 자리표시자로', 
   });
 });
 
-const CASES: Array<{ name: string; href: string; referrer: string; title: string; expected: ReturnType<typeof safePageContext> }> = [
+const CASES: Array<{ name: string; href: string; referrer: string; expected: ReturnType<typeof safePageContext> }> = [
   {
-    name: '궁합 공유 — 토큰을 빼고, 제목(보낸 사람 이름)도 경로로',
+    name: '궁합 공유 — 토큰을 빼고, 제목은 다듬은 경로',
     href: `${ORIGIN}/en/compat/tok_secret?utm_source=kakao&utm_medium=share`,
     referrer: '',
-    title: 'Your compatibility with Minji',
     expected: {
       page_location: `${ORIGIN}/en/compat/:token?utm_source=kakao&utm_medium=share`,
       page_referrer: '',
       page_title: '/en/compat/:token',
-      personal: true,
     },
   },
   {
     name: '수신거부 — 쿼리 토큰은 통째로 버린다',
     href: `${ORIGIN}/ko/unsubscribe?token=secret-token`,
     referrer: '',
-    title: '수신거부',
-    expected: { page_location: `${ORIGIN}/ko/unsubscribe`, page_referrer: '', page_title: '수신거부', personal: false },
+    expected: { page_location: `${ORIGIN}/ko/unsubscribe`, page_referrer: '', page_title: '/ko/unsubscribe' },
   },
   {
     name: '신년운세 수신거부 — 토큰은 버리고 utm만 남긴다(utm 순서는 고정)',
     href: `${ORIGIN}/es/lunar-new-year/unsubscribe?utm_campaign=ny%20drip&token=abc&utm_source=email#top`,
     referrer: '',
-    title: 'Baja',
     expected: {
       page_location: `${ORIGIN}/es/lunar-new-year/unsubscribe?utm_source=email&utm_campaign=ny%20drip`,
       page_referrer: '',
-      page_title: 'Baja',
-      personal: false,
+      page_title: '/es/lunar-new-year/unsubscribe',
     },
   },
   {
     name: '신년운세 결과 id',
     href: `${ORIGIN}/ja/lunar-new-year/r/abc-123`,
     referrer: `${ORIGIN}/ja/lunar-new-year?utm_source=x`,
-    title: '結果',
     expected: {
       page_location: `${ORIGIN}/ja/lunar-new-year/r/:id`,
       page_referrer: `${ORIGIN}/ja/lunar-new-year`,
       page_title: '/ja/lunar-new-year/r/:id',
-      personal: true,
     },
   },
   {
     name: '같은 사이트 referrer의 토큰도 다듬는다',
     href: `${ORIGIN}/en/privacy`,
     referrer: `${ORIGIN}/en/compat/tok_secret?x=1`,
-    title: 'Privacy',
-    expected: { page_location: `${ORIGIN}/en/privacy`, page_referrer: `${ORIGIN}/en/compat/:token`, page_title: 'Privacy', personal: false },
+    expected: { page_location: `${ORIGIN}/en/privacy`, page_referrer: `${ORIGIN}/en/compat/:token`, page_title: '/en/privacy' },
   },
   {
     name: '외부 referrer는 origin만',
     href: `${ORIGIN}/en`,
     referrer: 'https://www.reddit.com/r/kpop/comments/abc/?ref=share',
-    title: 'Saju Letter',
-    expected: { page_location: `${ORIGIN}/en`, page_referrer: 'https://www.reddit.com/', page_title: 'Saju Letter', personal: false },
+    expected: { page_location: `${ORIGIN}/en`, page_referrer: 'https://www.reddit.com/', page_title: '/en' },
   },
   {
     name: '해석할 수 없는 주소는 빈 값',
     href: 'not a url',
     referrer: '',
-    title: 'x',
-    expected: { page_location: '', page_referrer: '', page_title: '', personal: false },
+    expected: { page_location: '', page_referrer: '', page_title: '' },
   },
 ];
 
 describe('safePageContext', () => {
-  it.each(CASES)('$name', ({ href, referrer, title, expected }) => {
-    expect(safePageContext(href, referrer, title)).toEqual(expected);
+  it.each(CASES)('$name', ({ href, referrer, expected }) => {
+    expect(safePageContext(href, referrer)).toEqual(expected);
   });
 
-  it('앞서 본 개인화 페이지의 제목이 이동 뒤에도 남아 있으면 경로로 바꾼다', () => {
-    const unsafe = new Set(['Your compatibility with Minji']);
-    expect(safePageContext(`${ORIGIN}/en/blog`, '', 'Your compatibility with Minji', unsafe).page_title).toBe('/en/blog');
-    expect(safePageContext(`${ORIGIN}/en/blog`, '', 'Blog', unsafe).page_title).toBe('Blog');
+  it('제목은 언제나 다듬은 경로 — document.title(이름·AI 헤드라인)을 받는 자리 자체가 없다', () => {
+    expect(safePageContext.length).toBe(2);
+    expect(safePageContext(`${ORIGIN}/en/blog/what-is-saju?utm_source=x`, '').page_title).toBe('/en/blog/what-is-saju');
   });
 });
 
 describe('inlinePageContextFunctionSource — GoogleAnalytics.tsx 인라인 스크립트가 같은 답을 낸다', () => {
   const inline = new Function(`return (${inlinePageContextFunctionSource()});`)() as typeof safePageContext;
 
-  it.each(CASES)('$name', ({ href, referrer, title, expected }) => {
-    expect(inline(href, referrer, title)).toEqual(expected);
+  it.each(CASES)('$name', ({ href, referrer, expected }) => {
+    expect(inline(href, referrer)).toEqual(expected);
   });
 });

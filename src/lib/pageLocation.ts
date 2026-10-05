@@ -9,7 +9,9 @@
  * - 경로: 토큰·id 조각을 자리표시자로(`/compat/:token`, `/lunar-new-year/r/:id`).
  * - 쿼리: 통째로 버리고 유입 분석에 필요한 `utm_*`만 남긴다(GA4 세션 출처가 page_location의 utm을 읽는다).
  * - referrer: 같은 사이트면 경로만 같은 규칙으로 다듬고(쿼리 없음), 외부면 origin만.
- * - 제목: 개인화 페이지 제목엔 사람 이름이 들어간다("OOO님과의 궁합") — 다듬은 경로로 바꾼다.
+ * - 제목: `document.title`은 **어느 페이지에서도 보내지 않고** 다듬은 경로를 제목으로 쓴다(2026-10-06 전체 점검 5차).
+ *   개인화 페이지 제목엔 사람 이름이 들어가는데("OOO님과의 궁합", 신년운세 결과의 AI 헤드라인), 클라이언트 이동에선
+ *   새 제목이 page_view effect보다 늦게 붙을 수 있어 "언제 읽은 제목이 누구 것인가"를 타이밍으로 가릴 수 없었다.
  *
  * **같은 규칙이 `GoogleAnalytics.tsx`의 인라인 스크립트(첫 로드의 `config`)에도 있다** — 인라인은 TS를 import할 수
  * 없어 `inlinePageContextFunctionSource()`가 규칙 상수로 JS 원문을 만든다. 둘이 같은 답을 내는지는 테스트가 확인한다.
@@ -30,9 +32,8 @@ export const KEPT_QUERY_KEYS: readonly string[] = ['utm_source', 'utm_medium', '
 export interface SafePageContext {
   page_location: string;
   page_referrer: string;
+  /** 다듬은 경로(쿼리 없음) — `document.title`은 쓰지 않는다. */
   page_title: string;
-  /** 경로에 토큰·id가 있던 페이지인가(제목에 이름이 있을 수 있다). */
-  personal: boolean;
 }
 
 export function sanitizePagePath(pathname: string): string {
@@ -58,38 +59,28 @@ function safeReferrer(referrer: string, siteOrigin: string): string {
   }
 }
 
-/**
- * GA4 page_view·이후 이벤트에 쓸 위치·referrer·제목. `unsafeTitles`는 앞서 본 개인화 페이지의 제목들 — 클라이언트 이동
- * 직후 `document.title`이 아직 이전(이름이 든) 제목일 수 있어, 그 제목이면 다듬은 경로로 바꾼다.
- */
-export function safePageContext(
-  href: string,
-  referrer: string,
-  title: string,
-  unsafeTitles?: ReadonlySet<string>,
-): SafePageContext {
+/** GA4 page_view·이후 이벤트에 쓸 위치·referrer·제목(제목은 늘 다듬은 경로). */
+export function safePageContext(href: string, referrer: string): SafePageContext {
   let url: URL;
   try {
     url = new URL(href);
   } catch {
-    return { page_location: '', page_referrer: '', page_title: '', personal: false };
+    return { page_location: '', page_referrer: '', page_title: '' };
   }
   const path = sanitizePagePath(url.pathname);
-  const personal = path !== url.pathname;
   return {
     page_location: url.origin + path + keptQuery(url.searchParams),
     page_referrer: safeReferrer(referrer, url.origin),
-    page_title: personal || unsafeTitles?.has(title) ? path : title,
-    personal,
+    page_title: path,
   };
 }
 
 /**
- * `safePageContext(href, referrer, title)`와 같은 일을 하는 ES5 함수 원문 — `GoogleAnalytics.tsx`의 인라인 스크립트용
- * (`(<원문>)(location.href, document.referrer, document.title)`). 규칙 상수를 JSON으로 박는다.
+ * `safePageContext(href, referrer)`와 같은 일을 하는 ES5 함수 원문 — `GoogleAnalytics.tsx`의 인라인 스크립트용
+ * (`(<원문>)(location.href, document.referrer)`). 규칙 상수를 JSON으로 박는다.
  */
 export function inlinePageContextFunctionSource(): string {
-  return `function (href, referrer, title) {
+  return `function (href, referrer) {
     var rules = ${JSON.stringify(PAGE_PATH_RULES)};
     var keep = ${JSON.stringify(KEPT_QUERY_KEYS)};
     function path(p) {
@@ -97,9 +88,8 @@ export function inlinePageContextFunctionSource(): string {
       return p;
     }
     var url;
-    try { url = new URL(href); } catch (e) { return { page_location: '', page_referrer: '', page_title: '', personal: false }; }
+    try { url = new URL(href); } catch (e) { return { page_location: '', page_referrer: '', page_title: '' }; }
     var safePath = path(url.pathname);
-    var personal = safePath !== url.pathname;
     var parts = [];
     for (var j = 0; j < keep.length; j++) {
       var value = url.searchParams.get(keep[j]);
@@ -115,8 +105,7 @@ export function inlinePageContextFunctionSource(): string {
     return {
       page_location: url.origin + safePath + (parts.length ? '?' + parts.join('&') : ''),
       page_referrer: ref,
-      page_title: personal ? safePath : title,
-      personal: personal
+      page_title: safePath
     };
   }`;
 }

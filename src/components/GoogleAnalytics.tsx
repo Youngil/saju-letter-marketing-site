@@ -20,9 +20,11 @@ import { GoogleAnalyticsPageView } from './GoogleAnalyticsPageView';
  *
  * **자동 page_view 끔(2026-10-06 전체 점검 3차 후속, 개인정보)** — 예전엔 `gtag('config', ID)`가 주소 전체(궁합 토큰,
  * 신년운세 결과 id, 수신거부 `?token=`)로 page_view를 보냈다. 이제 `config`는 같은 인라인 스크립트에서(동의 기본값
- * 바로 뒤, 어떤 이벤트보다 먼저) `send_page_view: false` + 다듬은 위치·referrer·제목으로 부르고(`pageLocation.ts`의
- * 같은 규칙을 JS 원문으로), page_view는 `GoogleAnalyticsPageView`가 경로가 바뀔 때마다 보낸다. 명령은 dataLayer에
- * 쌓였다가 gtag.js가 로드되면 순서대로 처리되므로 config를 gtag.js 로드 전에 넣어도 된다(Google 기본 스니펫과 같다).
+ * 바로 뒤, 어떤 이벤트보다 먼저) `send_page_view: false`로 부르고, page_view는 `GoogleAnalyticsPageView`가 경로가
+ * 바뀔 때마다 보낸다. 명령은 dataLayer에 쌓였다가 gtag.js가 로드되면 순서대로 처리되므로 config를 gtag.js 로드 전에
+ * 넣어도 된다(Google 기본 스니펫과 같다). 다듬은 위치·referrer·제목(`pageLocation.ts`의 같은 규칙을 JS 원문으로)은
+ * `config`가 아니라 그 앞의 `gtag('set', …)`으로 넣는다 — config 값은 뒤의 `set`보다 우선해 이동 뒤 이벤트의 위치를
+ * 첫 화면 값으로 고정시켰다(2026-10-06 전체 점검 5차). 제목은 어디서도 `document.title`을 쓰지 않는다.
  * GA4 콘솔의 향상된 측정 "브라우저 기록 이벤트 기반 페이지 변경"은 꺼 둬야 한다(CLAUDE.md §7).
  */
 export function GoogleAnalytics() {
@@ -55,16 +57,18 @@ export function GoogleAnalytics() {
           gtag('js', new Date());
           var page = { page_location: '', page_referrer: '', page_title: '' };
           try {
-            page = (${inlinePageContextFunctionSource()})(window.location.href, document.referrer, document.title);
+            page = (${inlinePageContextFunctionSource()})(window.location.href, document.referrer);
           } catch (e) {}
-          // 다듬기에 실패해도(아주 오래된 브라우저) 주소 전체로 떨어지지 않게 사이트 루트만 남긴다.
-          var config = {
-            send_page_view: false,
+          // 다듬은 위치·referrer·제목은 config가 아니라 set으로(2026-10-06 전체 점검 5차) — config에 넣은 값은 그 측정 ID의
+          // 모든 이벤트에서 나중의 set보다 앞서, 클라이언트 이동 뒤 GoogleAnalyticsPageView가 set한 새 위치를 page_view가
+          // 아닌 이벤트(compat_result_view 등)에서 첫 화면 값으로 덮었다. 다듬기에 실패해도(아주 오래된 브라우저) 주소
+          // 전체로 떨어지지 않게 사이트 루트만 남기고, 제목도 document.title 대신 경로로.
+          gtag('set', {
             page_location: page.page_location || (window.location.protocol + '//' + window.location.host + '/'),
-            page_referrer: page.page_referrer
-          };
-          if (page.personal) config.page_title = page.page_title;
-          gtag('config', '${GA_MEASUREMENT_ID}', config);
+            page_referrer: page.page_referrer,
+            page_title: page.page_title || '/'
+          });
+          gtag('config', '${GA_MEASUREMENT_ID}', { send_page_view: false });
         `}
       </Script>
       <Script src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`} strategy="afterInteractive" />
