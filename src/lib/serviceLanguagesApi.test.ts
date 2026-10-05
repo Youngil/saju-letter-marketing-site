@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   activeContentLanguages,
+  fetchServiceLanguagesOnce,
   loadActiveServiceLanguages,
   parseServiceLanguages,
   resetServiceLanguagesMemoryForTest,
@@ -68,5 +69,26 @@ describe('loadActiveServiceLanguages — 실패 처리', () => {
     vi.stubEnv('NEXT_PHASE', 'phase-production-build');
     vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new TypeError('fetch failed')));
     await expect(loadActiveServiceLanguages()).resolves.toEqual(STATIC_SERVICE_LANGUAGES);
+  });
+});
+
+describe('fetchServiceLanguagesOnce — middleware용 한 번 조회', () => {
+  it('마지막 성공 값이 있어도 실패는 그대로 던진다(middleware 캐시가 짧게 다시 시도하도록)', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValueOnce(jsonResponse(200, { languages: ['ko'], defaultLanguage: 'ko' })));
+    await fetchServiceLanguagesOnce();
+
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(jsonResponse(503, { error: 'down' })));
+    await expect(fetchServiceLanguagesOnce()).rejects.toMatchObject({ status: 503 });
+  });
+
+  it('timeoutMs를 주면 그 시간 제한 signal로 부른다', async () => {
+    const fetchMock = vi.fn().mockResolvedValue(jsonResponse(200, { languages: ['en'] }));
+    vi.stubGlobal('fetch', fetchMock);
+    const timeoutSpy = vi.spyOn(AbortSignal, 'timeout');
+
+    await fetchServiceLanguagesOnce({ timeoutMs: 2000 });
+
+    expect(timeoutSpy).toHaveBeenCalledWith(2000);
+    expect(fetchMock.mock.calls[0]![1].signal).toBe(timeoutSpy.mock.results[0]!.value);
   });
 });
