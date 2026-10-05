@@ -185,11 +185,16 @@ export const dictionary: MarketingDictionary = {
       appBridgeTitle: 'Want a short letter every morning?',
       appBridgeBody:
         'Separate from this New Year reading, Dain writes a brief morning note in the Saju Letter app — warm, personal, and never a long fortune report.',
+      publicCtaTitle: 'Curious about your own year?',
+      publicCtaBody: 'Get a short New Year reading of your own, based on your birth chart.',
+      publicCtaButton: 'Get my own reading',
       errors: {
         email: 'Please enter a valid email address.',
         consent: 'Please check the box to receive the email series.',
         generic: 'Something went wrong — please try again.',
         already: "This reading's already signed up for the series.",
+        notOwner: 'Only the person who created this reading can sign up for its email series. Please open it in the browser you used to create it.',
+        unavailable: "The email series isn't available for this reading.",
       },
     },
     unsubscribe: {

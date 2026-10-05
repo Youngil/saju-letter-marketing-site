@@ -188,11 +188,16 @@ export const dictionary: MarketingDictionary = {
       appBridgeTitle: 'Bạn muốn một lá thư ngắn mỗi sáng?',
       appBridgeBody:
         'Tách biệt với bài đọc năm mới này, Dain viết một ghi chú ngắn mỗi sáng trong ứng dụng Saju Letter — ấm áp, riêng tư, và không bao giờ là một báo cáo vận mệnh dài.',
+      publicCtaTitle: 'Bạn tò mò về năm mới của chính mình?',
+      publicCtaBody: 'Nhận một bài đọc năm mới ngắn dành riêng cho bạn, dựa trên lá số của bạn.',
+      publicCtaButton: 'Xem bài đọc của tôi',
       errors: {
         email: 'Vui lòng nhập một địa chỉ email hợp lệ.',
         consent: 'Vui lòng đánh dấu vào ô để nhận chuỗi email.',
         generic: 'Đã có lỗi xảy ra — vui lòng thử lại.',
         already: 'Bài đọc này đã được đăng ký vào chuỗi email rồi.',
+        notOwner: 'Chỉ người đã tạo bài đọc này mới có thể đăng ký chuỗi email. Vui lòng mở bài đọc trên trình duyệt bạn đã dùng để tạo.',
+        unavailable: 'Chuỗi email không khả dụng cho bài đọc này.',
       },
     },
     unsubscribe: {

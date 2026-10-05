@@ -192,11 +192,16 @@ export const dictionary: MarketingDictionary = {
       appBridgeTitle: '매일 아침 짧은 편지도 받아보실래요?',
       appBridgeBody:
         '이번 신년운세와는 별개로, 사주편지 앱에서는 다인이 짧은 아침 노트를 보내드려요 — 따뜻하고 개인적인, 긴 운세 리포트가 아닌 편지예요.',
+      publicCtaTitle: '내 신년운세도 궁금하다면',
+      publicCtaBody: '생년월일로 나만의 짧은 신년운세를 받아 보세요.',
+      publicCtaButton: '내 신년운세 보기',
       errors: {
         email: '올바른 이메일 주소를 입력해주세요.',
         consent: '이메일 시리즈를 받으려면 동의해주세요.',
         generic: '문제가 발생했어요. 다시 시도해주세요.',
         already: '이미 이 운세로 시리즈를 신청하셨어요.',
+        notOwner: '이 운세를 만든 분만 이메일 시리즈를 신청할 수 있어요. 운세를 만들 때 쓴 브라우저에서 열어 주세요.',
+        unavailable: '이 운세로는 이메일 시리즈를 신청할 수 없어요.',
       },
     },
     unsubscribe: {

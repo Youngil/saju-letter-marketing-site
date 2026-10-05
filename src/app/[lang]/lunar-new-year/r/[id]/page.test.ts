@@ -1,4 +1,6 @@
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { isValidElement, type ReactElement, type ReactNode } from 'react';
+import { EmailSignupForm } from '@/components/lunar-new-year/EmailSignupForm';
 
 class NotFoundSentinel extends Error {}
 vi.mock('next/navigation', () => ({
@@ -7,24 +9,49 @@ vi.mock('next/navigation', () => ({
   },
 }));
 
-// getReading은 saju-letter-backend를 실제로 호출한다 — 언어 게이트만 검증하는 이 테스트에서는
-// 네트워크 호출 없이 항상 같은 결과를 돌려주도록 목킹한다(compat/[token]/page.test.ts와 같은 패턴).
-vi.mock('@/lib/lunarNewYearApi', () => ({
-  getReading: vi.fn().mockResolvedValue({
-    id: 'sample-reading-id',
-    name: 'Test',
-    language: 'en',
-    dayStem: '甲',
-    content: {
-      title: 'Sample title',
-      greeting: 'Sample greeting',
-      overview: 'Sample overview',
-      highlight: 'Sample highlight',
-      closing: 'Sample closing',
-    },
-    hasEmailSubscription: false,
+// 요청 쿠키 — 테스트마다 소유자 쿠키를 넣었다 뺐다 한다.
+const cookieJar = new Map<string, string>();
+vi.mock('next/headers', () => ({
+  cookies: async () => ({
+    get: (name: string) => (cookieJar.has(name) ? { name, value: cookieJar.get(name)! } : undefined),
   }),
 }));
+
+// getReading은 saju-letter-backend를 실제로 호출한다 — 네트워크 호출 없이 항상 같은 결과를 돌려주도록 목킹한다
+// (compat/[token]/page.test.ts와 같은 패턴). 기본은 공유 링크로 연 사람이 받는 공개 응답.
+const PUBLIC_READING = {
+  id: 'sample-reading-id',
+  name: 'Test',
+  language: 'en',
+  dayStem: '甲',
+  content: {
+    title: 'Sample title',
+    greeting: 'Sample greeting',
+    overview: 'Sample overview',
+    highlight: 'Sample highlight',
+    closing: 'Sample closing',
+  },
+  isOwner: false,
+};
+vi.mock('@/lib/lunarNewYearApi', () => ({
+  getReading: vi.fn(),
+}));
+
+beforeEach(async () => {
+  cookieJar.clear();
+  const { getReading } = await import('@/lib/lunarNewYearApi');
+  vi.mocked(getReading).mockReset();
+  vi.mocked(getReading).mockResolvedValue(PUBLIC_READING as never);
+});
+
+/** 서버 컴포넌트가 돌려준 JSX 트리(렌더 전)에서 특정 컴포넌트 엘리먼트를 찾는다. */
+function findElements(node: ReactNode, type: unknown): ReactElement[] {
+  if (Array.isArray(node)) return node.flatMap((child) => findElements(child, type));
+  if (!isValidElement(node)) return [];
+  const own = node.type === type ? [node] : [];
+  const children = (node.props as { children?: ReactNode }).children;
+  return [...own, ...findElements(children, type)];
+}
 
 /**
  * 2026-09-08 4차 종합 버그 점검(항목 1) 회귀 테스트 — `/[lang]/lunar-new-year/r/[id]`(신년운세
@@ -55,5 +82,68 @@ describe('/[lang]/lunar-new-year/r/[id] 언어 게이트 — 6개 언어(MARKETI
     await expect(
       LunarNewYearResultPage({ params: Promise.resolve({ lang: 'xx', id: 'sample-reading-id' }) }),
     ).rejects.toBeInstanceOf(NotFoundSentinel);
+  });
+});
+
+/**
+ * 2026-10-07 전체 점검 7차 항목 1 — 공유 링크로 연 사람에게는 메일 구독 폼·구독 상태를 보이지 않는다. 결과를 만든 브라우저의
+ * httpOnly 쿠키(`nyo_<id>`)에 있는 소유자 토큰을 백엔드가 확인해 준(isOwner) 경우에만 폼을 그린다.
+ */
+describe('/[lang]/lunar-new-year/r/[id] 소유자만 메일 구독', () => {
+  const READING_ID = '3f2b8c1e-4d5a-4b6c-8d7e-9f0a1b2c3d4e';
+  const OWNER_TOKEN = 'b3duZXItdG9rZW4tZXhhbXBsZS12YWx1ZQ';
+
+  async function renderPage() {
+    const { default: LunarNewYearResultPage } = await import('./page');
+    return LunarNewYearResultPage({ params: Promise.resolve({ lang: 'en', id: READING_ID }) });
+  }
+
+  it('쿠키가 없으면(공유 링크) 토큰 없이 조회하고 구독 폼을 그리지 않는다', async () => {
+    const { getReading } = await import('@/lib/lunarNewYearApi');
+    const tree = await renderPage();
+    expect(getReading).toHaveBeenCalledWith(READING_ID, undefined);
+    expect(findElements(tree, EmailSignupForm)).toHaveLength(0);
+  });
+
+  it('소유자 쿠키가 있고 백엔드가 isOwner를 확인하면 토큰과 구독 상태를 폼에 넘긴다', async () => {
+    cookieJar.set(`nyo_${READING_ID}`, OWNER_TOKEN);
+    const { getReading } = await import('@/lib/lunarNewYearApi');
+    vi.mocked(getReading).mockResolvedValue({
+      ...PUBLIC_READING,
+      isOwner: true,
+      hasEmailSubscription: true,
+      subscriptionAvailable: true,
+    } as never);
+    const tree = await renderPage();
+    expect(getReading).toHaveBeenCalledWith(READING_ID, OWNER_TOKEN);
+    const forms = findElements(tree, EmailSignupForm);
+    expect(forms).toHaveLength(1);
+    expect(forms[0]!.props).toMatchObject({ readingId: READING_ID, ownerToken: OWNER_TOKEN, alreadySubscribed: true });
+  });
+
+  it('쿠키가 있어도 백엔드가 소유자가 아니라고 하면(토큰 불일치) 폼이 없다', async () => {
+    cookieJar.set(`nyo_${READING_ID}`, OWNER_TOKEN);
+    const tree = await renderPage();
+    expect(findElements(tree, EmailSignupForm)).toHaveLength(0);
+  });
+
+  it('위기 신호로 대체된 결과(subscriptionAvailable false)는 소유자에게도 폼이 없다', async () => {
+    cookieJar.set(`nyo_${READING_ID}`, OWNER_TOKEN);
+    const { getReading } = await import('@/lib/lunarNewYearApi');
+    vi.mocked(getReading).mockResolvedValue({
+      ...PUBLIC_READING,
+      isOwner: true,
+      hasEmailSubscription: false,
+      subscriptionAvailable: false,
+    } as never);
+    const tree = await renderPage();
+    expect(findElements(tree, EmailSignupForm)).toHaveLength(0);
+  });
+
+  it('모양이 틀린 쿠키 값은 백엔드로 보내지 않는다', async () => {
+    cookieJar.set(`nyo_${READING_ID}`, 'not a token!');
+    const { getReading } = await import('@/lib/lunarNewYearApi');
+    await renderPage();
+    expect(getReading).toHaveBeenCalledWith(READING_ID, undefined);
   });
 });

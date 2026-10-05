@@ -2,6 +2,7 @@ import { cache } from 'react';
 import type { MarketingLanguage } from './languages';
 import type { Pillar } from './saju';
 import { ApiError, isRetryableApiError, request, sendBeaconJson } from './apiClient';
+import { OWNER_TOKEN_HEADER, OWNER_TOKEN_ROUTE } from './readingOwner';
 
 /**
  * saju-letter-newyear-campaign 이관분(2026-08-07) — 백엔드는 무변경이라 기존 `/newyear-campaign/*`
@@ -56,6 +57,10 @@ export interface ReadingContent {
 export interface CreateReadingResponse {
   readingId: string;
   content: ReadingContent;
+  /** 만든 사람만 메일 구독을 할 수 있게 하는 비공개 토큰(2026-10-07) — 주소·GA에 절대 넣지 않는다(`readingOwner.ts`). */
+  ownerToken?: string;
+  /** false면 위기 신호로 대체된 결과라 메일 구독을 받지 않는다. */
+  subscriptionAvailable?: boolean;
 }
 
 export function createReading(input: CreateReadingInput): Promise<CreateReadingResponse> {
@@ -88,7 +93,13 @@ export interface ReadingView {
   language: MarketingLanguage;
   dayStem: string;
   content: ReadingContent;
-  hasEmailSubscription: boolean;
+  /**
+   * 요청에 맞는 소유자 토큰이 있을 때만 true(2026-10-07) — 그때만 아래 두 값이 온다. 공유 링크로 연 사람은 false라 구독 폼도
+   * 구독 상태도 보지 않는다(구 백엔드는 이 필드가 없다 → 공개 화면).
+   */
+  isOwner?: boolean;
+  hasEmailSubscription?: boolean;
+  subscriptionAvailable?: boolean;
 }
 
 /**
@@ -96,10 +107,14 @@ export interface ReadingView {
  * getCompatInvite와 같은 이유·같은 수정(예전엔 일시 오류도 404 화면이 됐다). 한 요청 안의 generateMetadata·
  * 페이지 호출은 `cache()`로 한 번에 묶는다.
  */
-export const getReading = cache(async (id: string): Promise<ReadingView | null> => {
+export const getReading = cache(async (id: string, ownerToken?: string): Promise<ReadingView | null> => {
   try {
     // id는 주소에서 온 값이라 인코딩한다 — `..` 같은 값으로 다른 백엔드 경로를 부르지 못하게(2026-10-06).
-    return await request<ReadingView>(`/newyear-campaign/readings/${encodeURIComponent(id)}`);
+    // 소유자 토큰은 만든 사람 브라우저의 httpOnly 쿠키에서만 온다(서버 렌더 전용, 2026-10-07).
+    return await request<ReadingView>(
+      `/newyear-campaign/readings/${encodeURIComponent(id)}`,
+      ownerToken ? { headers: { [OWNER_TOKEN_HEADER]: ownerToken } } : undefined,
+    );
   } catch (error) {
     if (error instanceof ApiError && !isRetryableApiError(error)) return null;
     throw error;
@@ -108,6 +123,8 @@ export const getReading = cache(async (id: string): Promise<ReadingView | null> 
 
 export interface SubscribeInput {
   readingId: string;
+  /** 결과를 만든 사람의 비공개 토큰 — 없거나 틀리면 403 `not_reading_owner`(2026-10-07). */
+  ownerToken: string;
   email: string;
   consent: boolean;
   turnstileToken?: string;
@@ -115,6 +132,30 @@ export interface SubscribeInput {
 
 export function subscribeForDrip(input: SubscribeInput): Promise<{ subscriptionId: string }> {
   return request('/newyear-campaign/subscriptions', { method: 'POST', body: JSON.stringify(input) });
+}
+
+/**
+ * 결과를 만든 브라우저에 소유자 토큰을 httpOnly 쿠키로 남긴다(2026-10-07, `readingOwner.ts`) — 이 사이트 자체 라우트를
+ * 부른다(백엔드 아님). 실패해도 결과 화면으로는 넘어가야 하므로 던지지 않고 성공 여부만 돌려준다(한 번 다시 시도).
+ */
+export async function rememberReadingOwner(readingId: string, ownerToken: string): Promise<boolean> {
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    try {
+      const response = await fetch(OWNER_TOKEN_ROUTE, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ readingId, ownerToken }),
+        credentials: 'same-origin',
+        signal: AbortSignal.timeout(10_000),
+      });
+      if (response.ok) return true;
+      // 4xx는 다시 보내도 같다.
+      if (response.status < 500) break;
+    } catch (error) {
+      console.warn('rememberReadingOwner failed', error);
+    }
+  }
+  return false;
 }
 
 export function unsubscribeFromCampaign(token: string): Promise<{ status: string }> {

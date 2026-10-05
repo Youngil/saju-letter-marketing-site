@@ -5,7 +5,7 @@ import { useRef, useState } from 'react';
 import type { MarketingDictionary } from '@/dictionaries/types';
 import type { MarketingLanguage } from '@/lib/languages';
 import { isOldEnough } from '@/lib/age';
-import { createReading } from '@/lib/lunarNewYearApi';
+import { createReading, rememberReadingOwner } from '@/lib/lunarNewYearApi';
 import { Turnstile, TURNSTILE_ENABLED, type TurnstileHandle } from '@/components/Turnstile';
 import { isValidBirthDate, parseBirthTime } from '@/lib/birthDate';
 import { mapPublicFormError } from '@/lib/publicForm';
@@ -104,6 +104,9 @@ export function ReadingForm({
         turnstileToken,
       });
 
+      // 만든 사람만 메일 구독을 할 수 있게 소유자 토큰을 이 브라우저의 httpOnly 쿠키로 남긴 뒤 넘어간다(2026-10-07) —
+      // 주소에는 절대 넣지 않는다(공유 링크·GA로 샌다). 저장에 실패해도 결과는 보여 준다(구독 폼만 안 보인다).
+      if (result.ownerToken) await rememberReadingOwner(result.readingId, result.ownerToken);
       router.push(`/${language}/lunar-new-year/r/${result.readingId}`);
     } catch (err) {
       setError(

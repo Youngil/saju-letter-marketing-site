@@ -186,11 +186,16 @@ export const dictionary: MarketingDictionary = {
       appBridgeTitle: '¿Quieres una carta corta cada mañana?',
       appBridgeBody:
         'Aparte de esta lectura de Año Nuevo, Dain escribe una nota breve cada mañana en la app de Saju Letter — cálida, personal, y nunca un informe de fortuna largo.',
+      publicCtaTitle: '¿Te da curiosidad tu propio año?',
+      publicCtaBody: 'Recibe tu propia lectura breve de Año Nuevo, basada en tu carta de nacimiento.',
+      publicCtaButton: 'Quiero mi lectura',
       errors: {
         email: 'Por favor, ingresa una dirección de correo electrónico válida.',
         consent: 'Por favor, marca la casilla para recibir la serie de correos.',
         generic: 'Algo salió mal — por favor, inténtalo de nuevo.',
         already: 'Esta lectura ya está registrada en la serie.',
+        notOwner: 'Solo quien creó esta lectura puede suscribirse a su serie de correos. Ábrela en el mismo navegador que usaste para crearla.',
+        unavailable: 'La serie de correos no está disponible para esta lectura.',
       },
     },
     unsubscribe: {

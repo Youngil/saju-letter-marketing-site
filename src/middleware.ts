@@ -77,6 +77,7 @@ export async function middleware(request: NextRequest, event: NextFetchEvent) {
 }
 
 export const config = {
-  // _next(빌드 산출물), 확장자가 있는 정적 파일(og 이미지 등), sitemap/robots는 리다이렉트 대상에서 제외.
-  matcher: ['/((?!_next|sitemap.xml|robots.txt|.*\\..*).*)'],
+  // _next(빌드 산출물), 확장자가 있는 정적 파일(og 이미지 등), sitemap/robots, 이 사이트 자체 API(`/api/…` — 신년운세
+  // 소유자 쿠키 저장, 2026-10-07)는 리다이렉트 대상에서 제외.
+  matcher: ['/((?!api/|_next|sitemap.xml|robots.txt|.*\\..*).*)'],
 };

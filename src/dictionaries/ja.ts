@@ -184,11 +184,16 @@ export const dictionary: MarketingDictionary = {
       appBridgeTitle: '毎朝、短い手紙が欲しいですか？',
       appBridgeBody:
         'この新年占いとは別に、ダインがサジュレターのアプリで毎朝短い手紙を書いています — 温かく、あなただけの一文で、長い占いレポートではありません。',
+      publicCtaTitle: 'あなたの新年も占ってみませんか？',
+      publicCtaBody: '生年月日から、あなただけの短い新年占いをお届けします。',
+      publicCtaButton: '自分の新年占いを見る',
       errors: {
         email: '正しいメールアドレスを入力してください。',
         consent: 'メールシリーズを受け取るには同意が必要です。',
         generic: '問題が発生しました。もう一度お試しください。',
         already: 'この結果はすでにシリーズに登録済みです。',
+        notOwner: 'メールシリーズに登録できるのは、この結果を作ったご本人だけです。作成したときと同じブラウザで開いてください。',
+        unavailable: 'この結果ではメールシリーズをご利用いただけません。',
       },
     },
     unsubscribe: {

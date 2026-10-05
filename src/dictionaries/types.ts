@@ -226,11 +226,22 @@ export interface MarketingDictionary {
       /** 결과 하단 soft connect — 캠페인 Fortune 톤과 별도로 아침 편지/앱 안내. */
       appBridgeTitle: string;
       appBridgeBody: string;
+      /**
+       * 공유 링크로 연 사람(결과를 만든 사람이 아님)에게 메일 구독 폼 대신 보여 주는 "나도 해 보기" 안내(2026-10-07) —
+       * 신년운세 랜딩으로 보낸다.
+       */
+      publicCtaTitle: string;
+      publicCtaBody: string;
+      publicCtaButton: string;
       errors: {
         email: string;
         consent: string;
         generic: string;
         already: string;
+        /** 백엔드 403 `not_reading_owner` — 소유자 토큰이 없거나 틀림(다른 브라우저 등). 2026-10-07. */
+        notOwner: string;
+        /** 백엔드 409 `subscription_unavailable` — 이 결과는 메일 구독을 받지 않음. 2026-10-07. */
+        unavailable: string;
       };
     };
     unsubscribe: {
