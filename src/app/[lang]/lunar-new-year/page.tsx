@@ -50,7 +50,12 @@ export async function generateMetadata({ params }: { params: Promise<{ lang: str
   };
 }
 
-/** 기간·활성 언어를 5분마다 다시 읽는다(2026-10-06 — 랜딩을 서버에서 그리면서). */
+/**
+ * 캠페인 기간은 5분마다 다시 읽는다(2026-10-06 — 랜딩을 서버에서 그리면서). 활성 언어는 이 주기와 별개로
+ * `fetchActiveServiceLanguages`의 데이터 캐시(최대 1시간, 레이아웃 언어 스위처와 같은 값)를 따른다 — 관리자가 언어를
+ * 끄면 이 랜딩이 최대 1시간 더 열려 있을 수 있지만, 새 결과 생성은 백엔드가 자기 활성 언어 목록(주기 갱신)으로 거절한다(`unsupported_language`
+ * → 일반 오류 문구). 2026-10-07 전체 점검 7차에서 "5분마다 활성 언어도 다시 읽는다"던 예전 주석을 바로잡았다.
+ */
 export const revalidate = 300;
 
 export default async function LunarNewYearPage({ params }: { params: Promise<{ lang: string }> }) {
