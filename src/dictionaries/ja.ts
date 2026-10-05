@@ -115,6 +115,8 @@ export const dictionary: MarketingDictionary = {
     notFound: '該当する登録が見つかりませんでした。',
     error: 'ただいま処理できませんでした。もう一度お試しください。',
     retry: 'もう一度試す',
+    confirmPrompt: '下のボタンを押すと、サジュレターからのメール配信を停止します。',
+    confirmButton: '配信を停止する',
   },
   footer: {
     privacyNote: '満16歳確認のため太陽暦の生年月日をサーバーに送りますが、保存はしません。四柱の計算はブラウザ内で行います。',
@@ -206,6 +208,8 @@ export const dictionary: MarketingDictionary = {
       notFound: '該当する登録が見つかりませんでした。',
       error: 'ただいま処理できませんでした。もう一度お試しください。',
       retry: 'もう一度試す',
+      confirmPrompt: '下のボタンを押すと、新年メールシリーズの配信を停止します。',
+      confirmButton: '配信を停止する',
     },
     footerPrivacy: 'これはサジュレターによるプロモーション企画です。生年月日時はブラウザの外に送信されません — 計算結果のみが送信されます。',
   },

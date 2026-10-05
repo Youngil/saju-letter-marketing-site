@@ -114,6 +114,8 @@ export const dictionary: MarketingDictionary = {
     notFound: "We couldn't find that subscription.",
     error: "We couldn't process this right now. Please try again.",
     retry: 'Try again',
+    confirmPrompt: 'Press the button below to stop receiving Saju Letter emails.',
+    confirmButton: 'Unsubscribe',
   },
   footer: {
     privacyNote: 'We send your Gregorian date of birth only to confirm you are 16 or older — we do not store it. Your chart is calculated in the browser.',
@@ -207,6 +209,8 @@ export const dictionary: MarketingDictionary = {
       notFound: "We couldn't find that subscription.",
       error: "We couldn't process this right now. Please try again.",
       retry: 'Try again',
+      confirmPrompt: 'Press the button below to stop the New Year email series.',
+      confirmButton: 'Unsubscribe',
     },
     footerPrivacy:
       'This is a promotional experience by Saju Letter. Your birth date and time never leave your browser — only the calculated chart is sent.',

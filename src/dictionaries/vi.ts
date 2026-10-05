@@ -117,6 +117,8 @@ export const dictionary: MarketingDictionary = {
     notFound: 'Không tìm thấy đăng ký này.',
     error: 'Hiện chưa thể xử lý. Vui lòng thử lại.',
     retry: 'Thử lại',
+    confirmPrompt: 'Nhấn nút bên dưới để ngừng nhận email từ Saju Letter.',
+    confirmButton: 'Hủy đăng ký',
   },
   footer: {
     privacyNote: 'Chúng tôi gửi ngày sinh dương lịch chỉ để xác nhận bạn từ 16 tuổi trở lên — không lưu trữ. Lá số được tính trên trình duyệt.',
@@ -210,6 +212,8 @@ export const dictionary: MarketingDictionary = {
       notFound: 'Chúng tôi không tìm thấy đăng ký đó.',
       error: 'Hiện chưa thể xử lý. Vui lòng thử lại.',
       retry: 'Thử lại',
+      confirmPrompt: 'Nhấn nút bên dưới để ngừng nhận chuỗi email năm mới.',
+      confirmButton: 'Hủy đăng ký',
     },
     footerPrivacy:
       'Đây là trải nghiệm quảng bá của Saju Letter. Ngày và giờ sinh của bạn không bao giờ rời khỏi trình duyệt của bạn — chỉ lá số đã tính toán được gửi đi.',

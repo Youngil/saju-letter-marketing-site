@@ -134,6 +134,9 @@ export interface MarketingDictionary {
     /** 일시 오류(네트워크·429·5xx) — "링크 없음"과 구분한다(2026-10-06). */
     error: string;
     retry: string;
+    /** 버튼을 누르기 전 안내·버튼(2026-10-07) — 페이지를 여는 것만으로는 수신거부하지 않는다(메일 보안 검사기 오작동 방지). */
+    confirmPrompt: string;
+    confirmButton: string;
   };
   footer: {
     privacyNote: string;
@@ -257,6 +260,9 @@ export interface MarketingDictionary {
       /** 일시 오류(네트워크·429·5xx) — "링크 없음"과 구분한다(2026-10-06). */
       error: string;
       retry: string;
+      /** 버튼을 누르기 전 안내·버튼(2026-10-07). */
+      confirmPrompt: string;
+      confirmButton: string;
     };
     footerPrivacy: string;
   };

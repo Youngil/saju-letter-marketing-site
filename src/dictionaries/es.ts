@@ -115,6 +115,8 @@ export const dictionary: MarketingDictionary = {
     notFound: 'No pudimos encontrar esa suscripción.',
     error: 'No pudimos procesarlo en este momento. Inténtalo de nuevo.',
     retry: 'Intentar de nuevo',
+    confirmPrompt: 'Pulsa el botón de abajo para dejar de recibir los correos de Saju Letter.',
+    confirmButton: 'Darme de baja',
   },
   footer: {
     privacyNote: 'Enviamos tu fecha de nacimiento gregoriana solo para confirmar que tienes 16 años o más — no la almacenamos. Tu carta se calcula en el navegador.',
@@ -208,6 +210,8 @@ export const dictionary: MarketingDictionary = {
       notFound: 'No pudimos encontrar esa suscripción.',
       error: 'No pudimos procesarlo en este momento. Inténtalo de nuevo.',
       retry: 'Intentar de nuevo',
+      confirmPrompt: 'Pulsa el botón de abajo para dejar de recibir la serie de correos de Año Nuevo.',
+      confirmButton: 'Darme de baja',
     },
     footerPrivacy:
       'Esta es una experiencia promocional de Saju Letter. Tu fecha y hora de nacimiento nunca salen de tu navegador — solo se envía la carta calculada.',
