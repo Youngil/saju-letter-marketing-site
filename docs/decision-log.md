@@ -589,3 +589,12 @@ npm run build   # 프로덕션 빌드 — App Router 라우트/타입 검증 + M
 - **블로그 DB 글** — `compileMDX`가 `mdx-components.tsx`를 읽지 않아 DB 글엔 서식이 하나도 없었다(공용 `mdxElements`). `blockJS`는 `{}` 식만 지워 `<script>`·`<iframe>`·`<img onerror>`가 렌더됐다 — 관리자 API가 공개(토큰 탈취 위험 감수)라 저장형 XSS 경로. 허용 목록 remark 플러그인(`mdxSanitize.ts`)으로 막았다. 남은 갭: `blockJS`가 배열 prop을 지워 `RitualFlowDiagram`은 DB 글에서 렌더 중 예외가 난다(쓰지 말 것).
 - **유입 귀속** — 배지 클릭마다 다시 뽑아 진입 UTM을 처음 referrer로 덮어썼다. 문서당 한 번만 뽑고 배지는 저장값만.
 - 그 밖: Noto Serif KR/JP `preload: false`, 날짜·시간·이메일 입력칸 접근성 이름(`emailLabel` 새 키), 오류 화면 6개 언어, 수신거부 확인 버튼, 신년운세 랜딩 revalidate 주석 정정(활성 언어는 최대 1시간 캐시 — 짧게 하지 않고 백엔드 거절에 맡김).
+
+## 2026-10-06 — 전체 점검 8차(브랜치 `fix/full-review-8`)
+
+- **동의(사용자 결정)** — 배너는 "방문 통계 쿠키"만 묻는데 동의하면 광고 저장소 3종까지 `granted`였다. 광고를 쓰지 않는 동안은 `analytics_storage`만 선택을 따르고 `ad_*`는 항상 `denied`(인라인 기본값·`storeConsent` 공유 `consentModeState()`). 배너 문구가 "언제든 바꿀 수 있다"고 하는데 다시 열 방법이 없었다(GDPR 7(3)) → 푸터 "쿠키 설정"(6개 언어)이 window 이벤트로 배너를 다시 열고, 철회는 기존 `denied` 경로(보관 유입 삭제) + `_ga` 쿠키 삭제. 처리방침 §1에 같은 이름으로 변경·철회 안내 추가.
+- **유입 귀속** — 진입은 문서당 한 번만 뽑아, 처음 온 방문자(동의 전 → 메모리)가 나중에 동의해도 보관되지 않아 30일 귀속이 끊겼다(언어 전환만으로도) → 배너가 `granted` 직후 `persistAttributionTouch()`.
+- **블로그 DB 글** — `RitualFlowDiagram`을 DB 맵에서 빼고 배열 가드(전 글 500 방지), `className` 전역 허용 제거(Tailwind 오버레이), 이미지는 상대 주소만(추적 픽셀; 이미지 참조는 참조 정의 주소로 판정).
+- **신년운세** — 위기 대체 결과엔 공유·앱 안내 숨김. 소유자 쿠키를 결과별 `nyo_<id>`에서 하나의 `nyo`(최근 10개, 항목별 90일)로 — 헤더가 결과 수만큼 커졌다. 결과 OG 부제 현지화, 공유 클립보드 실패 처리.
+- **구독 POST를 같은 사이트 라우트로 옮기는 안(검토 후 보류)** — 소유자 토큰을 클라이언트 prop에서 빼려면 서버가 구독을 대신 보내야 하는데, 백엔드는 `req.ip`(trust proxy 1홉)만 보고 전달된 방문자 IP를 받는 경로가 없다. 대신 보내면 구독 한도(`newyear-public`, IP당 20/분, 내부 키 별도 한도 없음)를 사이트 서버 IP 하나로 전 방문자가 나눠 쓰고, Turnstile `remoteip`도 서버 IP가 된다. 백엔드가 내부 키가 맞을 때만 방문자 IP 헤더를 믿고 구독 경로에 `internalKeyMax`를 주는 변경이 선행돼야 한다.
+- 그 밖: `app/global-error.tsx`(레이아웃 실패 — 콜드 스타트 언어 조회 실패 시 Next 기본 영어 화면이었다), 기본·compare OG `generateStaticParams`, `middleware.ts` → `proxy.ts`(Next 16, Node 런타임에서도 `waitUntil` 유지), 처리방침 최종 수정일을 미래(10-08)에서 실제 날짜 2026-10-06으로.
