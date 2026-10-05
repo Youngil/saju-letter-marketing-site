@@ -1,6 +1,6 @@
 import { ImageResponse } from 'next/og';
 import { getDictionary } from '@/dictionaries';
-import { isMarketingLanguage } from '@/lib/languages';
+import { isMarketingLanguage, MARKETING_LANGUAGES } from '@/lib/languages';
 
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
@@ -21,6 +21,14 @@ export const contentType = 'image/png';
  * pt/vi 개인정보처리방침 페이지의 OG 이미지가 깨져, 항목 2에서 되돌린 "pt/vi 접근성"을 이
  * 파일이 다시 부분적으로 깨뜨리게 된다 — 그래서 `isMarketingLanguage`(6개)를 그대로 유지한다.
  */
+/**
+ * 빌드 때 6개 언어 카드를 미리 만든다(2026-10-06 전체 점검 8차) — 없으면 레이아웃의 `generateStaticParams`와 별개로 이 이미지
+ * 라우트는 요청마다 다시 그렸다(사전만 읽는 정적 카드).
+ */
+export function generateStaticParams() {
+  return MARKETING_LANGUAGES.map((lang) => ({ lang }));
+}
+
 export default async function Image({ params }: { params: Promise<{ lang: string }> }) {
   const { lang: rawLang } = await params;
   const dict = await getDictionary(isMarketingLanguage(rawLang) ? rawLang : 'en');

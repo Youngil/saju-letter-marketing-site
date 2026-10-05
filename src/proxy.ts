@@ -19,23 +19,27 @@ import { createStaleWhileRevalidate } from '@/lib/staleWhileRevalidate';
  */
 const LANGUAGE_CACHE_MS = 10 * 60_000;
 const FAILURE_CACHE_MS = 30_000;
-const MIDDLEWARE_FETCH_TIMEOUT_MS = 2_000;
+const PROXY_FETCH_TIMEOUT_MS = 2_000;
 
 const activeLanguages = createStaleWhileRevalidate({
-  load: () => fetchServiceLanguagesOnce({ timeoutMs: MIDDLEWARE_FETCH_TIMEOUT_MS }),
+  load: () => fetchServiceLanguagesOnce({ timeoutMs: PROXY_FETCH_TIMEOUT_MS }),
   ttlMs: LANGUAGE_CACHE_MS,
   failureTtlMs: FAILURE_CACHE_MS,
   fallback: STATIC_SERVICE_LANGUAGES,
-  onError: (error) => console.warn('middleware: service languages unavailable — using last/static list briefly', error),
+  onError: (error) => console.warn('proxy: service languages unavailable — using last/static list briefly', error),
 });
 
 /**
+ * Next 16의 Proxy(옛 Middleware, 2026-10-06 전체 점검 8차에 `middleware.ts` → `proxy.ts`로 이름만 바꿈 — Next 16에서
+ * `middleware` 규약은 폐기 예정). Proxy는 Node.js 런타임에서 돌고 `event.waitUntil`도 그대로 지원한다(공식 문서
+ * "waitUntil and NextFetchEvent") — 아래 stale-while-revalidate 동작은 바뀌지 않는다.
+ *
  * saju-letter-newyear-campaign은 URL 세그먼트 없이 브라우저 언어 감지+localStorage만 썼다
  * (단일 세션 퍼널이라 SEO가 필요 없었음). 이 사이트는 블로그/compare가 언어별로 독립
  * 인덱싱돼야 해서 URL 세그먼트가 필수다 — 그래서 언어 감지는 여기(최초 진입 시 리다이렉트)
  * 한 번뿐이고, 이후로는 URL이 언어를 그대로 들고 다닌다(src/lib/languages.ts 참고).
  */
-export async function middleware(request: NextRequest, event: NextFetchEvent) {
+export async function proxy(request: NextRequest, event: NextFetchEvent) {
   const { pathname } = request.nextUrl;
 
   // apex 도메인(saju-letter.com, www 없음)은 GCP 배포(2026-08-09) 이후 DNS 자체가 없다가

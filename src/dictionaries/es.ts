@@ -122,9 +122,10 @@ export const dictionary: MarketingDictionary = {
     privacyNote: 'Enviamos tu fecha de nacimiento gregoriana solo para confirmar que tienes 16 años o más — no la almacenamos. Tu carta se calcula en el navegador.',
     privacyLinkLabel: 'Política de Privacidad',
     disclaimerLinkLabel: 'Sobre este servicio',
+    cookieSettingsLabel: 'Configuración de cookies',
   },
   consent: {
-    message: 'Usamos cookies para entender cómo se usa este sitio. Puedes cambiar tu elección en cualquier momento.',
+    message: 'Usamos cookies para entender cómo se usa este sitio. Puedes cambiar tu elección en cualquier momento en "Configuración de cookies", al final de la página.',
     acceptButton: 'Aceptar',
     declineButton: 'Rechazar',
   },

@@ -9,6 +9,9 @@
 
 /** 글 1(what-is-saju) — 매일 편지의 4단 구성을 가로 흐름으로 보여준다. */
 export function RitualFlowDiagram({ steps, caption }: { steps: string[]; caption: string }) {
+  // 배열이 아니면 그리지 않는다(2026-10-06 전체 점검 8차) — DB 글은 blockJS가 `{[…]}` 식을 지워 `steps`가 빠지거나 문자열로
+  // 와서 `.map`이 렌더 중에 던졌고, SafeMdx의 try/catch는 컴파일만 감싸 글 페이지 전체가 500이 됐다. DB 글 허용 목록에서도 뺐다.
+  if (!Array.isArray(steps)) return null;
   const icons = [SparkIcon, BookIcon, HandHeartIcon, WaveIcon];
   return (
     <div className="not-prose my-8 rounded-xl border border-foreground/10 bg-foreground/[0.02] p-6">
@@ -169,13 +172,15 @@ function MoonIcon() {
   );
 }
 /**
- * DB 저장 글(2026-09-06)이 `next-mdx-remote/rsc`의 `<MDXRemote components={...}>`로 렌더될 때
- * 참조할 수 있는 컴포넌트 맵 — 정적 파일 글(`content-posts/*.mdx`)은 `import`로 직접 불러오지만,
- * `next-mdx-remote`는 런타임에 문자열을 컴파일해 `import` 구문을 지원하지 않으므로 DB 본문에서는
- * `<RitualFlowDiagram .../>`처럼 태그만 쓰고 실제 구현은 이 맵으로 주입해야 한다.
+ * DB 저장 글(2026-09-06)이 `next-mdx-remote/rsc`로 렌더될 때 참조할 수 있는 컴포넌트 맵 — 정적 파일 글(`content-posts/*.mdx`)은
+ * `import`로 직접 불러오지만, `next-mdx-remote`는 런타임에 문자열을 컴파일해 `import` 구문을 지원하지 않으므로 DB 본문에서는
+ * `<FixedVsChangingDiagram .../>`처럼 태그만 쓰고 실제 구현은 이 맵으로 주입해야 한다.
+ *
+ * **문자열 prop만 받는 다이어그램만 넣는다** — `RitualFlowDiagram`(배열 `steps`)은 뺐다(2026-10-06 전체 점검 8차). DB 글은
+ * `blockJS`가 `{}` 식을 지워 배열을 넘길 방법이 없고, 넣어 두면 그 태그를 쓴 글이 렌더 중 실패했다. 이제 DB 글에서 그 태그는
+ * 모르는 태그처럼 껍데기만 벗겨진다(`lib/mdxSanitize.ts`).
  */
 export const blogMdxComponents = {
-  RitualFlowDiagram,
   FixedVsChangingDiagram,
   NewYearTimelineDiagram,
 };

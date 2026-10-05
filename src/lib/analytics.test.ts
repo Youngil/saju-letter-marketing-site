@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { readStoredConsent, storeConsent, CONSENT_STORAGE_KEY } from './analytics';
+import { readStoredConsent, storeConsent, CONSENT_STORAGE_KEY, OPEN_CONSENT_SETTINGS_EVENT, openConsentSettings } from './analytics';
 
 /**
  * 2026-09-08 3차 종합 버그 점검(항목 3) 회귀 테스트 — GA4가 방문자 동의 없이 항상 발화하던
@@ -74,15 +74,16 @@ describe('storeConsent', () => {
     expect(typeof saved.storedAt).toBe('number');
   });
 
-  it('granted를 고르면 4개 저장소 전부 granted로 Consent Mode를 갱신한다', () => {
+  // 2026-10-06 전체 점검 8차(사용자 결정) — 광고를 쓰지 않는 동안 동의로 열리는 건 분석 저장소 하나뿐.
+  it('granted를 고르면 analytics_storage만 granted, 광고 저장소 3종은 denied로 둔다', () => {
     const gtag = vi.fn();
     stubWindow({ gtag });
     storeConsent('granted');
     expect(gtag).toHaveBeenCalledWith('consent', 'update', {
       analytics_storage: 'granted',
-      ad_storage: 'granted',
-      ad_user_data: 'granted',
-      ad_personalization: 'granted',
+      ad_storage: 'denied',
+      ad_user_data: 'denied',
+      ad_personalization: 'denied',
     });
   });
 
@@ -98,6 +99,40 @@ describe('storeConsent', () => {
     });
   });
 
+  it('denied(철회 포함)면 현재 호스트와 상위 도메인의 GA 쿠키를 지운다', () => {
+    stubWindow();
+    (globalThis as unknown as { window: Record<string, unknown> }).window.location = { hostname: 'www.saju-letter.com' };
+    const writes: string[] = [];
+    vi.stubGlobal('document', {
+      get cookie() {
+        return '_ga=GA1.1.123; theme=dark; _ga_ABC123=GS1.1.456';
+      },
+      set cookie(value: string) {
+        writes.push(value);
+      },
+    });
+    storeConsent('denied');
+    expect(writes).toContain('_ga=; Max-Age=0; path=/; domain=.saju-letter.com');
+    expect(writes).toContain('_ga_ABC123=; Max-Age=0; path=/; domain=.www.saju-letter.com');
+    expect(writes).toContain('_ga=; Max-Age=0; path=/');
+    expect(writes.some((w) => w.startsWith('theme='))).toBe(false);
+  });
+
+  it('granted면 쿠키를 건드리지 않는다', () => {
+    stubWindow();
+    const writes: string[] = [];
+    vi.stubGlobal('document', {
+      get cookie() {
+        return '_ga=GA1.1.123';
+      },
+      set cookie(value: string) {
+        writes.push(value);
+      },
+    });
+    storeConsent('granted');
+    expect(writes).toEqual([]);
+  });
+
   it('window가 없어도(SSR) 예외를 던지지 않는다', () => {
     expect(() => storeConsent('granted')).not.toThrow();
   });
@@ -105,5 +140,19 @@ describe('storeConsent', () => {
   it('gtag가 아직 로드 전(함수가 아님)이어도 예외를 던지지 않는다', () => {
     stubWindow();
     expect(() => storeConsent('granted')).not.toThrow();
+  });
+});
+
+describe('openConsentSettings', () => {
+  it('푸터 "쿠키 설정"이 배너를 다시 여는 이벤트를 보낸다', () => {
+    const dispatchEvent = vi.fn();
+    vi.stubGlobal('window', { dispatchEvent });
+    openConsentSettings();
+    expect(dispatchEvent).toHaveBeenCalledTimes(1);
+    expect((dispatchEvent.mock.calls[0]![0] as Event).type).toBe(OPEN_CONSENT_SETTINGS_EVENT);
+  });
+
+  it('SSR에서는 아무것도 하지 않는다', () => {
+    expect(() => openConsentSettings()).not.toThrow();
   });
 });

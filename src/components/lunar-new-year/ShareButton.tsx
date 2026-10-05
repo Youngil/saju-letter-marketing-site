@@ -27,7 +27,13 @@ export function ShareButton({
     }
 
     if (typeof navigator !== 'undefined' && navigator.clipboard) {
-      await navigator.clipboard.writeText(url);
+      try {
+        await navigator.clipboard.writeText(url);
+      } catch (error) {
+        // 권한 거부·비보안 문맥 등(2026-10-06 전체 점검 8차) — 예전엔 처리되지 않은 rejection이었다. "복사됨"을 띄우지 않는다.
+        console.warn('clipboard write failed', error);
+        return;
+      }
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     }

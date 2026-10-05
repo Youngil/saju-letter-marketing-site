@@ -21,8 +21,15 @@ describe('isSafeUrl', () => {
     expect(isSafeUrl('vbscript:msgbox')).toBe(false);
   });
 
-  it('이미지는 http(s)·상대 주소만', () => {
+  // 2026-10-06 전체 점검 8차 — 외부 이미지는 추적 픽셀이 될 수 있어 이 사이트 상대 주소만.
+  it('이미지는 이 사이트 상대 주소만', () => {
     expect(isSafeUrl('/dain-portrait.png', 'image')).toBe(true);
+    expect(isSafeUrl('images/x.png', 'image')).toBe(true);
+    expect(isSafeUrl('https://tracker.example/p.gif', 'image')).toBe(false);
+    expect(isSafeUrl('http://tracker.example/p.gif', 'image')).toBe(false);
+    expect(isSafeUrl('//tracker.example/p.gif', 'image')).toBe(false);
+    expect(isSafeUrl('/\\tracker.example/p.gif', 'image')).toBe(false);
+    expect(isSafeUrl(' \t//tracker.example/p.gif', 'image')).toBe(false);
     expect(isSafeUrl('mailto:x@example.com', 'image')).toBe(false);
     expect(isSafeUrl('data:image/svg+xml,<svg onload=alert(1)>', 'image')).toBe(false);
   });
@@ -76,6 +83,33 @@ describe('SafeMdx — DB 글 정화', () => {
     expect(html).not.toMatch(/<img/i);
   });
 
+  it('className은 지운다(Tailwind로 화면 전체를 덮는 가짜 화면 방지)', async () => {
+    const html = await renderDbPost('<div className="fixed inset-0 z-50 bg-white">Log in again</div>');
+    expect(html).toContain('Log in again');
+    expect(html).not.toMatch(/fixed|inset-0|class=/);
+  });
+
+  it('외부 이미지(마크다운·JSX·이미지 참조)는 지우고 상대 주소 이미지는 남긴다', async () => {
+    const html = await renderDbPost(
+      [
+        '![pixel](https://tracker.example/p.gif) ![proto](//tracker.example/q.gif)',
+        '',
+        '<img src="https://tracker.example/r.gif" alt="r" />',
+        '',
+        '![ref pixel][px] and [a link][px]',
+        '',
+        '![local](/dain-portrait.png)',
+        '',
+        '[px]: https://tracker.example/s.gif',
+      ].join('\n'),
+    );
+    expect(html).not.toMatch(/<img[^>]*tracker/);
+    expect(html).not.toMatch(/[pqr]\.gif/);
+    expect(html).toContain('src="/dain-portrait.png"');
+    // 같은 참조 정의를 쓰는 링크는 링크 규칙(http(s) 허용)대로 남는다.
+    expect(html).toMatch(/<a [^>]*href="https:\/\/tracker\.example\/s\.gif"/);
+  });
+
   it('모르는 태그·컴포넌트는 껍데기만 벗기고 글자는 남긴다(렌더 중 "컴포넌트 없음" 예외 없이)', async () => {
     const html = await renderDbPost('<Unknown>inside text</Unknown>\n\n<section>sectioned</section>');
     expect(html).toContain('inside text');
@@ -100,6 +134,15 @@ describe('SafeMdx — DB 글 정화', () => {
     );
     expect(html).toContain('Every day');
     expect(html).not.toMatch(/onclick/i);
+  });
+
+  // 2026-10-06 전체 점검 8차 — 배열 prop이 필요한 RitualFlowDiagram은 blockJS가 식을 지워 렌더 중 던졌다(글 전체 500).
+  it('RitualFlowDiagram은 DB 글에서 쓰지 않는다 — 태그를 써도 렌더가 실패하지 않는다', async () => {
+    const html = await renderDbPost(
+      ['Before', '', '<RitualFlowDiagram steps={["a", "b"]} caption="Flow caption" />', '', '<RitualFlowDiagram steps="a,b" caption="Second" />', '', 'After'].join('\n'),
+    );
+    expect(html).toContain('Before');
+    expect(html).toContain('After');
   });
 
   it('컴파일 실패는 평문으로 떨어진다(기존 동작 유지)', async () => {

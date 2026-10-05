@@ -14,7 +14,7 @@ interface PageProps {
 /**
  * 궁합 공유 웹페이지(2026-08-12, saju-letter-backend/public/compat.html에서 이관). 옛
  * saju-letter.com/compat/:token은 언어 세그먼트가 없었고 방문자 브라우저 언어를 자동감지했다 —
- * 이 사이트의 middleware.ts가 언어 프리픽스 없는 요청을 이미 Accept-Language 기준으로
+ * 이 사이트의 proxy.ts가 언어 프리픽스 없는 요청을 이미 Accept-Language 기준으로
  * /{lang}/... 로 리다이렉트해주므로, 공유 URL 자체는 여전히 언어 없이
  * (COMPAT_SHARE_BASE_URL/compat/{token}) 만들고 이 라우트가 그 리다이렉트를 받는다. 미들웨어의
  * 자동감지 후보가 LAUNCH_CONTENT_LANGUAGES(4개)로 한정된 건 이 사이트 전체(홈 포함)에 이미

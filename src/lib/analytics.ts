@@ -66,7 +66,52 @@ export function readStoredConsent(): ConsentChoice | null {
   }
 }
 
-/** 방문자의 선택을 저장하고, GA4가 이미 로드돼 있으면 Consent Mode 상태를 즉시 갱신한다. */
+/**
+ * Consent Mode에 넘길 저장소 상태(2026-10-06 전체 점검 8차, 사용자 결정) — **광고를 쓰지 않는 동안엔 `analytics_storage`만
+ * 방문자의 선택을 따르고, 광고 저장소 3종(`ad_storage`·`ad_user_data`·`ad_personalization`)은 항상 `denied`.** 배너 문구는
+ * "방문 통계 쿠키"만 묻는데 예전엔 동의하면 광고 저장소까지 함께 열었다. 인라인 기본값 스크립트(`GoogleAnalytics.tsx`)도
+ * 같은 값을 쓴다 — 광고를 붙이게 되면 배너 문구·개인정보처리방침과 함께 이 함수를 바꿀 것.
+ */
+export function consentModeState(choice: ConsentChoice): Record<string, ConsentChoice> {
+  return {
+    analytics_storage: choice,
+    ad_storage: 'denied',
+    ad_user_data: 'denied',
+    ad_personalization: 'denied',
+  };
+}
+
+/**
+ * 동의를 철회하면 이미 심긴 GA 쿠키(`_ga`, `_ga_<스트림>`)도 지운다(2026-10-06 전체 점검 8차) — Consent Mode를 `denied`로
+ * 바꾸면 gtag는 더 읽고 쓰지 않지만 쿠키 자체는 남는다. gtag는 기본(`cookie_domain: 'auto'`)으로 가장 넓은 도메인
+ * (`.saju-letter.com`)에 심으므로, 현재 호스트와 그 상위 도메인마다 지운다(브라우저가 거부하는 공용 접미사는 무해하게 무시).
+ */
+export function clearAnalyticsCookies(): void {
+  if (typeof document === 'undefined' || typeof window === 'undefined') return;
+  try {
+    const names = String(document.cookie ?? '')
+      .split(';')
+      .map((part) => part.split('=')[0]!.trim())
+      .filter((name) => name === '_ga' || name.startsWith('_ga_'));
+    if (names.length === 0) return;
+    const hostname = window.location?.hostname ?? '';
+    const labels = hostname.split('.').filter(Boolean);
+    const domains: Array<string | null> = [null];
+    for (let i = 0; i < labels.length - 1; i += 1) domains.push(`.${labels.slice(i).join('.')}`);
+    for (const name of names) {
+      for (const domain of domains) {
+        document.cookie = `${name}=; Max-Age=0; path=/${domain ? `; domain=${domain}` : ''}`;
+      }
+    }
+  } catch {
+    // 쿠키 접근이 막힌 환경 — Consent Mode 갱신만으로도 더는 쓰이지 않는다.
+  }
+}
+
+/**
+ * 방문자의 선택을 저장하고, GA4가 이미 로드돼 있으면 Consent Mode 상태를 즉시 갱신한다. `denied`(처음 거부든, 동의했다가
+ * 푸터 "쿠키 설정"으로 철회든)면 보관된 유입 정보와 GA 쿠키를 지운다.
+ */
 export function storeConsent(choice: ConsentChoice): void {
   if (typeof window !== 'undefined') {
     try {
@@ -76,11 +121,19 @@ export function storeConsent(choice: ConsentChoice): void {
       // 저장 실패해도 이번 세션의 Consent Mode 갱신 자체는 계속 진행한다.
     }
   }
-  if (typeof window === 'undefined' || typeof window.gtag !== 'function') return;
-  window.gtag('consent', 'update', {
-    analytics_storage: choice,
-    ad_storage: choice,
-    ad_user_data: choice,
-    ad_personalization: choice,
-  });
+  if (typeof window === 'undefined') return;
+  if (typeof window.gtag === 'function') window.gtag('consent', 'update', consentModeState(choice));
+  if (choice === 'denied') clearAnalyticsCookies();
+}
+
+/**
+ * 푸터 "쿠키 설정"이 동의 배너를 다시 여는 신호(2026-10-06 전체 점검 8차) — 배너 문구가 "언제든 바꿀 수 있다"고 하는데
+ * 한 번 고르면 다시 열 방법이 없었다(GDPR 7(3) 철회). 배너와 링크가 레이아웃의 서로 다른 클라이언트 섬이라 window 이벤트
+ * 하나로 잇는다.
+ */
+export const OPEN_CONSENT_SETTINGS_EVENT = 'saju-letter:open-consent-settings';
+
+export function openConsentSettings(): void {
+  if (typeof window === 'undefined') return;
+  window.dispatchEvent(new Event(OPEN_CONSENT_SETTINGS_EVENT));
 }

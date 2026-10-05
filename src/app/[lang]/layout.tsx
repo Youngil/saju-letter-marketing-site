@@ -11,6 +11,7 @@ import { WEB_BASE_URL } from '@/lib/seo';
 import { organizationJsonLd } from '@/lib/structuredData';
 import { GoogleAnalytics } from '@/components/GoogleAnalytics';
 import { ConsentBanner } from '@/components/ConsentBanner';
+import { ConsentSettingsLink } from '@/components/ConsentSettingsLink';
 import { AttributionCapture } from '@/components/AttributionCapture';
 import { GA_MEASUREMENT_ID } from '@/lib/analytics';
 import { notFound } from 'next/navigation';
@@ -55,7 +56,7 @@ const notoSerifJp = Noto_Serif_JP({
 /**
  * app/[lang]/layout.tsx가 이 사이트의 실질적인 루트 레이아웃이다 — Next.js App Router는
  * 트리 전체에 <html>/<body>가 정확히 한 번만 있어야 하므로, 별도의 app/layout.tsx를 두지
- * 않는다(공식 i18n 라우팅 예제와 같은 패턴). middleware.ts가 언어 세그먼트 없는 요청을
+ * 않는다(공식 i18n 라우팅 예제와 같은 패턴). proxy.ts가 언어 세그먼트 없는 요청을
  * 전부 여기로 리다이렉트하므로 이 레이아웃은 항상 유효한 lang을 받는다.
  *
  * **2026-09-07 — "모든 서비스를 1차 출시 4개 언어로 좁힌다"는 결정에 따라 한때 MARKETING_LANGUAGES(6)
@@ -182,6 +183,8 @@ export default async function LangLayout({
               <Link href={`/${lang}/disclaimer`} className="w-fit underline hover:text-foreground/70">
                 {dict.footer.disclaimerLinkLabel}
               </Link>
+              {/* 동의 배너를 다시 여는 "쿠키 설정"(2026-10-06 전체 점검 8차) — 배너와 같은 조건. */}
+              {GA_MEASUREMENT_ID && <ConsentSettingsLink label={dict.footer.cookieSettingsLabel} />}
             </div>
           </div>
         </footer>

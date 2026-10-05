@@ -5,7 +5,7 @@ export const WEB_BASE_URL = process.env.NEXT_PUBLIC_WEB_BASE_URL ?? 'http://loca
 
 /**
  * hreflang(`alternates.languages`) 빌더 — 이 사이트는 페이지마다 지원 언어 집합이 다르다(홈/
- * 개인정보처리방침 6개, 블로그/compare 4개, 신년운세 5개). 'x-default'는 middleware.ts가 언어
+ * 개인정보처리방침 6개, 블로그/compare 4개, 신년운세 5개). 'x-default'는 proxy.ts가 언어
  * 자동감지에 실패했을 때 실제로 떨어지는 DEFAULT_LANGUAGE 경로를 가리킨다 — 그 경로가 항상
  * 대상 언어 목록 안에 있어야 한다(호출부가 그 언어를 defaultLang으로 넘긴다).
  */

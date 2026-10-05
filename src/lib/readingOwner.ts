@@ -6,12 +6,21 @@
  * 갔고 주인은 "이미 구독됨"만 보게 됐다. 이제 백엔드가 결과를 만들 때 비공개 소유자 토큰(`ownerToken`)을 한 번 내주고,
  * 구독·구독 상태 조회는 그 토큰이 있을 때만 된다.
  *
- * 토큰은 만든 사람 브라우저의 **httpOnly 쿠키**(`nyo_<readingId>`, 90일)에만 둔다 — 주소·GA로 새지 않게. 결과 생성은 방문자
+ * 토큰은 만든 사람 브라우저의 **httpOnly 쿠키** 하나(`nyo`, 최근 결과 최대 `MAX_OWNER_ENTRIES`개, 결과마다 90일)에만 둔다 —
+ * 주소·GA로 새지 않게. 처음엔 결과마다 `nyo_<readingId>` 쿠키를 따로 심어(path=/, 90일) 결과를 여러 번 만든 브라우저는 이
+ * 사이트의 모든 요청 헤더가 계속 커졌다(2026-10-06 전체 점검 8차) — 예전 쿠키는 읽기만 하고(스스로 만료) 더 만들지 않는다. 결과 생성은 방문자
  * IP 기준 한도·Turnstile 검증 때문에 브라우저가 백엔드를 직접 부르므로, 받은 토큰을 이 사이트의 `/api/lunar-new-year/owner-token`
  * 이 쿠키로 바꿔 심는다. 결과 페이지(서버)가 그 쿠키를 읽어 `X-Reading-Owner-Token` 헤더로 백엔드에 넘긴다.
  */
-export const OWNER_COOKIE_PREFIX = 'nyo_';
+/** 소유자 토큰 쿠키(하나) — 값은 `<id>.<토큰>.<발급 초(36진)>`를 `~`로 이은 목록, 오래된 것부터. */
+export const OWNER_COOKIE_NAME = 'nyo';
+/** 예전(2026-10-07 전체 점검 7차) 결과별 쿠키 이름 접두사 — 읽기 전용 호환. */
+export const LEGACY_OWNER_COOKIE_PREFIX = 'nyo_';
 export const OWNER_COOKIE_MAX_AGE_SECONDS = 90 * 24 * 60 * 60;
+/** 한 쿠키에 담는 최근 결과 수 — 토큰이 최대 길이(256자)여도 쿠키 한도(4KB) 안에 들게. */
+export const MAX_OWNER_ENTRIES = 10;
+/** 직렬화한 값의 상한 — 넘으면 오래된 결과부터 뺀다. */
+const MAX_OWNER_COOKIE_VALUE_LENGTH = 3500;
 export const OWNER_TOKEN_HEADER = 'X-Reading-Owner-Token';
 
 /** 쿠키 저장 라우트(같은 사이트) — 미들웨어의 언어 리다이렉트 대상에서 빠진 `/api` 아래. */
@@ -30,8 +39,58 @@ export function isValidOwnerToken(value: unknown): value is string {
   return typeof value === 'string' && OWNER_TOKEN_PATTERN.test(value);
 }
 
-export function ownerCookieName(readingId: string): string {
-  return `${OWNER_COOKIE_PREFIX}${readingId.toLowerCase()}`;
+/** 예전 결과별 쿠키 이름 — 읽기 호환용. */
+export function legacyOwnerCookieName(readingId: string): string {
+  return `${LEGACY_OWNER_COOKIE_PREFIX}${readingId.toLowerCase()}`;
+}
+
+export interface OwnerEntry {
+  readingId: string;
+  ownerToken: string;
+  /** 발급 시각(유닉스 초) — 결과마다 90일을 넘기면 버린다(쿠키 자체의 Max-Age는 마지막으로 심은 때부터라). */
+  issuedAt: number;
+}
+
+/** 쿠키 값 → 아직 유효한 항목(오래된 것부터). 모양이 틀리거나 90일이 지난 항목은 버린다. */
+export function parseOwnerCookie(value: string | undefined, nowSeconds: number): OwnerEntry[] {
+  if (!value) return [];
+  const entries: OwnerEntry[] = [];
+  for (const part of value.split('~')) {
+    const [rawId, ownerToken, rawIssued, ...rest] = part.split('.');
+    if (rest.length > 0 || !isValidReadingId(rawId) || !isValidOwnerToken(ownerToken)) continue;
+    if (!rawIssued || !/^[0-9a-z]{1,10}$/.test(rawIssued)) continue;
+    const issuedAt = parseInt(rawIssued, 36);
+    if (nowSeconds - issuedAt > OWNER_COOKIE_MAX_AGE_SECONDS || issuedAt - nowSeconds > 60 * 60) continue;
+    const readingId = rawId.toLowerCase();
+    // 같은 결과가 두 번 있으면 나중 것만.
+    const existing = entries.findIndex((entry) => entry.readingId === readingId);
+    if (existing >= 0) entries.splice(existing, 1);
+    entries.push({ readingId, ownerToken, issuedAt });
+  }
+  return entries;
+}
+
+export function serializeOwnerEntries(entries: readonly OwnerEntry[]): string {
+  return entries.map((entry) => `${entry.readingId}.${entry.ownerToken}.${entry.issuedAt.toString(36)}`).join('~');
+}
+
+/** 새 결과를 맨 뒤(가장 최근)에 더하고, 개수·길이 상한을 넘으면 오래된 것부터 뺀 쿠키 값. */
+export function addOwnerEntry(
+  currentValue: string | undefined,
+  readingId: string,
+  ownerToken: string,
+  nowSeconds: number,
+): string {
+  const id = readingId.toLowerCase();
+  const entries = parseOwnerCookie(currentValue, nowSeconds).filter((entry) => entry.readingId !== id);
+  entries.push({ readingId: id, ownerToken, issuedAt: nowSeconds });
+  while (entries.length > MAX_OWNER_ENTRIES) entries.shift();
+  let value = serializeOwnerEntries(entries);
+  while (value.length > MAX_OWNER_COOKIE_VALUE_LENGTH && entries.length > 1) {
+    entries.shift();
+    value = serializeOwnerEntries(entries);
+  }
+  return value;
 }
 
 export interface OwnerCookieOptions {
@@ -47,12 +106,19 @@ export function ownerCookieOptions(isProduction: boolean = process.env.NODE_ENV 
   return { httpOnly: true, secure: isProduction, sameSite: 'lax', path: '/', maxAge: OWNER_COOKIE_MAX_AGE_SECONDS };
 }
 
-/** 요청 쿠키에서 이 결과의 소유자 토큰을 꺼낸다 — 모양이 틀린 값은 없는 것으로 본다. */
+/**
+ * 요청 쿠키에서 이 결과의 소유자 토큰을 꺼낸다 — 모양이 틀리거나 90일이 지난 값은 없는 것으로 본다. 새 쿠키(`nyo`)에 없으면
+ * 예전 결과별 쿠키(`nyo_<id>`, 브라우저가 Max-Age로 스스로 지운다)를 본다.
+ */
 export function readOwnerToken(
   readingId: string,
   cookieStore: { get(name: string): { value: string } | undefined },
+  nowSeconds: number = Math.floor(Date.now() / 1000),
 ): string | undefined {
   if (!isValidReadingId(readingId)) return undefined;
-  const value = cookieStore.get(ownerCookieName(readingId))?.value;
-  return isValidOwnerToken(value) ? value : undefined;
+  const id = readingId.toLowerCase();
+  const entry = parseOwnerCookie(cookieStore.get(OWNER_COOKIE_NAME)?.value, nowSeconds).find((e) => e.readingId === id);
+  if (entry) return entry.ownerToken;
+  const legacy = cookieStore.get(legacyOwnerCookieName(readingId))?.value;
+  return isValidOwnerToken(legacy) ? legacy : undefined;
 }
