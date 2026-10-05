@@ -50,6 +50,16 @@ const CASES: Array<{ name: string; href: string; referrer: string; expected: Ret
     },
   },
   {
+    name: 'Google Ads 클릭 id·_gl은 남긴다(utm 뒤, 정해진 순서로)',
+    href: `${ORIGIN}/en?_gl=1*abc*_ga*MTIz&wbraid=W1&token=x&gclid=G1&dclid=D1&gbraid=B1&utm_source=google`,
+    referrer: '',
+    expected: {
+      page_location: `${ORIGIN}/en?utm_source=google&gclid=G1&gbraid=B1&wbraid=W1&dclid=D1&_gl=1*abc*_ga*MTIz`,
+      page_referrer: '',
+      page_title: '/en',
+    },
+  },
+  {
     name: '신년운세 결과 id',
     href: `${ORIGIN}/ja/lunar-new-year/r/abc-123`,
     referrer: `${ORIGIN}/ja/lunar-new-year?utm_source=x`,

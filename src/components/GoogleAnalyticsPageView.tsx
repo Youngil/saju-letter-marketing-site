@@ -10,7 +10,7 @@ import { safePageContext } from '@/lib/pageLocation';
  * page_view를 껐다(주소 전체에 토큰이 실려 갔다). 경로가 바뀔 때마다 `pageLocation.ts`로 다듬은 위치·referrer·제목(=다듬은 경로)을
  * `set`(이후 커스텀 이벤트도 같은 값을 쓰도록) + `page_view`로 보낸다.
  *
- * - `usePathname`만 본다 — 쿼리만 바뀌는 이동은 새 페이지가 아니고(남기는 것도 utm뿐), `useSearchParams`를 쓰면 Suspense
+ * - `usePathname`만 본다 — 쿼리만 바뀌는 이동은 새 페이지가 아니고(남기는 것도 utm·광고 클릭 id뿐), `useSearchParams`를 쓰면 Suspense
  *   경계가 필요해져 이 컴포넌트가 늦게 하이드레이션되면서 다른 컴포넌트의 마운트 이벤트(`compat_result_view`)보다
  *   뒤에 위치를 바꾸게 된다. 레이아웃 `<body>` 맨 앞에 두어 effect도 페이지 컴포넌트들보다 먼저 돈다.
  * - referrer는 첫 화면이면 `document.referrer`, 그 뒤로는 직전에 보낸(이미 다듬은) 위치.

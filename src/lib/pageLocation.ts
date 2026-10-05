@@ -7,7 +7,8 @@
  * 이 모듈로 다듬은 값만 직접 보낸다(`GoogleAnalyticsPageView.tsx`).
  *
  * - 경로: 토큰·id 조각을 자리표시자로(`/compat/:token`, `/lunar-new-year/r/:id`).
- * - 쿼리: 통째로 버리고 유입 분석에 필요한 `utm_*`만 남긴다(GA4 세션 출처가 page_location의 utm을 읽는다).
+ * - 쿼리: 통째로 버리고 유입 분석에 필요한 `utm_*`와 Google Ads 클릭 id(`gclid`·`gbraid`·`wbraid`·`dclid`, 교차 도메인
+ *   링커 `_gl`)만 남긴다(GA4 세션 출처·광고 귀속이 page_location의 이 값들을 읽는다, 2026-10-06 전체 점검 5차).
  * - referrer: 같은 사이트면 경로만 같은 규칙으로 다듬고(쿼리 없음), 외부면 origin만.
  * - 제목: `document.title`은 **어느 페이지에서도 보내지 않고** 다듬은 경로를 제목으로 쓴다(2026-10-06 전체 점검 5차).
  *   개인화 페이지 제목엔 사람 이름이 들어가는데("OOO님과의 궁합", 신년운세 결과의 AI 헤드라인), 클라이언트 이동에선
@@ -26,8 +27,20 @@ export const PAGE_PATH_RULES: ReadonlyArray<readonly [pattern: string, replaceme
   ['^((?:/[a-z]{2})?/lunar-new-year/r/)[^/]+', '$1:id'],
 ];
 
-/** 쿼리에서 남기는 키 — 유입 귀속(attribution.ts·GA4 세션 출처)에 필요한 것만. 순서대로 붙인다. */
-export const KEPT_QUERY_KEYS: readonly string[] = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content', 'utm_id'];
+/** 쿼리에서 남기는 키 — 유입 귀속(attribution.ts·GA4 세션 출처·Google Ads 클릭 귀속)에 필요한 것만. 순서대로 붙인다. */
+export const KEPT_QUERY_KEYS: readonly string[] = [
+  'utm_source',
+  'utm_medium',
+  'utm_campaign',
+  'utm_term',
+  'utm_content',
+  'utm_id',
+  'gclid',
+  'gbraid',
+  'wbraid',
+  'dclid',
+  '_gl',
+];
 
 export interface SafePageContext {
   page_location: string;
