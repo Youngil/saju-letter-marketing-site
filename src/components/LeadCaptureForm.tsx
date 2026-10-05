@@ -6,8 +6,7 @@ import type { LaunchContentLanguage } from '@/lib/languages';
 import { ApiError, getCouponAvailability, subscribeLead, type CouponAvailability } from '@/lib/api';
 import { Turnstile, TURNSTILE_ENABLED, type TurnstileHandle } from './Turnstile';
 import { trackEvent } from '@/lib/analytics';
-
-const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+import { EMAIL_REGEX } from '@/lib/publicForm';
 
 /**
  * 홈 화면 하단 이메일 리드 캡처 — 신년운세 캠페인의 EmailSignupForm.tsx와 달리 특정 reading에

@@ -6,12 +6,13 @@ import type { MarketingDictionary } from '@/dictionaries/types';
 import type { LaunchContentLanguage } from '@/lib/languages';
 import { DISCLAIMER_CONTENT } from '@/content/disclaimer';
 import { isOldEnough } from '@/lib/age';
-import { ApiError, getDemoReading, type DemoReadingResponse } from '@/lib/api';
+import { getDemoReading, type DemoReadingResponse } from '@/lib/api';
 import { Turnstile, TURNSTILE_ENABLED, type TurnstileHandle } from './Turnstile';
 import { AppDownloadLinks } from './AppDownloadLinks';
 import { Postmark } from './Postmark';
 import { trackEvent } from '@/lib/analytics';
 import { isValidBirthDate } from '@/lib/birthDate';
+import { mapPublicFormError } from '@/lib/publicForm';
 
 
 /**
@@ -86,13 +87,14 @@ export function DemoForm({
       setResult(reading);
       trackEvent('demo_result_view', { language });
     } catch (err) {
-      if (err instanceof ApiError && (err.reason === 'underage' || err.reason === 'birth_date_required')) {
-        setError(err.reason === 'underage' ? dict.errors.underage : dict.errors.date);
-      } else if (err instanceof ApiError && err.status === 429) {
-        setError(dict.errors.rateLimited);
-      } else {
-        setError(dict.errors.generic);
-      }
+      setError(
+        mapPublicFormError(err, {
+          underage: dict.errors.underage,
+          date: dict.errors.date,
+          rateLimited: dict.errors.rateLimited,
+          generic: dict.errors.generic,
+        }),
+      );
       // Turnstile 토큰은 1회용이라, 실패한 시도에 쓰인 토큰을 그대로 두면 재제출도 항상 403으로
       // 막힌다(2026-09-03, 종합 버그 점검으로 발견) — 폼이 그대로 남는 실패 경로라 새 토큰을
       // 명시적으로 요청한다.

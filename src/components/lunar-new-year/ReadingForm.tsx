@@ -6,9 +6,9 @@ import type { MarketingDictionary } from '@/dictionaries/types';
 import type { MarketingLanguage } from '@/lib/languages';
 import { isOldEnough } from '@/lib/age';
 import { createReading } from '@/lib/lunarNewYearApi';
-import { ApiError } from '@/lib/apiClient';
 import { Turnstile, TURNSTILE_ENABLED, type TurnstileHandle } from '@/components/Turnstile';
 import { isValidBirthDate, parseBirthTime } from '@/lib/birthDate';
+import { mapPublicFormError } from '@/lib/publicForm';
 
 const MEMORABLE_EVENT_MAX_LENGTH = 300;
 
@@ -106,15 +106,15 @@ export function ReadingForm({
 
       router.push(`/${language}/lunar-new-year/r/${result.readingId}`);
     } catch (err) {
-      if (err instanceof ApiError && (err.reason === 'underage' || err.reason === 'birth_date_required')) {
-        setError(err.reason === 'underage' ? t.errors.underage : t.errors.date);
-      } else if (err instanceof ApiError && err.status === 429) {
-        setError(t.errors.rateLimited);
-      } else if (err instanceof ApiError && err.reason === 'campaign_not_active') {
-        setError(offSeasonMessage);
-      } else {
-        setError(t.errors.generic);
-      }
+      setError(
+        mapPublicFormError(err, {
+          underage: t.errors.underage,
+          date: t.errors.date,
+          rateLimited: t.errors.rateLimited,
+          byReason: { campaign_not_active: offSeasonMessage },
+          generic: t.errors.generic,
+        }),
+      );
       // Turnstile 토큰은 1회용이라, 실패한 시도에 쓰인 토큰을 그대로 두면 재제출도 항상 403으로
       // 막힌다(2026-09-03, 종합 버그 점검으로 발견) — 이 폼은 실패해도 언마운트되지 않으므로
       // 새 토큰을 명시적으로 요청한다.

@@ -7,12 +7,12 @@ import type { MarketingDictionary } from '@/dictionaries/types';
 import { COMPAT_CONTENT, type CompatContent } from '@/content/compatContent';
 import type { InviteView } from '@/lib/compatApi';
 import { logCompatEvent, submitGuestInvite } from '@/lib/compatApi';
-import { ApiError } from '@/lib/apiClient';
 import { DISCLAIMER_CONTENT } from '@/content/disclaimer';
 import { isOldEnough } from '@/lib/age';
 import { Turnstile, TURNSTILE_ENABLED, type TurnstileHandle } from '../Turnstile';
 import { AppDownloadLinks } from '../AppDownloadLinks';
 import { trackEvent } from '@/lib/analytics';
+import { mapPublicFormError } from '@/lib/publicForm';
 import { birthYearOptions } from '@/lib/birthDate';
 
 const MONTH_OPTIONS = Array.from({ length: 12 }, (_, i) => i + 1);
@@ -330,11 +330,8 @@ function PendingForm({
         onSubmitted({ status: 'not_found' });
       }
     } catch (err) {
-      if (err instanceof ApiError && (err.reason === 'underage' || err.reason === 'birth_date_required')) {
-        setError(err.reason === 'underage' ? content.underageError : content.formError);
-      } else {
-        setError(content.submitError);
-      }
+      // 429는 따로 안내하지 않는다(rateLimited 없음 → submitError).
+      setError(mapPublicFormError(err, { underage: content.underageError, date: content.formError, generic: content.submitError }));
       // Turnstile 토큰은 1회용이라 실패한 시도의 토큰을 그대로 두면 재제출도 막힌다(2026-09-03).
       setTurnstileToken(undefined);
       turnstileRef.current?.reset();
