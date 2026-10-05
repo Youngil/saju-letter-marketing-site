@@ -35,17 +35,21 @@ const lora = Lora({
   variable: '--font-lora',
   display: 'swap',
 });
+// 두 Noto는 미리 받지 않는다(2026-10-07 전체 점검 7차) — 모든 페이지가 ko/ja용 라틴 서브셋까지 4개 파일(~126KB)을
+// preload해 en/es 페이지에선 통째로 낭비였다. 실제로 쓰는 ko/ja 페이지에선 CSS가 필요할 때 받는다(display: swap).
 const notoSerifKr = Noto_Serif_KR({
   subsets: ['latin'],
   weight: ['600', '700'],
   variable: '--font-noto-kr',
   display: 'swap',
+  preload: false,
 });
 const notoSerifJp = Noto_Serif_JP({
   subsets: ['latin'],
   weight: ['600', '700'],
   variable: '--font-noto-ja',
   display: 'swap',
+  preload: false,
 });
 
 /**
