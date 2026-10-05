@@ -75,6 +75,7 @@
 - 같은 GA4 프로퍼티(`saju-letter-20575`)의 웹 스트림, gtag.js 직접(`analytics.ts`의 `trackEvent`, `GoogleAnalytics.tsx`). `NEXT_PUBLIC_GA_MEASUREMENT_ID` 없으면 스크립트·배너 미렌더.
 - **Consent Mode v2**: 로드 전 4개 저장소 `denied`, 저장된 선택은 같은 인라인 스크립트에서 동기 반영. `ConsentBanner.tsx` + `readStoredConsent`/`storeConsent`(localStorage `saju-letter-consent`, 1년 TTL). `dict.consent`는 AI 초안.
 - 이벤트: `install_cta_click`(`context`/`platform`), `lead_submit`, `compat_result_view`, `demo_submit`, `demo_result_view`. **이메일·토큰 등 식별 값을 파라미터에 넣지 않는다.** 새 이벤트 시 개인정보처리방침 갱신.
+- **page_view는 직접 보낸다(주소에 토큰이 있어서)**: 인라인 스크립트의 `config`가 `send_page_view: false` + 다듬은 위치로 시작하고, `GoogleAnalyticsPageView`(`usePathname`, `<body>` 맨 앞)가 경로가 바뀔 때마다 `set`+`page_view`. 다듬기는 `pageLocation.ts` — `/compat/:token`·`/lunar-new-year/r/:id`, 쿼리는 `utm_*`만, 같은 사이트 referrer도 같은 규칙·외부는 origin만, 개인화 페이지 제목(이름)은 경로로. 인라인 스크립트는 같은 규칙의 JS 원문(`inlinePageContextFunctionSource`)을 쓰고 테스트가 두 구현의 일치를 확인한다 — **토큰이 든 새 경로를 만들면 `PAGE_PATH_RULES`에 추가**. ⚠️ **GA4 콘솔 → 데이터 스트림(웹) → 향상된 측정 → 페이지 조회 고급 설정의 "브라우저 기록 이벤트 기반 페이지 변경"은 반드시 꺼 둔다**(켜면 gtag가 주소 전체로 page_view를 따로 보낸다).
 - **유입 귀속 `attribution.ts`**: UTM(없으면 궁합 직접 진입 `compat_share`, 그다음 referrer 매핑)을 기억 → `buildPlayStoreUrl()`이 Play `referrer`에 utm_* + `utm_content`(=배지 `context`). 기본 `marketing_site / website / direct`. **localStorage(30일, last touch)는 동의 `granted`일 때만**, 미동의는 탭 메모리, `storeConsent('denied')`가 삭제. 키 상수는 순환 import 방지로 `analytics.ts`에. `AttributionCapture.tsx`가 배지 없는 페이지 진입도 기록.
 
 ## 8. 앱 다운로드 배지 (`appLinks.ts`, `AppDownloadLinks.tsx`)
