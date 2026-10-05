@@ -2,6 +2,7 @@
 
 import { useRef, useState } from 'react';
 import type { MarketingDictionary } from '@/dictionaries/types';
+import type { MarketingLanguage } from '@/lib/languages';
 import { subscribeForDrip, logCampaignEvent } from '@/lib/lunarNewYearApi';
 import { ApiError } from '@/lib/apiClient';
 import { Turnstile, TURNSTILE_ENABLED, type TurnstileHandle } from '@/components/Turnstile';
@@ -21,11 +22,13 @@ type ResultDict = NonNullable<MarketingDictionary['lunarNewYear']>['result'];
 export function EmailSignupForm({
   readingId,
   ownerToken,
+  language,
   dict: t,
   alreadySubscribed,
 }: {
   readingId: string;
   ownerToken: string;
+  language: MarketingLanguage;
   dict: ResultDict;
   alreadySubscribed: boolean;
 }) {
@@ -90,7 +93,9 @@ export function EmailSignupForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+    // action은 결과 id 없는 랜딩 주소로(2026-10-07 전체 점검 7차) — 없으면 브라우저가 현재 주소(`/xx/lunar-new-year/r/<id>`)를
+    // action으로 보고, GA4 "양식 상호작용"이 그 주소를 form_destination으로 보낸다. 제출은 항상 onSubmit이 막는다.
+    <form onSubmit={handleSubmit} action={`/${language}/lunar-new-year`} className="flex flex-col gap-3">
       <input
         type="email"
         value={email}

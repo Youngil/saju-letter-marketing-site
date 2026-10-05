@@ -409,7 +409,10 @@ function PendingForm({
   return (
     <div className="flex flex-col gap-4">
       <p className="text-center text-xs tracking-wide text-foreground/55">{content.aboutLine}</p>
-      <form onSubmit={handleSubmit} className={SHEET_CLASS}>
+      {/* action은 토큰 없는 주소로(2026-10-07 전체 점검 7차) — 없으면 브라우저가 현재 주소(`/xx/compat/<토큰>`)를 action으로
+          보고, GA4 향상된 측정의 "양식 상호작용"이 그 주소를 form_destination으로 보내 pageLocation.ts 다듬기를 우회한다.
+          제출은 항상 onSubmit이 막으므로 하이드레이션 전에 눌렸을 때만 쓰인다(루트 → 미들웨어가 홈으로). */}
+      <form onSubmit={handleSubmit} action="/" className={SHEET_CLASS}>
         <LetterSheet content={content}>
           <div>
             {/* 누가 보냈는지를 제목에(2026-10-02) — 모르는 링크에 생년월일을 넣게 하는 화면이라 보낸 사람이

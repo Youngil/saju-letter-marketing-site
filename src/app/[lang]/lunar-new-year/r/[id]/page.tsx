@@ -102,6 +102,7 @@ export default async function LunarNewYearResultPage({ params }: PageProps) {
             <EmailSignupForm
               readingId={id}
               ownerToken={ownerToken}
+              language={language}
               dict={t}
               alreadySubscribed={reading.hasEmailSubscription === true}
             />
