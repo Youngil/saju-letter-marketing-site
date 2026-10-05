@@ -92,6 +92,7 @@ export const dictionary: MarketingDictionary = {
     subtitle:
       'メールアドレスをご登録いただくと、ダインからの短い紹介ノートをすぐにお届けします。実際の朝の手紙の例と、アプリで使える30日間無料体験クーポン(通常7日間のところ)も一緒にお送りします。',
     emailPlaceholder: 'you@example.com',
+    emailLabel: 'メールアドレス',
     consentLabel: 'この紹介ノートメールの受信に同意します(いつでも配信停止できます)',
     submitButton: '紹介ノートを受け取る',
     submitting: '登録しています…',
@@ -177,6 +178,7 @@ export const dictionary: MarketingDictionary = {
       emailSectionTitle: 'あなたの新年物語は、あと11日続きます',
       emailSectionSubtitle: 'メールアドレスを登録すると、これから12日間、毎日違う角度からの占いをお届けします。',
       emailPlaceholder: 'you@example.com',
+      emailLabel: 'メールアドレス',
       consentLabel: 'この12日間のメールシリーズを受け取る(いつでも解除できます)',
       subscribeButton: '登録する',
       subscribing: '登録しています…',

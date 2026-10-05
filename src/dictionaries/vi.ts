@@ -94,6 +94,7 @@ export const dictionary: MarketingDictionary = {
     subtitle:
       'Để lại email và Dain sẽ gửi ngay một ghi chú chào mừng ngắn — kèm một lá thư buổi sáng mẫu và mã dùng thử miễn phí 30 ngày (thay vì 7 ngày như thường lệ).',
     emailPlaceholder: 'ban@example.com',
+    emailLabel: 'Địa chỉ email',
     consentLabel: 'Tôi đồng ý nhận email chào mừng này (có thể hủy bất cứ lúc nào)',
     submitButton: 'Gửi ghi chú cho tôi',
     submitting: 'Đang đăng ký…',
@@ -181,6 +182,7 @@ export const dictionary: MarketingDictionary = {
       emailSectionSubtitle:
         'Để lại email của bạn và chúng tôi sẽ gửi một bài đọc ngắn mỗi ngày trong 12 ngày tới — mỗi lần một góc nhìn khác về lá số của bạn.',
       emailPlaceholder: 'ban@vidu.com',
+      emailLabel: 'Địa chỉ email',
       consentLabel: 'Tôi muốn nhận chuỗi email 12 ngày này (bạn có thể hủy đăng ký bất cứ lúc nào)',
       subscribeButton: 'Gửi chuỗi email cho tôi',
       subscribing: 'Đang đăng ký cho bạn…',

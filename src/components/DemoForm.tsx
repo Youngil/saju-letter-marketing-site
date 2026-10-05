@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useId, useRef, useState } from 'react';
 import Image from 'next/image';
 import type { MarketingDictionary } from '@/dictionaries/types';
 import type { LaunchContentLanguage } from '@/lib/languages';
@@ -32,6 +32,7 @@ export function DemoForm({
   dict: MarketingDictionary['demo'];
   appLinksDict: MarketingDictionary['appLinks'];
 }) {
+  const dateLabelId = useId();
   const [year, setYear] = useState('');
   const [month, setMonth] = useState('');
   const [day, setDay] = useState('');
@@ -158,15 +159,19 @@ export function DemoForm({
   return (
     <form onSubmit={handleSubmit} className="letter-surface flex flex-col gap-5 rounded-sm p-6 sm:p-7">
       <div>
-        <span className="mb-1.5 block text-sm font-medium">{dict.dateLabel}</span>
+        {/* 세 칸은 자리표시자로만 이름이 붙어 있었다(2026-10-07) — 묶음 이름은 위 라벨, 칸마다 연/월/일 aria-label. */}
+        <span id={dateLabelId} className="mb-1.5 block text-sm font-medium">
+          {dict.dateLabel}
+        </span>
         {/* 예전엔 각 입력칸을 고정폭(w-20/w-16 등)으로 줘서 카드 폭 전체를 못 채우고 왼쪽에만
          * 몰려 붙어 보였다(2026-08-26, 사용자가 "생년월일 입력이 좌측으로 치우쳐보인다"고 지적해
          * 발견) — flex-1로 바꿔 세 칸이 카드 폭을 균등하게 나눠 쓰도록 고쳤다. */}
-        <div className="flex gap-1.5 sm:gap-2">
+        <div role="group" aria-labelledby={dateLabelId} className="flex gap-1.5 sm:gap-2">
           <input
             type="number"
             inputMode="numeric"
             placeholder={dict.yearLabel}
+            aria-label={dict.yearLabel}
             value={year}
             onChange={(e) => setYear(e.target.value)}
             className="min-w-0 flex-1 rounded-lg border border-foreground/15 bg-white px-2 py-2.5 transition focus-visible:border-accent-warm sm:px-3"
@@ -175,6 +180,7 @@ export function DemoForm({
             type="number"
             inputMode="numeric"
             placeholder={dict.monthLabel}
+            aria-label={dict.monthLabel}
             value={month}
             onChange={(e) => setMonth(e.target.value)}
             min={1}
@@ -185,6 +191,7 @@ export function DemoForm({
             type="number"
             inputMode="numeric"
             placeholder={dict.dayLabel}
+            aria-label={dict.dayLabel}
             value={day}
             onChange={(e) => setDay(e.target.value)}
             min={1}

@@ -97,6 +97,7 @@ export const dictionary: MarketingDictionary = {
     subtitle:
       '이메일을 남겨주시면 다인이 짧은 소개 편지를 바로 보내드려요. 실제 아침 편지 예시도 들어 있고, 앱에서 쓸 수 있는 30일 무료체험 쿠폰(원래 7일 대신)도 함께 드려요.',
     emailPlaceholder: 'you@example.com',
+    emailLabel: '이메일 주소',
     consentLabel: '이 소개 편지 이메일 수신에 동의해요 (언제든 수신거부 가능)',
     submitButton: '소개 편지 받기',
     submitting: '등록하는 중…',
@@ -185,6 +186,7 @@ export const dictionary: MarketingDictionary = {
       emailSectionTitle: '앞으로 11일 더, 신년 이야기가 이어져요',
       emailSectionSubtitle: '이메일을 남기시면 앞으로 12일 동안 매일 짧은 풀이를 보내드려요 — 매번 사주의 다른 면을 살펴봐요.',
       emailPlaceholder: 'you@example.com',
+      emailLabel: '이메일 주소',
       consentLabel: '12일 이메일 시리즈를 받고 싶어요 (언제든 수신거부 가능)',
       subscribeButton: '시리즈 받기',
       subscribing: '등록하는 중…',

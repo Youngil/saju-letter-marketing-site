@@ -92,6 +92,7 @@ export const dictionary: MarketingDictionary = {
     subtitle:
       'Déjanos tu correo y Dain te enviará ahora mismo una breve nota de bienvenida — incluida una carta matutina de ejemplo y un código para una prueba gratuita de 30 días (en vez de los 7 habituales).',
     emailPlaceholder: 'tu@ejemplo.com',
+    emailLabel: 'Correo electrónico',
     consentLabel: 'Acepto recibir este correo de bienvenida (puedes darte de baja cuando quieras)',
     submitButton: 'Enviarme la nota',
     submitting: 'Registrando…',
@@ -179,6 +180,7 @@ export const dictionary: MarketingDictionary = {
       emailSectionSubtitle:
         'Déjanos tu correo electrónico y te enviaremos una lectura corta cada día durante los próximos 12 días — un lado diferente de tu carta cada vez.',
       emailPlaceholder: 'tu@ejemplo.com',
+      emailLabel: 'Correo electrónico',
       consentLabel: 'Me gustaría recibir esta serie de correos de 12 días (puedes darte de baja en cualquier momento)',
       subscribeButton: 'Envíame la serie',
       subscribing: 'Registrándote…',

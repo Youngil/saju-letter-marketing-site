@@ -104,6 +104,8 @@ export interface MarketingDictionary {
     title: string;
     subtitle: string;
     emailPlaceholder: string;
+    /** 이메일 입력칸의 접근성 이름(aria-label) — 자리표시자(you@example.com)는 이름이 아니다(2026-10-07). */
+    emailLabel: string;
     consentLabel: string;
     submitButton: string;
     submitting: string;
@@ -219,6 +221,8 @@ export interface MarketingDictionary {
       emailSectionTitle: string;
       emailSectionSubtitle: string;
       emailPlaceholder: string;
+      /** 이메일 입력칸의 접근성 이름(aria-label, 2026-10-07). */
+      emailLabel: string;
       consentLabel: string;
       subscribeButton: string;
       subscribing: string;
