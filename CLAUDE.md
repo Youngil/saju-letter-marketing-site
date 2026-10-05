@@ -88,7 +88,7 @@
 - `seo.ts`(`WEB_BASE_URL`, `languageAlternates()` — `x-default`=en, `NOINDEX_ROBOTS`, `buildSocialMetadata()` — OG+twitter 항상 함께), `structuredData.ts`(`organizationJsonLd`, `articleJsonLd`).
 - 모든 정적 페이지에 hreflang(실제 지원 언어 집합) + canonical. 개인화/트랜잭션 페이지(`compat/[token]`, `r/[id]`, 두 `unsubscribe`)는 메타 `noindex, follow`(robots.txt Disallow 금지).
 - 기본 OG `[lang]/opengraph-image.tsx`, 다른 세그먼트는 그 URL을 직접 참조(파일 규약 비상속). compare/compat/신년운세 결과는 전용 OG.
-- `sitemap.ts`(async, `revalidate = 3600` 필수): 엔트리별 alternates, 블로그 slug는 실제 발행 언어에만. 홈/블로그/compare 4개, 신년운세/privacy/disclaimer 6개.
+- `sitemap.ts`(async, `revalidate = 3600` 필수): 엔트리별 alternates, 블로그 slug는 실제 발행 언어에만(`posts.ts::getSlugLanguageMap` — 글 페이지 hreflang과 공용). `lastModified`는 블로그 글 날짜만, 정적 페이지는 생략(`new Date()` 금지). 홈/블로그/compare 4개, 신년운세/privacy/disclaimer 6개.
 - ISR 3600: 홈·블로그 목록/글·sitemap·레이아웃. 새 DB 글은 목록에 최대 1시간 지연.
 
 ## 10. 백엔드 연동

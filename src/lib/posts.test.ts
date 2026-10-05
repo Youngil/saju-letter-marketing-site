@@ -97,3 +97,33 @@ describe('getPostContent — 정적 파일 slug는 파일에서, 그 외는 DB�
     expect(await getPostContent('en', 'does-not-exist')).toBeNull();
   });
 });
+
+// 2026-10-06 전체 점검 3차 — sitemap과 글 페이지 hreflang이 같은 slug→언어 계산을 쓰도록 합쳤다.
+describe('buildSlugLanguageMap / getLanguagesForSlug', () => {
+  const summary = (slug: string, date: string) => ({ slug, title: slug, description: '', date });
+
+  it('slug마다 공개된 언어와 그 언어판 날짜를 BLOG_LANGUAGES 순서로 모은다', async () => {
+    const { buildSlugLanguageMap } = await import('./posts');
+    const map = buildSlugLanguageMap([
+      { lang: 'ko', posts: [summary('a', '2026-01-02')] },
+      { lang: 'en', posts: [summary('a', '2026-01-01'), summary('b', '2026-02-01')] },
+    ]);
+    expect(map.get('a')).toEqual([
+      { lang: 'ko', date: '2026-01-02' },
+      { lang: 'en', date: '2026-01-01' },
+    ]);
+    expect(map.get('b')).toEqual([{ lang: 'en', date: '2026-02-01' }]);
+  });
+
+  it('getLanguagesForSlug는 실제로 그 글이 있는 언어만 돌려준다', async () => {
+    const { listDbBlogPosts } = await import('./blogApi');
+    vi.mocked(listDbBlogPosts).mockImplementation(async (lang) =>
+      lang === 'ja' || lang === 'en'
+        ? [{ slug: 'db-only', title: 't', description: 'd', date: '2099-01-01', category: null }]
+        : [],
+    );
+    const { getLanguagesForSlug } = await import('./posts');
+    expect(await getLanguagesForSlug('db-only')).toEqual(['en', 'ja']);
+    expect(await getLanguagesForSlug('missing')).toEqual([]);
+  });
+});

@@ -137,13 +137,35 @@ export function isPostCategory(value: unknown): value is PostCategory {
   return typeof value === 'string' && (POST_CATEGORIES as readonly string[]).includes(value);
 }
 
+export type BlogLanguage = (typeof BLOG_LANGUAGES)[number];
+
+/** 한 slug가 공개된 언어 하나와 그 언어판의 글 날짜(sitemap `lastModified`). */
+export interface SlugLanguageEntry {
+  lang: BlogLanguage;
+  date: string;
+}
+
+/** 언어별 글 목록 → slug별 공개 언어(BLOG_LANGUAGES 순서). 순수 함수라 따로 테스트한다. */
+export function buildSlugLanguageMap(byLanguage: { lang: BlogLanguage; posts: PostSummary[] }[]): Map<string, SlugLanguageEntry[]> {
+  const map = new Map<string, SlugLanguageEntry[]>();
+  for (const { lang, posts } of byLanguage) {
+    for (const post of posts) {
+      map.set(post.slug, [...(map.get(post.slug) ?? []), { lang, date: post.date }]);
+    }
+  }
+  return map;
+}
+
 /**
  * slug마다 실제로 공개된 블로그 언어(2026-10-06) — sitemap과 글 페이지의 hreflang이 같은 값을 쓰게 한다. 예전엔
- * 글 페이지가 4개 언어를 무조건 alternates에 넣어, 번역이 보류된 언어는 404를 가리켰다.
+ * 글 페이지가 4개 언어를 무조건 alternates에 넣어, 번역이 보류된 언어는 404를 가리켰다. 2026-10-06 전체 점검 3차로
+ * sitemap이 따로 하던 같은 계산을 이 함수 하나로 합쳤다(요청 안에서는 `cache()`로 한 번만).
  */
-export async function getLanguagesForSlug(slug: string): Promise<(typeof BLOG_LANGUAGES)[number][]> {
-  const found = await Promise.all(
-    BLOG_LANGUAGES.map(async (lang) => ((await getAllPostSummaries(lang)).some((post) => post.slug === slug) ? lang : null)),
-  );
-  return found.filter((lang): lang is (typeof BLOG_LANGUAGES)[number] => lang !== null);
+export const getSlugLanguageMap = cache(async (): Promise<Map<string, SlugLanguageEntry[]>> => {
+  const byLanguage = await Promise.all(BLOG_LANGUAGES.map(async (lang) => ({ lang, posts: await getAllPostSummaries(lang) })));
+  return buildSlugLanguageMap(byLanguage);
+});
+
+export async function getLanguagesForSlug(slug: string): Promise<BlogLanguage[]> {
+  return ((await getSlugLanguageMap()).get(slug) ?? []).map((entry) => entry.lang);
 }

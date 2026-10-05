@@ -6,7 +6,7 @@ import {
   type MarketingLanguage,
   type LaunchContentLanguage,
 } from '@/lib/languages';
-import { BLOG_LANGUAGES, getAllPostSummaries } from '@/lib/posts';
+import { BLOG_LANGUAGES, getSlugLanguageMap } from '@/lib/posts';
 import { WEB_BASE_URL, languageAlternates } from '@/lib/seo';
 import { fetchActiveServiceLanguages } from '@/lib/serviceLanguagesApi';
 
@@ -22,6 +22,9 @@ const DEFAULT_BLOG_LANGUAGE = DEFAULT_LANGUAGE as LaunchContentLanguage;
 // 보였지만 sitemap은 무기한 캐시). 위 세 파일과 같은 값(1시간)으로 맞춘다.
 export const revalidate = 3600;
 
+// `lastModified`(2026-10-06 전체 점검 3차): 예전엔 모든 항목에 `new Date()`를 넣어 sitemap을 만들 때마다 전부 "방금
+// 바뀜"으로 보였다(검색엔진이 신호를 무시하게 된다). 블로그 글은 그 언어판의 글 날짜를 쓰고, 정적 페이지는 뺀다.
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // 2026-09-07 — "모든 서비스를 1차 출시 4개 언어로 좁힌다"는 결정에 따라 홈도
   // MARKETING_LANGUAGES(6) 대신 LAUNCH_CONTENT_LANGUAGES(4)만 사이트맵에 올린다 — pt/vi는
@@ -29,7 +32,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const homePath = (lang: MarketingLanguage) => `/${lang}`;
   const homeEntries = LAUNCH_CONTENT_LANGUAGES.map((lang) => ({
     url: `${WEB_BASE_URL}${homePath(lang)}`,
-    lastModified: new Date(),
     alternates: { languages: languageAlternates(LAUNCH_CONTENT_LANGUAGES, homePath, DEFAULT_LANGUAGE) },
   }));
 
@@ -38,26 +40,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const blogIndexPath = (lang: (typeof BLOG_LANGUAGES)[number]) => `/${lang}/blog`;
   const blogIndexEntries = BLOG_LANGUAGES.map((lang) => ({
     url: `${WEB_BASE_URL}${blogIndexPath(lang)}`,
-    lastModified: new Date(),
     alternates: { languages: languageAlternates(BLOG_LANGUAGES, blogIndexPath, DEFAULT_BLOG_LANGUAGE) },
   }));
   // 2026-09-06부터 slug 목록이 코드 상수(POST_SLUGS)만으로 안 끝난다 — DB 저장 글(코드 배포
   // 없이 발행)이 언어별로 다른 조합으로 존재할 수 있어, 언어마다 실제 발행된 글을 직접 조회해
   // slug→가능한 언어 집합을 구성한다(각 slug가 실제로 번역된 언어에만 alternates를 건다).
-  const summariesByLanguage = await Promise.all(
-    BLOG_LANGUAGES.map(async (lang) => ({ lang, slugs: (await getAllPostSummaries(lang)).map((post) => post.slug) })),
-  );
-  const languagesBySlug = new Map<string, (typeof BLOG_LANGUAGES)[number][]>();
-  for (const { lang, slugs } of summariesByLanguage) {
-    for (const slug of slugs) {
-      languagesBySlug.set(slug, [...(languagesBySlug.get(slug) ?? []), lang]);
-    }
-  }
+  const languagesBySlug = await getSlugLanguageMap();
   const blogPostPath = (slug: string) => (lang: (typeof BLOG_LANGUAGES)[number]) => `/${lang}/blog/${slug}`;
-  const blogPostEntries = Array.from(languagesBySlug.entries()).flatMap(([slug, availableLangs]) =>
-    availableLangs.map((lang) => ({
+  const blogPostEntries = Array.from(languagesBySlug.entries()).flatMap(([slug, entries]) => {
+    const availableLangs = entries.map((entry) => entry.lang);
+    return entries.map(({ lang, date }) => ({
       url: `${WEB_BASE_URL}${blogPostPath(slug)(lang)}`,
-      lastModified: new Date(),
+      lastModified: date,
       alternates: {
         languages: languageAlternates(
           availableLangs,
@@ -65,12 +59,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
           availableLangs.includes(DEFAULT_BLOG_LANGUAGE) ? DEFAULT_BLOG_LANGUAGE : availableLangs[0]!,
         ),
       },
-    })),
-  );
+    }));
+  });
   const comparePath = (lang: (typeof BLOG_LANGUAGES)[number]) => `/${lang}/compare`;
   const compareEntries = BLOG_LANGUAGES.map((lang) => ({
     url: `${WEB_BASE_URL}${comparePath(lang)}`,
-    lastModified: new Date(),
     alternates: { languages: languageAlternates(BLOG_LANGUAGES, comparePath, DEFAULT_BLOG_LANGUAGE) },
   }));
 
@@ -84,7 +77,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const lunarNewYearPath = (lang: MarketingLanguage) => `/${lang}/lunar-new-year`;
   const lunarNewYearEntries = activeLanguages.map((lang) => ({
     url: `${WEB_BASE_URL}${lunarNewYearPath(lang)}`,
-    lastModified: new Date(),
     alternates: { languages: languageAlternates(activeLanguages, lunarNewYearPath, activeDefault) },
   }));
 
@@ -97,7 +89,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const privacyPath = (lang: MarketingLanguage) => `/${lang}/privacy`;
   const privacyEntries = MARKETING_LANGUAGES.map((lang) => ({
     url: `${WEB_BASE_URL}${privacyPath(lang)}`,
-    lastModified: new Date(),
     alternates: { languages: languageAlternates(MARKETING_LANGUAGES, privacyPath, DEFAULT_LANGUAGE) },
   }));
 
@@ -107,7 +98,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const disclaimerPath = (lang: MarketingLanguage) => `/${lang}/disclaimer`;
   const disclaimerEntries = MARKETING_LANGUAGES.map((lang) => ({
     url: `${WEB_BASE_URL}${disclaimerPath(lang)}`,
-    lastModified: new Date(),
     alternates: { languages: languageAlternates(MARKETING_LANGUAGES, disclaimerPath, DEFAULT_LANGUAGE) },
   }));
 
