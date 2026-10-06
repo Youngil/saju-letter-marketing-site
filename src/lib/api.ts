@@ -66,24 +66,61 @@ export interface CouponAvailability {
 }
 
 /**
- * 30일 체험 쿠폰 현황의 재검증 주기(초). 홈 라우트의 재검증 주기도 이 값으로 내려간다(Next는 라우트 안 fetch 중 가장 짧은
- * `revalidate`를 라우트 전체에 쓴다) — 홈은 이 주기로 다시 그려진다.
+ * 홈이 처음 그릴 때 넣는 쿠폰 현황(초기 prop)의 재검증 주기(초) — 홈 라우트 ISR(3600)과 같게 둔다(2026-10-06 전체 점검
+ * 10차). Next는 라우트 안 fetch 중 가장 짧은 `revalidate`를 라우트 전체에 쓰므로, 9차처럼 120초로 두면 홈 전체가 2분마다
+ * 다시 그려졌다. 이제 숫자의 신선도는 리드 폼이 마운트 때 같은 사이트 `/api/coupon-availability`(60초 캐시)로 다시 받아
+ * 맞춘다 — 초기 prop은 JS 전·조회 실패 때 보여 줄 값일 뿐이다.
  */
-export const COUPON_AVAILABILITY_REVALIDATE_SECONDS = 120;
+export const COUPON_AVAILABILITY_REVALIDATE_SECONDS = 3600;
+
+/** 같은 사이트 Route Handler 경로 — 브라우저는 백엔드가 아니라 이 주소를 부른다(백엔드 공개 IP 한도를 쓰지 않게). */
+export const COUPON_AVAILABILITY_ROUTE_PATH = '/api/coupon-availability';
+
+function isCount(value: unknown): value is number {
+  return typeof value === 'number' && Number.isFinite(value) && value >= 0;
+}
 
 /**
- * 30일 체험 쿠폰 현황 — **서버(홈 페이지)에서만** 조회해 리드 캡처 폼에 prop으로 넘긴다(2026-10-06 전체 점검 9차). 예전엔
- * 폼이 마운트될 때마다 브라우저에서 불러, 방문마다 백엔드의 공개 IP 한도(리드 제출과 같은 버킷)를 하나씩 썼다. 이제
- * Next 데이터 캐시로 `COUPON_AVAILABILITY_REVALIDATE_SECONDS`마다 한 번만 부른다(서버 요청이라 내부 키 헤더도 붙는다).
- * 실패하면 null — 폼은 문구 없이 그대로 쓸 수 있어야 한다.
+ * 쿠폰 현황 응답 모양 검사 — 백엔드 응답(Route Handler)과 Route Handler 응답(브라우저) 양쪽에 쓴다. 세 필드만 골라
+ * 새 객체로 돌려주고(다른 필드는 흘리지 않는다), 모양이 틀리면 null.
+ */
+export function parseCouponAvailability(body: unknown): CouponAvailability | null {
+  if (!body || typeof body !== 'object') return null;
+  const { capacity, issued, remaining } = body as Record<string, unknown>;
+  if (!isCount(issued)) return null;
+  if (capacity !== null && !isCount(capacity)) return null;
+  if (remaining !== null && !isCount(remaining)) return null;
+  return { capacity, issued, remaining };
+}
+
+/**
+ * 30일 체험 쿠폰 현황 — 홈 서버 컴포넌트가 리드 캡처 폼의 **초기값**으로 조회한다(2026-10-06 전체 점검 9차 → 10차). Next
+ * 데이터 캐시로 `COUPON_AVAILABILITY_REVALIDATE_SECONDS`마다 한 번(서버 요청이라 내부 키 헤더도 붙는다). 실패하면 null —
+ * 폼은 문구 없이 그대로 쓸 수 있어야 한다.
  */
 export async function loadCouponAvailability(): Promise<CouponAvailability | null> {
   try {
-    return await request<CouponAvailability>('/marketing-site/coupon-availability', {
+    const body = await request<unknown>('/marketing-site/coupon-availability', {
       next: { revalidate: COUPON_AVAILABILITY_REVALIDATE_SECONDS },
     });
+    return parseCouponAvailability(body);
   } catch (error) {
     console.warn('loadCouponAvailability failed', error);
+    return null;
+  }
+}
+
+/**
+ * 브라우저에서 최신 쿠폰 현황 받기(2026-10-06 전체 점검 10차) — 리드 폼이 마운트될 때 부른다. ISR HTML(최대 1시간,
+ * 콜드 스타트 인스턴스면 빌드 때 값)에 박힌 숫자를 바로잡는다. 같은 사이트 Route Handler가 60초 캐시로 백엔드를 대신
+ * 불러 주므로 방문마다 백엔드를 치지 않는다. 실패(503·네트워크·중단·모양 틀림)는 null — 호출부는 초기값을 그대로 둔다.
+ */
+export async function fetchFreshCouponAvailability(signal?: AbortSignal): Promise<CouponAvailability | null> {
+  try {
+    const response = await fetch(COUPON_AVAILABILITY_ROUTE_PATH, { signal, headers: { Accept: 'application/json' } });
+    if (!response.ok) return null;
+    return parseCouponAvailability(await response.json());
+  } catch {
     return null;
   }
 }

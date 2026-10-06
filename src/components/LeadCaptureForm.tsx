@@ -1,9 +1,9 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { MarketingDictionary } from '@/dictionaries/types';
 import type { LaunchContentLanguage } from '@/lib/languages';
-import { subscribeLead, type CouponAvailability } from '@/lib/api';
+import { fetchFreshCouponAvailability, subscribeLead, type CouponAvailability } from '@/lib/api';
 import { Turnstile, TURNSTILE_ENABLED, type TurnstileHandle } from './Turnstile';
 import { trackEvent } from '@/lib/analytics';
 import { EMAIL_REGEX, mapPublicFormError } from '@/lib/publicForm';
@@ -22,17 +22,27 @@ import { EMAIL_REGEX, mapPublicFormError } from '@/lib/publicForm';
 export function LeadCaptureForm({
   language,
   dict,
-  availability,
+  initialAvailability,
 }: {
   language: LaunchContentLanguage;
   dict: MarketingDictionary['leadCapture'];
   /**
    * 선착순 현황(전체 캡/현재 발급 수/잔여 인원) — 관리자 패널에서 캡을 조정할 수 있어 하드코딩하지 않는다. 2026-08-26부터
-   * capacity/issued도 함께 보여 준다. **홈 서버 컴포넌트가 짧은 재검증으로 조회해 넘긴다**(2026-10-06 전체 점검 9차 — 예전엔
-   * 마운트마다 브라우저가 불러 리드 제출과 같은 백엔드 IP 한도를 썼다). 조회 실패면 null이고 문구를 숨긴다.
+   * capacity/issued도 함께 보여 준다. **초기값은 홈 서버 컴포넌트가 넘기고**(ISR과 같은 주기, 2026-10-06 전체 점검 9차 →
+   * 10차), 마운트되면 같은 사이트 `/api/coupon-availability`(60초 캐시)로 한 번 다시 받아 바꾼다 — ISR HTML이나 콜드
+   * 스타트 인스턴스의 빌드 때 값이 오래돼 있어도 바로잡힌다. 브라우저는 백엔드를 직접 부르지 않는다(리드 제출과 같은
+   * 백엔드 IP 한도를 쓰지 않게). 다시 받기가 실패하면 초기값을 그대로 두고, 초기값도 null이면 문구를 숨긴다.
    */
-  availability: CouponAvailability | null;
+  initialAvailability: CouponAvailability | null;
 }) {
+  const [availability, setAvailability] = useState(initialAvailability);
+  useEffect(() => {
+    const controller = new AbortController();
+    void fetchFreshCouponAvailability(controller.signal).then((fresh) => {
+      if (fresh) setAvailability(fresh);
+    });
+    return () => controller.abort();
+  }, []);
   const [email, setEmail] = useState('');
   const [consent, setConsent] = useState(false);
   const [turnstileToken, setTurnstileToken] = useState<string | undefined>(undefined);
