@@ -99,13 +99,30 @@ export const getAllPostSummaries = cache(async (lang: MarketingLanguage): Promis
   // DB는 카테고리 없음을 null로 표현하지만(Prisma nullable 컬럼), PostMeta는 optional(undefined)
   // 관례를 쓴다(`isPostCategory` 등 기존 소비처와 형태를 맞추기 위함) — 여기서 한 번만 정규화한다.
   const normalizedDbPosts: PostSummary[] = dbPosts.map((post) => ({ ...post, category: post.category ?? undefined }));
-  return [...filePosts, ...normalizedDbPosts].sort((a, b) => b.date.localeCompare(a.date));
+  return mergePostSummaries(filePosts, normalizedDbPosts, lang);
 });
+
+/**
+ * 파일 글 + DB 글 병합(순수 함수, 테스트용으로 분리 — 2026-10-06 전체 점검 9차). DB 글의 slug가 정적 파일 글
+ * slug(`POST_SLUGS`)와 겹치면 그 DB 글은 버린다 — `getPostContent`가 `isPostSlug`로 항상 파일 쪽을 열기 때문에,
+ * 걸러내지 않으면 목록에 같은 slug가 두 번(파일 글 + 열리지 않는 DB 글) 나오고 sitemap·hreflang도 DB 글만 있는
+ * 언어를 공개 언어로 잘못 센다(그 언어의 파일 글이 없으면 404). 해당 언어에 파일 글이 없어도 버린다 — 같은 이유로
+ * 그 주소는 파일 쪽으로 가서 404다. 운영자가 알 수 있게 서버 로그에 경고를 남긴다.
+ */
+export function mergePostSummaries(filePosts: PostSummary[], dbPosts: PostSummary[], lang: MarketingLanguage): PostSummary[] {
+  const visibleDbPosts = dbPosts.filter((post) => {
+    if (!isPostSlug(post.slug)) return true;
+    console.warn(`blog: DB post slug "${post.slug}" (${lang}) collides with a static file post slug — ignored`);
+    return false;
+  });
+  return [...filePosts, ...visibleDbPosts].sort((a, b) => b.date.localeCompare(a.date));
+}
 
 /**
  * `blog/[slug]/page.tsx` 전용 — 알려진 정적 slug면 파일에서, 아니면 DB에서 찾는다. 두 소스가
  * 같은 slug를 가질 일은 없다고 가정한다(정적 slug는 `POST_SLUGS`에 코드로 등록된 것뿐이라
- * DB 발행 시점에 겹치지 않게 고르면 된다) — 겹치면 이 함수는 항상 파일 쪽을 우선한다.
+ * DB 발행 시점에 겹치지 않게 고르면 된다) — 겹치면 이 함수는 항상 파일 쪽을 우선하고, 목록·sitemap도
+ * `mergePostSummaries`가 그 DB 글을 빼서 같은 판정을 따른다.
  */
 export const getPostContent = cache(async (lang: MarketingLanguage, slug: string): Promise<PostContent | null> => {
   if (isPostSlug(slug)) {

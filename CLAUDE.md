@@ -46,7 +46,7 @@
 - **블로그**(4개 언어, ISR 3600) — 하이브리드:
   - 파일 글: `content-posts/{slug}.{lang}.mdx` + `POST_SLUGS`(`@next/mdx`, `export const meta = {...}`, `meta.category` = `observation`/`explainer`/`behind`/`season`).
   - DB 글(백엔드 `MarketingSiteBlogPost`): admin-panel UI 없이 `saju-letter-admin-backend`의 `POST /marketing-site/blog-posts`로 발행. `next-mdx-remote/rsc` 런타임 컴파일 — **`import` 불가**, 태그는 `blogMdxComponents`(문자열 prop만 받는 `FixedVsChangingDiagram`/`NewYearTimelineDiagram`)만 — 배열 prop이 필요한 `RitualFlowDiagram`은 `blockJS`가 `{}` 식을 지워 렌더 중 예외가 나서 DB 맵에서 뺐다(파일 글 전용, DB 글에선 껍데기만 벗겨짐). 이미지는 `public/`에 git 커밋 — **DB 글의 이미지는 이 사이트 상대 주소만**(외부·`//host`는 추적 픽셀이라 삭제). `SafeMdx`가 `remarkSanitizeMdx`(`lib/mdxSanitize.ts`)로 다이어그램 + 서식용 HTML 태그·허용 속성(**`className` 없음** — Tailwind 피싱 오버레이 방지)·안전한 주소만 남기고(script·iframe 등은 내용째 삭제, 모르는 태그는 껍데기만 벗김), `blockJS`가 `{}` 식을 지운다. 요소 스타일(h2·h3·p·ul·ol·li·strong·blockquote·a)은 파일 글·DB 글 공용 `components/blog/mdxElements.tsx`.
-  - `posts.ts`: `getAllPostSummaries`가 `date` 문자열로 병합 정렬(발행 게이트 아님), `getPostContent`가 `isPostSlug`로 file/db 분기(DB slug는 정적 slug와 겹치지 않게).
+  - `posts.ts`: `getAllPostSummaries`가 `date` 문자열로 병합 정렬(발행 게이트 아님), `getPostContent`가 `isPostSlug`로 file/db 분기(DB slug는 정적 slug와 겹치지 않게 — 겹치면 `mergePostSummaries`가 그 DB 글을 목록·sitemap에서 빼고 서버 로그에 경고).
   - `blogApi.ts`는 **네트워크 포함 모든 예외를 흡수**(빈 배열/null) — 백엔드 없이도 빌드 성공해야 함.
   - 주간 칼럼은 **수동 편집**(자동 생성 없음): 화요일, EN 원문 → ko/ja/es(백로그: realignment 문서 §4.5–4.6). `what-is-saju`(입문, ko와 en/ja/es 구조 다름)는 별도 트랙.
 - **compare**(+OG, 4개 언어): 별자리 12 vs 일간 10 정적 비교(1:1 매칭표 없음), `CompareInfographic` + `dict.compare.*`. 다이어그램은 인라인 SVG/HTML, 절대 위치 대신 flex 흐름.

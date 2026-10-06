@@ -127,3 +127,45 @@ describe('buildSlugLanguageMap / getLanguagesForSlug', () => {
     expect(await getLanguagesForSlug('missing')).toEqual([]);
   });
 });
+
+// 2026-10-06 전체 점검 9차 — DB 글 slug가 정적 파일 글 slug와 겹치면 목록·sitemap에서 뺀다(글 페이지는 항상 파일 쪽).
+describe('mergePostSummaries — 파일 글 slug와 겹치는 DB 글 제외', () => {
+  const filePost = { slug: 'what-is-saju', title: 'File', description: 'd', date: '2026-08-01' };
+
+  it('겹치는 DB 글은 버리고 경고를 남기며, 나머지는 날짜 내림차순으로 병합한다', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+    const { mergePostSummaries } = await import('./posts');
+    const merged = mergePostSummaries(
+      [filePost],
+      [
+        { slug: 'what-is-saju', title: 'DB dup', description: 'd', date: '2099-01-01' },
+        { slug: 'fresh-db-post', title: 'DB', description: 'd', date: '2026-09-01' },
+      ],
+      'en',
+    );
+    expect(merged.map((p) => p.title)).toEqual(['DB', 'File']);
+    expect(warn).toHaveBeenCalledWith(expect.stringContaining('what-is-saju'));
+    warn.mockRestore();
+  });
+
+  it('그 언어에 파일 글이 없어도 정적 slug와 겹치는 DB 글은 버린다(글 페이지가 파일 쪽으로 가서 404)', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+    const { mergePostSummaries } = await import('./posts');
+    const merged = mergePostSummaries([], [{ slug: 'zodiac-and-saju-feel', title: 'DB dup', description: 'd', date: '2026-09-01' }], 'ko');
+    expect(merged).toEqual([]);
+    warn.mockRestore();
+  });
+
+  it('getSlugLanguageMap(sitemap)에도 겹치는 DB 글의 언어가 들어가지 않는다', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+    const { listDbBlogPosts } = await import('./blogApi');
+    vi.mocked(listDbBlogPosts).mockImplementation(async (lang) =>
+      lang === 'ja' ? [{ slug: 'why-a-short-letter', title: 'DB dup', description: 'd', date: '2026-09-01', category: null }] : [],
+    );
+    const { getSlugLanguageMap } = await import('./posts');
+    const map = await getSlugLanguageMap();
+    // vitest에선 파일 글이 로드되지 않으므로(위 주석) 겹치는 DB 글이 빠지면 그 slug 자체가 없어야 한다.
+    expect(map.has('why-a-short-letter')).toBe(false);
+    warn.mockRestore();
+  });
+});
