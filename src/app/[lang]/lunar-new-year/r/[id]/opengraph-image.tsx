@@ -3,6 +3,7 @@ import { getReading } from '@/lib/lunarNewYearApi';
 import { getDictionary } from '@/dictionaries';
 import { isMarketingLanguage, type MarketingLanguage } from '@/lib/languages';
 import { isValidReadingId } from '@/lib/routeParams';
+import { getRequestVisitorIp } from '@/lib/requestVisitorIp';
 
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
@@ -28,7 +29,7 @@ export default async function Image({ params }: { params: Promise<{ lang: string
   const { lang: rawLang, id } = await params;
   const language: MarketingLanguage = isMarketingLanguage(rawLang) ? rawLang : 'en';
   // 모양부터 틀린 id(백엔드 UUID가 아님)는 백엔드를 부르지 않고 일반 카드로(2026-10-06 전체 점검 11차 R11-6-1).
-  const reading = isValidReadingId(id) ? await getReading(id).catch(() => null) : null;
+  const reading = isValidReadingId(id) ? await getReading(id, undefined, await getRequestVisitorIp()).catch(() => null) : null;
   const dict = await getDictionary(language);
 
   const title = reading?.content.title ?? 'Saju Letter';

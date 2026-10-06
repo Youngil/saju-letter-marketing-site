@@ -7,6 +7,7 @@ import { COMPAT_CONTENT, pickCompatViewCopy, resolveCompatOg } from '@/content/c
 import { CompatView } from '@/components/compat/CompatView';
 import { WEB_BASE_URL, languageAlternates, NOINDEX_ROBOTS } from '@/lib/seo';
 import { isValidCompatToken } from '@/lib/routeParams';
+import { getRequestVisitorIp } from '@/lib/requestVisitorIp';
 
 interface PageProps {
   params: Promise<{ lang: string; token: string }>;
@@ -39,7 +40,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   if (!isValidCompatToken(token)) return { robots: NOINDEX_ROBOTS };
   const content = COMPAT_CONTENT[rawLang];
   // 일시 오류(429·5xx)면 메타데이터는 보낸 사람 이름 없는 일반 문구로 — 본문은 페이지가 같은 오류로 다시 시도 화면을 그린다.
-  const view = await getCompatInvite(token, rawLang).catch((): InviteView => ({ status: 'pending' }));
+  const view = await getCompatInvite(token, rawLang, await getRequestVisitorIp()).catch((): InviteView => ({ status: 'pending' }));
 
   const og = resolveCompatOg(content, view);
   const path = (lang: MarketingLanguage) => `/${lang}/compat/${token}`;
@@ -67,7 +68,8 @@ export default async function CompatPage({ params }: PageProps) {
   if (!isValidCompatToken(token)) notFound();
 
   // 일시 오류는 여기서 잡지 않는다 — [lang]/error.tsx가 "다시 시도"를 보여 준다("초대 없음"으로 보이지 않게).
-  const view = await getCompatInvite(token, lang);
+  // 방문자 IP를 함께 넘겨 백엔드가 방문자별로 센다(2026-10-07 전체 점검 12차) — 메타데이터와 같은 인자라 `cache()`가 한 번으로 묶는다.
+  const view = await getCompatInvite(token, lang, await getRequestVisitorIp());
   const dict = await getDictionary(lang);
 
   return (

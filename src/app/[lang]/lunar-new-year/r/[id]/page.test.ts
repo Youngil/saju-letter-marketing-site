@@ -16,10 +16,13 @@ const SAMPLE_READING_ID = '0d6f3a52-7c1e-4b8a-9e2d-5f4c3b2a1e0d';
 
 // 요청 쿠키 — 테스트마다 소유자 쿠키를 넣었다 뺐다 한다.
 const cookieJar = new Map<string, string>();
+// 요청 헤더 — 방문자 IP는 X-Forwarded-For의 맨 오른쪽(Cloud Run 앞단이 덧붙인 값, 2026-10-07 전체 점검 12차).
+const VISITOR_IP = '198.51.100.7';
 vi.mock('next/headers', () => ({
   cookies: async () => ({
     get: (name: string) => (cookieJar.has(name) ? { name, value: cookieJar.get(name)! } : undefined),
   }),
+  headers: async () => new Headers({ 'x-forwarded-for': `203.0.113.9, ${VISITOR_IP}` }),
 }));
 
 // getReading은 saju-letter-backend를 실제로 호출한다 — 네트워크 호출 없이 항상 같은 결과를 돌려주도록 목킹한다
@@ -116,7 +119,7 @@ describe('/[lang]/lunar-new-year/r/[id] 소유자만 메일 구독', () => {
   it('쿠키가 없으면(공유 링크) 토큰 없이 조회하고 구독 폼을 그리지 않는다', async () => {
     const { getReading } = await import('@/lib/lunarNewYearApi');
     const tree = await renderPage();
-    expect(getReading).toHaveBeenCalledWith(READING_ID, undefined);
+    expect(getReading).toHaveBeenCalledWith(READING_ID, undefined, VISITOR_IP);
     expect(findElements(tree, EmailSignupForm)).toHaveLength(0);
   });
 
@@ -130,7 +133,7 @@ describe('/[lang]/lunar-new-year/r/[id] 소유자만 메일 구독', () => {
       subscriptionAvailable: true,
     } as never);
     const tree = await renderPage();
-    expect(getReading).toHaveBeenCalledWith(READING_ID, OWNER_TOKEN);
+    expect(getReading).toHaveBeenCalledWith(READING_ID, OWNER_TOKEN, VISITOR_IP);
     const forms = findElements(tree, EmailSignupForm);
     expect(forms).toHaveLength(1);
     expect(forms[0]!.props).toMatchObject({ readingId: READING_ID, ownerToken: OWNER_TOKEN, alreadySubscribed: true });
@@ -143,7 +146,7 @@ describe('/[lang]/lunar-new-year/r/[id] 소유자만 메일 구독', () => {
     cookieJar.set('nyo', addOwnerEntry(other, READING_ID, OWNER_TOKEN, now));
     const { getReading } = await import('@/lib/lunarNewYearApi');
     await renderPage();
-    expect(getReading).toHaveBeenCalledWith(READING_ID, OWNER_TOKEN);
+    expect(getReading).toHaveBeenCalledWith(READING_ID, OWNER_TOKEN, VISITOR_IP);
   });
 
   it('쿠키가 있어도 백엔드가 소유자가 아니라고 하면(토큰 불일치) 폼이 없다', async () => {
@@ -185,6 +188,6 @@ describe('/[lang]/lunar-new-year/r/[id] 소유자만 메일 구독', () => {
     cookieJar.set(`nyo_${READING_ID}`, 'not a token!');
     const { getReading } = await import('@/lib/lunarNewYearApi');
     await renderPage();
-    expect(getReading).toHaveBeenCalledWith(READING_ID, undefined);
+    expect(getReading).toHaveBeenCalledWith(READING_ID, undefined, VISITOR_IP);
   });
 });

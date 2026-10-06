@@ -14,6 +14,11 @@ vi.mock('@/lib/compatApi', () => ({
   getCompatInvite: vi.fn().mockResolvedValue({ status: 'pending' }),
 }));
 
+// 방문자 IP — X-Forwarded-For의 맨 오른쪽(Cloud Run 앞단이 덧붙인 값)을 백엔드 조회에 함께 넘긴다(2026-10-07 전체 점검 12차).
+vi.mock('next/headers', () => ({
+  headers: async () => new Headers({ 'x-forwarded-for': '203.0.113.9, 198.51.100.7' }),
+}));
+
 /** 백엔드가 만드는 모양(32바이트 base64url, 43자) — 모양이 틀리면 백엔드를 부르기 전에 404(2026-10-06 전체 점검 11차). */
 const SAMPLE_TOKEN = 'q3JxP0bV9mZk1yTn8LwC4uHs6dRf2aGe7iOj5pXc-_A';
 
@@ -49,5 +54,20 @@ describe('/[lang]/compat/[token] 토큰 모양 검사(2026-10-06 전체 점검 1
     const metadata = await generateMetadata({ params: Promise.resolve({ lang: 'en', token }) });
     expect(metadata.title).toBeUndefined();
     expect(getCompatInvite).not.toHaveBeenCalled();
+  });
+});
+
+describe('/[lang]/compat/[token] 방문자 IP 전달(2026-10-07 전체 점검 12차)', () => {
+  it('본문·메타데이터 모두 같은 방문자 IP로 조회한다(cache()가 한 번으로 묶이게)', async () => {
+    const { getCompatInvite } = await import('@/lib/compatApi');
+    vi.mocked(getCompatInvite).mockClear();
+    const { default: CompatPage, generateMetadata } = await import('./page');
+    await generateMetadata({ params: Promise.resolve({ lang: 'en', token: SAMPLE_TOKEN }) });
+    await CompatPage({ params: Promise.resolve({ lang: 'en', token: SAMPLE_TOKEN }) });
+    expect(getCompatInvite).toHaveBeenCalledTimes(2);
+    expect(vi.mocked(getCompatInvite).mock.calls).toEqual([
+      [SAMPLE_TOKEN, 'en', '198.51.100.7'],
+      [SAMPLE_TOKEN, 'en', '198.51.100.7'],
+    ]);
   });
 });

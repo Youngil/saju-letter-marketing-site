@@ -36,10 +36,15 @@ export type InviteView =
  *
  * React `cache()`로 한 번의 요청 안에서 한 번만 부른다 — apiClient의 시간 제한 signal 때문에 Next의 fetch
  * 중복 제거가 꺼져, generateMetadata와 페이지가 같은 초대를 두 번씩 조회하며 위 한도를 두 배로 썼다.
+ *
+ * `visitorIp`(서버 전용, 2026-10-07 전체 점검 12차) — 이 조회를 일으킨 방문자 IP. 내부 키와 함께 `X-Visitor-Ip`로 넘겨 백엔드가
+ * 방문자별로 센다(`apiClient.ts::internalKeyHeaders`). `cache()` 키에 들어가므로 한 요청 안에선 같은 값(`getRequestVisitorIp()`)을 넘길 것.
  */
-export const getCompatInvite = cache(async (token: string, language: MarketingLanguage): Promise<InviteView> => {
+export const getCompatInvite = cache(async (token: string, language: MarketingLanguage, visitorIp?: string): Promise<InviteView> => {
   try {
-    return await request<InviteView>(`/compatibility-invites/${encodeURIComponent(token)}?language=${encodeURIComponent(language)}`);
+    return await request<InviteView>(`/compatibility-invites/${encodeURIComponent(token)}?language=${encodeURIComponent(language)}`, {
+      visitorIp,
+    });
   } catch (error) {
     if (error instanceof ApiError && !isRetryableApiError(error)) return { status: 'not_found' };
     throw error;

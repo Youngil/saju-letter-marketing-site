@@ -1,3 +1,5 @@
+import { normalizeIpAddress, VISITOR_IP_HEADER } from './visitorIp';
+
 /**
  * saju-letter-backend 호출 공용 클라이언트 — 원래 api.ts 안에 있던 걸 분리했다(2026-08-07,
  * 신년운세 캠페인 이관 시점) — lunarNewYearApi.ts도 같은 fetch/에러 처리 로직이 필요해져서
@@ -56,22 +58,36 @@ const SUBMIT_TIMEOUT_MS = 120_000;
  */
 export const INTERNAL_KEY_HEADER = 'X-Marketing-Internal-Key';
 
-export function internalKeyHeaders(): Record<string, string> {
+/**
+ * 내부 키 헤더 + (넘겨받았으면) 방문자 IP 헤더(2026-10-07 전체 점검 12차, 백엔드와의 계약). 내부 키로 IP별 한도에서 빠지면
+ * 방문자 모두가 내부 키 버킷 하나를 나눠 쓰므로, 요청마다 그리는 서버 렌더는 방문자 IP를 `X-Visitor-Ip`로 함께 넘겨 백엔드가
+ * 방문자별로 세게 한다(`visitorIp.ts`). **내부 키를 보낼 때만** 붙인다 — 키 없는 요청의 이 헤더는 백엔드가 믿을 근거가 없다.
+ * IP 모양이 아니거나 없으면(방문자 없는 ISR 재검증·공용 캐시 조회 등) 빼고 보낸다.
+ */
+export function internalKeyHeaders(visitorIp?: string): Record<string, string> {
   if (typeof window !== 'undefined') return {};
   const key = process.env.MARKETING_INTERNAL_KEY?.trim();
-  return key ? { [INTERNAL_KEY_HEADER]: key } : {};
+  if (!key) return {};
+  const ip = normalizeIpAddress(visitorIp);
+  return ip ? { [INTERNAL_KEY_HEADER]: key, [VISITOR_IP_HEADER]: ip } : { [INTERNAL_KEY_HEADER]: key };
 }
 
-export async function request<T>(path: string, init?: RequestInit): Promise<T> {
-  const isSubmit = Boolean(init?.method && init.method.toUpperCase() !== 'GET');
+export interface ApiRequestInit extends RequestInit {
+  /** 이 조회를 일으킨 방문자 IP(서버 전용, `requestVisitorIp.ts::getRequestVisitorIp`) — 내부 키와 함께만 보낸다. */
+  visitorIp?: string;
+}
+
+export async function request<T>(path: string, options?: ApiRequestInit): Promise<T> {
+  const { visitorIp, ...init } = options ?? {};
+  const isSubmit = Boolean(init.method && init.method.toUpperCase() !== 'GET');
   const response = await fetch(`${API_BASE_URL}${path}`, {
     ...init,
-    signal: init?.signal ?? AbortSignal.timeout(isSubmit ? SUBMIT_TIMEOUT_MS : GET_TIMEOUT_MS),
+    signal: init.signal ?? AbortSignal.timeout(isSubmit ? SUBMIT_TIMEOUT_MS : GET_TIMEOUT_MS),
     // 본문이 있을 때만 Content-Type을 붙인다 — GET에 붙이면 브라우저가 매번 CORS 사전 요청(OPTIONS)을 보낸다.
     headers: {
-      ...(init?.body != null ? { 'Content-Type': 'application/json' } : {}),
-      ...internalKeyHeaders(),
-      ...(init?.headers ?? {}),
+      ...(init.body != null ? { 'Content-Type': 'application/json' } : {}),
+      ...internalKeyHeaders(visitorIp),
+      ...(init.headers ?? {}),
     },
   });
 
