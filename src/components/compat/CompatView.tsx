@@ -4,10 +4,10 @@ import Image from 'next/image';
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import type { MarketingLanguage } from '@/lib/languages';
 import type { MarketingDictionary } from '@/dictionaries/types';
-import { COMPAT_CONTENT, type CompatContent } from '@/content/compatContent';
+import type { CompatViewCopy } from '@/content/compatContent';
+import { COMPAT_NAME_LINES, type CompatNameLines } from '@/content/compatNameLines';
 import type { InviteView } from '@/lib/compatApi';
 import { logCompatEvent, submitGuestInvite } from '@/lib/compatApi';
-import { DISCLAIMER_CONTENT } from '@/content/disclaimer';
 import { isOldEnough } from '@/lib/age';
 import { Turnstile, TURNSTILE_ENABLED, type TurnstileHandle } from '../Turnstile';
 import { AppDownloadLinks } from '../AppDownloadLinks';
@@ -37,33 +37,38 @@ function loadSaju(): Promise<SajuModule> {
  * 첫 렌더부터 로딩 깜빡임 없이 보여준다 — 옛 페이지는 항상 "불러오는 중…"을 먼저 그렸지만
  * 이제 그럴 필요가 없다. 인터랙션(폼 제출)이 필요한 부분만 이 컴포넌트가 담당한다.
  *
- * `content`(COMPAT_CONTENT[language])는 서버 컴포넌트로부터 prop으로 받지 않고 이 클라이언트
- * 컴포넌트가 직접 `COMPAT_CONTENT`를 import해 `language`(순수 문자열, 직렬화 가능)로 조회한다
- * (2026-09-02, 사용자 리포트: "Functions cannot be passed directly to Client Components" 런타임
- * 에러) — `CompatContent`에 함수 필드(`pairLine`, `og.completed.titleFor`)가 있어서, page.tsx가
- * 이 객체를 통째로 prop으로 넘기면 서버→클라이언트 RSC 경계를 함수가 못 건너가 항상(상태와
- * 무관하게) 크래시했다.
+ * 문구: 서버 페이지가 현재 언어의 **문자열 필드만**(`pickCompatViewCopy` → `copy`) 넘기고, 이름이 들어가는 함수 두 줄은
+ * 이 컴포넌트가 작은 `COMPAT_NAME_LINES`에서 `language`로 고른다(2026-10-06 전체 점검 9차 — 예전엔 6개 언어 전체
+ * `COMPAT_CONTENT`·`DISCLAIMER_CONTENT`를 직접 import해 번들에 통째로 실렸다). `CompatContent` 객체를 통째로 prop으로
+ * 넘기면 함수 필드(`pairLine`, `og.completed.titleFor`)가 RSC 경계를 못 건너 항상 크래시한다(2026-09-02 사용자 리포트:
+ * "Functions cannot be passed directly to Client Components").
  *
  * **2026-10-02 다인의 편지 세계로 재구성** — 흰 카드 위 일반 웹 폼이라 앱을 모르는 친구에게 이 서비스가
  * 무엇인지 전혀 전달되지 않았고(이 페이지가 앱보다 더 많은 사람의 첫인상이다), 누가 보냈는지도 안 보였다.
  * 이제 대기·결과 모두 다인의 편지 한 장(`LetterSheet`)이고, 대기 제목에 보낸 사람 이름, 날짜는 선택형,
  * 결과 뒤에는 앱에서 할 수 있는 일(매일 편지 + 누구에게나 궁합 편지)을 먼저 말하고 설치로 잇는다.
  */
+/** 화면 안 하위 컴포넌트가 쓰는 문구 — 서버가 넘긴 문자열 + 클라이언트가 고른 이름 줄 함수. */
+type CompatViewContent = CompatViewCopy & CompatNameLines;
+
 export function CompatView({
   token,
   language,
+  copy,
   initialView,
   appLinksDict,
   currentYear,
 }: {
   token: string;
   language: MarketingLanguage;
+  /** 현재 언어의 문자열 문구(`pickCompatViewCopy`) — 함수 필드 없음. */
+  copy: CompatViewCopy;
   initialView: InviteView;
   appLinksDict: MarketingDictionary['appLinks'];
   /** 연도 목록 기준 — 서버 페이지가 정해 넘긴다(모듈에서 계산하면 서버·브라우저 값이 갈려 하이드레이션이 어긋났다). */
   currentYear: number;
 }) {
-  const content = COMPAT_CONTENT[language];
+  const content = useMemo<CompatViewContent>(() => ({ ...copy, ...COMPAT_NAME_LINES[language] }), [copy, language]);
   const [view, setView] = useState<InviteView>(initialView);
 
   useEffect(() => {
@@ -107,7 +112,7 @@ export function CompatView({
 }
 
 /** 다인이 보낸 편지 한 장 — 발신자 줄 + 종이 면. 대기 폼과 결과가 같은 셸을 쓴다. */
-function LetterSheet({ content, children }: { content: CompatContent; children: ReactNode }) {
+function LetterSheet({ content, children }: { content: CompatViewContent; children: ReactNode }) {
   return (
     <>
       <div className="flex items-center gap-3 border-b border-foreground/10 pb-4">
@@ -138,7 +143,7 @@ function CompletedResult({
   language,
   appLinksDict,
 }: {
-  content: CompatContent;
+  content: CompatViewContent;
   requesterName: string | null;
   reading: { title: string; body: string } | null;
   token: string;
@@ -159,7 +164,7 @@ function CompletedResult({
               <h1 className="font-display text-2xl leading-snug text-balance">{reading.title}</h1>
               <p className="whitespace-pre-line leading-relaxed text-foreground/85">{reading.body}</p>
               <p className="self-end font-display text-lg">{content.signature}</p>
-              <p className="text-xs text-foreground/50">{DISCLAIMER_CONTENT[language].short}</p>
+              <p className="text-xs text-foreground/50">{content.disclaimerShort}</p>
             </>
           ) : (
             <p className="text-foreground/60">{content.loading}</p>
@@ -194,7 +199,7 @@ function PendingForm({
 }: {
   token: string;
   language: MarketingLanguage;
-  content: CompatContent;
+  content: CompatViewContent;
   requesterName: string | null;
   onSubmitted: (view: InviteView) => void;
   currentYear: number;

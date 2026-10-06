@@ -4,7 +4,6 @@ import { useId, useRef, useState } from 'react';
 import Image from 'next/image';
 import type { MarketingDictionary } from '@/dictionaries/types';
 import type { LaunchContentLanguage } from '@/lib/languages';
-import { DISCLAIMER_CONTENT } from '@/content/disclaimer';
 import { isOldEnough } from '@/lib/age';
 import { getDemoReading, type DemoReadingResponse } from '@/lib/api';
 import { Turnstile, TURNSTILE_ENABLED, type TurnstileHandle } from './Turnstile';
@@ -27,10 +26,14 @@ export function DemoForm({
   language,
   dict,
   appLinksDict,
+  disclaimerShort,
 }: {
   language: LaunchContentLanguage;
   dict: MarketingDictionary['demo'];
   appLinksDict: MarketingDictionary['appLinks'];
+  /** 결과 옆 오락 목적 고지(`DISCLAIMER_CONTENT[lang].short`) — 서버 페이지가 현재 언어 문자열만 넘긴다(2026-10-06 전체
+   *  점검 9차, 예전엔 6개 언어 전문을 직접 import해 홈 번들에 실렸다). */
+  disclaimerShort: string;
 }) {
   const dateLabelId = useId();
   const [year, setYear] = useState('');
@@ -135,7 +138,7 @@ export function DemoForm({
           </div>
           <p className="font-display self-end text-lg">— {dict.resultFromName}</p>
         </article>
-        <p className="text-center text-xs text-foreground/50">{DISCLAIMER_CONTENT[language].short}</p>
+        <p className="text-center text-xs text-foreground/50">{disclaimerShort}</p>
         <div className="flex flex-col items-center gap-3">
           <p className="text-center text-sm font-medium text-foreground/70">{dict.resultCta}</p>
           <AppDownloadLinks dict={appLinksDict} language={language} emphasized context="demo_result" />

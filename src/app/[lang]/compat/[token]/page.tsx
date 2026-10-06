@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation';
 import { isMarketingLanguage, MARKETING_LANGUAGES, DEFAULT_LANGUAGE, type MarketingLanguage } from '@/lib/languages';
 import { getDictionary } from '@/dictionaries';
 import { getCompatInvite, type InviteView } from '@/lib/compatApi';
-import { COMPAT_CONTENT, resolveCompatOg } from '@/content/compatContent';
+import { COMPAT_CONTENT, pickCompatViewCopy, resolveCompatOg } from '@/content/compatContent';
 import { CompatView } from '@/components/compat/CompatView';
 import { WEB_BASE_URL, languageAlternates, NOINDEX_ROBOTS } from '@/lib/seo';
 
@@ -68,7 +68,14 @@ export default async function CompatPage({ params }: PageProps) {
   return (
     <div className="mx-auto max-w-lg px-4 py-12">
       {/* 연도 목록 기준 해는 서버가 정해 넘긴다 — 서버·브라우저가 같은 목록을 그리게(2026-10-06 전체 점검 3차). */}
-      <CompatView token={token} language={lang} initialView={view} appLinksDict={dict.appLinks} currentYear={new Date().getFullYear()} />
+      <CompatView
+        token={token}
+        language={lang}
+        copy={pickCompatViewCopy(lang)}
+        initialView={view}
+        appLinksDict={dict.appLinks}
+        currentYear={new Date().getFullYear()}
+      />
     </div>
   );
 }

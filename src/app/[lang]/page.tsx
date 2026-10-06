@@ -19,6 +19,7 @@ import { DainHomeMark } from '@/components/DainHomeMark';
 import { BlogByline, categoryLabelFor } from '@/components/BlogByline';
 import { getLatestPostSummary } from '@/lib/posts';
 import { loadCouponAvailability } from '@/lib/api';
+import { DISCLAIMER_CONTENT } from '@/content/disclaimer';
 import { WEB_BASE_URL, activeLanguageAlternates, buildSocialMetadata, NOINDEX_ROBOTS } from '@/lib/seo';
 import { notFound } from 'next/navigation';
 
@@ -135,7 +136,7 @@ export default async function HomePage({ params }: { params: Promise<{ lang: str
             <p className="mx-auto max-w-xl text-foreground/70">{dict.demo.subtitle}</p>
           </div>
           <div className="mx-auto w-full max-w-md">
-            <DemoForm language={lang} dict={dict.demo} appLinksDict={dict.appLinks} />
+            <DemoForm language={lang} dict={dict.demo} appLinksDict={dict.appLinks} disclaimerShort={DISCLAIMER_CONTENT[lang].short} />
           </div>
         </section>
       ) : null}
