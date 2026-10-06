@@ -10,6 +10,7 @@ import {
 import { activeContentLanguages, fetchActiveServiceLanguages } from '@/lib/serviceLanguagesApi';
 import { BLOG_LANGUAGES, getLanguagesForSlug, getPostContent, POST_SLUGS } from '@/lib/posts';
 import { jsonLdScript } from '@/lib/structuredData';
+import { isValidBlogSlug } from '@/lib/routeParams';
 import { SafeMdx } from '@/components/blog/SafeMdx';
 import { WEB_BASE_URL, activeLanguageAlternates, buildSocialMetadata, NOINDEX_ROBOTS } from '@/lib/seo';
 import { articleJsonLd } from '@/lib/structuredData';
@@ -35,6 +36,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { lang: rawLang, slug } = await params;
   if (!isMarketingLanguage(rawLang) || !isLaunchContentLanguage(rawLang)) return {};
+  if (!isValidBlogSlug(slug)) return {};
   const content = await getPostContent(rawLang, slug);
   if (!content) return {};
   const path = (lang: LaunchContentLanguage) => `/${lang}/blog/${slug}`;
@@ -66,6 +68,8 @@ export default async function BlogPostPage({ params }: { params: Promise<{ lang:
   const { lang: rawLang, slug } = await params;
   if (!isMarketingLanguage(rawLang) || !isLaunchContentLanguage(rawLang)) notFound();
   const lang: LaunchContentLanguage = rawLang;
+  // 모양부터 틀린 slug는 백엔드를 부르기 전에 404(2026-10-06 전체 점검 11차 R11-6-1).
+  if (!isValidBlogSlug(slug)) notFound();
   const content = await getPostContent(lang, slug);
   if (!content) notFound();
   const dict = await getDictionary(lang);

@@ -2,6 +2,7 @@ import { ImageResponse } from 'next/og';
 import { isMarketingLanguage } from '@/lib/languages';
 import { getCompatInvite, type InviteView } from '@/lib/compatApi';
 import { COMPAT_CONTENT, resolveCompatOg } from '@/content/compatContent';
+import { isValidCompatToken } from '@/lib/routeParams';
 
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
@@ -17,7 +18,10 @@ export default async function Image({ params }: { params: Promise<{ lang: string
   const lang = isMarketingLanguage(rawLang) ? rawLang : 'en';
   const content = COMPAT_CONTENT[lang];
   // 일시 오류(429·5xx)면 이름 없는 일반 카드로 — 미리보기 카드가 "초대 없음"으로 굳지 않게.
-  const view = await getCompatInvite(token, lang).catch((): InviteView => ({ status: 'pending' }));
+  // 모양부터 틀린 토큰은 백엔드를 부르지 않고 같은 일반 카드로(2026-10-06 전체 점검 11차 R11-6-1).
+  const view: InviteView = isValidCompatToken(token)
+    ? await getCompatInvite(token, lang).catch((): InviteView => ({ status: 'pending' }))
+    : { status: 'pending' };
 
   const og = resolveCompatOg(content, view);
 
