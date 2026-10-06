@@ -598,3 +598,11 @@ npm run build   # 프로덕션 빌드 — App Router 라우트/타입 검증 + M
 - **신년운세** — 위기 대체 결과엔 공유·앱 안내 숨김. 소유자 쿠키를 결과별 `nyo_<id>`에서 하나의 `nyo`(최근 10개, 항목별 90일)로 — 헤더가 결과 수만큼 커졌다. 결과 OG 부제 현지화, 공유 클립보드 실패 처리.
 - **구독 POST를 같은 사이트 라우트로 옮기는 안(검토 후 보류)** — 소유자 토큰을 클라이언트 prop에서 빼려면 서버가 구독을 대신 보내야 하는데, 백엔드는 `req.ip`(trust proxy 1홉)만 보고 전달된 방문자 IP를 받는 경로가 없다. 대신 보내면 구독 한도(`newyear-public`, IP당 20/분, 내부 키 별도 한도 없음)를 사이트 서버 IP 하나로 전 방문자가 나눠 쓰고, Turnstile `remoteip`도 서버 IP가 된다. 백엔드가 내부 키가 맞을 때만 방문자 IP 헤더를 믿고 구독 경로에 `internalKeyMax`를 주는 변경이 선행돼야 한다.
 - 그 밖: `app/global-error.tsx`(레이아웃 실패 — 콜드 스타트 언어 조회 실패 시 Next 기본 영어 화면이었다), 기본·compare OG `generateStaticParams`, `middleware.ts` → `proxy.ts`(Next 16, Node 런타임에서도 `waitUntil` 유지), 처리방침 최종 수정일을 미래(10-08)에서 실제 날짜 2026-10-06으로.
+
+## 2026-10-06 — 전체 점검 9차(브랜치 `fix/full-review-9`)
+
+- **처리방침 §4 Anthropic 항목(사용자 결정 반영, 6개 언어)** — 운영 보조 에이전트의 주간 보고서가 문의 대화는 읽지 않고 최근 약 31일 문의의 **제목만**(답변·종료 포함, 위기 신호 제목은 가림)과 건수로 주제 통계를 만들기로 해, 목적에 "서비스 개선을 위한 주간 주제 통계"를 추가했다. 답장 초안은 그대로 답장 대기 문의의 제목·본문·대화. "이메일·이름을 보내지 않는다"는 **계정 필드**로 한정(본문에 직접 쓴 이름은 갈 수 있음을 밝힘). "생년월일시·오늘의 이야기는 전달되지 않는다"는 "이 작업들에는"으로 좁혔다 — 위 AI 콘텐츠 생성 제공업체 항목이 설정·페일오버에 따라 Anthropic일 수 있다고 적고 있어 무조건 문장이면 모순이다. §1 공개 페이지 IP 문장은 백엔드가 방문자 IP 저장을 멈추고 기존 값을 지우기로 해(사용자 결정) 그대로 둔다.
+- **블로그 slug 충돌** — 글 페이지는 `isPostSlug`로 항상 파일 쪽을 여는데 목록·slug-언어 맵(sitemap·hreflang)은 두 소스를 그대로 합쳐, 같은 slug가 두 번 보이거나 DB 글만 있는 언어를 공개 언어로 셌다. `mergePostSummaries`가 정적 slug와 겹치는 DB 글을 버리고 서버 로그에 경고.
+- **쿠폰 현황** — `LeadCaptureForm`이 마운트마다 브라우저에서 `coupon-availability`를 불러 리드 제출과 같은 백엔드 공개 IP 한도를 썼다. 홈 서버 컴포넌트가 `loadCouponAvailability`(fetch `revalidate` 120초 — 홈 라우트 재검증도 이 값으로 내려감, 서버 요청이라 내부 키 헤더)로 조회해 prop으로 넘긴다. 리드 제출 오류는 `mapPublicFormError`로(429 → 새 `errors.rateLimited`, 6개 언어).
+- **번들** — `CompatView`가 6개 언어 `COMPAT_CONTENT`(+OG)·`DISCLAIMER_CONTENT`를, `DemoForm`이 `DISCLAIMER_CONTENT`를 클라이언트에서 import했다. 서버가 현재 언어의 문자열 필드만 넘기고(`pickCompatViewCopy`, `disclaimerShort`), 이름 줄 함수 두 개는 `compatNameLines.ts`로 분리해 클라이언트가 고른다.
+- **문서** — CLAUDE.md §1이 "궁합 게스트 페이지엔 다인 초상 없음"이라 적고 있었지만 2026-10-02 편지 세계 재구성 이후 `LetterSheet`가 `/dain-portrait.png`를 보여 준다(의도된 변경) — 문서를 현재 상태로.

@@ -1,12 +1,12 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import type { MarketingDictionary } from '@/dictionaries/types';
 import type { LaunchContentLanguage } from '@/lib/languages';
-import { ApiError, getCouponAvailability, subscribeLead, type CouponAvailability } from '@/lib/api';
+import { subscribeLead, type CouponAvailability } from '@/lib/api';
 import { Turnstile, TURNSTILE_ENABLED, type TurnstileHandle } from './Turnstile';
 import { trackEvent } from '@/lib/analytics';
-import { EMAIL_REGEX } from '@/lib/publicForm';
+import { EMAIL_REGEX, mapPublicFormError } from '@/lib/publicForm';
 
 /**
  * 홈 화면 하단 이메일 리드 캡처 — 신년운세 캠페인의 EmailSignupForm.tsx와 달리 특정 reading에
@@ -19,7 +19,20 @@ import { EMAIL_REGEX } from '@/lib/publicForm';
  * 있다. `NEXT_PUBLIC_TURNSTILE_SITE_KEY`가 없으면 `Turnstile` 컴포넌트가 아무것도 렌더하지
  * 않고, 백엔드도 로컬(시크릿 없음)에서는 토큰 없이 통과시킨다 — 운영에서만 실질적으로 강제된다.
  */
-export function LeadCaptureForm({ language, dict }: { language: LaunchContentLanguage; dict: MarketingDictionary['leadCapture'] }) {
+export function LeadCaptureForm({
+  language,
+  dict,
+  availability,
+}: {
+  language: LaunchContentLanguage;
+  dict: MarketingDictionary['leadCapture'];
+  /**
+   * 선착순 현황(전체 캡/현재 발급 수/잔여 인원) — 관리자 패널에서 캡을 조정할 수 있어 하드코딩하지 않는다. 2026-08-26부터
+   * capacity/issued도 함께 보여 준다. **홈 서버 컴포넌트가 짧은 재검증으로 조회해 넘긴다**(2026-10-06 전체 점검 9차 — 예전엔
+   * 마운트마다 브라우저가 불러 리드 제출과 같은 백엔드 IP 한도를 썼다). 조회 실패면 null이고 문구를 숨긴다.
+   */
+  availability: CouponAvailability | null;
+}) {
   const [email, setEmail] = useState('');
   const [consent, setConsent] = useState(false);
   const [turnstileToken, setTurnstileToken] = useState<string | undefined>(undefined);
@@ -27,24 +40,6 @@ export function LeadCaptureForm({ language, dict }: { language: LaunchContentLan
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
-  // 선착순 현황(전체 캡/현재 발급 수/잔여 인원) — 관리자 패널에서 캡을 조정할 수 있어
-  // (saju-letter-admin-panel "설정" 화면) 하드코딩하지 않고 매번 조회한다. 조회 실패해도 폼
-  // 자체는 그대로 쓸 수 있어야 하므로 조용히 무시한다(null로 남겨두면 문구 자체를 숨긴다).
-  // **2026-08-26 확장** — 원래 remaining(잔여 인원)만 저장/표시했는데, "총 몇 명까지인지·현재
-  // 몇 명이 신청했는지가 안 보인다"는 사용자 지적으로 capacity/issued까지 함께 보여주도록 넓혔다.
-  const [availability, setAvailability] = useState<CouponAvailability | null>(null);
-
-  useEffect(() => {
-    let cancelled = false;
-    getCouponAvailability()
-      .then((result) => {
-        if (!cancelled) setAvailability(result);
-      })
-      .catch(() => {});
-    return () => {
-      cancelled = true;
-    };
-  }, []);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -66,11 +61,16 @@ export function LeadCaptureForm({ language, dict }: { language: LaunchContentLan
       trackEvent('lead_submit', { language });
       setSuccess(true);
     } catch (err) {
-      if (err instanceof ApiError && err.reason === 'already_subscribed') {
-        setError(dict.errors.already);
-      } else {
-        setError(dict.errors.generic);
-      }
+      // 리드 폼엔 나이·생년월일 입력이 없어 underage/date도 일반 문구로 둔다.
+      setError(
+        mapPublicFormError(err, {
+          underage: dict.errors.generic,
+          date: dict.errors.generic,
+          generic: dict.errors.generic,
+          rateLimited: dict.errors.rateLimited,
+          byReason: { already_subscribed: dict.errors.already },
+        }),
+      );
       // Turnstile 토큰은 1회용이라, 실패한 시도에 쓰인 토큰을 그대로 두면 재제출도 항상 403으로
       // 막힌다(2026-09-03, 종합 버그 점검으로 발견) — 이 폼은 실패해도 언마운트되지 않으므로
       // 새 토큰을 명시적으로 요청한다.

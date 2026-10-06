@@ -104,6 +104,7 @@ export const dictionary: MarketingDictionary = {
       consent: 'Please check the box to receive the emails.',
       generic: 'Something went wrong — please try again.',
       already: "This email is already signed up.",
+      rateLimited: "You've tried this a few times already — please wait a bit before trying again.",
     },
   },
   unsubscribe: {

@@ -16,7 +16,7 @@
 - **실제 사람 이름 텍스트에 붉은 계열 색 금지**(한국 정서상 금기) — 중립색 사용.
 - **마케팅 카피에서 AI 활용 사실을 언급하지 않는다**(법적 고지 문서는 예외).
 - **다인은 가상 캐릭터** — 바이라인("다인 씀", `dict.blog.byLabel`)은 필명처럼 수식어 없이. 전기를 서술할 땐 "가상의 캐릭터, 실존 인물 아님" 고지를 맨 앞에 두고 "~라는 설정"으로(`who-writes-your-letter`). JSON-LD에서 다인을 `Person`으로 마크업하지 않는다(Article `publisher`=Organization).
-- 신년운세·궁합 게스트 페이지엔 다인 초상/서사 없음 — 결과 등에서만 앱으로 soft connect.
+- 신년운세 페이지엔 다인 초상/서사 없음 — 결과 등에서만 앱으로 soft connect. **궁합 게스트 페이지는 2026-10-02부터 다인의 편지 한 장**(`CompatView`의 `LetterSheet` — `/dain-portrait.png` 발신자 줄 + 서명, 의도된 변경): 대기·결과 모두 편지 셸, 결과 뒤에 앱에서 할 수 있는 일을 말하고 설치로 잇는다.
 
 ## 2. 언어 — 두 개의 축 (`src/lib/languages.ts`)
 
@@ -37,23 +37,23 @@
 - `src/app/[lang]/layout.tsx`가 실질적 루트 레이아웃(별도 `app/layout.tsx` 없음) — `metadataBase`, Organization JSON-LD, `AttributionCapture`, GA·동의 배너·푸터 "쿠키 설정". 레이아웃 자체가 실패하면(콜드 스타트에 서비스 언어 조회 실패 등) `app/global-error.tsx`(자체 `<html>`, 인라인 스타일, 주소 첫 마디로 언어) — 문구는 `[lang]/error.tsx`와 공용 `content/errorCopy.ts`.
 - 사전 `src/dictionaries/{lang}.ts`+`types.ts`, 장문 콘텐츠 `src/content/`.
 - `LanguageSwitcher.tsx`: `availableSwitcherLanguages(rest, activeLanguages)`가 **경로별로** 고른다 — 트랜잭션 경로(`isTransactionalPath`: lunar-new-year·compat·privacy·disclaimer·unsubscribe)는 켠 언어 그대로, 나머지는 콘텐츠 축만. 블로그 글은 `SwitcherLanguageLimit`(글 페이지가 그 글이 있는 언어를 알림)으로 글이 없는 언어를 `/{lang}/blog`로 보낸다. `buildLanguageSwitchPath()`로 **쿼리스트링(`?token=`) 보존**. `useSearchParams()` 때문에 Suspense 래퍼(`LanguageSwitcherInner`/`LanguageSwitcherFallback`) 필수 — 없으면 정적 생성 깨짐.
-- **RSC 경계**: 함수 필드가 있는 객체(예: `COMPAT_CONTENT[lang]`)를 클라이언트 컴포넌트 prop으로 넘기지 말 것 — 클라이언트가 `language`로 직접 조회. 핸들러가 필요한 공용 컴포넌트는 `'use client'`.
+- **RSC 경계**: 함수 필드가 있는 객체(예: `COMPAT_CONTENT[lang]`)를 클라이언트 컴포넌트 prop으로 넘기지 말 것. 대신 서버가 **현재 언어의 문자열 필드만** 넘기고(`pickCompatViewCopy` → `CompatView`의 `copy`, 홈의 `DemoForm` `disclaimerShort`), 꼭 필요한 함수만 클라이언트가 작은 모듈에서 `language`로 고른다(`compatNameLines.ts`) — 6개 언어 전체 문구 객체를 클라이언트에서 import하면 번들에 통째로 실린다. 핸들러가 필요한 공용 컴포넌트는 `'use client'`.
 
 ## 4. 페이지별 현재 동작
 
-- **홈 `/[lang]`**(4개 언어, ISR 3600): 히어로 + `DainHomeMark` + `AppDownloadLinks` + `DemoForm` + 최신 글 배너(`getLatestPostSummary`) + **`<LeadCaptureForm>`(노출 중, 30일 체험 쿠폰 안내 포함 — 의도된 상태)**. 데모·리드 폼 모두 `showContentLinks` 게이트 안.
+- **홈 `/[lang]`**(4개 언어, ISR 3600 — 리드 폼이 보이면 쿠폰 현황 fetch가 120초로 내림): 히어로 + `DainHomeMark` + `AppDownloadLinks` + `DemoForm` + 최신 글 배너(`getLatestPostSummary`) + **`<LeadCaptureForm>`(노출 중, 30일 체험 쿠폰 안내 포함 — 의도된 상태)**. 데모·리드 폼 모두 `showContentLinks` 게이트 안.
 - **미니 데모**: `src/lib/saju.ts`가 `lunar-javascript`로 **브라우저에서 사주 계산**(백엔드는 계산 안 함 — 데모·궁합·신년운세 폼 모두 `await import('@/lib/saju')`로 지연 로드, 정적 import 금지)해 천간/지지를 `POST /marketing-site/demo-readings`로. 만 16세 확인용 양력 년/월/일은 서버가 검증만 하고 저장 안 함. 결과(`teaser`)는 DB 미저장.
 - **블로그**(4개 언어, ISR 3600) — 하이브리드:
   - 파일 글: `content-posts/{slug}.{lang}.mdx` + `POST_SLUGS`(`@next/mdx`, `export const meta = {...}`, `meta.category` = `observation`/`explainer`/`behind`/`season`).
   - DB 글(백엔드 `MarketingSiteBlogPost`): admin-panel UI 없이 `saju-letter-admin-backend`의 `POST /marketing-site/blog-posts`로 발행. `next-mdx-remote/rsc` 런타임 컴파일 — **`import` 불가**, 태그는 `blogMdxComponents`(문자열 prop만 받는 `FixedVsChangingDiagram`/`NewYearTimelineDiagram`)만 — 배열 prop이 필요한 `RitualFlowDiagram`은 `blockJS`가 `{}` 식을 지워 렌더 중 예외가 나서 DB 맵에서 뺐다(파일 글 전용, DB 글에선 껍데기만 벗겨짐). 이미지는 `public/`에 git 커밋 — **DB 글의 이미지는 이 사이트 상대 주소만**(외부·`//host`는 추적 픽셀이라 삭제). `SafeMdx`가 `remarkSanitizeMdx`(`lib/mdxSanitize.ts`)로 다이어그램 + 서식용 HTML 태그·허용 속성(**`className` 없음** — Tailwind 피싱 오버레이 방지)·안전한 주소만 남기고(script·iframe 등은 내용째 삭제, 모르는 태그는 껍데기만 벗김), `blockJS`가 `{}` 식을 지운다. 요소 스타일(h2·h3·p·ul·ol·li·strong·blockquote·a)은 파일 글·DB 글 공용 `components/blog/mdxElements.tsx`.
-  - `posts.ts`: `getAllPostSummaries`가 `date` 문자열로 병합 정렬(발행 게이트 아님), `getPostContent`가 `isPostSlug`로 file/db 분기(DB slug는 정적 slug와 겹치지 않게).
+  - `posts.ts`: `getAllPostSummaries`가 `date` 문자열로 병합 정렬(발행 게이트 아님), `getPostContent`가 `isPostSlug`로 file/db 분기(DB slug는 정적 slug와 겹치지 않게 — 겹치면 `mergePostSummaries`가 그 DB 글을 목록·sitemap에서 빼고 서버 로그에 경고).
   - `blogApi.ts`는 **네트워크 포함 모든 예외를 흡수**(빈 배열/null) — 백엔드 없이도 빌드 성공해야 함.
   - 주간 칼럼은 **수동 편집**(자동 생성 없음): 화요일, EN 원문 → ko/ja/es(백로그: realignment 문서 §4.5–4.6). `what-is-saju`(입문, ko와 en/ja/es 구조 다름)는 별도 트랙.
 - **compare**(+OG, 4개 언어): 별자리 12 vs 일간 10 정적 비교(1:1 매칭표 없음), `CompareInfographic` + `dict.compare.*`. 다이어그램은 인라인 SVG/HTML, 절대 위치 대신 flex 흐름.
 - **`compat/[token]`**(+OG, 6개 언어, 동적): 공유 URL엔 언어 없음(middleware가 리다이렉트). 백엔드 `compatibilityPublicRouter`를 `compatApi.ts`/`CompatView.tsx`로 호출. 게스트는 이름+생년월일만 입력, 일간 + `yearStem`/`yearBranch`/`monthStem`/`monthBranch`/`dayBranch` 전송. 음력/윤달 지원(윤달 체크박스는 그해 윤달인 달에만, 연/월/양음력 변경 시 `getLunarLeapMonth()`로 `isLeapMonth` 리셋). 연도 목록은 서버 페이지가 넘긴 `currentYear` 기준(`birthYearOptions`, 하이드레이션 일치). **"OOO님과의 궁합"·OG 제목은 발신자 `requesterName`**(없으면 "a friend" 계열). `logCompatEvent`와 GA 이벤트 병행.
 - **`lunar-new-year`**(+`r/[id]`+OG, `unsubscribe`; 6개 언어): 옛 캠페인 이관분, Fortune 톤 유지, 결과(`appBridgeTitle`/`Body`)·오프시즌(`offSeason.cta`)에서만 `AppDownloadLinks`. 백엔드 `/newyear-campaign/*`. `OffSeasonPlaceholder`의 `INTL_LOCALE`은 6개 언어 필수. `EmailSignupForm`(신년운세 드립)은 리드 캡처와 별개. **결과 공유 링크 `r/[id]`는 공개 화면**(결과·공유·"나도 해 보기"): 메일 구독 폼·구독 상태는 결과를 만든 사람만 — 생성 응답의 `ownerToken`을 `ReadingForm`이 `/api/lunar-new-year/owner-token`으로 보내 httpOnly 쿠키 **하나 `nyo`**(`<id>.<토큰>.<발급초36진>`을 `~`로, 최근 10개·결과마다 90일 — 예전 결과별 `nyo_<id>`는 읽기 호환만)로 심고, 페이지가 그 쿠키를 `X-Reading-Owner-Token`으로 넘겨 백엔드가 `isOwner: true`(+`subscriptionAvailable !== false`)일 때만 폼을 그린다(`lib/readingOwner.ts`). 토큰은 주소·GA에 넣지 않는다. 구독 POST는 Turnstile `remoteip`·IP 한도 때문에 여전히 브라우저가 백엔드로 직접 보내므로 토큰이 폼 prop(RSC 페이로드)으로 내려간다 — 같은 사이트 라우트로 옮기려면 백엔드가 내부 키와 함께 방문자 IP를 받아 주는 변경이 먼저 필요. 위기 대체 결과(`isOwner && subscriptionAvailable === false`)엔 공유 버튼·앱 안내도 없다.
 - **`privacy`**(6개 언어, `privacyPolicy.ts`, 모바일 `buildPrivacyPolicyUrl`이 직접 링크): ⚠️ AI 초안, 법률 검토 전. **수집·전송(분석 이벤트, 제3자, AI 호출 경로)이 바뀌면 같은 작업에서 6개 언어 §1/§2/§4 + effectiveDate/§10 갱신**, 파일 상단 개정 주석 기록. 데모·신년운세(동기 AI)는 §4 AI 제공업체에 포함, 궁합 공유(배치 캐시)는 제외.
-- **`disclaimer`**(6개 언어, `disclaimer.ts` = 모바일 문구 그대로): 로그인 없이 AI 결과를 보는 세 곳(데모, 궁합 `CompletedResult`, 신년운세 결과)에 `DISCLAIMER_CONTENT[language].short` 표시.
+- **`disclaimer`**(6개 언어, `disclaimer.ts` = 모바일 문구 그대로): 로그인 없이 AI 결과를 보는 세 곳(데모, 궁합 `CompletedResult`, 신년운세 결과)에 `DISCLAIMER_CONTENT[language].short` 표시(데모·궁합은 서버 페이지가 그 문자열만 prop으로).
 - **`unsubscribe`**(6개 언어): 비추측성 `?token=`, `UnsubscribeStatus.tsx`(신년운세 수신거부와 공용) — **확인 버튼을 눌러야 API를 부른다**(메일 보안 검사기가 링크를 열어도 수신거부되지 않게).
 - **`/.well-known/assetlinks.json`**: Android App Links(지문 일치 확인, 실기기 검증 미확인).
 - 아이콘: `src/app/icon.png`/`apple-icon.png`, 헤더 로고 `public/logo-icon.png`. `public/icon.png` 이름 금지(라우트 충돌).
@@ -61,7 +61,7 @@
 ## 5. 리드·드립·쿠폰 (홈에 노출 중)
 
 - 리드는 이메일만(나이 게이트·개인화 없음). 드립은 백엔드가 `(language × dayNumber)` 단위로 공유 캐시(`dripService.ts`), 다인 페르소나 프롬프트 — 프롬프트 변경은 기존 캐시에 소급 안 됨. 드립 기준일 = max(가입일, 관리자 지정 앱 출시일).
-- 쿠폰 모델은 백엔드에서 이벤트→쿠폰→코드(`PromotionEvent`/`PromotionCoupon`/`PromotionCode`)로 통합됨. 이 사이트의 계약은 유지: `LeadCaptureForm`이 `GET /marketing-site/coupon-availability`의 `capacity`/`issued`/`remaining`을 `remainingSlots`로 표시, 소진 시 `soldOut`, 조회 실패는 무시. 캡·오퍼링 관리는 백엔드/관리자 패널/모바일 소관.
+- 쿠폰 모델은 백엔드에서 이벤트→쿠폰→코드(`PromotionEvent`/`PromotionCoupon`/`PromotionCode`)로 통합됨. 이 사이트의 계약은 유지: `GET /marketing-site/coupon-availability`의 `capacity`/`issued`/`remaining`을 `remainingSlots`로 표시, 소진 시 `soldOut`, 조회 실패는 무시(문구 숨김). **조회는 홈 서버 컴포넌트가 `api.ts::loadCouponAvailability`(fetch `revalidate` 120초 — 홈 라우트 재검증도 이 값으로 내려감)로 하고 `LeadCaptureForm`에 `availability` prop으로 넘긴다** — 브라우저가 방문마다 부르면 리드 제출과 같은 백엔드 IP 한도를 쓴다. 리드 제출 오류는 `mapPublicFormError`(429 → `errors.rateLimited`, `already_subscribed` → `errors.already`). 캡·오퍼링 관리는 백엔드/관리자 패널/모바일 소관.
 
 ## 6. Turnstile (`src/components/Turnstile.tsx`)
 

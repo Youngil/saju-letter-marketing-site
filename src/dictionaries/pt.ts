@@ -105,6 +105,7 @@ export const dictionary: MarketingDictionary = {
       consent: 'Marque a caixa para receber os e-mails.',
       generic: 'Algo deu errado — tente novamente.',
       already: 'Este e-mail já está cadastrado.',
+      rateLimited: 'Você já tentou algumas vezes — aguarde um pouco antes de tentar novamente.',
     },
   },
   unsubscribe: {

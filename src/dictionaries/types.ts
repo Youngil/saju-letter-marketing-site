@@ -123,6 +123,8 @@ export interface MarketingDictionary {
       consent: string;
       generic: string;
       already: string;
+      /** 429 — 요청 빈도 제한(2026-10-06 전체 점검 9차). */
+      rateLimited: string;
     };
   };
   unsubscribe: {

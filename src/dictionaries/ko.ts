@@ -110,6 +110,7 @@ export const dictionary: MarketingDictionary = {
       consent: '이메일 수신에 동의해주세요.',
       generic: '문제가 발생했어요. 다시 시도해주세요.',
       already: '이미 등록된 이메일이에요.',
+      rateLimited: '이미 여러 번 시도하셨어요. 잠시 후 다시 시도해주세요.',
     },
   },
   unsubscribe: {

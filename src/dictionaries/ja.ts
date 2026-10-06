@@ -105,6 +105,7 @@ export const dictionary: MarketingDictionary = {
       consent: 'メール受信のチェックを入れてください。',
       generic: 'エラーが発生しました。もう一度お試しください。',
       already: 'このメールアドレスはすでに登録されています。',
+      rateLimited: '試行回数が多くなっています。しばらくしてからもう一度お試しください。',
     },
   },
   unsubscribe: {

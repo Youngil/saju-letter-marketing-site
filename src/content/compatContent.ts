@@ -1,4 +1,6 @@
 import type { MarketingLanguage } from '@/lib/languages';
+import { DISCLAIMER_CONTENT } from './disclaimer';
+import { COMPAT_NAME_LINES } from './compatNameLines';
 
 /**
  * 궁합 공유 웹페이지 문구 — saju-letter-backend/public/compat.js의 STRINGS(폼/결과 화면 UI)와
@@ -91,9 +93,9 @@ export const COMPAT_CONTENT: Record<MarketingLanguage, CompatContent> = {
     submitError: '문제가 발생했어요. 잠시 후 다시 시도해주세요.',
     leapMonthCheckHint: '그해에는 고른 달에 윤달이 있어요. 윤달에 태어났다면 아래에 체크하고, 아니면 그대로 다시 눌러주세요.',
     loadError: '화면 일부를 불러오지 못했어요. 페이지를 새로고침한 뒤 다시 시도해주세요.',
-    pairLine: (requesterName) => (requesterName ? `${requesterName}님과의 궁합` : '친구와의 궁합'),
+    pairLine: COMPAT_NAME_LINES.ko.pairLine,
     cta: '사주편지에서 나만의 편지도 받아보기',
-    pendingTitleFor: (requesterName) => (requesterName ? `${requesterName}님이 궁합 편지를 보냈어요` : '궁합 편지가 도착했어요'),
+    pendingTitleFor: COMPAT_NAME_LINES.ko.pendingTitleFor,
     pendingIntroLetter: '생년월일을 알려주면, 다인이 두 사람의 결을 읽고 짧은 편지로 답해 드려요. 가입하지 않아도 바로 볼 수 있어요.',
     aboutLine: '사주편지 · 다인이 매일 아침 보내는 사주 편지',
     fromName: '다인',
@@ -136,9 +138,9 @@ export const COMPAT_CONTENT: Record<MarketingLanguage, CompatContent> = {
     submitError: 'Something went wrong — please try again shortly.',
     leapMonthCheckHint: 'The month you picked has a leap month that year. If you were born in the leap month, tick the box below; otherwise just tap the button again.',
     loadError: "Part of this page didn't load. Please refresh the page and try again.",
-    pairLine: (requesterName) => `Compatibility with ${requesterName || 'a friend'}`,
+    pairLine: COMPAT_NAME_LINES.en.pairLine,
     cta: 'Get your own daily letter from Saju Letter',
-    pendingTitleFor: (requesterName) => (requesterName ? `${requesterName} sent you a compatibility letter` : 'A compatibility letter for you'),
+    pendingTitleFor: COMPAT_NAME_LINES.en.pendingTitleFor,
     pendingIntroLetter: 'Share your birthdate and Dain will read how the two of you fit together, then answer in a short letter. No sign-up needed.',
     aboutLine: 'Saju Letter · a Korean saju letter from Dain, every morning',
     fromName: 'Dain',
@@ -181,9 +183,9 @@ export const COMPAT_CONTENT: Record<MarketingLanguage, CompatContent> = {
     submitError: '問題が発生しました。しばらくしてからもう一度お試しください。',
     leapMonthCheckHint: '選んだ月は、その年に閏月がある月です。閏月生まれなら下のチェックを入れ、そうでなければそのままもう一度押してください。',
     loadError: 'ページの一部を読み込めませんでした。ページを再読み込みしてから、もう一度お試しください。',
-    pairLine: (requesterName) => (requesterName ? `${requesterName}さんとの相性` : '友達との相性'),
+    pairLine: COMPAT_NAME_LINES.ja.pairLine,
     cta: 'サジュレターで毎日の手紙を受け取る',
-    pendingTitleFor: (requesterName) => (requesterName ? `${requesterName}さんから相性の手紙が届きました` : '相性の手紙が届きました'),
+    pendingTitleFor: COMPAT_NAME_LINES.ja.pendingTitleFor,
     pendingIntroLetter: '生年月日を教えてくれたら、ダインがふたりの相性を読んで短い手紙で返します。登録しなくてもすぐ見られます。',
     aboutLine: 'サジュレター · ダインが毎朝届ける四柱の手紙',
     fromName: 'ダイン',
@@ -226,9 +228,9 @@ export const COMPAT_CONTENT: Record<MarketingLanguage, CompatContent> = {
     submitError: 'Algo salió mal — inténtalo de nuevo en un momento.',
     leapMonthCheckHint: 'Ese año, el mes que elegiste tiene un mes bisiesto. Si naciste en el mes bisiesto, marca la casilla de abajo; si no, vuelve a pulsar el botón.',
     loadError: 'No se pudo cargar parte de la página. Recárgala e inténtalo de nuevo.',
-    pairLine: (requesterName) => `Compatibilidad con ${requesterName || 'un amigo'}`,
+    pairLine: COMPAT_NAME_LINES.es.pairLine,
     cta: 'Recibe tu propia carta diaria de Saju Letter',
-    pendingTitleFor: (requesterName) => (requesterName ? `${requesterName} te envió una carta de compatibilidad` : 'Tienes una carta de compatibilidad'),
+    pendingTitleFor: COMPAT_NAME_LINES.es.pendingTitleFor,
     pendingIntroLetter: 'Comparte tu fecha de nacimiento y Dain leerá cómo encajan los dos y te responderá con una carta breve. No necesitas registrarte.',
     aboutLine: 'Saju Letter · una carta de saju coreano de Dain, cada mañana',
     fromName: 'Dain',
@@ -271,9 +273,9 @@ export const COMPAT_CONTENT: Record<MarketingLanguage, CompatContent> = {
     submitError: 'Algo deu errado — tente novamente em instantes.',
     leapMonthCheckHint: 'Nesse ano, o mês escolhido tem um mês bissexto. Se você nasceu no mês bissexto, marque a caixa abaixo; se não, toque no botão de novo.',
     loadError: 'Não foi possível carregar parte da página. Recarregue a página e tente novamente.',
-    pairLine: (requesterName) => `Compatibilidade com ${requesterName || 'um amigo'}`,
+    pairLine: COMPAT_NAME_LINES.pt.pairLine,
     cta: 'Receba sua própria carta diária do Saju Letter',
-    pendingTitleFor: (requesterName) => (requesterName ? `${requesterName} te enviou uma carta de compatibilidade` : 'Você recebeu uma carta de compatibilidade'),
+    pendingTitleFor: COMPAT_NAME_LINES.pt.pendingTitleFor,
     pendingIntroLetter: 'Conte sua data de nascimento e Dain vai ler como vocês dois combinam e responder com uma carta curta. Não precisa se cadastrar.',
     aboutLine: 'Saju Letter · uma carta de saju coreano de Dain, toda manhã',
     fromName: 'Dain',
@@ -316,9 +318,9 @@ export const COMPAT_CONTENT: Record<MarketingLanguage, CompatContent> = {
     submitError: 'Đã xảy ra lỗi — vui lòng thử lại sau giây lát.',
     leapMonthCheckHint: 'Năm đó, tháng bạn chọn có tháng nhuận. Nếu bạn sinh vào tháng nhuận, hãy đánh dấu ô bên dưới; nếu không, chỉ cần bấm nút lần nữa.',
     loadError: 'Không tải được một phần trang. Vui lòng tải lại trang rồi thử lại.',
-    pairLine: (requesterName) => `Mức độ hợp nhau với ${requesterName || 'một người bạn'}`,
+    pairLine: COMPAT_NAME_LINES.vi.pairLine,
     cta: 'Nhận lá thư hằng ngày của riêng bạn từ Saju Letter',
-    pendingTitleFor: (requesterName) => (requesterName ? `${requesterName} đã gửi bạn một lá thư hợp nhau` : 'Bạn có một lá thư hợp nhau'),
+    pendingTitleFor: COMPAT_NAME_LINES.vi.pendingTitleFor,
     pendingIntroLetter: 'Cho biết ngày sinh của bạn, Dain sẽ đọc xem hai người hợp nhau thế nào và trả lời bằng một lá thư ngắn. Không cần đăng ký.',
     aboutLine: 'Saju Letter · lá thư saju Hàn Quốc từ Dain mỗi sáng',
     fromName: 'Dain',
@@ -352,4 +354,21 @@ export function resolveCompatOg(
   if (view.status === 'completed') return { title: content.og.completed.titleFor(view.requesterName), description: content.og.completed.description };
   if (view.status === 'pending') return { title: content.og.pending.titleFor(view.requesterName ?? null), description: content.og.pending.description };
   return content.og[view.status];
+}
+
+/**
+ * 궁합 화면(`CompatView`, 클라이언트)에 넘기는 문구 — 현재 언어의 **문자열 필드만**(2026-10-06 전체 점검 9차). 예전엔
+ * 클라이언트가 `COMPAT_CONTENT`(6개 언어 전체 + OG 문구)와 `DISCLAIMER_CONTENT`(6개 언어 전문)를 import해 궁합 링크 첫 화면
+ * 번들에 통째로 실렸다. 함수 필드(`pairLine`·`pendingTitleFor`·`og`)는 RSC 경계를 못 건너므로 빼고, 이름이 들어가는 두
+ * 줄은 클라이언트가 작은 `COMPAT_NAME_LINES`에서 `language`로 직접 고른다.
+ */
+export type CompatViewCopy = Omit<CompatContent, 'pairLine' | 'pendingTitleFor' | 'og'> & {
+  /** 결과 옆 오락 목적 고지(`DISCLAIMER_CONTENT[lang].short`). */
+  disclaimerShort: string;
+};
+
+export function pickCompatViewCopy(language: MarketingLanguage): CompatViewCopy {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars -- 함수 필드를 빼고 문자열만 넘긴다.
+  const { pairLine, pendingTitleFor, og, ...strings } = COMPAT_CONTENT[language];
+  return { ...strings, disclaimerShort: DISCLAIMER_CONTENT[language].short };
 }

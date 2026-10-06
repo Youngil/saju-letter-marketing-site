@@ -65,7 +65,25 @@ export interface CouponAvailability {
   remaining: number | null;
 }
 
-/** 30일 체험 쿠폰 잔여 인원 — 리드 캡처 폼이 "OO명 남음" 문구를 보여줄 때 조회한다. */
-export function getCouponAvailability(): Promise<CouponAvailability> {
-  return request('/marketing-site/coupon-availability');
+/**
+ * 30일 체험 쿠폰 현황의 재검증 주기(초). 홈 라우트의 재검증 주기도 이 값으로 내려간다(Next는 라우트 안 fetch 중 가장 짧은
+ * `revalidate`를 라우트 전체에 쓴다) — 홈은 이 주기로 다시 그려진다.
+ */
+export const COUPON_AVAILABILITY_REVALIDATE_SECONDS = 120;
+
+/**
+ * 30일 체험 쿠폰 현황 — **서버(홈 페이지)에서만** 조회해 리드 캡처 폼에 prop으로 넘긴다(2026-10-06 전체 점검 9차). 예전엔
+ * 폼이 마운트될 때마다 브라우저에서 불러, 방문마다 백엔드의 공개 IP 한도(리드 제출과 같은 버킷)를 하나씩 썼다. 이제
+ * Next 데이터 캐시로 `COUPON_AVAILABILITY_REVALIDATE_SECONDS`마다 한 번만 부른다(서버 요청이라 내부 키 헤더도 붙는다).
+ * 실패하면 null — 폼은 문구 없이 그대로 쓸 수 있어야 한다.
+ */
+export async function loadCouponAvailability(): Promise<CouponAvailability | null> {
+  try {
+    return await request<CouponAvailability>('/marketing-site/coupon-availability', {
+      next: { revalidate: COUPON_AVAILABILITY_REVALIDATE_SECONDS },
+    });
+  } catch (error) {
+    console.warn('loadCouponAvailability failed', error);
+    return null;
+  }
 }
