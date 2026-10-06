@@ -106,17 +106,13 @@ describe('readingOwner — 쿠키 하나에 최근 결과 여러 개', () => {
   });
 });
 
-describe('shouldShowCreatedResultInPlace — 위기 대체 결과를 공개 화면으로 보내지 않기(전체 점검 11차 R11-6-2)', () => {
-  it('위기 대체 결과인데 소유자 쿠키를 못 남겼으면 이 자리에서 보여 준다', () => {
-    expect(shouldShowCreatedResultInPlace(false, false)).toBe(true);
+describe('shouldShowCreatedResultInPlace — 위기 대체 결과를 공개 화면으로 보내지 않기(전체 점검 12차)', () => {
+  it('위기 대체 결과는 소유자 쿠키 여부와 무관하게 항상 이 자리에서 보여 준다(쿠키를 막은 브라우저도)', () => {
+    expect(shouldShowCreatedResultInPlace(false)).toBe(true);
   });
 
-  it('쿠키를 남겼으면 결과 페이지로(그 페이지가 소유자로 알아보고 공유·앱 안내를 숨긴다)', () => {
-    expect(shouldShowCreatedResultInPlace(false, true)).toBe(false);
-  });
-
-  it('일반 결과(또는 구 백엔드 — 필드 없음)는 쿠키와 무관하게 결과 페이지로', () => {
-    expect(shouldShowCreatedResultInPlace(true, false)).toBe(false);
-    expect(shouldShowCreatedResultInPlace(undefined, false)).toBe(false);
+  it('일반 결과(또는 구 백엔드 — 필드 없음)는 결과 페이지로', () => {
+    expect(shouldShowCreatedResultInPlace(true)).toBe(false);
+    expect(shouldShowCreatedResultInPlace(undefined)).toBe(false);
   });
 });

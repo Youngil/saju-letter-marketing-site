@@ -106,15 +106,18 @@ export interface ReadingView {
  * 404 같은 영구 실패만 null(없는 결과)로 보고, 429·5xx·시간 초과는 던진다(2026-10-06 전체 점검 3차) — compatApi.ts의
  * getCompatInvite와 같은 이유·같은 수정(예전엔 일시 오류도 404 화면이 됐다). 한 요청 안의 generateMetadata·
  * 페이지 호출은 `cache()`로 한 번에 묶는다.
+ *
+ * `visitorIp`(서버 전용, 2026-10-07 전체 점검 12차) — 내부 키와 함께 `X-Visitor-Ip`로 넘겨 백엔드가 방문자별로 센다
+ * (`compatApi.ts::getCompatInvite`와 같은 계약).
  */
-export const getReading = cache(async (id: string, ownerToken?: string): Promise<ReadingView | null> => {
+export const getReading = cache(async (id: string, ownerToken?: string, visitorIp?: string): Promise<ReadingView | null> => {
   try {
     // id는 주소에서 온 값이라 인코딩한다 — `..` 같은 값으로 다른 백엔드 경로를 부르지 못하게(2026-10-06).
     // 소유자 토큰은 만든 사람 브라우저의 httpOnly 쿠키에서만 온다(서버 렌더 전용, 2026-10-07).
-    return await request<ReadingView>(
-      `/newyear-campaign/readings/${encodeURIComponent(id)}`,
-      ownerToken ? { headers: { [OWNER_TOKEN_HEADER]: ownerToken } } : undefined,
-    );
+    return await request<ReadingView>(`/newyear-campaign/readings/${encodeURIComponent(id)}`, {
+      visitorIp,
+      ...(ownerToken ? { headers: { [OWNER_TOKEN_HEADER]: ownerToken } } : {}),
+    });
   } catch (error) {
     if (error instanceof ApiError && !isRetryableApiError(error)) return null;
     throw error;

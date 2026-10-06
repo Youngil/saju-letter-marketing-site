@@ -45,7 +45,7 @@ export function ReadingForm({
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  /** 위기 신호로 대체된 결과를 소유자 쿠키 없이 이 자리에서 보여 줄 때(아래 handleSubmit 참고). */
+  /** 위기 신호로 대체된 결과를 결과 페이지로 넘어가지 않고 이 자리에서 보여 줄 때(아래 handleSubmit 참고). */
   const [inPlaceCrisisResult, setInPlaceCrisisResult] = useState<ReadingContent | null>(null);
   const crisisHeadingRef = useRef<HTMLHeadingElement>(null);
 
@@ -116,15 +116,16 @@ export function ReadingForm({
         turnstileToken,
       });
 
-      // 만든 사람만 메일 구독을 할 수 있게 소유자 토큰을 이 브라우저의 httpOnly 쿠키로 남긴 뒤 넘어간다(2026-10-07) —
-      // 주소에는 절대 넣지 않는다(공유 링크·GA로 샌다). 저장에 실패해도 결과는 보여 준다(구독 폼만 안 보인다).
-      const remembered = result.ownerToken ? await rememberReadingOwner(result.readingId, result.ownerToken) : false;
-      // 위기 신호로 대체된 결과(도움 안내 글)인데 소유자 쿠키를 못 남겼으면 결과 페이지가 공개 화면(공유 버튼·앱 안내·"나도 해
-      // 보기")으로 그려진다 — 넘어가지 않고 이 자리에서 결과만 보여 준다(2026-10-06 전체 점검 11차 R11-6-2).
-      if (shouldShowCreatedResultInPlace(result.subscriptionAvailable, remembered)) {
+      // 위기 신호로 대체된 결과(도움 안내 글)는 결과 페이지로 넘어가지 않고 항상 이 자리에서 결과만 보여 준다(2026-10-07 전체
+      // 점검 12차) — 그 페이지는 소유자 쿠키가 있어야 위기 대체 결과로 알아보는데, 쿠키를 막은 브라우저에선 쿠키 저장 라우트가
+      // 성공해도 쿠키가 없어 공개 화면(공유 버튼·앱 안내·"나도 해 보기")으로 그려졌다. 구독할 수 없는 결과라 소유자 쿠키도 남기지 않는다.
+      if (shouldShowCreatedResultInPlace(result.subscriptionAvailable)) {
         setInPlaceCrisisResult(result.content);
         return;
       }
+      // 만든 사람만 메일 구독을 할 수 있게 소유자 토큰을 이 브라우저의 httpOnly 쿠키로 남긴 뒤 넘어간다(2026-10-07) —
+      // 주소에는 절대 넣지 않는다(공유 링크·GA로 샌다). 저장에 실패해도 결과는 보여 준다(구독 폼만 안 보인다).
+      if (result.ownerToken) await rememberReadingOwner(result.readingId, result.ownerToken);
       router.push(`/${language}/lunar-new-year/r/${result.readingId}`);
     } catch (err) {
       setError(

@@ -124,11 +124,14 @@ export function readOwnerToken(
 }
 
 /**
- * 결과를 만든 직후, 결과 페이지로 넘어가지 않고 폼 자리에서 결과를 보여 줘야 하는지(2026-10-06 전체 점검 11차 R11-6-2).
- * 위기 신호로 대체된 결과(`subscriptionAvailable === false`)는 결과 페이지가 소유자 쿠키로만 알아보므로, 쿠키를 못 남겼으면
- * 그 페이지가 공개 화면(공유 버튼·앱 안내·"나도 해 보기")으로 그려진다 — 그럴 땐 넘어가지 않는다. 일반 결과는 쿠키가 없어도
- * 넘어간다(메일 구독 폼만 안 보인다).
+ * 결과를 만든 직후, 결과 페이지로 넘어가지 않고 폼 자리에서 결과를 보여 줘야 하는지.
+ *
+ * 위기 신호로 대체된 결과(`subscriptionAvailable === false`)는 **항상** 이 자리에서 보여 준다(2026-10-07 전체 점검 12차 —
+ * 11차 R11-6-2는 소유자 쿠키를 못 남겼을 때만 그랬다). 결과 페이지는 소유자 쿠키로만 위기 대체 결과를 알아보는데, 쿠키 저장
+ * 라우트가 204를 돌려줘도 쿠키를 막은 브라우저(Safari "모든 쿠키 차단" 등)엔 쿠키가 없어 그 페이지가 공개 화면(공유 버튼·앱
+ * 안내·"나도 해 보기")으로 그려졌다. 도움 안내 글은 공유할 주소가 필요 없으니 넘어갈 이유가 없다. 일반 결과(또는 이 필드가
+ * 없는 구 백엔드)는 쿠키가 없어도 넘어간다(메일 구독 폼만 안 보인다).
  */
-export function shouldShowCreatedResultInPlace(subscriptionAvailable: boolean | undefined, ownerRemembered: boolean): boolean {
-  return subscriptionAvailable === false && !ownerRemembered;
+export function shouldShowCreatedResultInPlace(subscriptionAvailable: boolean | undefined): boolean {
+  return subscriptionAvailable === false;
 }

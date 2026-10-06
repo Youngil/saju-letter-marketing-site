@@ -242,6 +242,28 @@ import type { MarketingLanguage } from '@/lib/languages';
  *       사용하지 않음"(광고를 붙이지 않았고 GA 광고 신호도 켜지 않음)만 적었다. 광고 ID 수집을 끈 버전만 남게 되면 "광고 ID를 수집하지
  *       않음"으로 강화할 수 있다.
  * effectiveDate/§10 날짜는 이미 같은 날짜(2026-10-06)라 그대로. AI 초안 — 변호사 검토 대상.
+ *
+ * ⚠️⚠️ 2026-10-07 개정(전체 점검 12차) — AI 초안, 법률 검토 대상. 11차 문구가 실제 동작과 어긋난 곳(리뷰 R12-6-1·2·4·7·8,
+ * R12-3-2·4·6·7)을 백엔드가 같은 점검에서 함께 바꾸는 동작에 맞춰 6개 언어 모두 고쳤다 — **백엔드 12차 변경과 같은 시점에
+ * 배포할 것**(11차와 마찬가지로 먼저 나가면 아직 지키지 않는 약속이 된다).
+ *   (a) §1 IP: 11차의 "데이터베이스에 저장하지 않음"은 틀렸다 — 요청 빈도 제한 버킷(`rate_limit_buckets`)이 IP 원문을 키로
+ *       저장하고 있었다. 백엔드가 이제 IP의 키 기반 단방향 해시만 저장하고 최대 1일 뒤 지우므로 "IP 원문은 저장하지 않고 해시만
+ *       최대 1일"로 바꾸고, 범위를 "공개 페이지 등 서비스 접속 시"로 넓혔다. §3 목록에 "요청 빈도 제한 기록: 최대 1일(백업 최대
+ *       7일)"을 추가했다. 해시 대신 원문을 다시 저장하게 되면 이 두 곳을 고칠 것.
+ *   (b) §4 Firebase 푸시: 11차의 "푸시엔 일반 안내 문구만"은 틀렸다 — 매일 편지 알림 본문이 편지 첫 문장(hook)이고, 다음날
+ *       개인화 편지는 그 hook에 전날 저널을 녹일 수 있었다. 백엔드가 이제 '오늘의 이야기' 답장·문의 답장·위기 안내·개인화 편지가
+ *       온 날의 아침·주간/월말 편지 공개 알림을 고정 문구로 보내므로 그 목록을 적고, 미리보기가 담길 수 있는 알림(개인화되지 않은
+ *       매일 편지 = 첫 문장, 기념일(마일스톤) 편지 = 제목 — 저널이 아니라 활동 수치로 쓰는 편지, 궁합 결과 = 두 사람이 입력한
+ *       이름)을 사실대로 적었다. FCM 경유·잠금 화면 노출도 한 문장. 알림 본문 규칙을 바꾸면 이 문단도 고칠 것.
+ *   (c) §1/§3/§7 즉석 궁합 이름: 11차부터 즉석 궁합(바로 보는 궁합)에 입력한 두 사람의 이름을 결과 표시용으로 암호화 저장하는데
+ *       수집 항목·암호화 목록에 없었다(상대방 이름·사주 정보 = 제3자 정보). §1에 항목을 추가하고(결과 표시용, 암호화, AI로 안 보냄,
+ *       탈퇴 시 삭제), §3 암호화 문단과 §7에 넣었다. §4의 "즉석 궁합엔 이름이 AI로 가지 않는다"는 그대로 사실.
+ *   (d) §3 보유 기간: 수신거부 30일을 홈 리드와 신년운세 이메일 시리즈 둘 다로 명시(백엔드가 신년운세 구독의 수신거부 이메일도
+ *       30일 뒤 지움 — 신년운세 리딩 항목엔 "수신거부한 이메일은 그보다 먼저"를 덧붙임), "관리자 접근 기록 및 감사 로그"를
+ *       "관리자 열람·변경 기록"으로(⚠️ 검수 감사 기록 `review_actions`도 1년 정리 대상인지는 이 개정 시점에 확인하지 못했다 —
+ *       백엔드 정리 작업에 없으면 넣거나 이 문구를 좁힐 것), 운영 알림·AI 초안 180일의 기준을 "처리·결정이 끝난 뒤"로
+ *       고치고 처리 전 항목은 처리될 때까지 보관한다고 적었다.
+ * effectiveDate/§10 날짜는 6개 언어 모두 2026년 10월 7일로 갱신. AI 초안 — 변호사 검토 대상.
  */
 
 export const PRIVACY_CONTACT_EMAIL = 'contact@mikomaru.com';
@@ -262,7 +284,7 @@ export interface PrivacyPolicyContent {
 export const PRIVACY_POLICY_CONTENT: Record<MarketingLanguage, PrivacyPolicyContent> = {
   ko: {
     title: '개인정보처리방침',
-    effectiveDate: '시행일자: 2026년 7월 29일 (최종 수정: 2026년 10월 6일)',
+    effectiveDate: '시행일자: 2026년 7월 29일 (최종 수정: 2026년 10월 7일)',
     intro:
       '사주편지(이하 "회사" 또는 "서비스")는 이용자의 개인정보를 중요하게 생각하며, 관련 법령을 준수합니다. ' +
       '본 방침은 사주편지 앱과 saju-letter.com(마케팅 사이트, 궁합 공유·신년운세 공개 페이지, 이메일 구독 신청 ' +
@@ -275,7 +297,8 @@ export const PRIVACY_POLICY_CONTENT: Record<MarketingLanguage, PrivacyPolicyCont
           '<li>이용자가 직접 입력하는 정보: 이름(또는 별칭), 생년월일, 성별(선택), 기기 시간대</li>' +
           '<li>선택 입력 정보: 출생 시간("모름" 선택 가능), 이메일 주소(이메일로 가입할 때는 필수이며, Google 계정으로 로그인하면 그 계정의 이메일 주소를 받습니다. 로그인과 계정 관리, 계정 복구와 본인 확인, 친구 초대 혜택 자격 확인, 이메일 소식 구독을 신청한 경우 마케팅 쿠폰 발급, 무료체험 남용 방지, 고객 문의 응대에 사용), 궁합 공유·즉석 궁합 이용 시 상대를 구분하기 위해 입력하는 메모(상대방에게는 노출되지 않음)</li>' +
           '<li>친구 초대(리퍼럴) 기능 이용 시 수집되는 정보: 본인에게 자동으로 부여되는 추천 코드, 그리고 가입 시 다른 회원의 추천 코드를 입력한 경우 그 회원과의 연결 정보(추천인 식별자)</li>' +
-          '<li>자동으로 수집되는 정보: Firebase 인증 식별자(UID), 기기 푸시 토큰(FCM), 프로덕션 빌드에서만 수집되는 앱 이용 분석 이벤트(Google Analytics for Firebase — 가입 완료 시 로그인 수단 포함. 광고 ID는 광고 목적으로 사용하지 않음), 이 마케팅 사이트 방문 시 수집되는 웹 이용 분석 이벤트(Google Analytics — 앱 다운로드 버튼 클릭, 리드 등록 제출, 궁합 결과 열람, 무료 미리보기 이용 등. 이메일·이름·생년월일·궁합 링크 토큰 등 식별 가능한 개인정보는 이벤트에 포함하지 않음. 앱 다운로드 버튼을 누르면 이 사이트에 들어온 경로(예: "tiktok")만 Google Play에 함께 전달되며, 이 경로 정보는 분석 쿠키에 동의한 경우에만 브라우저에 최대 30일 보관됨. 분석 쿠키는 동의한 경우에만 쓰며, 동의는 모든 페이지 맨 아래 "쿠키 설정"에서 언제든 바꾸거나 철회할 수 있음), 신년운세 결과를 만든 브라우저에만 저장되는 기능용 쿠키(결과를 만든 본인만 이메일 시리즈를 신청할 수 있게 하는 무작위 값으로, 최대 90일 보관하며 광고·분석에 쓰지 않고 브라우저 설정에서 언제든 지울 수 있음), 구독/결제 상태(RevenueCat 경유), 무료체험 남용 방지를 위한 Google Play Integrity 기기 무결성 신호, 오류·크래시 진단 정보, 공개(비로그인) 페이지 접속 시의 IP 주소(악용 방지를 위한 일시적 요청 빈도 제한 목적으로만 사용하며 데이터베이스에 저장하지 않음), 서비스 이용 시 웹 서버가 남기는 요청 기록(IP 주소, 접속 시각, 요청한 주소 등 — 최대 30일 보관), 마케팅 사이트의 공개 제출 폼(홈 미니 데모·궁합 공유·리드 등록·신년운세)에서 봇 방지를 위해 구동되는 Cloudflare Turnstile을 통해 Cloudflare로 전달되는 브라우저 정보와 IP 주소</li>' +
+          '<li>즉석 궁합 이용 시 입력하는 정보: 궁합을 볼 두 사람의 이름과 계산된 사주 정보(상대방의 정보 포함 — 결과를 보여 주기 위해 저장하며, 이름은 암호화해 보관하고 AI 제공업체로 보내지 않음. 회원 탈퇴 시 함께 삭제)</li>' +
+          '<li>자동으로 수집되는 정보: Firebase 인증 식별자(UID), 기기 푸시 토큰(FCM), 프로덕션 빌드에서만 수집되는 앱 이용 분석 이벤트(Google Analytics for Firebase — 가입 완료 시 로그인 수단 포함. 광고 ID는 광고 목적으로 사용하지 않음), 이 마케팅 사이트 방문 시 수집되는 웹 이용 분석 이벤트(Google Analytics — 앱 다운로드 버튼 클릭, 리드 등록 제출, 궁합 결과 열람, 무료 미리보기 이용 등. 이메일·이름·생년월일·궁합 링크 토큰 등 식별 가능한 개인정보는 이벤트에 포함하지 않음. 앱 다운로드 버튼을 누르면 이 사이트에 들어온 경로(예: "tiktok")만 Google Play에 함께 전달되며, 이 경로 정보는 분석 쿠키에 동의한 경우에만 브라우저에 최대 30일 보관됨. 분석 쿠키는 동의한 경우에만 쓰며, 동의는 모든 페이지 맨 아래 "쿠키 설정"에서 언제든 바꾸거나 철회할 수 있음), 신년운세 결과를 만든 브라우저에만 저장되는 기능용 쿠키(결과를 만든 본인만 이메일 시리즈를 신청할 수 있게 하는 무작위 값으로, 최대 90일 보관하며 광고·분석에 쓰지 않고 브라우저 설정에서 언제든 지울 수 있음), 구독/결제 상태(RevenueCat 경유), 무료체험 남용 방지를 위한 Google Play Integrity 기기 무결성 신호, 오류·크래시 진단 정보, 공개(비로그인) 페이지 등 서비스 접속 시의 IP 주소(악용 방지를 위한 요청 빈도 제한에만 사용하며, 데이터베이스에는 IP 주소 원문을 저장하지 않고 원래 주소로 되돌릴 수 없는 키 기반 단방향 해시값만 최대 1일 보관), 서비스 이용 시 웹 서버가 남기는 요청 기록(IP 주소, 접속 시각, 요청한 주소 등 — 최대 30일 보관), 마케팅 사이트의 공개 제출 폼(홈 미니 데모·궁합 공유·리드 등록·신년운세)에서 봇 방지를 위해 구동되는 Cloudflare Turnstile을 통해 Cloudflare로 전달되는 브라우저 정보와 IP 주소</li>' +
           '<li>사주 개인화 계산 결과: 온보딩 시 입력한 생년월일시를 바탕으로 계산되는 사주 전체(연주·월주·일주·시주) — 주간/월별 편지 등 개인화된 해석에 사용됩니다</li>' +
           '<li>이용자가 자유롭게 작성하는 내용: "오늘의 이야기" 기능에 입력한 텍스트(답장 생성을 위해 AI 제공업체로 전달됨), "문의하기" 기능에 입력한 제목과 내용</li>' +
           '<li>마케팅 사이트(saju-letter.com) 이용 시 수집되는 정보: 이메일 구독 신청 시 입력한 이메일 주소와 마케팅 수신 동의 여부·시각, 홈 미니 데모·신년운세·궁합 공유 제출 시 입력한 이름(해당되는 경우)·계산된 사주 정보·자유롭게 작성한 텍스트. 만 16세 확인을 위해 양력 생년월일(년·월·일)을 서버로 보내지만 저장하지 않으며, 사주 계산 자체는 이용자의 기기에서 이뤄집니다</li>' +
@@ -300,16 +323,17 @@ export const PRIVACY_POLICY_CONTENT: Record<MarketingLanguage, PrivacyPolicyCont
           '<p>회원 탈퇴 또는 삭제 요청은 접수 즉시 처리되며, 별도의 유예 기간 없이 그 자리에서 파기 또는 익명화됩니다. 데이터베이스 백업은 최대 7일간 보관한 뒤 삭제하므로, 탈퇴로 지워진 정보도 이 기간 안에 백업에서까지 사라집니다.</p>' +
           '<p>그 밖의 정보는 아래 기간이 지나면 파기합니다.</p>' +
           '<ul>' +
-          '<li>마케팅 이메일 수신을 거부한 이메일 주소: 수신거부 후 30일</li>' +
-          '<li>신년운세 리딩 정보(이름, 작성한 텍스트, 이메일 구독 정보): 해당 연도 캠페인이 끝난 뒤 1년</li>' +
+          '<li>마케팅 이메일(홈 이메일 소식 구독, 신년운세 이메일 시리즈) 수신을 거부한 이메일 주소: 수신거부 후 30일</li>' +
+          '<li>신년운세 리딩 정보(이름, 작성한 텍스트, 이메일 구독 정보): 해당 연도 캠페인이 끝난 뒤 1년(수신을 거부한 이메일 주소는 위 기준에 따라 그보다 먼저 삭제)</li>' +
           '<li>궁합 공유에서 친구(비회원)가 입력한 이름: 궁합 결과가 완성된 뒤 1년</li>' +
-          '<li>관리자 접근 기록 및 감사 로그: 1년</li>' +
-          '<li>운영 알림 기록: 180일</li>' +
-          '<li>운영 보조 AI가 작성한 초안(고객 문의 답장 초안, 보고서): 180일</li>' +
+          '<li>관리자 열람·변경 기록: 1년</li>' +
+          '<li>운영 알림 기록: 처리가 끝난 뒤 180일(처리 중인 항목은 처리될 때까지 보관)</li>' +
+          '<li>운영 보조 AI가 작성한 초안(고객 문의 답장 초안, 보고서): 채택·반려 등 결정이 끝난 뒤 180일(결정 전인 초안은 결정될 때까지 보관)</li>' +
           '<li>웹 서버 요청 기록(IP 주소 포함, Google Cloud 로그): 최대 30일</li>' +
+          '<li>요청 빈도 제한 기록(IP 주소의 키 기반 단방향 해시값): 최대 1일(데이터베이스 백업에는 최대 7일)</li>' +
           '<li>이메일 주소의 해시값(원래 주소로 되돌릴 수 없는 키 기반 단방향 해시): 무료체험과 친구 초대 혜택이 반복해서 쓰이는 것을 막기 위해 회원 탈퇴 후에도 보관</li>' +
           '</ul>' +
-          '<p>생년월일·출생시간, "오늘의 이야기" 기능에 입력한 텍스트와 답장, 궁합 공유·즉석 궁합에서 상대를 구분하기 위해 입력한 메모, 신년운세 제출 시 자유롭게 작성한 텍스트, "문의하기" 대화에서 주고받은 메시지 본문(이용자의 메시지와 운영자의 답장)은 AES-256 방식으로 암호화해 저장합니다. 다만 "문의하기"의 제목은 문의 목록에 표시하기 위해 암호화하지 않고 저장하며, 계산 결과물(일간·월지·시지)은 개인 식별이 어려운 값으로 판단해 암호화 없이 저장합니다.</p>' +
+          '<p>생년월일·출생시간, "오늘의 이야기" 기능에 입력한 텍스트와 답장, 궁합 공유·즉석 궁합에서 상대를 구분하기 위해 입력한 메모, 즉석 궁합에 입력한 두 사람의 이름, 신년운세 제출 시 자유롭게 작성한 텍스트, "문의하기" 대화에서 주고받은 메시지 본문(이용자의 메시지와 운영자의 답장)은 AES-256 방식으로 암호화해 저장합니다. 다만 "문의하기"의 제목은 문의 목록에 표시하기 위해 암호화하지 않고 저장하며, 계산 결과물(일간·월지·시지)은 개인 식별이 어려운 값으로 판단해 암호화 없이 저장합니다.</p>' +
           '<p>관계 법령상 일정 기간 보존이 필요한 정보(예: 결제 기록)는 해당 법령이 정한 기간 동안 보존 후 파기합니다.</p>',
       },
       {
@@ -317,7 +341,7 @@ export const PRIVACY_POLICY_CONTENT: Record<MarketingLanguage, PrivacyPolicyCont
         html:
           '<p>서비스 제공에 필요한 범위 내에서 아래 외부 업체에 개인정보 처리를 위탁하거나 제공합니다.</p>' +
           '<ul>' +
-          '<li><strong>Firebase / Google Analytics(Google)</strong>: 회원 인증, 푸시 알림 발송, 앱 및 이 마케팅 사이트의 이용 현황 분석(앱은 Google Analytics for Firebase, 프로덕션 빌드에서만 수집 / 마케팅 사이트는 같은 GA4 프로퍼티의 별도 웹 스트림). 푸시 알림에는 일반적인 안내 문구만 담기며, "오늘의 이야기" 답장이나 문의 답장의 내용은 담기지 않습니다</li>' +
+          '<li><strong>Firebase / Google Analytics(Google)</strong>: 회원 인증, 푸시 알림 발송, 앱 및 이 마케팅 사이트의 이용 현황 분석(앱은 Google Analytics for Firebase, 프로덕션 빌드에서만 수집 / 마케팅 사이트는 같은 GA4 프로퍼티의 별도 웹 스트림). 푸시 알림은 FCM을 거쳐 기기로 전달되며 잠금 화면에 표시될 수 있습니다. "오늘의 이야기" 답장, 문의 답장, 위기 상황 안내, 전날 쓴 "오늘의 이야기"를 반영한 개인화 편지가 도착한 날의 아침 알림, 주간·월말 편지 공개 알림에는 정해진 안내 문구만 담깁니다. 개인화되지 않은 매일 편지 알림에는 그 편지의 첫 문장이, 기념일 편지 알림에는 편지 제목이, 궁합 결과 알림에는 두 사람이 입력한 이름이 미리보기로 담길 수 있습니다</li>' +
           '<li><strong>Google Cloud</strong>: 서비스 서버 운영(호스팅), 데이터베이스, 암호화 키 관리, 서버 로그 보관</li>' +
           '<li><strong>RevenueCat</strong>: 구독 상태 확인 및 관리(실제 결제는 Google Play 빌링을 통해 처리되며, 카드 등 결제 수단 정보는 회사가 직접 보관하지 않습니다)</li>' +
           '<li><strong>AI 콘텐츠 생성 제공업체</strong>(현재 OpenAI, 설정에 따라 Anthropic 또는 Google로 달라질 수 있음): 편지·오늘의 이야기 답장·즉석 궁합 결과의 문장 생성과, 마케팅 사이트(saju-letter.com)의 신년운세 리딩 생성. 계산된 사주 정보, "오늘의 이야기" 기능에 직접 작성한 텍스트, 신년운세 제출 시 입력한 이름·자유 텍스트가 전달될 수 있습니다. 즉석 궁합에는 두 사람의 계산된 사주 정보만 전달되고 이름은 전달되지 않습니다. 홈 미니 데모는 요청 시점에 AI를 호출하지 않고 미리 만들어 둔 편지 중에서 골라 보여 주므로, 입력한 정보가 AI 제공업체로 전달되지 않습니다.</li>' +
@@ -352,7 +376,7 @@ export const PRIVACY_POLICY_CONTENT: Record<MarketingLanguage, PrivacyPolicyCont
         heading: '7. 개인정보의 안전성 확보 조치',
         html:
           '<ul>' +
-          '<li>생년월일·출생시간, "오늘의 이야기" 텍스트와 답장, 궁합·즉석 궁합의 메모, 신년운세 자유 작성 텍스트, 문의하기 메시지 본문 등 민감할 수 있는 정보는 AES-256 방식으로 암호화하여 저장(문의 제목은 목록 표시를 위해 암호화하지 않음)</li>' +
+          '<li>생년월일·출생시간, "오늘의 이야기" 텍스트와 답장, 궁합·즉석 궁합의 메모, 즉석 궁합의 이름, 신년운세 자유 작성 텍스트, 문의하기 메시지 본문 등 민감할 수 있는 정보는 AES-256 방식으로 암호화하여 저장(문의 제목은 목록 표시를 위해 암호화하지 않음)</li>' +
           '<li>암호화 키는 별도의 키 관리 서비스(KMS)에서 관리하며 코드에 하드코딩하지 않음</li>' +
           '<li>관리자 페이지 접근에는 별도의 인증 체계 적용</li>' +
           '</ul>',
@@ -373,13 +397,13 @@ export const PRIVACY_POLICY_CONTENT: Record<MarketingLanguage, PrivacyPolicyCont
         heading: '10. 고지의 의무',
         html:
           '<p>본 방침은 2026년 7월 29일부터 적용되며, 법령·정책 또는 서비스 변경에 따라 내용이 추가·삭제·수정될 ' +
-          '수 있습니다(가장 최근 수정: 2026년 10월 6일). 변경 시 앱 공지 또는 본 페이지를 통해 고지합니다.</p>',
+          '수 있습니다(가장 최근 수정: 2026년 10월 7일). 변경 시 앱 공지 또는 본 페이지를 통해 고지합니다.</p>',
       },
     ],
   },
   en: {
     title: 'Privacy Policy',
-    effectiveDate: 'Effective date: July 29, 2026 (last updated: October 6, 2026)',
+    effectiveDate: 'Effective date: July 29, 2026 (last updated: October 7, 2026)',
     intro:
       'Saju Letter ("we", "us", or "the Service") respects your privacy and is committed to protecting your ' +
       'personal information. This Privacy Policy explains what information we collect and how we use it when ' +
@@ -393,7 +417,8 @@ export const PRIVACY_POLICY_CONTENT: Record<MarketingLanguage, PrivacyPolicyCont
           '<li>Provided by you: name (or nickname), birth date, gender (optional), device timezone</li>' +
           '<li>Optional: birth time (you may choose "unknown"), email address (required if you sign up with email; if you sign in with a Google account, we receive that account\'s email address. Used for sign-in and account management, account recovery and verification, checking eligibility for referral rewards, issuing marketing coupons if you sign up for our emails, preventing free-trial abuse, and responding to support requests), a note you enter in compatibility-sharing or deep compatibility to help you tell people apart (never shown to the other person)</li>' +
           '<li>Referral program: a referral code automatically assigned to your account, and — if you entered another member\'s referral code when signing up — a record linking your account to that referrer</li>' +
-          '<li>Collected automatically: Firebase authentication identifier (UID), device push token (FCM), app-usage analytics events collected only in production builds (Google Analytics for Firebase — including the sign-in method on the sign-up event; we do not use the advertising ID for advertising), web-usage analytics events collected when you visit this marketing site (Google Analytics — app-download button clicks, lead sign-up submissions, viewing a compatibility result, using the free preview; we do not include identifying data such as email, name, birth date, or compatibility-link tokens in these events. When you tap the app-download button, only the channel that brought you to this site (for example "tiktok") is passed along to Google Play; that channel tag is kept in your browser for up to 30 days only if you accept analytics cookies. Analytics cookies are used only with your consent, which you can change or withdraw at any time via "Cookie settings" at the bottom of every page), a functional cookie stored only in the browser that created a Lunar New Year reading (a random value that lets only the reading\'s creator sign up for its email series; kept for up to 90 days, never used for ads or analytics, and you can delete it in your browser settings at any time), subscription/purchase status (via RevenueCat), Google Play Integrity device-integrity signals used to prevent free-trial abuse, crash/error diagnostic data, your IP address on public pages (used briefly for abuse-prevention rate limiting and not stored in our database), request logs that our web servers keep when you use the service (including IP address, time, and the address requested; kept for up to 30 days), and browser information and your IP address sent to Cloudflare while the Cloudflare Turnstile bot-protection widget is active on our marketing site\'s public submission forms (home demo, compatibility-sharing, lead sign-up, and Lunar New Year)</li>' +
+          '<li>Deep compatibility: the names of the two people you enter and their calculated saju information (including the other person\'s), stored so we can show you the result. The names are stored encrypted, are never sent to the AI provider, and are deleted when you delete your account</li>' +
+          '<li>Collected automatically: Firebase authentication identifier (UID), device push token (FCM), app-usage analytics events collected only in production builds (Google Analytics for Firebase — including the sign-in method on the sign-up event; we do not use the advertising ID for advertising), web-usage analytics events collected when you visit this marketing site (Google Analytics — app-download button clicks, lead sign-up submissions, viewing a compatibility result, using the free preview; we do not include identifying data such as email, name, birth date, or compatibility-link tokens in these events. When you tap the app-download button, only the channel that brought you to this site (for example "tiktok") is passed along to Google Play; that channel tag is kept in your browser for up to 30 days only if you accept analytics cookies. Analytics cookies are used only with your consent, which you can change or withdraw at any time via "Cookie settings" at the bottom of every page), a functional cookie stored only in the browser that created a Lunar New Year reading (a random value that lets only the reading\'s creator sign up for its email series; kept for up to 90 days, never used for ads or analytics, and you can delete it in your browser settings at any time), subscription/purchase status (via RevenueCat), Google Play Integrity device-integrity signals used to prevent free-trial abuse, crash/error diagnostic data, your IP address when you use public pages and other parts of the service (used only for abuse-prevention rate limiting; we never store the IP address itself in our database — only a keyed, one-way hash that cannot be turned back into the address, kept for up to 1 day), request logs that our web servers keep when you use the service (including IP address, time, and the address requested; kept for up to 30 days), and browser information and your IP address sent to Cloudflare while the Cloudflare Turnstile bot-protection widget is active on our marketing site\'s public submission forms (home demo, compatibility-sharing, lead sign-up, and Lunar New Year)</li>' +
           '<li>Personalization calculations: your full four-pillar saju chart (year, month, day, and hour pillars), calculated from the birth date and time you provide during onboarding — used to personalize weekly and monthly letters</li>' +
           '<li>Content you write: free text you enter in the "Today\'s Story" feature, which is sent to an AI provider to generate a personalized reply; and the subject and message you enter when contacting Support</li>' +
           '<li>Collected when you use our marketing site (saju-letter.com): the email address you provide when signing up, along with whether and when you consented to marketing emails; and, if you submit the home demo, compatibility-sharing, or Lunar New Year public pages, the name (where applicable), calculated saju information, and free text you enter. We send your Gregorian date of birth (year, month, day) only to confirm you are 16 or older and do not store it; the chart itself is calculated on your device</li>' +
@@ -418,16 +443,17 @@ export const PRIVACY_POLICY_CONTENT: Record<MarketingLanguage, PrivacyPolicyCont
           '<p>We delete your information immediately when you close your account or when we receive a deletion request — there is no additional grace period or delay. Database backups are kept for at most 7 days and then deleted, so information erased when you delete your account also disappears from our backups within that period.</p>' +
           '<p>Other information is deleted once the periods below have passed:</p>' +
           '<ul>' +
-          '<li>Email addresses unsubscribed from our marketing emails: 30 days after you unsubscribe</li>' +
-          '<li>Lunar New Year reading data (name, the text you wrote, and email subscription details): 1 year after that year\'s campaign ends</li>' +
+          '<li>Email addresses unsubscribed from our marketing emails (the home-page email sign-up and the Lunar New Year email series): 30 days after you unsubscribe</li>' +
+          '<li>Lunar New Year reading data (name, the text you wrote, and email subscription details): 1 year after that year\'s campaign ends (an email address you unsubscribed is deleted sooner, under the rule above)</li>' +
           '<li>Names entered by friends (guests) in compatibility sharing: 1 year after the compatibility result was completed</li>' +
-          '<li>Admin access and audit logs: 1 year</li>' +
-          '<li>Operational alert records: 180 days</li>' +
-          '<li>Drafts written by our AI operations assistant (support reply drafts and reports): 180 days</li>' +
+          '<li>Records of what administrators viewed and changed: 1 year</li>' +
+          '<li>Operational alert records: 180 days after they are resolved (open items are kept until they are handled)</li>' +
+          '<li>Drafts written by our AI operations assistant (support reply drafts and reports): 180 days after they are accepted, rejected, or otherwise decided (drafts awaiting a decision are kept until then)</li>' +
           '<li>Web server request logs (including IP addresses, kept in Google Cloud logging): up to 30 days</li>' +
+          '<li>Rate-limiting records (a keyed, one-way hash of your IP address): up to 1 day (up to 7 days in database backups)</li>' +
           '<li>Hashes of email addresses (a keyed, one-way hash that cannot be turned back into the address): kept even after account deletion to prevent repeated free trials and referral-reward abuse</li>' +
           '</ul>' +
-          '<p>Your birth date and birth time; the text you write in the "Today\'s Story" feature and its reply; the notes you enter in compatibility-sharing or deep compatibility to tell people apart; the free text you submit for a Lunar New Year reading; and the message bodies of your Support conversations (both your messages and our replies) are all stored encrypted (AES-256). The subject line of a Support inquiry is stored without encryption so it can be shown in inquiry lists. Calculated results (day master, month branch, hour branch) are not personally identifying on their own, so we store them without encryption.</p>' +
+          '<p>Your birth date and birth time; the text you write in the "Today\'s Story" feature and its reply; the notes you enter in compatibility-sharing or deep compatibility to tell people apart; the names you enter for deep compatibility; the free text you submit for a Lunar New Year reading; and the message bodies of your Support conversations (both your messages and our replies) are all stored encrypted (AES-256). The subject line of a Support inquiry is stored without encryption so it can be shown in inquiry lists. Calculated results (day master, month branch, hour branch) are not personally identifying on their own, so we store them without encryption.</p>' +
           '<p>Where law requires longer retention (e.g., payment records), we retain that data only for the legally required period before deletion.</p>',
       },
       {
@@ -435,7 +461,7 @@ export const PRIVACY_POLICY_CONTENT: Record<MarketingLanguage, PrivacyPolicyCont
         html:
           '<p>We share data with the following third parties only as needed to provide the service:</p>' +
           '<ul>' +
-          '<li><strong>Firebase / Google Analytics (Google)</strong>: authentication, push notifications, and usage analytics for both the app (Google Analytics for Firebase, production builds only) and this marketing site (a separate web stream in the same GA4 property). Push notifications contain only general notification text — never the content of your "Today\'s Story" replies or support replies</li>' +
+          '<li><strong>Firebase / Google Analytics (Google)</strong>: authentication, push notifications, and usage analytics for both the app (Google Analytics for Firebase, production builds only) and this marketing site (a separate web stream in the same GA4 property). Push notifications are delivered through FCM and may appear on your lock screen. Notifications for "Today\'s Story" replies, support replies, and crisis-support guidance, the morning notification on days you receive a letter personalized from the previous day\'s "Today\'s Story", and notices that a weekly or month-end letter is ready contain only fixed, generic text. A notification for an ordinary (non-personalized) daily letter may show the letter\'s first sentence as a preview, a milestone letter notification may show the letter\'s title, and a compatibility-result notification may show the names the two people entered</li>' +
           '<li><strong>Google Cloud</strong>: hosting our servers, databases, encryption key management, and server logs</li>' +
           '<li><strong>RevenueCat</strong>: subscription status management (actual payment is processed by Google Play Billing; we do not store your card or payment details ourselves)</li>' +
           '<li><strong>Our AI content provider</strong> (currently OpenAI; may be Anthropic or Google depending on configuration): generates the wording of your letters, "Today\'s Story" replies, and deep compatibility results, as well as Lunar New Year readings on our marketing site (saju-letter.com). This may include your calculated saju values, the text you write in the "Today\'s Story" feature, and the name and free text you submit for a Lunar New Year reading. For deep compatibility, only the two people\'s calculated saju values are shared — not their names. The home mini demo does not call an AI when you submit it: it shows a letter we generated in advance, so what you enter there is not sent to the AI provider.</li>' +
@@ -475,7 +501,7 @@ export const PRIVACY_POLICY_CONTENT: Record<MarketingLanguage, PrivacyPolicyCont
         heading: '7. Security Measures',
         html:
           '<ul>' +
-          '<li>Sensitive information — including birth date, birth time, "Today\'s Story" text and replies, compatibility/deep-compatibility notes, Lunar New Year free text, and Support message bodies — is stored using AES-256 encryption (Support inquiry subject lines are not encrypted, so they can be shown in lists)</li>' +
+          '<li>Sensitive information — including birth date, birth time, "Today\'s Story" text and replies, compatibility/deep-compatibility notes, deep-compatibility names, Lunar New Year free text, and Support message bodies — is stored using AES-256 encryption (Support inquiry subject lines are not encrypted, so they can be shown in lists)</li>' +
           '<li>Encryption keys are managed through a dedicated key management service (KMS) and are never hardcoded</li>' +
           '<li>Access to the admin panel requires separate authentication</li>' +
           '</ul>',
@@ -498,14 +524,14 @@ export const PRIVACY_POLICY_CONTENT: Record<MarketingLanguage, PrivacyPolicyCont
         heading: '10. Changes to This Policy',
         html:
           '<p>This policy is effective as of July 29, 2026, and may be updated as our practices, applicable ' +
-          'laws, or the service itself change (most recently updated: October 6, 2026). We will notify you of ' +
+          'laws, or the service itself change (most recently updated: October 7, 2026). We will notify you of ' +
           'material changes through the app or this page.</p>',
       },
     ],
   },
   ja: {
     title: 'プライバシーポリシー',
-    effectiveDate: '施行日: 2026年7月29日(最終更新: 2026年10月6日)',
+    effectiveDate: '施行日: 2026年7月29日(最終更新: 2026年10月7日)',
     intro:
       'サジュレター(以下「当社」または「本サービス」)は、利用者のプライバシーを尊重し、個人情報の保護に努めて' +
       'います。本ポリシーは、サジュレターアプリおよびsaju-letter.com(マーケティングサイト、相性シェア・旧正月' +
@@ -518,7 +544,8 @@ export const PRIVACY_POLICY_CONTENT: Record<MarketingLanguage, PrivacyPolicyCont
           '<li>ご入力いただく情報: お名前(またはニックネーム)、生年月日、性別(任意)、端末のタイムゾーン</li>' +
           '<li>任意項目: 出生時刻(「わからない」を選択可能)、メールアドレス(メールアドレスで登録する場合は必須。Googleアカウントでログインした場合はそのアカウントのメールアドレスを受け取ります。ログインとアカウント管理、アカウントの復旧と本人確認、友達招待特典の対象確認、メール配信に登録した場合のマーケティング用クーポンの発行、無料体験の不正利用防止、お問い合わせへの対応に使用)、相性シェア・その場でわかる相性のご利用時に相手を区別するために入力するメモ(相手には表示されません)</li>' +
           '<li>友達招待(リファラル)機能: ご自身のアカウントに自動的に付与される紹介コード、および登録時に他の会員の紹介コードを入力した場合、その会員との連携情報(紹介者の識別子)</li>' +
-          '<li>自動的に収集される情報: Firebase認証ID(UID)、端末のプッシュ通知トークン(FCM)、プロダクションビルドでのみ収集されるアプリ利用分析イベント(Google Analytics for Firebase — 会員登録完了イベントにログイン手段を含む。広告IDを広告目的で使用することはありません)、本マーケティングサイトご利用時に収集されるウェブ利用分析イベント(Google Analytics — アプリダウンロードボタンのクリック、リード登録の送信、相性診断結果の閲覧、無料プレビューの利用など。メールアドレス・氏名・生年月日・相性共有リンクのトークンなど識別可能な個人情報はイベントに含めません。アプリダウンロードボタンを押すと、本サイトへの流入経路(例: 「tiktok」)のみがGoogle Playに渡され、この経路情報は分析Cookieに同意した場合に限りブラウザに最長30日間保存されます。分析Cookieは同意いただいた場合にのみ使用し、同意は各ページ下部の「Cookie設定」からいつでも変更・撤回できます)、旧正月占いの結果を作成したブラウザにのみ保存される機能用Cookie(結果を作成したご本人だけがメールシリーズに登録できるようにするためのランダムな値。最長90日間保存し、広告・分析には使用せず、ブラウザの設定からいつでも削除できます)、サブスクリプション・購入状況(RevenueCat経由)、無料体験の不正利用防止のためのGoogle Play Integrity端末信頼性シグナル、エラー・クラッシュ診断情報、公開ページ(非会員向け)ご利用時のIPアドレス(不正利用防止のための一時的なリクエスト制限のみに使用し、データベースには保存しません)、サービスご利用時にウェブサーバーが残すリクエスト記録(IPアドレス、アクセス日時、リクエスト先のアドレスなど。最長30日間保存)、マーケティングサイトの公開フォーム(ホームのミニデモ・相性シェア・リード登録・旧正月占い)でボット対策として動作するCloudflare Turnstileを通じてCloudflareに送信されるブラウザ情報とIPアドレス</li>' +
+          '<li>その場でわかる相性のご利用時に入力される情報: 相性を見るお二人のお名前と計算済みの四柱情報(相手の方の情報を含みます。結果を表示するために保存し、お名前は暗号化して保管し、AIプロバイダーには送信しません。退会時に併せて削除します)</li>' +
+          '<li>自動的に収集される情報: Firebase認証ID(UID)、端末のプッシュ通知トークン(FCM)、プロダクションビルドでのみ収集されるアプリ利用分析イベント(Google Analytics for Firebase — 会員登録完了イベントにログイン手段を含む。広告IDを広告目的で使用することはありません)、本マーケティングサイトご利用時に収集されるウェブ利用分析イベント(Google Analytics — アプリダウンロードボタンのクリック、リード登録の送信、相性診断結果の閲覧、無料プレビューの利用など。メールアドレス・氏名・生年月日・相性共有リンクのトークンなど識別可能な個人情報はイベントに含めません。アプリダウンロードボタンを押すと、本サイトへの流入経路(例: 「tiktok」)のみがGoogle Playに渡され、この経路情報は分析Cookieに同意した場合に限りブラウザに最長30日間保存されます。分析Cookieは同意いただいた場合にのみ使用し、同意は各ページ下部の「Cookie設定」からいつでも変更・撤回できます)、旧正月占いの結果を作成したブラウザにのみ保存される機能用Cookie(結果を作成したご本人だけがメールシリーズに登録できるようにするためのランダムな値。最長90日間保存し、広告・分析には使用せず、ブラウザの設定からいつでも削除できます)、サブスクリプション・購入状況(RevenueCat経由)、無料体験の不正利用防止のためのGoogle Play Integrity端末信頼性シグナル、エラー・クラッシュ診断情報、公開ページ(非会員向け)など本サービスご利用時のIPアドレス(不正利用防止のためのリクエスト制限のみに使用します。データベースにはIPアドレスそのものは保存せず、元のアドレスに戻せない鍵を用いた一方向ハッシュ値のみを最長1日間保管します)、サービスご利用時にウェブサーバーが残すリクエスト記録(IPアドレス、アクセス日時、リクエスト先のアドレスなど。最長30日間保存)、マーケティングサイトの公開フォーム(ホームのミニデモ・相性シェア・リード登録・旧正月占い)でボット対策として動作するCloudflare Turnstileを通じてCloudflareに送信されるブラウザ情報とIPアドレス</li>' +
           '<li>パーソナライズのための計算結果: オンボーディング時にご入力いただいた生年月日時をもとに計算される四柱全体(年柱・月柱・日柱・時柱) — 週間・月間レターの個人化された解釈に使用されます</li>' +
           '<li>ご自身で入力される内容: 「今日の物語」機能に自由に記入されたテキスト(返信生成のためAIプロバイダーに送信されます)、および「お問い合わせ」機能にご入力いただく件名と内容</li>' +
           '<li>マーケティングサイト(saju-letter.com)ご利用時に収集される情報: メール登録時にご入力いただくメールアドレスと、マーケティングメールへの同意有無・同意日時。ホームのミニデモ・相性シェア・旧正月占い公開ページ送信時にご入力いただくお名前(該当する場合)・計算された四柱情報・自由記入テキスト。満16歳確認のため太陽暦の生年月日(年・月・日)をサーバーに送りますが保存はせず、四柱の計算自体はご自身の端末内で行います</li>' +
@@ -543,16 +570,17 @@ export const PRIVACY_POLICY_CONTENT: Record<MarketingLanguage, PrivacyPolicyCont
           '<p>退会または削除リクエストは受領後直ちに処理され、猶予期間を設けずその場で削除または匿名化されます。データベースのバックアップは最長7日間保管した後に削除するため、退会により消去された情報もこの期間内にバックアップからも消えます。</p>' +
           '<p>その他の情報は、以下の期間が経過した後に削除します。</p>' +
           '<ul>' +
-          '<li>マーケティングメールの配信を停止したメールアドレス: 配信停止から30日後</li>' +
-          '<li>旧正月占いのリーディング情報(お名前、記入したテキスト、メール配信の登録情報): その年のキャンペーン終了から1年後</li>' +
+          '<li>マーケティングメール(ホームのメール配信登録、旧正月占いのメールシリーズ)の配信を停止したメールアドレス: 配信停止から30日後</li>' +
+          '<li>旧正月占いのリーディング情報(お名前、記入したテキスト、メール配信の登録情報): その年のキャンペーン終了から1年後(配信を停止したメールアドレスは、上記の基準によりそれより早く削除)</li>' +
           '<li>相性シェアで友達(非会員)が入力したお名前: 相性結果の完成から1年後</li>' +
-          '<li>管理者のアクセス記録・監査ログ: 1年</li>' +
-          '<li>運用アラートの記録: 180日</li>' +
-          '<li>運用支援AIが作成した下書き(お問い合わせへの返信の下書き、レポート): 180日</li>' +
+          '<li>管理者の閲覧・変更記録: 1年</li>' +
+          '<li>運用アラートの記録: 対応完了から180日(対応中の項目は対応が終わるまで保管)</li>' +
+          '<li>運用支援AIが作成した下書き(お問い合わせへの返信の下書き、レポート): 採用・却下などの判断が済んでから180日(判断前の下書きは判断されるまで保管)</li>' +
           '<li>ウェブサーバーのリクエスト記録(IPアドレスを含む、Google Cloudのログ): 最長30日</li>' +
+          '<li>リクエスト制限の記録(IPアドレスの、鍵を用いた一方向ハッシュ値): 最長1日(データベースのバックアップには最長7日)</li>' +
           '<li>メールアドレスのハッシュ値(元のアドレスに戻せない、鍵を用いた一方向ハッシュ): 無料体験や友達招待特典の繰り返し利用を防ぐため、退会後も保管</li>' +
           '</ul>' +
-          '<p>生年月日・出生時刻、「今日の物語」機能に入力されたテキストとその返信、相性シェア・その場でわかる相性で相手を区別するために入力したメモ、旧正月占い送信時に自由に記入したテキスト、「お問い合わせ」のやり取りのメッセージ本文(お客様のメッセージと運営担当者の返信)は、AES-256方式で暗号化して保存します。ただし、「お問い合わせ」の件名はお問い合わせ一覧に表示するため暗号化せずに保存し、計算結果(日干・月支・時支)も個人を特定しにくい値と判断し、暗号化せずに保存します。</p>' +
+          '<p>生年月日・出生時刻、「今日の物語」機能に入力されたテキストとその返信、相性シェア・その場でわかる相性で相手を区別するために入力したメモ、その場でわかる相性で入力したお二人のお名前、旧正月占い送信時に自由に記入したテキスト、「お問い合わせ」のやり取りのメッセージ本文(お客様のメッセージと運営担当者の返信)は、AES-256方式で暗号化して保存します。ただし、「お問い合わせ」の件名はお問い合わせ一覧に表示するため暗号化せずに保存し、計算結果(日干・月支・時支)も個人を特定しにくい値と判断し、暗号化せずに保存します。</p>' +
           '<p>法令により一定期間の保存が義務付けられている情報(決済記録など)は、当該法令が定める期間保存した後に削除します。</p>',
       },
       {
@@ -560,7 +588,7 @@ export const PRIVACY_POLICY_CONTENT: Record<MarketingLanguage, PrivacyPolicyCont
         html:
           '<p>本サービスの提供に必要な範囲内で、以下の外部事業者に個人情報の取り扱いを委託または提供しています。</p>' +
           '<ul>' +
-          '<li><strong>Firebase / Google Analytics(Google)</strong>: 会員認証、プッシュ通知の送信、アプリおよび本マーケティングサイトの利用状況分析(アプリはGoogle Analytics for Firebase、プロダクションビルドのみ収集 / マーケティングサイトは同じGA4プロパティの別のウェブストリーム)。プッシュ通知には一般的なお知らせ文のみを載せ、「今日の物語」への返信やお問い合わせへの返信の内容は含めません</li>' +
+          '<li><strong>Firebase / Google Analytics(Google)</strong>: 会員認証、プッシュ通知の送信、アプリおよび本マーケティングサイトの利用状況分析(アプリはGoogle Analytics for Firebase、プロダクションビルドのみ収集 / マーケティングサイトは同じGA4プロパティの別のウェブストリーム)。プッシュ通知はFCMを通じて端末に届き、ロック画面に表示されることがあります。「今日の物語」への返信、お問い合わせへの返信、危機的な状況でのご案内、前日の「今日の物語」を反映したパーソナライズレターが届く日の朝の通知、週間・月末レターの公開通知には、決まったお知らせ文のみを載せます。パーソナライズしていない毎日のレターの通知にはそのレターの最初の一文が、記念日レターの通知にはレターのタイトルが、相性結果の通知にはお二人が入力したお名前が、プレビューとして含まれる場合があります</li>' +
           '<li><strong>Google Cloud</strong>: サーバーの運用(ホスティング)、データベース、暗号化キーの管理、サーバーログの保管</li>' +
           '<li><strong>RevenueCat</strong>: サブスクリプション状況の管理(実際の決済はGoogle Playの請求システムを通じて行われ、カード情報などの決済手段情報は当社では保管しません)</li>' +
           '<li><strong>AIコンテンツ生成プロバイダー</strong>(現在はOpenAI。設定によりAnthropicまたはGoogleの場合もあります): レター、「今日の物語」の返信文、その場でわかる相性の結果の生成、およびマーケティングサイト(saju-letter.com)の旧正月占いリーディングの生成。計算済みの四柱情報、「今日の物語」機能にご自身で入力されたテキスト、旧正月占い送信時に入力されたお名前・自由記述テキストが送信される場合があります。その場でわかる相性では、お二人の計算済みの四柱情報のみを送信し、お名前は送信しません。ホームのミニデモはリクエスト時にAIを呼び出さず、あらかじめ作成しておいたレターの中から選んで表示するため、入力された情報がAIプロバイダーに送信されることはありません。</li>' +
@@ -596,7 +624,7 @@ export const PRIVACY_POLICY_CONTENT: Record<MarketingLanguage, PrivacyPolicyCont
         heading: '7. 安全管理措置',
         html:
           '<ul>' +
-          '<li>生年月日・出生時刻、「今日の物語」のテキストと返信、相性シェア・その場でわかる相性のメモ、旧正月占いの自由記入テキスト、お問い合わせのメッセージ本文など機微になり得る情報はAES-256方式で暗号化して保存(お問い合わせの件名は一覧表示のため暗号化しません)</li>' +
+          '<li>生年月日・出生時刻、「今日の物語」のテキストと返信、相性シェア・その場でわかる相性のメモ、その場でわかる相性のお名前、旧正月占いの自由記入テキスト、お問い合わせのメッセージ本文など機微になり得る情報はAES-256方式で暗号化して保存(お問い合わせの件名は一覧表示のため暗号化しません)</li>' +
           '<li>暗号化キーは専用の鍵管理サービス(KMS)で管理し、コードに直接記載しません</li>' +
           '<li>管理画面へのアクセスには別途認証を適用</li>' +
           '</ul>',
@@ -617,7 +645,7 @@ export const PRIVACY_POLICY_CONTENT: Record<MarketingLanguage, PrivacyPolicyCont
       {
         heading: '10. 本ポリシーの変更',
         html:
-          '<p>本ポリシーは2026年7月29日より施行します(最終更新: 2026年10月6日)。法令、方針、またはサービス内容' +
+          '<p>本ポリシーは2026年7月29日より施行します(最終更新: 2026年10月7日)。法令、方針、またはサービス内容' +
           'の変更に応じて内容を追加・削除・修正する場合があります。重要な変更がある場合は、アプリ内または本ページ' +
           'にてお知らせします。</p>',
       },
@@ -625,7 +653,7 @@ export const PRIVACY_POLICY_CONTENT: Record<MarketingLanguage, PrivacyPolicyCont
   },
   es: {
     title: 'Política de Privacidad',
-    effectiveDate: 'Fecha de vigencia: 29 de julio de 2026 (última actualización: 6 de octubre de 2026)',
+    effectiveDate: 'Fecha de vigencia: 29 de julio de 2026 (última actualización: 7 de octubre de 2026)',
     intro:
       'Saju Letter ("nosotros" o "el Servicio") respeta tu privacidad y se compromete a proteger tu información ' +
       'personal. Esta Política de Privacidad explica qué información recopilamos y cómo la usamos cuando ' +
@@ -639,7 +667,8 @@ export const PRIVACY_POLICY_CONTENT: Record<MarketingLanguage, PrivacyPolicyCont
           '<li>Proporcionada por ti: nombre (o apodo), fecha de nacimiento, género (opcional), zona horaria del dispositivo</li>' +
           '<li>Opcional: hora de nacimiento (puedes elegir "desconocida"), dirección de correo electrónico (obligatoria si te registras con correo electrónico; si inicias sesión con una cuenta de Google, recibimos el correo de esa cuenta. La usamos para el inicio de sesión y la gestión de tu cuenta, la recuperación de la cuenta y la verificación, comprobar si cumples los requisitos de las recompensas por referidos, emitir cupones de marketing si te suscribes a nuestros correos, prevenir el abuso de la prueba gratuita y responder a tus consultas de soporte), una nota que ingresas en la compatibilidad compartida o la compatibilidad detallada para distinguir a las personas (nunca se muestra a la otra persona)</li>' +
           '<li>Programa de referidos: un código de referido asignado automáticamente a tu cuenta y, si ingresaste el código de referido de otro miembro al registrarte, un registro que vincula tu cuenta con ese miembro</li>' +
-          '<li>Recopilada automáticamente: identificador de autenticación de Firebase (UID), token de notificaciones push del dispositivo (FCM), eventos de análisis de uso de la app recopilados solo en compilaciones de producción (Google Analytics for Firebase — incluye el método de inicio de sesión en el evento de registro; no usamos el ID de publicidad con fines publicitarios), eventos de análisis de uso web recopilados al visitar este sitio de marketing (Google Analytics — clics en el botón de descarga de la app, envíos del formulario de contacto, visualización de un resultado de compatibilidad, uso de la vista previa gratuita; no incluimos datos identificables como el correo, nombre, fecha de nacimiento o el token del enlace de compatibilidad en estos eventos. Al tocar el botón de descarga, solo se envía a Google Play el canal por el que llegaste a este sitio (por ejemplo, "tiktok"); esa etiqueta se guarda en tu navegador hasta 30 días solo si aceptas las cookies de análisis. Las cookies de análisis solo se usan con tu consentimiento, que puedes cambiar o retirar en cualquier momento desde "Configuración de cookies", al final de cada página), una cookie funcional guardada solo en el navegador con el que se creó una lectura de Año Nuevo Lunar (un valor aleatorio que permite que solo quien creó la lectura se suscriba a su serie de correos; se conserva hasta 90 días, nunca se usa para publicidad ni análisis y puedes borrarla en cualquier momento desde la configuración del navegador), estado de suscripción/compra (a través de RevenueCat), señales de integridad del dispositivo de Google Play Integrity usadas para prevenir el abuso de la prueba gratuita, datos de diagnóstico de errores/fallos, tu dirección IP en las páginas públicas (usada brevemente para limitar la frecuencia de solicitudes y prevenir abusos, sin guardarla en nuestra base de datos), los registros de solicitudes que guardan nuestros servidores web cuando usas el servicio (incluyen la dirección IP, la hora y la dirección solicitada; se conservan hasta 30 días), e información del navegador y tu dirección IP enviadas a Cloudflare mientras el widget de protección contra bots Cloudflare Turnstile está activo en los formularios públicos de nuestro sitio de marketing (demo de inicio, compatibilidad compartida, registro de contacto y Año Nuevo Lunar)</li>' +
+          '<li>Compatibilidad detallada: los nombres de las dos personas que ingresas y su información de saju calculada (incluida la de la otra persona), que guardamos para mostrarte el resultado. Los nombres se almacenan cifrados, nunca se envían al proveedor de IA y se eliminan cuando eliminas tu cuenta</li>' +
+          '<li>Recopilada automáticamente: identificador de autenticación de Firebase (UID), token de notificaciones push del dispositivo (FCM), eventos de análisis de uso de la app recopilados solo en compilaciones de producción (Google Analytics for Firebase — incluye el método de inicio de sesión en el evento de registro; no usamos el ID de publicidad con fines publicitarios), eventos de análisis de uso web recopilados al visitar este sitio de marketing (Google Analytics — clics en el botón de descarga de la app, envíos del formulario de contacto, visualización de un resultado de compatibilidad, uso de la vista previa gratuita; no incluimos datos identificables como el correo, nombre, fecha de nacimiento o el token del enlace de compatibilidad en estos eventos. Al tocar el botón de descarga, solo se envía a Google Play el canal por el que llegaste a este sitio (por ejemplo, "tiktok"); esa etiqueta se guarda en tu navegador hasta 30 días solo si aceptas las cookies de análisis. Las cookies de análisis solo se usan con tu consentimiento, que puedes cambiar o retirar en cualquier momento desde "Configuración de cookies", al final de cada página), una cookie funcional guardada solo en el navegador con el que se creó una lectura de Año Nuevo Lunar (un valor aleatorio que permite que solo quien creó la lectura se suscriba a su serie de correos; se conserva hasta 90 días, nunca se usa para publicidad ni análisis y puedes borrarla en cualquier momento desde la configuración del navegador), estado de suscripción/compra (a través de RevenueCat), señales de integridad del dispositivo de Google Play Integrity usadas para prevenir el abuso de la prueba gratuita, datos de diagnóstico de errores/fallos, tu dirección IP al usar las páginas públicas y otras partes del servicio (usada solo para limitar la frecuencia de solicitudes y prevenir abusos; nunca guardamos la dirección IP en sí en nuestra base de datos, solo un hash unidireccional con clave que no permite recuperarla, durante un máximo de 1 día), los registros de solicitudes que guardan nuestros servidores web cuando usas el servicio (incluyen la dirección IP, la hora y la dirección solicitada; se conservan hasta 30 días), e información del navegador y tu dirección IP enviadas a Cloudflare mientras el widget de protección contra bots Cloudflare Turnstile está activo en los formularios públicos de nuestro sitio de marketing (demo de inicio, compatibilidad compartida, registro de contacto y Año Nuevo Lunar)</li>' +
           '<li>Cálculos de personalización: tu carta astral saju completa (los cuatro pilares: año, mes, día y hora), calculada a partir de la fecha y hora de nacimiento que proporcionas durante el proceso de incorporación — usada para personalizar las cartas semanales y mensuales</li>' +
           '<li>Contenido que escribes: el texto libre que ingresas en la función "Historia de Hoy", que se envía a un proveedor de IA para generar una respuesta personalizada; y el asunto y mensaje que ingresas al contactar con Soporte</li>' +
           '<li>Recopilada cuando usas nuestro sitio de marketing (saju-letter.com): la dirección de correo electrónico que proporcionas al registrarte, junto con si diste tu consentimiento para recibir correos de marketing y cuándo; y, si envías el demo de inicio, la compatibilidad compartida o las páginas públicas de Año Nuevo Lunar, el nombre (cuando corresponda), la información de saju calculada y el texto libre que ingresas. Enviamos tu fecha de nacimiento gregoriana (año, mes, día) solo para confirmar que tienes 16 años o más y no la almacenamos; la carta en sí se calcula en tu dispositivo</li>' +
@@ -664,16 +693,17 @@ export const PRIVACY_POLICY_CONTENT: Record<MarketingLanguage, PrivacyPolicyCont
           '<p>Eliminamos tu información de inmediato cuando cierras tu cuenta o cuando recibimos una solicitud de eliminación — no hay período de gracia adicional ni demora. Las copias de seguridad de la base de datos se conservan como máximo 7 días y luego se eliminan, así que la información borrada al eliminar tu cuenta también desaparece de las copias de seguridad dentro de ese plazo.</p>' +
           '<p>El resto de la información se elimina una vez transcurridos los siguientes plazos:</p>' +
           '<ul>' +
-          '<li>Direcciones de correo dadas de baja de nuestros correos de marketing: 30 días después de darte de baja</li>' +
-          '<li>Datos de las lecturas de Año Nuevo Lunar (nombre, texto que escribiste y datos de la suscripción por correo): 1 año después de que termine la campaña de ese año</li>' +
+          '<li>Direcciones de correo dadas de baja de nuestros correos de marketing (el registro por correo de la página de inicio y la serie de correos de Año Nuevo Lunar): 30 días después de darte de baja</li>' +
+          '<li>Datos de las lecturas de Año Nuevo Lunar (nombre, texto que escribiste y datos de la suscripción por correo): 1 año después de que termine la campaña de ese año (una dirección de correo dada de baja se elimina antes, según la regla anterior)</li>' +
           '<li>Nombres que ingresan los amigos (invitados) en la compatibilidad compartida: 1 año después de completarse el resultado de compatibilidad</li>' +
-          '<li>Registros de acceso y de auditoría de administradores: 1 año</li>' +
-          '<li>Registros de alertas operativas: 180 días</li>' +
-          '<li>Borradores escritos por nuestro asistente de operaciones con IA (borradores de respuesta a consultas de soporte e informes): 180 días</li>' +
+          '<li>Registros de lo que los administradores consultan y modifican: 1 año</li>' +
+          '<li>Registros de alertas operativas: 180 días después de resolverse (las que siguen abiertas se conservan hasta que se atienden)</li>' +
+          '<li>Borradores escritos por nuestro asistente de operaciones con IA (borradores de respuesta a consultas de soporte e informes): 180 días después de que se acepten, se rechacen o se decida sobre ellos de otro modo (los que esperan una decisión se conservan hasta entonces)</li>' +
           '<li>Registros de solicitudes de los servidores web (incluidas las direcciones IP, guardados en el registro de Google Cloud): hasta 30 días</li>' +
+          '<li>Registros de limitación de frecuencia (un hash unidireccional con clave de tu dirección IP): hasta 1 día (hasta 7 días en las copias de seguridad de la base de datos)</li>' +
           '<li>Hashes de direcciones de correo (un hash unidireccional con clave que no permite recuperar la dirección): se conservan incluso después de eliminar la cuenta para evitar pruebas gratuitas repetidas y el abuso de las recompensas por referidos</li>' +
           '</ul>' +
-          '<p>Tu fecha y hora de nacimiento; el texto que escribes en la función "Historia de Hoy" y su respuesta; las notas que ingresas en la compatibilidad compartida o la compatibilidad detallada para distinguir a las personas; el texto libre que envías para una lectura de Año Nuevo Lunar; y el cuerpo de los mensajes de tus conversaciones con Soporte (tanto tus mensajes como nuestras respuestas) se almacenan cifrados (AES-256). El asunto de una consulta de Soporte se almacena sin cifrar para poder mostrarlo en la lista de consultas. Los resultados calculados (día maestro, rama del mes, rama de la hora) no son identificables por sí solos, por lo que los almacenamos sin cifrar.</p>' +
+          '<p>Tu fecha y hora de nacimiento; el texto que escribes en la función "Historia de Hoy" y su respuesta; las notas que ingresas en la compatibilidad compartida o la compatibilidad detallada para distinguir a las personas; los nombres que ingresas en la compatibilidad detallada; el texto libre que envías para una lectura de Año Nuevo Lunar; y el cuerpo de los mensajes de tus conversaciones con Soporte (tanto tus mensajes como nuestras respuestas) se almacenan cifrados (AES-256). El asunto de una consulta de Soporte se almacena sin cifrar para poder mostrarlo en la lista de consultas. Los resultados calculados (día maestro, rama del mes, rama de la hora) no son identificables por sí solos, por lo que los almacenamos sin cifrar.</p>' +
           '<p>Cuando la ley exige una retención más larga (por ejemplo, registros de pago), conservamos esos datos solo durante el período legalmente requerido antes de eliminarlos.</p>',
       },
       {
@@ -681,7 +711,7 @@ export const PRIVACY_POLICY_CONTENT: Record<MarketingLanguage, PrivacyPolicyCont
         html:
           '<p>Compartimos datos con los siguientes terceros solo en la medida necesaria para prestar el servicio:</p>' +
           '<ul>' +
-          '<li><strong>Firebase / Google Analytics (Google)</strong>: autenticación, notificaciones push y análisis de uso tanto de la app (Google Analytics for Firebase, solo en compilaciones de producción) como de este sitio de marketing (un flujo web independiente en la misma propiedad de GA4). Las notificaciones push solo contienen un texto de aviso general, nunca el contenido de las respuestas de "Historia de Hoy" ni de las respuestas a tus consultas de soporte</li>' +
+          '<li><strong>Firebase / Google Analytics (Google)</strong>: autenticación, notificaciones push y análisis de uso tanto de la app (Google Analytics for Firebase, solo en compilaciones de producción) como de este sitio de marketing (un flujo web independiente en la misma propiedad de GA4). Las notificaciones push se entregan a través de FCM y pueden verse en la pantalla de bloqueo. Las notificaciones de respuestas de "Historia de Hoy", de respuestas a tus consultas de soporte y de orientación en situaciones de crisis, la notificación de la mañana del día en que recibes una carta personalizada a partir de tu "Historia de Hoy" del día anterior y los avisos de que una carta semanal o de fin de mes está lista solo contienen un texto fijo y genérico. La notificación de una carta diaria normal (no personalizada) puede mostrar la primera frase de la carta como vista previa, la de una carta de aniversario puede mostrar su título y la de un resultado de compatibilidad puede mostrar los nombres que ingresaron las dos personas</li>' +
           '<li><strong>Google Cloud</strong>: alojamiento de nuestros servidores, bases de datos, gestión de claves de cifrado y registros del servidor</li>' +
           '<li><strong>RevenueCat</strong>: gestión del estado de la suscripción (el pago real se procesa a través de Google Play Billing; nosotros no almacenamos tu tarjeta ni los datos de pago)</li>' +
           '<li><strong>Nuestro proveedor de contenido de IA</strong> (actualmente OpenAI; puede ser Anthropic o Google según la configuración): genera el texto de tus cartas, las respuestas de "Historia de Hoy" y los resultados de la compatibilidad detallada, así como las lecturas de Año Nuevo Lunar en nuestro sitio de marketing (saju-letter.com). Esto puede incluir tus valores de saju calculados, el texto que escribes en la función "Historia de Hoy", y el nombre y el texto libre que envías para una lectura de Año Nuevo Lunar. En la compatibilidad detallada solo se comparten los valores de saju calculados de las dos personas, no sus nombres. El mini demo de inicio no llama a la IA cuando lo envías: muestra una carta que generamos de antemano, así que lo que ingresas allí no se envía al proveedor de IA.</li>' +
@@ -722,7 +752,7 @@ export const PRIVACY_POLICY_CONTENT: Record<MarketingLanguage, PrivacyPolicyCont
         heading: '7. Medidas de seguridad',
         html:
           '<ul>' +
-          '<li>La información sensible — incluyendo la fecha y hora de nacimiento, el texto y las respuestas de "Historia de Hoy", las notas de compatibilidad/compatibilidad detallada, el texto libre de Año Nuevo Lunar y el cuerpo de los mensajes de Soporte — se almacena usando cifrado AES-256 (el asunto de las consultas de Soporte no se cifra para poder mostrarlo en listas)</li>' +
+          '<li>La información sensible — incluyendo la fecha y hora de nacimiento, el texto y las respuestas de "Historia de Hoy", las notas de compatibilidad/compatibilidad detallada, los nombres de la compatibilidad detallada, el texto libre de Año Nuevo Lunar y el cuerpo de los mensajes de Soporte — se almacena usando cifrado AES-256 (el asunto de las consultas de Soporte no se cifra para poder mostrarlo en listas)</li>' +
           '<li>Las claves de cifrado se gestionan mediante un servicio dedicado de gestión de claves (KMS) y nunca se codifican directamente en el código</li>' +
           '<li>El acceso al panel de administración requiere autenticación independiente</li>' +
           '</ul>',
@@ -746,14 +776,14 @@ export const PRIVACY_POLICY_CONTENT: Record<MarketingLanguage, PrivacyPolicyCont
         heading: '10. Cambios en esta política',
         html:
           '<p>Esta política entra en vigencia el 29 de julio de 2026 y puede actualizarse a medida que cambien ' +
-          'nuestras prácticas, las leyes aplicables o el propio servicio (última actualización: 6 de octubre ' +
+          'nuestras prácticas, las leyes aplicables o el propio servicio (última actualización: 7 de octubre ' +
           'de 2026). Te notificaremos sobre cambios importantes a través de la app o esta página.</p>',
       },
     ],
   },
   pt: {
     title: 'Política de Privacidade',
-    effectiveDate: 'Data de vigência: 29 de julho de 2026 (última atualização: 6 de outubro de 2026)',
+    effectiveDate: 'Data de vigência: 29 de julho de 2026 (última atualização: 7 de outubro de 2026)',
     intro:
       'O Saju Letter ("nós" ou "o Serviço") respeita sua privacidade e se compromete a proteger suas ' +
       'informações pessoais. Esta Política de Privacidade explica quais informações coletamos e como as usamos ' +
@@ -767,7 +797,8 @@ export const PRIVACY_POLICY_CONTENT: Record<MarketingLanguage, PrivacyPolicyCont
           '<li>Fornecidas por você: nome (ou apelido), data de nascimento, gênero (opcional), fuso horário do dispositivo</li>' +
           '<li>Opcional: horário de nascimento (você pode escolher "desconhecido"), endereço de e-mail (obrigatório se você se cadastrar com e-mail; se você entrar com uma conta Google, recebemos o e-mail dessa conta. Usado para login e gerenciamento da conta, recuperação da conta e verificação, conferir a elegibilidade para recompensas de indicação, emitir cupons de marketing se você se inscrever nos nossos e-mails, prevenir abuso do teste gratuito e responder a solicitações de suporte), uma nota que você insere na compatibilidade compartilhada ou na compatibilidade detalhada para diferenciar as pessoas (nunca é exibida para a outra pessoa)</li>' +
           '<li>Programa de indicação: um código de indicação atribuído automaticamente à sua conta e, se você inseriu o código de indicação de outro membro ao se cadastrar, um registro vinculando sua conta a esse membro</li>' +
-          '<li>Coletadas automaticamente: identificador de autenticação do Firebase (UID), token de notificações push do dispositivo (FCM), eventos de análise de uso do app coletados apenas em builds de produção (Google Analytics for Firebase — inclui o método de login no evento de cadastro; não usamos o ID de publicidade para fins de publicidade), eventos de análise de uso da web coletados ao visitar este site de marketing (Google Analytics — cliques no botão de download do app, envios do formulário de cadastro, visualização de um resultado de compatibilidade, uso da prévia gratuita; não incluímos dados identificáveis como e-mail, nome, data de nascimento ou o token do link de compatibilidade nesses eventos. Ao tocar no botão de download, apenas o canal pelo qual você chegou a este site (por exemplo, "tiktok") é repassado ao Google Play; essa etiqueta fica guardada no seu navegador por até 30 dias somente se você aceitar os cookies de análise. Os cookies de análise só são usados com o seu consentimento, que você pode alterar ou retirar a qualquer momento em "Configurações de cookies", no fim de cada página), um cookie funcional guardado apenas no navegador em que uma leitura de Ano Novo Lunar foi criada (um valor aleatório que permite que só quem criou a leitura se inscreva na série de e-mails; guardado por até 90 dias, nunca usado para publicidade ou análise, e você pode apagá-lo a qualquer momento nas configurações do navegador), status de assinatura/compra (via RevenueCat), sinais de integridade do dispositivo do Google Play Integrity usados para prevenir abuso do teste gratuito, dados de diagnóstico de erros/falhas, seu endereço IP nas páginas públicas (usado brevemente para limitar a frequência de solicitações e prevenir abusos, sem ser guardado no nosso banco de dados), os registros de solicitações que nossos servidores web mantêm quando você usa o serviço (incluem o endereço IP, o horário e o endereço solicitado; guardados por até 30 dias), e informações do navegador e seu endereço IP enviados ao Cloudflare enquanto o widget de proteção contra bots Cloudflare Turnstile está ativo nos formulários públicos do nosso site de marketing (demo da home, compatibilidade compartilhada, cadastro de contato e Ano Novo Lunar)</li>' +
+          '<li>Compatibilidade detalhada: os nomes das duas pessoas que você insere e as informações de saju calculadas delas (incluindo as da outra pessoa), que guardamos para mostrar o resultado. Os nomes são armazenados com criptografia, nunca são enviados ao provedor de IA e são excluídos quando você exclui sua conta</li>' +
+          '<li>Coletadas automaticamente: identificador de autenticação do Firebase (UID), token de notificações push do dispositivo (FCM), eventos de análise de uso do app coletados apenas em builds de produção (Google Analytics for Firebase — inclui o método de login no evento de cadastro; não usamos o ID de publicidade para fins de publicidade), eventos de análise de uso da web coletados ao visitar este site de marketing (Google Analytics — cliques no botão de download do app, envios do formulário de cadastro, visualização de um resultado de compatibilidade, uso da prévia gratuita; não incluímos dados identificáveis como e-mail, nome, data de nascimento ou o token do link de compatibilidade nesses eventos. Ao tocar no botão de download, apenas o canal pelo qual você chegou a este site (por exemplo, "tiktok") é repassado ao Google Play; essa etiqueta fica guardada no seu navegador por até 30 dias somente se você aceitar os cookies de análise. Os cookies de análise só são usados com o seu consentimento, que você pode alterar ou retirar a qualquer momento em "Configurações de cookies", no fim de cada página), um cookie funcional guardado apenas no navegador em que uma leitura de Ano Novo Lunar foi criada (um valor aleatório que permite que só quem criou a leitura se inscreva na série de e-mails; guardado por até 90 dias, nunca usado para publicidade ou análise, e você pode apagá-lo a qualquer momento nas configurações do navegador), status de assinatura/compra (via RevenueCat), sinais de integridade do dispositivo do Google Play Integrity usados para prevenir abuso do teste gratuito, dados de diagnóstico de erros/falhas, seu endereço IP ao usar as páginas públicas e outras partes do serviço (usado apenas para limitar a frequência de solicitações e prevenir abusos; nunca guardamos o endereço IP em si no nosso banco de dados, apenas um hash unidirecional com chave que não permite recuperá-lo, por no máximo 1 dia), os registros de solicitações que nossos servidores web mantêm quando você usa o serviço (incluem o endereço IP, o horário e o endereço solicitado; guardados por até 30 dias), e informações do navegador e seu endereço IP enviados ao Cloudflare enquanto o widget de proteção contra bots Cloudflare Turnstile está ativo nos formulários públicos do nosso site de marketing (demo da home, compatibilidade compartilhada, cadastro de contato e Ano Novo Lunar)</li>' +
           '<li>Cálculos de personalização: seu mapa saju completo (os quatro pilares: ano, mês, dia e hora), calculado a partir da data e hora de nascimento que você fornece durante o processo de integração — usado para personalizar as cartas semanais e mensais</li>' +
           '<li>Conteúdo que você escreve: o texto livre inserido no recurso "História de Hoje", que é enviado a um provedor de IA para gerar uma resposta personalizada; e o assunto e a mensagem que você insere ao entrar em contato com o Suporte</li>' +
           '<li>Coletadas quando você usa nosso site de marketing (saju-letter.com): o endereço de e-mail fornecido ao se cadastrar, junto com se e quando você consentiu em receber e-mails de marketing; e, se você enviar o demo da home, a compatibilidade compartilhada ou as páginas públicas de Ano Novo Lunar, o nome (quando aplicável), as informações de saju calculadas e o texto livre que você insere. Enviamos sua data de nascimento gregoriana (ano, mês, dia) apenas para confirmar que você tem 16 anos ou mais e não a armazenamos; o mapa em si é calculado no seu dispositivo</li>' +
@@ -792,16 +823,17 @@ export const PRIVACY_POLICY_CONTENT: Record<MarketingLanguage, PrivacyPolicyCont
           '<p>Excluímos suas informações imediatamente quando você encerra sua conta ou quando recebemos uma solicitação de exclusão — não há período de carência adicional nem atraso. Os backups do banco de dados são mantidos por no máximo 7 dias e depois excluídos, então as informações apagadas quando você exclui sua conta também desaparecem dos backups dentro desse prazo.</p>' +
           '<p>As demais informações são excluídas depois dos prazos abaixo:</p>' +
           '<ul>' +
-          '<li>Endereços de e-mail descadastrados dos nossos e-mails de marketing: 30 dias após o descadastramento</li>' +
-          '<li>Dados das leituras de Ano Novo Lunar (nome, texto que você escreveu e dados da inscrição por e-mail): 1 ano após o fim da campanha daquele ano</li>' +
+          '<li>Endereços de e-mail descadastrados dos nossos e-mails de marketing (o cadastro por e-mail da página inicial e a série de e-mails de Ano Novo Lunar): 30 dias após o descadastramento</li>' +
+          '<li>Dados das leituras de Ano Novo Lunar (nome, texto que você escreveu e dados da inscrição por e-mail): 1 ano após o fim da campanha daquele ano (um endereço de e-mail descadastrado é excluído antes, conforme a regra acima)</li>' +
           '<li>Nomes inseridos por amigos (convidados) na compatibilidade compartilhada: 1 ano após a conclusão do resultado de compatibilidade</li>' +
-          '<li>Registros de acesso e de auditoria de administradores: 1 ano</li>' +
-          '<li>Registros de alertas operacionais: 180 dias</li>' +
-          '<li>Rascunhos escritos pelo nosso assistente de operações com IA (rascunhos de resposta ao suporte e relatórios): 180 dias</li>' +
+          '<li>Registros do que os administradores consultam e alteram: 1 ano</li>' +
+          '<li>Registros de alertas operacionais: 180 dias após serem resolvidos (os que continuam abertos são mantidos até serem tratados)</li>' +
+          '<li>Rascunhos escritos pelo nosso assistente de operações com IA (rascunhos de resposta ao suporte e relatórios): 180 dias após serem aceitos, rejeitados ou decididos de outra forma (os que aguardam uma decisão são mantidos até lá)</li>' +
           '<li>Registros de solicitações dos servidores web (incluindo endereços IP, guardados no registro do Google Cloud): até 30 dias</li>' +
+          '<li>Registros de limite de frequência (um hash unidirecional com chave do seu endereço IP): até 1 dia (até 7 dias nos backups do banco de dados)</li>' +
           '<li>Hashes de endereços de e-mail (um hash unidirecional com chave, que não permite recuperar o endereço): mantidos mesmo após a exclusão da conta para evitar testes gratuitos repetidos e abuso das recompensas de indicação</li>' +
           '</ul>' +
-          '<p>Sua data e horário de nascimento; o texto que você escreve no recurso "História de Hoje" e sua resposta; as notas que você insere na compatibilidade compartilhada ou na compatibilidade detalhada para diferenciar as pessoas; o texto livre que você envia para uma leitura de Ano Novo Lunar; e o corpo das mensagens das suas conversas com o Suporte (tanto as suas mensagens quanto as nossas respostas) são armazenados de forma criptografada (AES-256). O assunto de uma solicitação de Suporte é armazenado sem criptografia para que possa ser exibido na lista de solicitações. Os resultados calculados (dia mestre, ramo do mês, ramo da hora) não são identificáveis por si só, portanto os armazenamos sem criptografia.</p>' +
+          '<p>Sua data e horário de nascimento; o texto que você escreve no recurso "História de Hoje" e sua resposta; as notas que você insere na compatibilidade compartilhada ou na compatibilidade detalhada para diferenciar as pessoas; os nomes que você insere na compatibilidade detalhada; o texto livre que você envia para uma leitura de Ano Novo Lunar; e o corpo das mensagens das suas conversas com o Suporte (tanto as suas mensagens quanto as nossas respostas) são armazenados de forma criptografada (AES-256). O assunto de uma solicitação de Suporte é armazenado sem criptografia para que possa ser exibido na lista de solicitações. Os resultados calculados (dia mestre, ramo do mês, ramo da hora) não são identificáveis por si só, portanto os armazenamos sem criptografia.</p>' +
           '<p>Quando a lei exige uma retenção mais longa (por exemplo, registros de pagamento), mantemos esses dados apenas pelo período legalmente exigido antes de excluí-los.</p>',
       },
       {
@@ -809,7 +841,7 @@ export const PRIVACY_POLICY_CONTENT: Record<MarketingLanguage, PrivacyPolicyCont
         html:
           '<p>Compartilhamos dados com os seguintes terceiros apenas na medida necessária para fornecer o serviço:</p>' +
           '<ul>' +
-          '<li><strong>Firebase / Google Analytics (Google)</strong>: autenticação, notificações push e análise de uso tanto do app (Google Analytics for Firebase, apenas em builds de produção) quanto deste site de marketing (um fluxo web separado na mesma propriedade do GA4). As notificações push contêm apenas um texto de aviso genérico, nunca o conteúdo das respostas de "História de Hoje" nem das respostas às suas solicitações de suporte</li>' +
+          '<li><strong>Firebase / Google Analytics (Google)</strong>: autenticação, notificações push e análise de uso tanto do app (Google Analytics for Firebase, apenas em builds de produção) quanto deste site de marketing (um fluxo web separado na mesma propriedade do GA4). As notificações push são entregues pelo FCM e podem aparecer na tela de bloqueio. As notificações de respostas de "História de Hoje", de respostas às suas solicitações de suporte e de orientação em situações de crise, a notificação da manhã do dia em que você recebe uma carta personalizada a partir da sua "História de Hoje" do dia anterior e os avisos de que uma carta semanal ou de fim de mês está pronta contêm apenas um texto fixo e genérico. A notificação de uma carta diária comum (não personalizada) pode mostrar a primeira frase da carta como prévia, a de uma carta comemorativa pode mostrar o título dela e a de um resultado de compatibilidade pode mostrar os nomes que as duas pessoas inseriram</li>' +
           '<li><strong>Google Cloud</strong>: hospedagem dos nossos servidores, bancos de dados, gerenciamento de chaves de criptografia e registros do servidor</li>' +
           '<li><strong>RevenueCat</strong>: gerenciamento do status da assinatura (o pagamento real é processado pelo Google Play Billing; não armazenamos seu cartão nem dados de pagamento)</li>' +
           '<li><strong>Nosso provedor de conteúdo de IA</strong> (atualmente OpenAI; pode ser Anthropic ou Google dependendo da configuração): gera o texto das suas cartas, das respostas de "História de Hoje" e dos resultados da compatibilidade detalhada, bem como as leituras de Ano Novo Lunar em nosso site de marketing (saju-letter.com). Isso pode incluir seus valores de saju calculados, o texto que você escreve no recurso "História de Hoje", e o nome e o texto livre que você envia para uma leitura de Ano Novo Lunar. Na compatibilidade detalhada, apenas os valores de saju calculados das duas pessoas são compartilhados, não os nomes. O mini demo da home não chama a IA quando você o envia: ele mostra uma carta que geramos com antecedência, então o que você insere ali não é enviado ao provedor de IA.</li>' +
@@ -850,7 +882,7 @@ export const PRIVACY_POLICY_CONTENT: Record<MarketingLanguage, PrivacyPolicyCont
         heading: '7. Medidas de segurança',
         html:
           '<ul>' +
-          '<li>Informações sensíveis — incluindo data e horário de nascimento, texto e respostas de "História de Hoje", notas de compatibilidade/compatibilidade detalhada, texto livre de Ano Novo Lunar e o corpo das mensagens do Suporte — são armazenadas com criptografia AES-256 (o assunto das solicitações de Suporte não é criptografado, para que possa ser exibido em listas)</li>' +
+          '<li>Informações sensíveis — incluindo data e horário de nascimento, texto e respostas de "História de Hoje", notas de compatibilidade/compatibilidade detalhada, nomes da compatibilidade detalhada, texto livre de Ano Novo Lunar e o corpo das mensagens do Suporte — são armazenadas com criptografia AES-256 (o assunto das solicitações de Suporte não é criptografado, para que possa ser exibido em listas)</li>' +
           '<li>As chaves de criptografia são gerenciadas por um serviço dedicado de gerenciamento de chaves (KMS) e nunca ficam fixas no código</li>' +
           '<li>O acesso ao painel administrativo exige autenticação separada</li>' +
           '</ul>',
@@ -874,14 +906,14 @@ export const PRIVACY_POLICY_CONTENT: Record<MarketingLanguage, PrivacyPolicyCont
         heading: '10. Alterações nesta política',
         html:
           '<p>Esta política entra em vigor em 29 de julho de 2026 e pode ser atualizada conforme nossas ' +
-          'práticas, as leis aplicáveis ou o próprio serviço mudarem (última atualização: 6 de outubro de ' +
+          'práticas, as leis aplicáveis ou o próprio serviço mudarem (última atualização: 7 de outubro de ' +
           '2026). Notificaremos você sobre alterações relevantes por meio do aplicativo ou desta página.</p>',
       },
     ],
   },
   vi: {
     title: 'Chính sách Quyền riêng tư',
-    effectiveDate: 'Ngày hiệu lực: 29 tháng 7 năm 2026 (cập nhật lần cuối: 6 tháng 10 năm 2026)',
+    effectiveDate: 'Ngày hiệu lực: 29 tháng 7 năm 2026 (cập nhật lần cuối: 7 tháng 10 năm 2026)',
     intro:
       'Saju Letter ("chúng tôi" hoặc "Dịch vụ") tôn trọng quyền riêng tư của bạn và cam kết bảo vệ thông tin cá ' +
       'nhân của bạn. Chính sách Quyền riêng tư này giải thích thông tin nào chúng tôi thu thập và cách chúng ' +
@@ -895,7 +927,8 @@ export const PRIVACY_POLICY_CONTENT: Record<MarketingLanguage, PrivacyPolicyCont
           '<li>Do bạn cung cấp: tên (hoặc biệt danh), ngày sinh, giới tính (không bắt buộc), múi giờ thiết bị</li>' +
           '<li>Tùy chọn: giờ sinh (bạn có thể chọn "không rõ"), địa chỉ email (bắt buộc nếu bạn đăng ký bằng email; nếu bạn đăng nhập bằng tài khoản Google, chúng tôi nhận địa chỉ email của tài khoản đó. Dùng để đăng nhập và quản lý tài khoản, khôi phục tài khoản và xác minh, kiểm tra điều kiện nhận ưu đãi giới thiệu bạn bè, cấp mã ưu đãi tiếp thị nếu bạn đăng ký nhận email, ngăn chặn lạm dụng bản dùng thử miễn phí và phản hồi yêu cầu hỗ trợ), ghi chú bạn nhập trong tính năng chia sẻ mức độ hợp nhau hoặc xem mức độ hợp nhau chi tiết để phân biệt mọi người (không bao giờ hiển thị cho người kia)</li>' +
           '<li>Tính năng giới thiệu bạn bè: mã giới thiệu được tự động gán cho tài khoản của bạn, và nếu bạn nhập mã giới thiệu của thành viên khác khi đăng ký, thông tin liên kết tài khoản của bạn với thành viên đó</li>' +
-          '<li>Thu thập tự động: mã định danh xác thực Firebase (UID), token thông báo đẩy của thiết bị (FCM), sự kiện phân tích sử dụng ứng dụng chỉ thu thập trên bản dựng production (Google Analytics for Firebase — bao gồm phương thức đăng nhập trong sự kiện đăng ký; chúng tôi không dùng mã nhận dạng quảng cáo cho mục đích quảng cáo), sự kiện phân tích sử dụng web thu thập khi bạn truy cập trang tiếp thị này (Google Analytics — nhấp vào nút tải ứng dụng, gửi biểu mẫu đăng ký nhận tin, xem kết quả mức độ hợp nhau, dùng bản xem trước miễn phí; chúng tôi không đưa dữ liệu định danh như email, tên, ngày sinh hay token liên kết mức độ hợp nhau vào các sự kiện này. Khi bạn nhấn nút tải ứng dụng, chỉ kênh đã đưa bạn đến trang này (ví dụ "tiktok") được chuyển cho Google Play; nhãn kênh đó chỉ được lưu trong trình duyệt tối đa 30 ngày nếu bạn đồng ý cookie phân tích. Cookie phân tích chỉ được dùng khi bạn đồng ý, và bạn có thể thay đổi hoặc rút lại sự đồng ý bất cứ lúc nào tại "Cài đặt cookie" ở cuối mỗi trang), một cookie chức năng chỉ được lưu trên trình duyệt đã tạo bài đọc Tết Nguyên Đán (một giá trị ngẫu nhiên giúp chỉ người tạo bài đọc mới đăng ký được chuỗi email; lưu tối đa 90 ngày, không dùng cho quảng cáo hay phân tích, và bạn có thể xóa bất cứ lúc nào trong cài đặt trình duyệt), trạng thái đăng ký/mua hàng (qua RevenueCat), tín hiệu toàn vẹn thiết bị từ Google Play Integrity dùng để ngăn chặn lạm dụng bản dùng thử miễn phí, dữ liệu chẩn đoán lỗi/sự cố, địa chỉ IP của bạn trên các trang công khai (được dùng trong thời gian ngắn để giới hạn tần suất yêu cầu nhằm ngăn lạm dụng, không lưu vào cơ sở dữ liệu của chúng tôi), nhật ký yêu cầu mà máy chủ web lưu lại khi bạn dùng dịch vụ (gồm địa chỉ IP, thời gian và địa chỉ được yêu cầu; lưu tối đa 30 ngày), cùng với thông tin trình duyệt và địa chỉ IP của bạn được gửi đến Cloudflare khi tiện ích chống bot Cloudflare Turnstile đang hoạt động trên các biểu mẫu công khai của trang web tiếp thị (bản demo trang chủ, chia sẻ mức độ hợp nhau, đăng ký nhận tin và Tết Nguyên Đán)</li>' +
+          '<li>Xem mức độ hợp nhau chi tiết: tên của hai người bạn nhập và thông tin saju đã tính toán của họ (bao gồm cả của người kia), được lưu để hiển thị kết quả cho bạn. Tên được lưu ở dạng mã hóa, không bao giờ được gửi đến nhà cung cấp AI và sẽ bị xóa khi bạn xóa tài khoản</li>' +
+          '<li>Thu thập tự động: mã định danh xác thực Firebase (UID), token thông báo đẩy của thiết bị (FCM), sự kiện phân tích sử dụng ứng dụng chỉ thu thập trên bản dựng production (Google Analytics for Firebase — bao gồm phương thức đăng nhập trong sự kiện đăng ký; chúng tôi không dùng mã nhận dạng quảng cáo cho mục đích quảng cáo), sự kiện phân tích sử dụng web thu thập khi bạn truy cập trang tiếp thị này (Google Analytics — nhấp vào nút tải ứng dụng, gửi biểu mẫu đăng ký nhận tin, xem kết quả mức độ hợp nhau, dùng bản xem trước miễn phí; chúng tôi không đưa dữ liệu định danh như email, tên, ngày sinh hay token liên kết mức độ hợp nhau vào các sự kiện này. Khi bạn nhấn nút tải ứng dụng, chỉ kênh đã đưa bạn đến trang này (ví dụ "tiktok") được chuyển cho Google Play; nhãn kênh đó chỉ được lưu trong trình duyệt tối đa 30 ngày nếu bạn đồng ý cookie phân tích. Cookie phân tích chỉ được dùng khi bạn đồng ý, và bạn có thể thay đổi hoặc rút lại sự đồng ý bất cứ lúc nào tại "Cài đặt cookie" ở cuối mỗi trang), một cookie chức năng chỉ được lưu trên trình duyệt đã tạo bài đọc Tết Nguyên Đán (một giá trị ngẫu nhiên giúp chỉ người tạo bài đọc mới đăng ký được chuỗi email; lưu tối đa 90 ngày, không dùng cho quảng cáo hay phân tích, và bạn có thể xóa bất cứ lúc nào trong cài đặt trình duyệt), trạng thái đăng ký/mua hàng (qua RevenueCat), tín hiệu toàn vẹn thiết bị từ Google Play Integrity dùng để ngăn chặn lạm dụng bản dùng thử miễn phí, dữ liệu chẩn đoán lỗi/sự cố, địa chỉ IP của bạn khi dùng các trang công khai và các phần khác của dịch vụ (chỉ dùng để giới hạn tần suất yêu cầu nhằm ngăn lạm dụng; chúng tôi không lưu chính địa chỉ IP vào cơ sở dữ liệu, mà chỉ lưu giá trị băm một chiều có khóa không thể khôi phục lại địa chỉ, tối đa 1 ngày), nhật ký yêu cầu mà máy chủ web lưu lại khi bạn dùng dịch vụ (gồm địa chỉ IP, thời gian và địa chỉ được yêu cầu; lưu tối đa 30 ngày), cùng với thông tin trình duyệt và địa chỉ IP của bạn được gửi đến Cloudflare khi tiện ích chống bot Cloudflare Turnstile đang hoạt động trên các biểu mẫu công khai của trang web tiếp thị (bản demo trang chủ, chia sẻ mức độ hợp nhau, đăng ký nhận tin và Tết Nguyên Đán)</li>' +
           '<li>Kết quả tính toán cá nhân hóa: toàn bộ lá số saju của bạn (tứ trụ: năm, tháng, ngày, giờ), được tính toán từ ngày và giờ sinh bạn cung cấp trong quá trình thiết lập ban đầu — dùng để cá nhân hóa thư hằng tuần và hằng tháng</li>' +
           '<li>Nội dung bạn viết: văn bản tự do bạn nhập trong tính năng "Câu Chuyện Hôm Nay", được gửi đến nhà cung cấp AI để tạo phản hồi cá nhân hóa; và tiêu đề, nội dung bạn nhập khi liên hệ Hỗ trợ</li>' +
           '<li>Thu thập khi bạn dùng trang web tiếp thị của chúng tôi (saju-letter.com): địa chỉ email bạn cung cấp khi đăng ký, cùng với việc bạn có đồng ý nhận email tiếp thị hay không và thời điểm đồng ý; và nếu bạn gửi bản demo trang chủ, chia sẻ mức độ hợp nhau hoặc các trang Tết Nguyên Đán công khai, tên (nếu có), thông tin saju đã tính toán và văn bản tự do bạn nhập. Chúng tôi gửi ngày sinh dương lịch (năm, tháng, ngày) chỉ để xác nhận bạn từ 16 tuổi trở lên và không lưu trữ; bản thân lá số được tính trên thiết bị của bạn</li>' +
@@ -920,16 +953,17 @@ export const PRIVACY_POLICY_CONTENT: Record<MarketingLanguage, PrivacyPolicyCont
           '<p>Chúng tôi xóa thông tin của bạn ngay lập tức khi bạn đóng tài khoản hoặc khi nhận được yêu cầu xóa — không có thời gian gia hạn hoặc trì hoãn bổ sung. Bản sao lưu cơ sở dữ liệu được giữ tối đa 7 ngày rồi bị xóa, nên thông tin đã bị xóa khi bạn xóa tài khoản cũng sẽ biến mất khỏi bản sao lưu trong khoảng thời gian đó.</p>' +
           '<p>Các thông tin khác được xóa sau các thời hạn dưới đây:</p>' +
           '<ul>' +
-          '<li>Địa chỉ email đã hủy đăng ký nhận email tiếp thị: 30 ngày sau khi hủy đăng ký</li>' +
-          '<li>Dữ liệu bài đọc Tết Nguyên Đán (tên, văn bản bạn đã viết và thông tin đăng ký nhận email): 1 năm sau khi chiến dịch của năm đó kết thúc</li>' +
+          '<li>Địa chỉ email đã hủy đăng ký nhận email tiếp thị (đăng ký nhận email trên trang chủ và chuỗi email Tết Nguyên Đán): 30 ngày sau khi hủy đăng ký</li>' +
+          '<li>Dữ liệu bài đọc Tết Nguyên Đán (tên, văn bản bạn đã viết và thông tin đăng ký nhận email): 1 năm sau khi chiến dịch của năm đó kết thúc (địa chỉ email đã hủy đăng ký sẽ bị xóa sớm hơn theo quy định ở trên)</li>' +
           '<li>Tên do bạn bè (khách) nhập trong tính năng chia sẻ mức độ hợp nhau: 1 năm sau khi kết quả hợp nhau được hoàn tất</li>' +
-          '<li>Nhật ký truy cập và nhật ký kiểm tra của quản trị viên: 1 năm</li>' +
-          '<li>Bản ghi cảnh báo vận hành: 180 ngày</li>' +
-          '<li>Bản nháp do trợ lý vận hành AI soạn (bản nháp trả lời yêu cầu hỗ trợ và báo cáo): 180 ngày</li>' +
+          '<li>Nhật ký những gì quản trị viên đã xem và thay đổi: 1 năm</li>' +
+          '<li>Bản ghi cảnh báo vận hành: 180 ngày sau khi được xử lý xong (các mục chưa xử lý được giữ cho đến khi xử lý)</li>' +
+          '<li>Bản nháp do trợ lý vận hành AI soạn (bản nháp trả lời yêu cầu hỗ trợ và báo cáo): 180 ngày sau khi được chấp nhận, từ chối hoặc có quyết định khác (bản nháp đang chờ quyết định được giữ cho đến lúc đó)</li>' +
           '<li>Nhật ký yêu cầu của máy chủ web (bao gồm địa chỉ IP, lưu trong hệ thống ghi nhật ký của Google Cloud): tối đa 30 ngày</li>' +
+          '<li>Bản ghi giới hạn tần suất (giá trị băm một chiều có khóa của địa chỉ IP): tối đa 1 ngày (tối đa 7 ngày trong bản sao lưu cơ sở dữ liệu)</li>' +
           '<li>Giá trị băm của địa chỉ email (băm một chiều có khóa, không thể khôi phục lại địa chỉ): được giữ lại kể cả sau khi xóa tài khoản để ngăn việc dùng thử miễn phí lặp lại và lạm dụng ưu đãi giới thiệu</li>' +
           '</ul>' +
-          '<p>Ngày sinh và giờ sinh của bạn; văn bản bạn viết trong tính năng "Câu Chuyện Hôm Nay" và phản hồi của nó; ghi chú bạn nhập trong tính năng hợp nhau để phân biệt mọi người; văn bản tự do bạn gửi cho bài đọc Tết Nguyên Đán; và nội dung các tin nhắn trong cuộc trao đổi với bộ phận Hỗ trợ (cả tin nhắn của bạn lẫn câu trả lời của chúng tôi) đều được lưu trữ ở dạng mã hóa (AES-256). Tiêu đề của yêu cầu hỗ trợ được lưu trữ không mã hóa để có thể hiển thị trong danh sách yêu cầu. Các kết quả đã tính toán (thiên can ngày, địa chi tháng, địa chi giờ) tự thân không thể nhận dạng cá nhân, nên chúng tôi lưu trữ chúng mà không mã hóa.</p>' +
+          '<p>Ngày sinh và giờ sinh của bạn; văn bản bạn viết trong tính năng "Câu Chuyện Hôm Nay" và phản hồi của nó; ghi chú bạn nhập trong tính năng hợp nhau để phân biệt mọi người; tên hai người bạn nhập khi xem mức độ hợp nhau chi tiết; văn bản tự do bạn gửi cho bài đọc Tết Nguyên Đán; và nội dung các tin nhắn trong cuộc trao đổi với bộ phận Hỗ trợ (cả tin nhắn của bạn lẫn câu trả lời của chúng tôi) đều được lưu trữ ở dạng mã hóa (AES-256). Tiêu đề của yêu cầu hỗ trợ được lưu trữ không mã hóa để có thể hiển thị trong danh sách yêu cầu. Các kết quả đã tính toán (thiên can ngày, địa chi tháng, địa chi giờ) tự thân không thể nhận dạng cá nhân, nên chúng tôi lưu trữ chúng mà không mã hóa.</p>' +
           '<p>Khi pháp luật yêu cầu lưu trữ lâu hơn (ví dụ: hồ sơ thanh toán), chúng tôi chỉ giữ dữ liệu đó trong thời gian pháp luật yêu cầu trước khi xóa.</p>',
       },
       {
@@ -937,7 +971,7 @@ export const PRIVACY_POLICY_CONTENT: Record<MarketingLanguage, PrivacyPolicyCont
         html:
           '<p>Chúng tôi chỉ chia sẻ dữ liệu với các bên thứ ba sau trong phạm vi cần thiết để cung cấp dịch vụ:</p>' +
           '<ul>' +
-          '<li><strong>Firebase / Google Analytics (Google)</strong>: xác thực, thông báo đẩy và phân tích sử dụng cho cả ứng dụng (Google Analytics for Firebase, chỉ thu thập trên bản dựng production) và trang tiếp thị này (một luồng web riêng trong cùng thuộc tính GA4). Thông báo đẩy chỉ chứa nội dung thông báo chung, không bao giờ chứa nội dung phản hồi "Câu Chuyện Hôm Nay" hay câu trả lời cho yêu cầu hỗ trợ của bạn</li>' +
+          '<li><strong>Firebase / Google Analytics (Google)</strong>: xác thực, thông báo đẩy và phân tích sử dụng cho cả ứng dụng (Google Analytics for Firebase, chỉ thu thập trên bản dựng production) và trang tiếp thị này (một luồng web riêng trong cùng thuộc tính GA4). Thông báo đẩy được gửi qua FCM và có thể hiển thị trên màn hình khóa. Thông báo về phản hồi "Câu Chuyện Hôm Nay", câu trả lời cho yêu cầu hỗ trợ, hướng dẫn khi gặp khủng hoảng, thông báo buổi sáng vào ngày bạn nhận thư được cá nhân hóa từ "Câu Chuyện Hôm Nay" của ngày hôm trước, và thông báo thư hằng tuần hoặc thư cuối tháng đã sẵn sàng chỉ chứa nội dung thông báo chung cố định. Thông báo thư hằng ngày thông thường (không cá nhân hóa) có thể hiển thị câu đầu tiên của thư làm bản xem trước, thông báo thư kỷ niệm có thể hiển thị tiêu đề thư, và thông báo kết quả hợp nhau có thể hiển thị tên mà hai người đã nhập</li>' +
           '<li><strong>Google Cloud</strong>: vận hành máy chủ (lưu trữ), cơ sở dữ liệu, quản lý khóa mã hóa và lưu nhật ký máy chủ</li>' +
           '<li><strong>RevenueCat</strong>: quản lý trạng thái đăng ký (thanh toán thực tế được xử lý qua Google Play Billing; chúng tôi không tự lưu trữ thẻ hay thông tin thanh toán của bạn)</li>' +
           '<li><strong>Nhà cung cấp nội dung AI của chúng tôi</strong> (hiện tại là OpenAI; có thể là Anthropic hoặc Google tùy theo cấu hình): tạo nội dung câu chữ cho thư của bạn, các phản hồi trong tính năng "Câu Chuyện Hôm Nay" và kết quả mức độ hợp nhau chi tiết, cũng như các bài đọc Tết Nguyên Đán trên trang web tiếp thị của chúng tôi (saju-letter.com). Việc này có thể bao gồm các giá trị saju đã tính toán của bạn, văn bản bạn viết trong tính năng "Câu Chuyện Hôm Nay", và tên cùng văn bản tự do bạn gửi khi xem bài đọc Tết Nguyên Đán. Với mức độ hợp nhau chi tiết, chỉ các giá trị saju đã tính toán của hai người được chia sẻ, không bao gồm tên. Bản demo trang chủ không gọi AI khi bạn gửi mà hiển thị một lá thư chúng tôi đã tạo sẵn, nên thông tin bạn nhập ở đó không được gửi đến nhà cung cấp AI.</li>' +
@@ -976,7 +1010,7 @@ export const PRIVACY_POLICY_CONTENT: Record<MarketingLanguage, PrivacyPolicyCont
         heading: '7. Biện pháp bảo mật',
         html:
           '<ul>' +
-          '<li>Thông tin nhạy cảm — bao gồm ngày sinh, giờ sinh, văn bản và phản hồi trong "Câu Chuyện Hôm Nay", ghi chú hợp nhau, văn bản tự do của Tết Nguyên Đán và nội dung tin nhắn Hỗ trợ — được lưu trữ bằng mã hóa AES-256 (tiêu đề yêu cầu hỗ trợ không được mã hóa để có thể hiển thị trong danh sách)</li>' +
+          '<li>Thông tin nhạy cảm — bao gồm ngày sinh, giờ sinh, văn bản và phản hồi trong "Câu Chuyện Hôm Nay", ghi chú hợp nhau, tên trong tính năng hợp nhau chi tiết, văn bản tự do của Tết Nguyên Đán và nội dung tin nhắn Hỗ trợ — được lưu trữ bằng mã hóa AES-256 (tiêu đề yêu cầu hỗ trợ không được mã hóa để có thể hiển thị trong danh sách)</li>' +
           '<li>Khóa mã hóa được quản lý thông qua dịch vụ quản lý khóa chuyên dụng (KMS) và không bao giờ được viết cứng trong mã nguồn</li>' +
           '<li>Việc truy cập trang quản trị yêu cầu xác thực riêng biệt</li>' +
           '</ul>',
@@ -999,7 +1033,7 @@ export const PRIVACY_POLICY_CONTENT: Record<MarketingLanguage, PrivacyPolicyCont
         heading: '10. Thay đổi đối với chính sách này',
         html:
           '<p>Chính sách này có hiệu lực từ ngày 29 tháng 7 năm 2026 và có thể được cập nhật khi các hoạt động ' +
-          'của chúng tôi, luật hiện hành hoặc bản thân dịch vụ thay đổi (cập nhật lần cuối: 6 tháng 10 năm ' +
+          'của chúng tôi, luật hiện hành hoặc bản thân dịch vụ thay đổi (cập nhật lần cuối: 7 tháng 10 năm ' +
           '2026). Chúng tôi sẽ thông báo cho bạn về những thay đổi quan trọng thông qua ứng dụng hoặc trang này.</p>',
       },
     ],

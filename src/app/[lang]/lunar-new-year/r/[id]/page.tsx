@@ -12,6 +12,7 @@ import { AppDownloadLinks } from '@/components/AppDownloadLinks';
 import { WEB_BASE_URL, NOINDEX_ROBOTS } from '@/lib/seo';
 import { readOwnerToken } from '@/lib/readingOwner';
 import { isValidReadingId } from '@/lib/routeParams';
+import { getRequestVisitorIp } from '@/lib/requestVisitorIp';
 
 interface PageProps {
   params: Promise<{ lang: string; id: string }>;
@@ -39,7 +40,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   // 모양부터 틀린 id는 백엔드를 부르지 않는다(2026-10-06 전체 점검 11차 R11-6-1) — 본문은 404.
   if (!isValidReadingId(id)) return { robots: NOINDEX_ROBOTS };
   // 일시 오류면 메타데이터만 비운다 — 본문은 페이지가 같은 오류로 다시 시도 화면을 그린다.
-  const reading = await getReading(id, await ownerTokenFor(id)).catch(() => null);
+  const reading = await getReading(id, await ownerTokenFor(id), await getRequestVisitorIp()).catch(() => null);
   if (!reading) return {};
 
   return {
@@ -66,7 +67,8 @@ export default async function LunarNewYearResultPage({ params }: PageProps) {
 
   // 일시 오류(429·5xx)는 던져 [lang]/error.tsx의 "다시 시도"로 — 404는 정말 없는 결과일 때만.
   const ownerToken = await ownerTokenFor(id);
-  const reading = await getReading(id, ownerToken);
+  // 방문자 IP를 함께 넘겨 백엔드가 방문자별로 센다(2026-10-07 전체 점검 12차) — 메타데이터와 같은 인자라 `cache()`가 한 번으로 묶는다.
+  const reading = await getReading(id, ownerToken, await getRequestVisitorIp());
   if (!reading) notFound();
 
   const dict = await getDictionary(language);
