@@ -138,7 +138,7 @@ export function DemoForm({
           </div>
           <p className="font-display self-end text-lg">— {dict.resultFromName}</p>
         </article>
-        <p className="text-center text-xs text-foreground/50">{disclaimerShort}</p>
+        <p className="text-center text-xs text-foreground/65">{disclaimerShort}</p>
         <div className="flex flex-col items-center gap-3">
           <p className="text-center text-sm font-medium text-foreground/70">{dict.resultCta}</p>
           <AppDownloadLinks dict={appLinksDict} language={language} emphasized context="demo_result" />

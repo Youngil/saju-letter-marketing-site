@@ -122,3 +122,13 @@ export function readOwnerToken(
   const legacy = cookieStore.get(legacyOwnerCookieName(readingId))?.value;
   return isValidOwnerToken(legacy) ? legacy : undefined;
 }
+
+/**
+ * 결과를 만든 직후, 결과 페이지로 넘어가지 않고 폼 자리에서 결과를 보여 줘야 하는지(2026-10-06 전체 점검 11차 R11-6-2).
+ * 위기 신호로 대체된 결과(`subscriptionAvailable === false`)는 결과 페이지가 소유자 쿠키로만 알아보므로, 쿠키를 못 남겼으면
+ * 그 페이지가 공개 화면(공유 버튼·앱 안내·"나도 해 보기")으로 그려진다 — 그럴 땐 넘어가지 않는다. 일반 결과는 쿠키가 없어도
+ * 넘어간다(메일 구독 폼만 안 보인다).
+ */
+export function shouldShowCreatedResultInPlace(subscriptionAvailable: boolean | undefined, ownerRemembered: boolean): boolean {
+  return subscriptionAvailable === false && !ownerRemembered;
+}

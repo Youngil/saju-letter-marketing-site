@@ -6,6 +6,7 @@ import { getCompatInvite, type InviteView } from '@/lib/compatApi';
 import { COMPAT_CONTENT, pickCompatViewCopy, resolveCompatOg } from '@/content/compatContent';
 import { CompatView } from '@/components/compat/CompatView';
 import { WEB_BASE_URL, languageAlternates, NOINDEX_ROBOTS } from '@/lib/seo';
+import { isValidCompatToken } from '@/lib/routeParams';
 
 interface PageProps {
   params: Promise<{ lang: string; token: string }>;
@@ -34,6 +35,8 @@ interface PageProps {
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { lang: rawLang, token } = await params;
   if (!isMarketingLanguage(rawLang)) return {};
+  // 모양부터 틀린 토큰은 백엔드를 부르지 않는다(2026-10-06 전체 점검 11차 R11-6-1) — 본문은 404.
+  if (!isValidCompatToken(token)) return { robots: NOINDEX_ROBOTS };
   const content = COMPAT_CONTENT[rawLang];
   // 일시 오류(429·5xx)면 메타데이터는 보낸 사람 이름 없는 일반 문구로 — 본문은 페이지가 같은 오류로 다시 시도 화면을 그린다.
   const view = await getCompatInvite(token, rawLang).catch((): InviteView => ({ status: 'pending' }));
@@ -60,6 +63,8 @@ export default async function CompatPage({ params }: PageProps) {
   const { lang: rawLang, token } = await params;
   if (!isMarketingLanguage(rawLang)) notFound();
   const lang: MarketingLanguage = rawLang;
+  // 모양부터 틀린 토큰(백엔드는 43자 base64url만 만든다)은 백엔드를 부르기 전에 404(2026-10-06 전체 점검 11차 R11-6-1).
+  if (!isValidCompatToken(token)) notFound();
 
   // 일시 오류는 여기서 잡지 않는다 — [lang]/error.tsx가 "다시 시도"를 보여 준다("초대 없음"으로 보이지 않게).
   const view = await getCompatInvite(token, lang);

@@ -10,6 +10,7 @@ import {
 } from '@/lib/languages';
 import { LunarNewYearHome } from '@/components/lunar-new-year/LunarNewYearHome';
 import { WEB_BASE_URL, languageAlternates, buildSocialMetadata } from '@/lib/seo';
+import { isBuildPhase } from '@/lib/buildPhase';
 
 /**
  * **2026-09-08 3차 종합 버그 점검(항목 1)으로 `MARKETING_LANGUAGES`(6)로 되돌렸다** — 2026-09-07
@@ -71,10 +72,18 @@ export default async function LunarNewYearPage({ params }: { params: Promise<{ l
   const { active, default: defaultLanguage } = await fetchActiveServiceLanguages();
   if (!active.includes(language)) redirect(`/${defaultLanguage}/lunar-new-year`);
 
-  const windowStatus: CampaignWindowStatus | null = await getCampaignWindow().catch((error) => {
-    console.warn('getCampaignWindow failed', error);
-    return null;
-  });
+  // 기간 조회가 실패하면 "폼 열림"으로 그리지 않는다(2026-10-06 전체 점검 11차 R11-6-3) — 예전엔 폼을 그려 ISR이 그 페이지를
+  // 5분간 굳혔고, 비시즌에도 폼이 열려 이름·사연을 다 적은 뒤에야 "기간이 아님"을 받았다. 실행 중엔 던져 Next가 직전에 잘
+  // 만든 페이지를 계속 보여 주게 하고(직전 페이지가 없으면 [lang]/error.tsx의 다시 시도), 백엔드가 없을 수 있는 빌드 중에만
+  // null로 넘겨 폼 대신 중립 안내를 그린다(다음 재검증이 실제 값으로 바꾼다).
+  let windowStatus: CampaignWindowStatus | null;
+  try {
+    windowStatus = await getCampaignWindow();
+  } catch (error) {
+    if (!isBuildPhase()) throw error;
+    console.warn('getCampaignWindow failed during build', error);
+    windowStatus = null;
+  }
 
   return (
     <LunarNewYearHome language={language} dict={dict.lunarNewYear} appLinksDict={dict.appLinks} windowStatus={windowStatus} />

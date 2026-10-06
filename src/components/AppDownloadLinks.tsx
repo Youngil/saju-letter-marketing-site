@@ -120,8 +120,8 @@ function TextBadge({
     <span
       className={
         emphasized
-          ? 'rounded-full border border-dashed border-foreground/20 px-6 py-3 text-center text-sm text-foreground/40'
-          : 'rounded-full border border-dashed border-foreground/15 px-4 py-2 text-sm text-foreground/40'
+          ? 'rounded-full border border-dashed border-foreground/20 px-6 py-3 text-center text-sm text-foreground/65'
+          : 'rounded-full border border-dashed border-foreground/15 px-4 py-2 text-sm text-foreground/65'
       }
     >
       {label} · {comingSoonLabel}

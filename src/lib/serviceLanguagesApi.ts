@@ -1,6 +1,7 @@
 import { cache } from 'react';
 import { DEFAULT_LANGUAGE, LAUNCH_CONTENT_LANGUAGES, isMarketingLanguage, type LaunchContentLanguage, type MarketingLanguage } from './languages';
 import { request } from './apiClient';
+import { isBuildPhase } from './buildPhase';
 
 /**
  * 서비스 언어 통합 관리(2026-09-07) — saju-letter-backend/saju-letter-admin-panel에서 관리자가
@@ -49,10 +50,6 @@ export function activeContentLanguages<L extends LaunchContentLanguage>(
 }
 
 let lastGood: ActiveServiceLanguages | null = null;
-
-function isBuildPhase(): boolean {
-  return process.env.NEXT_PHASE === 'phase-production-build';
-}
 
 /**
  * 한 번 조회 — 실패하면 그대로 던진다(폴백 없음). 성공하면 "마지막 성공 값"을 갱신한다. middleware는 이걸 짧은

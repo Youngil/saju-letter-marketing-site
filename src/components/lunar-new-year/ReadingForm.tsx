@@ -1,14 +1,15 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useId, useRef, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import type { MarketingDictionary } from '@/dictionaries/types';
 import type { MarketingLanguage } from '@/lib/languages';
 import { isOldEnough } from '@/lib/age';
-import { createReading, rememberReadingOwner } from '@/lib/lunarNewYearApi';
+import { createReading, rememberReadingOwner, type ReadingContent } from '@/lib/lunarNewYearApi';
 import { Turnstile, TURNSTILE_ENABLED, type TurnstileHandle } from '@/components/Turnstile';
 import { isValidBirthDate, parseBirthTime } from '@/lib/birthDate';
 import { mapPublicFormError } from '@/lib/publicForm';
+import { shouldShowCreatedResultInPlace } from '@/lib/readingOwner';
 
 const MEMORABLE_EVENT_MAX_LENGTH = 300;
 
@@ -18,11 +19,14 @@ export function ReadingForm({
   language,
   dict: t,
   offSeasonMessage,
+  disclaimerShort,
 }: {
   language: MarketingLanguage;
   dict: LandingDict;
   /** 제출 시점에 기간이 끝났다고 서버가 답하면(campaign_not_active) 보여 줄 문구. */
   offSeasonMessage: string;
+  /** 결과 아래 면책 한 줄 — 서버가 현재 언어 문자열만 넘긴다(6개 언어 문구 객체를 번들에 싣지 않게). */
+  disclaimerShort: string;
 }) {
   const router = useRouter();
   const dateLabelId = useId();
@@ -41,6 +45,13 @@ export function ReadingForm({
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  /** 위기 신호로 대체된 결과를 소유자 쿠키 없이 이 자리에서 보여 줄 때(아래 handleSubmit 참고). */
+  const [inPlaceCrisisResult, setInPlaceCrisisResult] = useState<ReadingContent | null>(null);
+  const crisisHeadingRef = useRef<HTMLHeadingElement>(null);
+
+  useEffect(() => {
+    if (inPlaceCrisisResult) crisisHeadingRef.current?.focus();
+  }, [inPlaceCrisisResult]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -107,7 +118,13 @@ export function ReadingForm({
 
       // 만든 사람만 메일 구독을 할 수 있게 소유자 토큰을 이 브라우저의 httpOnly 쿠키로 남긴 뒤 넘어간다(2026-10-07) —
       // 주소에는 절대 넣지 않는다(공유 링크·GA로 샌다). 저장에 실패해도 결과는 보여 준다(구독 폼만 안 보인다).
-      if (result.ownerToken) await rememberReadingOwner(result.readingId, result.ownerToken);
+      const remembered = result.ownerToken ? await rememberReadingOwner(result.readingId, result.ownerToken) : false;
+      // 위기 신호로 대체된 결과(도움 안내 글)인데 소유자 쿠키를 못 남겼으면 결과 페이지가 공개 화면(공유 버튼·앱 안내·"나도 해
+      // 보기")으로 그려진다 — 넘어가지 않고 이 자리에서 결과만 보여 준다(2026-10-06 전체 점검 11차 R11-6-2).
+      if (shouldShowCreatedResultInPlace(result.subscriptionAvailable, remembered)) {
+        setInPlaceCrisisResult(result.content);
+        return;
+      }
       router.push(`/${language}/lunar-new-year/r/${result.readingId}`);
     } catch (err) {
       setError(
@@ -126,6 +143,22 @@ export function ReadingForm({
       turnstileRef.current?.reset();
       setIsSubmitting(false);
     }
+  }
+
+  if (inPlaceCrisisResult) {
+    // 결과 페이지(r/[id])의 위기 대체 결과와 같은 모양 — 공유 버튼·앱 안내·메일 구독 없이 글과 면책 한 줄만.
+    return (
+      <article className="rounded-2xl bg-white p-6 shadow-sm">
+        <h2 ref={crisisHeadingRef} tabIndex={-1} className="text-xl font-semibold outline-none">
+          {inPlaceCrisisResult.title}
+        </h2>
+        <p className="mt-3 text-stone-700">{inPlaceCrisisResult.greeting}</p>
+        <p className="mt-3 text-stone-700">{inPlaceCrisisResult.overview}</p>
+        <p className="mt-3 text-stone-700">{inPlaceCrisisResult.highlight}</p>
+        <p className="mt-4 text-sm text-stone-600">{inPlaceCrisisResult.closing}</p>
+        <p className="mt-4 text-xs text-stone-500">{disclaimerShort}</p>
+      </article>
+    );
   }
 
   return (
@@ -232,7 +265,7 @@ export function ReadingForm({
           rows={2}
           className="w-full rounded-lg border border-stone-300 bg-white px-3 py-2"
         />
-        <div className="mt-1 text-right text-xs text-stone-400">
+        <div className="mt-1 text-right text-xs text-stone-600">
           {memorableEvent.length}/{MEMORABLE_EVENT_MAX_LENGTH}
         </div>
       </div>
@@ -241,7 +274,7 @@ export function ReadingForm({
         <input type="checkbox" checked={ageConfirmed} onChange={(e) => setAgeConfirmed(e.target.checked)} className="mt-1" />
         <span>{t.ageConfirmLabel}</span>
       </label>
-      <p className="text-xs text-stone-400">{t.consentPreviewNote}</p>
+      <p className="text-xs text-stone-600">{t.consentPreviewNote}</p>
 
       <Turnstile ref={turnstileRef} onVerify={setTurnstileToken} />
 

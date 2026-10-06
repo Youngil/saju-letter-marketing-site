@@ -50,6 +50,11 @@ export function LeadCaptureForm({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const successRef = useRef<HTMLDivElement>(null);
+  // 폼이 사라지고 완료 문구로 바뀌므로, 화면 낭독기가 새 영역을 놓치지 않게 초점을 옮긴다(2026-10-06 전체 점검 11차 R11-6-8).
+  useEffect(() => {
+    if (success) successRef.current?.focus();
+  }, [success]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -93,7 +98,13 @@ export function LeadCaptureForm({
 
   if (success) {
     return (
-      <div className="letter-surface rounded-sm p-6 text-center sm:p-7">
+      <div
+        ref={successRef}
+        tabIndex={-1}
+        role="status"
+        aria-live="polite"
+        className="letter-surface rounded-sm p-6 text-center outline-none sm:p-7"
+      >
         <p className="font-medium text-accent-warm">{dict.success}</p>
       </div>
     );

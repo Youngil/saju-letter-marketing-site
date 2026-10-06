@@ -14,6 +14,9 @@ vi.mock('@/lib/compatApi', () => ({
   getCompatInvite: vi.fn().mockResolvedValue({ status: 'pending' }),
 }));
 
+/** 백엔드가 만드는 모양(32바이트 base64url, 43자) — 모양이 틀리면 백엔드를 부르기 전에 404(2026-10-06 전체 점검 11차). */
+const SAMPLE_TOKEN = 'q3JxP0bV9mZk1yTn8LwC4uHs6dRf2aGe7iOj5pXc-_A';
+
 /**
  * 2026-09-08 3차 종합 버그 점검(항목 2) 회귀 테스트 — `/[lang]/compat/[token]`(궁합 공유 결과
  * 조회)은 트랜잭션 축이라, 이미 pt/vi로 발급된 공유 링크가 계속 열려야 한다. 2026-09-07 커밋이
@@ -26,13 +29,25 @@ describe('/[lang]/compat/[token] 언어 게이트 — 6개 언어(MARKETING_LANG
 
   it.each(marketingLanguages)('generateMetadata(%s)가 404 없이 실제 메타데이터를 반환한다', async (lang) => {
     const { generateMetadata } = await import('./page');
-    const metadata = await generateMetadata({ params: Promise.resolve({ lang, token: 'sample-token' }) });
+    const metadata = await generateMetadata({ params: Promise.resolve({ lang, token: SAMPLE_TOKEN }) });
     expect(metadata.title).toBeTruthy();
   });
 
   it('지원하지 않는 언어 코드는 generateMetadata에서 빈 메타데이터를 반환한다', async () => {
     const { generateMetadata } = await import('./page');
-    const metadata = await generateMetadata({ params: Promise.resolve({ lang: 'xx', token: 'sample-token' }) });
+    const metadata = await generateMetadata({ params: Promise.resolve({ lang: 'xx', token: SAMPLE_TOKEN }) });
     expect(metadata).toEqual({});
+  });
+});
+
+describe('/[lang]/compat/[token] 토큰 모양 검사(2026-10-06 전체 점검 11차 R11-6-1)', () => {
+  it.each(['sample-token', 'a'.repeat(44), `${SAMPLE_TOKEN.slice(0, 42)}=`])('모양이 틀린 토큰(%s)은 백엔드를 부르지 않고 404', async (token) => {
+    const { getCompatInvite } = await import('@/lib/compatApi');
+    vi.mocked(getCompatInvite).mockClear();
+    const { default: CompatPage, generateMetadata } = await import('./page');
+    await expect(CompatPage({ params: Promise.resolve({ lang: 'en', token }) })).rejects.toBeInstanceOf(NotFoundSentinel);
+    const metadata = await generateMetadata({ params: Promise.resolve({ lang: 'en', token }) });
+    expect(metadata.title).toBeUndefined();
+    expect(getCompatInvite).not.toHaveBeenCalled();
   });
 });

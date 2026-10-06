@@ -11,6 +11,7 @@ import { ShareButton } from '@/components/lunar-new-year/ShareButton';
 import { AppDownloadLinks } from '@/components/AppDownloadLinks';
 import { WEB_BASE_URL, NOINDEX_ROBOTS } from '@/lib/seo';
 import { readOwnerToken } from '@/lib/readingOwner';
+import { isValidReadingId } from '@/lib/routeParams';
 
 interface PageProps {
   params: Promise<{ lang: string; id: string }>;
@@ -35,6 +36,8 @@ async function ownerTokenFor(id: string): Promise<string | undefined> {
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { lang: rawLang, id } = await params;
   if (!isMarketingLanguage(rawLang)) return {};
+  // 모양부터 틀린 id는 백엔드를 부르지 않는다(2026-10-06 전체 점검 11차 R11-6-1) — 본문은 404.
+  if (!isValidReadingId(id)) return { robots: NOINDEX_ROBOTS };
   // 일시 오류면 메타데이터만 비운다 — 본문은 페이지가 같은 오류로 다시 시도 화면을 그린다.
   const reading = await getReading(id, await ownerTokenFor(id)).catch(() => null);
   if (!reading) return {};
@@ -58,6 +61,8 @@ export default async function LunarNewYearResultPage({ params }: PageProps) {
   const { lang: rawLang, id } = await params;
   if (!isMarketingLanguage(rawLang)) notFound();
   const language: MarketingLanguage = rawLang;
+  // 모양부터 틀린 id(백엔드 결과 id는 UUID)는 백엔드를 부르기 전에 404(2026-10-06 전체 점검 11차 R11-6-1).
+  if (!isValidReadingId(id)) notFound();
 
   // 일시 오류(429·5xx)는 던져 [lang]/error.tsx의 "다시 시도"로 — 404는 정말 없는 결과일 때만.
   const ownerToken = await ownerTokenFor(id);
@@ -84,7 +89,7 @@ export default async function LunarNewYearResultPage({ params }: PageProps) {
         <p className="mt-3 text-stone-700">{reading.content.overview}</p>
         <p className="mt-3 text-stone-700">{reading.content.highlight}</p>
         <p className="mt-4 text-sm text-stone-500">{reading.content.closing}</p>
-        <p className="mt-4 text-xs text-stone-400">{DISCLAIMER_CONTENT[language].short}</p>
+        <p className="mt-4 text-xs text-stone-500">{DISCLAIMER_CONTENT[language].short}</p>
       </article>
 
       {!isCrisisSubstitute && (

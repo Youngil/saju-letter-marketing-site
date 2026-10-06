@@ -11,6 +11,9 @@ vi.mock('next/navigation', () => ({
   },
 }));
 
+/** 백엔드 결과 id는 UUID — 모양이 틀리면 페이지가 백엔드를 부르기 전에 404를 낸다(2026-10-06 전체 점검 11차). */
+const SAMPLE_READING_ID = '0d6f3a52-7c1e-4b8a-9e2d-5f4c3b2a1e0d';
+
 // 요청 쿠키 — 테스트마다 소유자 쿠키를 넣었다 뺐다 한다.
 const cookieJar = new Map<string, string>();
 vi.mock('next/headers', () => ({
@@ -22,7 +25,7 @@ vi.mock('next/headers', () => ({
 // getReading은 saju-letter-backend를 실제로 호출한다 — 네트워크 호출 없이 항상 같은 결과를 돌려주도록 목킹한다
 // (compat/[token]/page.test.ts와 같은 패턴). 기본은 공유 링크로 연 사람이 받는 공개 응답.
 const PUBLIC_READING = {
-  id: 'sample-reading-id',
+  id: SAMPLE_READING_ID,
   name: 'Test',
   language: 'en',
   dayStem: '甲',
@@ -66,7 +69,7 @@ describe('/[lang]/lunar-new-year/r/[id] 언어 게이트 — 6개 언어(MARKETI
 
   it.each(marketingLanguages)('generateMetadata(%s)가 404 없이 실제 메타데이터를 반환한다', async (lang) => {
     const { generateMetadata } = await import('./page');
-    const metadata = await generateMetadata({ params: Promise.resolve({ lang, id: 'sample-reading-id' }) });
+    const metadata = await generateMetadata({ params: Promise.resolve({ lang, id: SAMPLE_READING_ID }) });
     expect(metadata.title).toBeTruthy();
   });
 
@@ -74,7 +77,7 @@ describe('/[lang]/lunar-new-year/r/[id] 언어 게이트 — 6개 언어(MARKETI
     const pageModule = await import('./page');
     const LunarNewYearResultPage = pageModule.default;
     await expect(
-      LunarNewYearResultPage({ params: Promise.resolve({ lang, id: 'sample-reading-id' }) }),
+      LunarNewYearResultPage({ params: Promise.resolve({ lang, id: SAMPLE_READING_ID }) }),
     ).resolves.toBeTruthy();
   });
 
@@ -82,8 +85,18 @@ describe('/[lang]/lunar-new-year/r/[id] 언어 게이트 — 6개 언어(MARKETI
     const pageModule = await import('./page');
     const LunarNewYearResultPage = pageModule.default;
     await expect(
-      LunarNewYearResultPage({ params: Promise.resolve({ lang: 'xx', id: 'sample-reading-id' }) }),
+      LunarNewYearResultPage({ params: Promise.resolve({ lang: 'xx', id: SAMPLE_READING_ID }) }),
     ).rejects.toBeInstanceOf(NotFoundSentinel);
+  });
+
+  // 2026-10-06 전체 점검 11차 R11-6-1 — 모양부터 틀린 id는 백엔드를 부르지 않고 404.
+  it.each(['sample-reading-id', '../admin', 'a'.repeat(300)])('UUID가 아닌 id(%s)는 백엔드를 부르지 않고 404', async (id) => {
+    const { getReading } = await import('@/lib/lunarNewYearApi');
+    const { default: LunarNewYearResultPage, generateMetadata } = await import('./page');
+    await expect(LunarNewYearResultPage({ params: Promise.resolve({ lang: 'en', id }) })).rejects.toBeInstanceOf(NotFoundSentinel);
+    const metadata = await generateMetadata({ params: Promise.resolve({ lang: 'en', id }) });
+    expect(metadata.title).toBeUndefined();
+    expect(getReading).not.toHaveBeenCalled();
   });
 });
 

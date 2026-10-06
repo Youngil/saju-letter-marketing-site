@@ -35,7 +35,7 @@ export function RitualFlowDiagram({ steps, caption }: { steps: string[]; caption
           );
         })}
       </div>
-      <p className="mt-4 text-center text-xs text-foreground/50">{caption}</p>
+      <p className="mt-4 text-center text-xs text-foreground/65">{caption}</p>
     </div>
   );
 }
@@ -60,7 +60,7 @@ export function FixedVsChangingDiagram({
         </span>
         <div>
           <div className="text-sm font-semibold text-foreground/80">{fixedLabel}</div>
-          <p className="mt-1 text-xs text-foreground/50">{fixedCaption}</p>
+          <p className="mt-1 text-xs text-foreground/65">{fixedCaption}</p>
         </div>
       </div>
       <div className="flex flex-col items-center gap-3 rounded-2xl border border-accent-warm/25 bg-accent-warm-soft/40 p-6 text-center">
@@ -105,7 +105,7 @@ function TimelineMarker({ label, date, icon, tint }: { label: string; date: stri
       <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${tint}`}>{icon}</span>
       <div>
         <div className="text-xs font-semibold text-foreground/80">{label}</div>
-        <div className="text-[11px] text-foreground/50">{date}</div>
+        <div className="text-[11px] text-foreground/65">{date}</div>
       </div>
     </div>
   );

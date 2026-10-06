@@ -52,7 +52,7 @@ export default async function PrivacyPolicyPage({ params }: { params: Promise<{ 
     <div className="mx-auto max-w-3xl px-4 py-12">
       <article className="card-surface rounded-2xl border border-foreground/10 p-6 sm:p-10">
         <h1 className="mb-1 text-2xl font-bold sm:text-3xl">{policy.title}</h1>
-        <p className="mb-8 text-sm text-foreground/50">{policy.effectiveDate}</p>
+        <p className="mb-8 text-sm text-foreground/65">{policy.effectiveDate}</p>
         <p className="mb-10 text-foreground/80">{policy.intro}</p>
 
         {policy.sections.map((section, index) => (
