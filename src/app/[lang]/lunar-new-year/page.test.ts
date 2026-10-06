@@ -1,4 +1,5 @@
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { isValidElement, type ReactElement, type ReactNode } from 'react';
 
 class NotFoundSentinel extends Error {}
 class RedirectSentinel extends Error {}
@@ -15,7 +16,7 @@ vi.mock('@/lib/serviceLanguagesApi', () => ({
   fetchActiveServiceLanguages: vi.fn(async () => ({ active: ['ko', 'en', 'ja', 'es'], default: 'en' })),
 }));
 vi.mock('@/lib/lunarNewYearApi', () => ({
-  getCampaignWindow: async () => ({ active: true }),
+  getCampaignWindow: vi.fn(async () => ({ active: true })),
 }));
 
 /**
@@ -70,3 +71,47 @@ describe('/[lang]/lunar-new-year 언어 게이트 — 6개 언어(MARKETING_LANG
     expect(params.map((p) => p.lang).sort()).toEqual([...marketingLanguages].sort());
   });
 });
+
+// 2026-10-06 전체 점검 11차 R11-6-3 — 기간 조회 실패를 "폼 열림"으로 굳히지 않는다.
+describe('/[lang]/lunar-new-year 캠페인 기간 조회 실패', () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
+  it('실행 중 조회가 실패하면 던진다(ISR이 직전 페이지를 유지하게)', async () => {
+    const { getCampaignWindow } = await import('@/lib/lunarNewYearApi');
+    vi.mocked(getCampaignWindow).mockRejectedValueOnce(new Error('down'));
+    const { default: LunarNewYearPage } = await import('./page');
+    await expect(LunarNewYearPage({ params: Promise.resolve({ lang: 'en' }) })).rejects.toThrow('down');
+  });
+
+  it('빌드 중 조회가 실패하면 기간을 모르는 상태(null)로 그린다 — 폼 대신 중립 안내', async () => {
+    vi.stubEnv('NEXT_PHASE', 'phase-production-build');
+    const { getCampaignWindow } = await import('@/lib/lunarNewYearApi');
+    vi.mocked(getCampaignWindow).mockRejectedValueOnce(new Error('down'));
+    const { default: LunarNewYearPage } = await import('./page');
+    const tree = (await LunarNewYearPage({ params: Promise.resolve({ lang: 'en' }) })) as ReactElement<{ windowStatus: unknown }>;
+    expect(isValidElement(tree)).toBe(true);
+    expect(tree.props.windowStatus).toBeNull();
+  });
+
+  it('기간을 모르면(null) 랜딩이 폼을 그리지 않고, 기간 안이면 폼을 그린다', async () => {
+    const { LunarNewYearHome } = await import('@/components/lunar-new-year/LunarNewYearHome');
+    const { ReadingForm } = await import('@/components/lunar-new-year/ReadingForm');
+    const { getDictionary } = await import('@/dictionaries');
+    const dict = await getDictionary('en');
+    const render = (windowStatus: { active: boolean } | null) =>
+      LunarNewYearHome({ language: 'en', dict: dict.lunarNewYear!, appLinksDict: dict.appLinks, windowStatus });
+    expect(findElements(render(null), ReadingForm)).toHaveLength(0);
+    expect(findElements(render({ active: true }), ReadingForm)).toHaveLength(1);
+  });
+});
+
+/** 서버 컴포넌트가 돌려준 JSX 트리(렌더 전)에서 특정 컴포넌트 엘리먼트를 찾는다. */
+function findElements(node: ReactNode, type: unknown): ReactElement[] {
+  if (Array.isArray(node)) return node.flatMap((child) => findElements(child, type));
+  if (!isValidElement(node)) return [];
+  const own = node.type === type ? [node] : [];
+  const children = (node.props as { children?: ReactNode }).children;
+  return [...own, ...findElements(children, type)];
+}
