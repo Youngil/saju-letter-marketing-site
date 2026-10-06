@@ -164,7 +164,7 @@ function CompletedResult({
               <h1 className="font-display text-2xl leading-snug text-balance">{reading.title}</h1>
               <p className="whitespace-pre-line leading-relaxed text-foreground/85">{reading.body}</p>
               <p className="self-end font-display text-lg">{content.signature}</p>
-              <p className="text-xs text-foreground/50">{content.disclaimerShort}</p>
+              <p className="text-xs text-foreground/65">{content.disclaimerShort}</p>
             </>
           ) : (
             <p className="text-foreground/60">{content.loading}</p>

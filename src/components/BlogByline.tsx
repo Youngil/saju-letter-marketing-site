@@ -20,7 +20,7 @@ export function BlogByline({
 }) {
   const px = size === 'md' ? 24 : 20;
   return (
-    <div className="flex flex-wrap items-center gap-2 text-sm text-foreground/50">
+    <div className="flex flex-wrap items-center gap-2 text-sm text-foreground/65">
       <Image
         src="/dain-portrait.png"
         alt=""

@@ -20,7 +20,7 @@ export function CompareInfographic({
 }) {
   return (
     <figure className="letter-surface rounded-sm px-5 py-6 sm:px-8 sm:py-8">
-      <figcaption className="mb-6 text-center text-xs font-medium tracking-wide text-foreground/45">
+      <figcaption className="mb-6 text-center text-xs font-medium tracking-wide text-foreground/65">
         {caption}
       </figcaption>
 

@@ -106,7 +106,7 @@ export default async function HomePage({ params }: { params: Promise<{ lang: str
             </a>
           ) : null}
           <div className="flex flex-col items-center gap-2">
-            <span className="text-xs font-medium uppercase tracking-wide text-foreground/40">{dict.appLinks.sectionLabel}</span>
+            <span className="text-xs font-medium uppercase tracking-wide text-foreground/65">{dict.appLinks.sectionLabel}</span>
             <AppDownloadLinks dict={dict.appLinks} language={lang} context="home_hero" />
           </div>
           {showContentLinks ? (
@@ -145,7 +145,7 @@ export default async function HomePage({ params }: { params: Promise<{ lang: str
 
       {latestPost ? (
         <section className="mx-auto w-full max-w-md">
-          <p className="mb-3 text-center text-xs font-medium tracking-wide text-foreground/45 uppercase">
+          <p className="mb-3 text-center text-xs font-medium tracking-wide text-foreground/65 uppercase">
             {dict.blog.latestNoteLabel}
           </p>
           <article className="letter-surface rounded-sm px-5 py-6 text-left sm:px-6">

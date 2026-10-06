@@ -89,7 +89,7 @@ export default async function LunarNewYearResultPage({ params }: PageProps) {
         <p className="mt-3 text-stone-700">{reading.content.overview}</p>
         <p className="mt-3 text-stone-700">{reading.content.highlight}</p>
         <p className="mt-4 text-sm text-stone-500">{reading.content.closing}</p>
-        <p className="mt-4 text-xs text-stone-400">{DISCLAIMER_CONTENT[language].short}</p>
+        <p className="mt-4 text-xs text-stone-500">{DISCLAIMER_CONTENT[language].short}</p>
       </article>
 
       {!isCrisisSubstitute && (

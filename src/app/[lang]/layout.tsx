@@ -169,7 +169,7 @@ export default async function LangLayout({
         </header>
         <main className="flex-1">{children}</main>
         <footer className="border-t border-foreground/10">
-          <div className="mx-auto flex max-w-5xl flex-col gap-1 px-4 py-10 text-sm text-foreground/50">
+          <div className="mx-auto flex max-w-5xl flex-col gap-1 px-4 py-10 text-sm text-foreground/65">
             <span className="font-display font-medium text-foreground/70">{dict.brand}</span>
             <p>{dict.footer.privacyNote}</p>
             {/* privacy/disclaimer 둘 다 트랜잭션/법적 고지 축이라 6개 언어(MARKETING_LANGUAGES)

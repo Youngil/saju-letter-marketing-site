@@ -143,6 +143,9 @@ function LanguageSwitcherInner({ current, activeLanguages }: { current: Marketin
             <li key={lang}>
               <Link
                 href={pathForLanguage(lang)}
+                // 언어 이름은 그 언어로 읽혀야 한다 — 페이지 lang(예: ko)으로 "日本語"를 읽지 않게(2026-10-06 전체 점검 11차 R11-6-8).
+                lang={lang}
+                hrefLang={lang}
                 onClick={() => setOpen(false)}
                 className={`block px-3 py-1.5 text-sm hover:bg-foreground/5 ${lang === current ? 'font-semibold' : ''}`}
               >

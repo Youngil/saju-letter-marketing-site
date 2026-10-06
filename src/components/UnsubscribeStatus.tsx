@@ -47,7 +47,11 @@ export function UnsubscribeStatus({ dict, kind }: { dict: UnsubscribeDict; kind:
   return (
     <div className="mx-auto flex w-full max-w-md flex-col items-center gap-4 px-4 py-16 text-center">
       <h1 className="text-xl font-semibold">{dict.title}</h1>
-      <p className="text-foreground/70">{message}</p>
+      {/* 확인 버튼을 누르면 이 문구가 처리 중 → 결과로 바뀐다 — 같은 요소가 남아 있어 화면 낭독기가 바뀐 결과를 읽는다
+       * (2026-10-06 전체 점검 11차 R11-6-8). */}
+      <p role="status" aria-live="polite" className="text-foreground/70">
+        {message}
+      </p>
       {/* <form>이 아니라 그냥 버튼 — 주소의 ?token=이 GA4 양식 이벤트(form_destination)로 새지 않게. */}
       {(status === 'confirm' || status === 'error') && (
         <button
