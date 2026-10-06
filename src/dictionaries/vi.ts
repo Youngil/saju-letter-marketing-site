@@ -107,6 +107,7 @@ export const dictionary: MarketingDictionary = {
       consent: 'Vui lòng đánh dấu vào ô để nhận email.',
       generic: 'Đã có lỗi xảy ra — vui lòng thử lại.',
       already: 'Email này đã được đăng ký rồi.',
+      rateLimited: 'Bạn đã thử vài lần rồi — vui lòng đợi một chút trước khi thử lại.',
     },
   },
   unsubscribe: {
