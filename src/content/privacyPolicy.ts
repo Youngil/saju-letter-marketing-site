@@ -189,6 +189,12 @@ import type { MarketingLanguage } from '@/lib/languages';
  * 쿠키라 동의 배너 대상은 아니다. 같은 날 전체 점검 8차로 — 동의 배너를 다시 여는 푸터 "쿠키 설정"을 만들면서 6개 언어 §1 웹
  * 분석 괄호에 "분석 쿠키는 동의한 경우에만, 각 페이지 맨 아래 '쿠키 설정'에서 언제든 변경·철회"를 덧붙였다(동의해도 광고
  * 저장소는 열지 않으므로 광고 관련 문구는 없다 — 광고를 붙이면 이 문단과 배너 문구를 함께 고칠 것). AI 초안 — 변호사 검토 대상.
+ *
+ * ⚠️⚠️ 2026-10-06 개정(운영 보조 에이전트) — 마케팅 서버의 `saju-letter-ops-agent`가 답장을 기다리는 고객 문의의 제목·본문·
+ * 대화를 Anthropic(Claude API)으로 보내 답장 초안을 만든다(`docs/ops-agent-design.md`). 기존 "AI 콘텐츠 생성 제공업체"
+ * 항목은 편지 생성용으로 설정에 따라 바뀌는 업체라 별개로, 6개 언어 §4에 Anthropic 항목을 따로 추가했다. 관리자 API가
+ * agent 역할 응답에서 유저 이메일·이름·관리자 이메일을 빼므로 "이메일 주소와 이름은 보내지 않는다"고 적었다 — 그 처리를
+ * 바꾸면 이 문장도 고칠 것. 답장 발송은 항상 사람이 한다. effectiveDate/§10 날짜는 이미 같은 날짜라 그대로. AI 초안 — 변호사 검토 대상.
  */
 
 export const PRIVACY_CONTACT_EMAIL = 'contact@mikomaru.com';
@@ -256,6 +262,7 @@ export const PRIVACY_POLICY_CONTENT: Record<MarketingLanguage, PrivacyPolicyCont
           '<li><strong>Firebase / Google Analytics(Google)</strong>: 회원 인증, 푸시 알림 발송, 앱 및 이 마케팅 사이트의 이용 현황 분석(앱은 Google Analytics for Firebase, 프로덕션 빌드에서만 수집 / 마케팅 사이트는 같은 GA4 프로퍼티의 별도 웹 스트림)</li>' +
           '<li><strong>RevenueCat</strong>: 구독 상태 확인 및 관리(실제 결제는 Google Play 빌링을 통해 처리되며, 카드 등 결제 수단 정보는 회사가 직접 보관하지 않습니다)</li>' +
           '<li><strong>AI 콘텐츠 생성 제공업체</strong>(현재 OpenAI, 설정에 따라 Anthropic 또는 Google로 달라질 수 있음): 편지 및 오늘의 이야기 답장의 문장 생성과, 마케팅 사이트(saju-letter.com)의 홈 미니 데모·신년운세 리딩 생성. 계산된 사주 정보, "오늘의 이야기" 기능에 직접 작성한 텍스트, 신년운세 제출 시 입력한 이름·자유 텍스트가 전달될 수 있습니다.</li>' +
+          '<li><strong>Anthropic</strong>: 고객 문의 답장 초안 작성 보조. 답장을 기다리는 문의의 제목·본문과 지금까지 주고받은 대화가 전달될 수 있으며(이메일 주소와 이름은 보내지 않습니다), 답장은 항상 운영자가 확인한 뒤 직접 보냅니다. 생년월일시와 "오늘의 이야기" 내용은 전달되지 않습니다.</li>' +
           '<li><strong>Cloudflare Turnstile</strong>: 마케팅 사이트 공개 제출 폼의 봇·스팸 방지(위젯이 구동되는 동안 방문자의 브라우저 정보가 Cloudflare로 전달됩니다)</li>' +
           '<li><strong>Resend</strong>: 마케팅 이메일 및 신년운세 결과 이메일 발송</li>' +
           '<li><strong>Sentry</strong>: 오류·크래시 모니터링</li>' +
@@ -359,6 +366,7 @@ export const PRIVACY_POLICY_CONTENT: Record<MarketingLanguage, PrivacyPolicyCont
           '<li><strong>Firebase / Google Analytics (Google)</strong>: authentication, push notifications, and usage analytics for both the app (Google Analytics for Firebase, production builds only) and this marketing site (a separate web stream in the same GA4 property)</li>' +
           '<li><strong>RevenueCat</strong>: subscription status management (actual payment is processed by Google Play Billing; we do not store your card or payment details ourselves)</li>' +
           '<li><strong>Our AI content provider</strong> (currently OpenAI; may be Anthropic or Google depending on configuration): generates the wording of your letters and "Today\'s Story" replies, as well as the home mini demo and Lunar New Year readings on our marketing site (saju-letter.com). This may include your calculated saju values, the text you write in the "Today\'s Story" feature, and the name and free text you submit for a Lunar New Year reading.</li>' +
+          '<li><strong>Anthropic</strong>: helps us draft replies to your support inquiries. The subject, message and conversation of an inquiry awaiting a reply may be shared (your email address and name are not), and a staff member always reviews and sends each reply personally. Your birth date and time and your "Today\'s Story" entries are never shared.</li>' +
           '<li><strong>Cloudflare Turnstile</strong>: bot and spam prevention on our marketing site\'s public submission forms (your browser information is sent to Cloudflare while the widget is active)</li>' +
           '<li><strong>Resend</strong>: sending marketing emails and Lunar New Year result emails</li>' +
           '<li><strong>Sentry</strong>: crash and error monitoring</li>' +
@@ -469,6 +477,7 @@ export const PRIVACY_POLICY_CONTENT: Record<MarketingLanguage, PrivacyPolicyCont
           '<li><strong>Firebase / Google Analytics(Google)</strong>: 会員認証、プッシュ通知の送信、アプリおよび本マーケティングサイトの利用状況分析(アプリはGoogle Analytics for Firebase、プロダクションビルドのみ収集 / マーケティングサイトは同じGA4プロパティの別のウェブストリーム)</li>' +
           '<li><strong>RevenueCat</strong>: サブスクリプション状況の管理(実際の決済はGoogle Playの請求システムを通じて行われ、カード情報などの決済手段情報は当社では保管しません)</li>' +
           '<li><strong>AIコンテンツ生成プロバイダー</strong>(現在はOpenAI。設定によりAnthropicまたはGoogleの場合もあります): レターおよび「今日の物語」の返信文の生成、およびマーケティングサイト(saju-letter.com)のホームミニデモ・旧正月占いリーディングの生成。計算済みの四柱情報、「今日の物語」機能にご自身で入力されたテキスト、旧正月占い送信時に入力されたお名前・自由記述テキストが送信される場合があります。</li>' +
+          '<li><strong>Anthropic</strong>: お問い合わせへの返信文の下書き作成の補助。返信待ちのお問い合わせの件名・本文とこれまでのやり取りが送信される場合があります(メールアドレスとお名前は送信しません)。返信は必ず運営担当者が確認したうえで送信します。生年月日時と「今日の物語」の内容は送信されません。</li>' +
           '<li><strong>Cloudflare Turnstile</strong>: マーケティングサイトの公開フォームにおけるボット・スパム対策(ウィジェット動作中、訪問者のブラウザ情報がCloudflareに送信されます)</li>' +
           '<li><strong>Resend</strong>: マーケティングメールおよび旧正月占い結果メールの送信</li>' +
           '<li><strong>Sentry</strong>: エラー・クラッシュのモニタリング</li>' +
@@ -575,6 +584,7 @@ export const PRIVACY_POLICY_CONTENT: Record<MarketingLanguage, PrivacyPolicyCont
           '<li><strong>Firebase / Google Analytics (Google)</strong>: autenticación, notificaciones push y análisis de uso tanto de la app (Google Analytics for Firebase, solo en compilaciones de producción) como de este sitio de marketing (un flujo web independiente en la misma propiedad de GA4)</li>' +
           '<li><strong>RevenueCat</strong>: gestión del estado de la suscripción (el pago real se procesa a través de Google Play Billing; nosotros no almacenamos tu tarjeta ni los datos de pago)</li>' +
           '<li><strong>Nuestro proveedor de contenido de IA</strong> (actualmente OpenAI; puede ser Anthropic o Google según la configuración): genera el texto de tus cartas y las respuestas de "Historia de Hoy", así como el mini demo de inicio y las lecturas de Año Nuevo Lunar en nuestro sitio de marketing (saju-letter.com). Esto puede incluir tus valores de saju calculados, el texto que escribes en la función "Historia de Hoy", y el nombre y el texto libre que envías para una lectura de Año Nuevo Lunar.</li>' +
+          '<li><strong>Anthropic</strong>: nos ayuda a redactar borradores de respuesta a tus consultas de soporte. Se pueden compartir el asunto, el mensaje y la conversación de una consulta pendiente de respuesta (no se comparten tu correo electrónico ni tu nombre), y una persona del equipo siempre revisa y envía cada respuesta. Tu fecha y hora de nacimiento y tus entradas de "Historia de Hoy" nunca se comparten.</li>' +
           '<li><strong>Cloudflare Turnstile</strong>: prevención de bots y spam en los formularios públicos de nuestro sitio de marketing (tu información del navegador se envía a Cloudflare mientras el widget está activo)</li>' +
           '<li><strong>Resend</strong>: envío de correos de marketing y de resultados de Año Nuevo Lunar</li>' +
           '<li><strong>Sentry</strong>: monitoreo de errores y fallos</li>' +
@@ -688,6 +698,7 @@ export const PRIVACY_POLICY_CONTENT: Record<MarketingLanguage, PrivacyPolicyCont
           '<li><strong>Firebase / Google Analytics (Google)</strong>: autenticação, notificações push e análise de uso tanto do app (Google Analytics for Firebase, apenas em builds de produção) quanto deste site de marketing (um fluxo web separado na mesma propriedade do GA4)</li>' +
           '<li><strong>RevenueCat</strong>: gerenciamento do status da assinatura (o pagamento real é processado pelo Google Play Billing; não armazenamos seu cartão nem dados de pagamento)</li>' +
           '<li><strong>Nosso provedor de conteúdo de IA</strong> (atualmente OpenAI; pode ser Anthropic ou Google dependendo da configuração): gera o texto das suas cartas e das respostas de "História de Hoje", bem como o mini demo da home e as leituras de Ano Novo Lunar em nosso site de marketing (saju-letter.com). Isso pode incluir seus valores de saju calculados, o texto que você escreve no recurso "História de Hoje", e o nome e o texto livre que você envia para uma leitura de Ano Novo Lunar.</li>' +
+          '<li><strong>Anthropic</strong>: nos ajuda a redigir rascunhos de resposta às suas solicitações de suporte. O assunto, a mensagem e a conversa de uma solicitação aguardando resposta podem ser compartilhados (seu e-mail e nome não são), e uma pessoa da equipe sempre revisa e envia cada resposta. Sua data e hora de nascimento e suas entradas de "História de Hoje" nunca são compartilhadas.</li>' +
           '<li><strong>Cloudflare Turnstile</strong>: prevenção de bots e spam nos formulários públicos do nosso site de marketing (suas informações do navegador são enviadas ao Cloudflare enquanto o widget está ativo)</li>' +
           '<li><strong>Resend</strong>: envio de e-mails de marketing e de resultados de Ano Novo Lunar</li>' +
           '<li><strong>Sentry</strong>: monitoramento de erros e falhas</li>' +
@@ -801,6 +812,7 @@ export const PRIVACY_POLICY_CONTENT: Record<MarketingLanguage, PrivacyPolicyCont
           '<li><strong>Firebase / Google Analytics (Google)</strong>: xác thực, thông báo đẩy và phân tích sử dụng cho cả ứng dụng (Google Analytics for Firebase, chỉ thu thập trên bản dựng production) và trang tiếp thị này (một luồng web riêng trong cùng thuộc tính GA4)</li>' +
           '<li><strong>RevenueCat</strong>: quản lý trạng thái đăng ký (thanh toán thực tế được xử lý qua Google Play Billing; chúng tôi không tự lưu trữ thẻ hay thông tin thanh toán của bạn)</li>' +
           '<li><strong>Nhà cung cấp nội dung AI của chúng tôi</strong> (hiện tại là OpenAI; có thể là Anthropic hoặc Google tùy theo cấu hình): tạo nội dung câu chữ cho thư của bạn và các phản hồi trong tính năng "Câu Chuyện Hôm Nay", cũng như bản demo trang chủ và các bài đọc Tết Nguyên Đán trên trang web tiếp thị của chúng tôi (saju-letter.com). Việc này có thể bao gồm các giá trị saju đã tính toán của bạn, văn bản bạn viết trong tính năng "Câu Chuyện Hôm Nay", và tên cùng văn bản tự do bạn gửi khi xem bài đọc Tết Nguyên Đán.</li>' +
+          '<li><strong>Anthropic</strong>: hỗ trợ soạn bản nháp trả lời các yêu cầu hỗ trợ của bạn. Tiêu đề, nội dung và cuộc trao đổi của một yêu cầu đang chờ trả lời có thể được chia sẻ (địa chỉ email và tên của bạn thì không), và nhân viên của chúng tôi luôn xem lại rồi tự gửi từng câu trả lời. Ngày giờ sinh và các mục "Câu Chuyện Hôm Nay" của bạn không bao giờ được chia sẻ.</li>' +
           '<li><strong>Cloudflare Turnstile</strong>: ngăn chặn bot và spam trên các biểu mẫu công khai của trang web tiếp thị (thông tin trình duyệt của bạn được gửi đến Cloudflare trong khi tiện ích đang hoạt động)</li>' +
           '<li><strong>Resend</strong>: gửi email tiếp thị và email kết quả Tết Nguyên Đán</li>' +
           '<li><strong>Sentry</strong>: giám sát lỗi và sự cố</li>' +
