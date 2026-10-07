@@ -38,6 +38,8 @@ declare module 'lunar-javascript' {
   }
 
   export const Solar: {
+    /** 테스트의 중국 음력 대조용(13차). */
+    fromJulianDay(julianDay: number): Solar;
     fromYmdHms(year: number, month: number, day: number, hour: number, minute: number, second: number): Solar;
   };
 
@@ -45,9 +47,17 @@ declare module 'lunar-javascript' {
     fromYmdHms(year: number, month: number, day: number, hour: number, minute: number, second: number): Lunar;
   };
 
+  /** 테스트의 중국 음력 대조용(13차). */
+  export interface LunarMonth {
+    getDayCount(): number;
+    getFirstJulianDay(): number;
+  }
+
   export interface LunarYear {
     /** 그 해에 윤달이 없으면 0을 반환 */
     getLeapMonth(): number;
+    /** month에 음수를 넘기면 윤달 조회. 존재하지 않는 달이면 null */
+    getMonth(month: number): LunarMonth | null;
   }
 
   export const LunarYear: {
