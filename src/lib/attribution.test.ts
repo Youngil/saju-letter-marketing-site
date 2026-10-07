@@ -33,6 +33,11 @@ describe('deriveTouch', () => {
     expect(t).toEqual({ source: 'tiktok', medium: 'social', campaign: 'tiktok_en', storedAt: NOW });
   });
 
+  it('utm_content(게시물 추적 코드)가 있으면 content로 기억한다', () => {
+    const t = deriveTouch('https://www.saju-letter.com/en?utm_source=youtube&utm_medium=social&utm_campaign=organic&utm_content=p7k2m9qxa', '', NOW);
+    expect(t).toEqual({ source: 'youtube', medium: 'social', campaign: 'organic', content: 'p7k2m9qxa', storedAt: NOW });
+  });
+
   it('궁합 공유 페이지로 직접 들어오면 compat_share로 기록한다', () => {
     const t = deriveTouch('https://www.saju-letter.com/ko/compat/abc123', '', NOW);
     expect(t?.source).toBe('compat_share');
@@ -64,6 +69,16 @@ describe('buildPlayStoreUrl', () => {
     expect(r.get('utm_source')).toBe('tiktok');
     expect(r.get('utm_campaign')).toBe('tiktok_en');
     expect(r.get('utm_content')).toBe('home_hero');
+  });
+
+  it('게시물 추적 코드가 있으면 utm_content로 넘기고 배지 위치는 utm_term으로 옮긴다', () => {
+    const touch = { source: 'tiktok', medium: 'social', campaign: 'organic', content: 'p7k2m9qxa', storedAt: NOW };
+    const r = referrerParams(buildPlayStoreUrl(PLAY, touch, 'home_hero'));
+    expect(r.get('utm_content')).toBe('p7k2m9qxa');
+    expect(r.get('utm_term')).toBe('home_hero');
+    const noBadge = referrerParams(buildPlayStoreUrl(PLAY, touch));
+    expect(noBadge.get('utm_content')).toBe('p7k2m9qxa');
+    expect(noBadge.has('utm_term')).toBe(false);
   });
 
   it('유입 정보가 없으면 사이트 자체 유입으로 기록한다', () => {
