@@ -12,9 +12,9 @@
   "dependencies": {
     "@mdx-js/loader": "^3",
     "@mdx-js/react": "^3",
-    "@next/mdx": "16.2.12",
+    "@next/mdx": "16.4.0",
     "lunar-javascript": "^1.7.7",
-    "next": "16.2.12",
+    "next": "16.4.0",
     "next-mdx-remote": "^6.0.0",
     "react": "19.2.4",
     "react-dom": "19.2.4"
@@ -26,7 +26,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
-    "eslint-config-next": "16.2.12",
+    "eslint-config-next": "16.4.0",
     "tailwindcss": "^4",
     "typescript": "^5",
     "vitest": "^4.1.10"
