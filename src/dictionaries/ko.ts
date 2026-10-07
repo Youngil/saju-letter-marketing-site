@@ -101,7 +101,7 @@ export const dictionary: MarketingDictionary = {
     consentLabel: '이 소개 편지 이메일 수신에 동의해요 (언제든 수신거부 가능)',
     submitButton: '소개 편지 받기',
     submitting: '등록하는 중…',
-    success: '완료됐어요! 다인의 소개 편지를 메일함에서 확인해보세요.',
+    success: '완료됐어요! 다인의 소개 편지를 메일로 보내 드릴게요. 전에 등록하셨다면 따로 하실 건 없어요.',
     limitedSlots: '선착순 {capacity}명',
     remainingSlots: '선착순 {capacity}명 중 {issued}명 신청 완료, {remaining}명 남았어요',
     soldOut: '선착순 쿠폰이 모두 소진됐어요 — 소개 노트 등록은 계속 받고 있어요!',

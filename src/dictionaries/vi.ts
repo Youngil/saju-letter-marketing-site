@@ -98,7 +98,7 @@ export const dictionary: MarketingDictionary = {
     consentLabel: 'Tôi đồng ý nhận email chào mừng này (có thể hủy bất cứ lúc nào)',
     submitButton: 'Gửi ghi chú cho tôi',
     submitting: 'Đang đăng ký…',
-    success: 'Xong rồi! Hãy kiểm tra hộp thư để xem ghi chú của Dain.',
+    success: 'Xong rồi! Ghi chú chào mừng của Dain đang được gửi đến bạn. Nếu bạn đã đăng ký trước đó, bạn không cần làm gì thêm.',
     limitedSlots: 'Chỉ dành cho {capacity} người đầu tiên',
     remainingSlots: 'Đã có {issued}/{capacity} người đăng ký — còn {remaining} suất',
     soldOut: 'Ưu đãi mã dùng thử đã hết suất — bạn vẫn có thể đăng ký nhận ghi chú!',

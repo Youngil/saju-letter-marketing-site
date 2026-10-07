@@ -96,7 +96,7 @@ export const dictionary: MarketingDictionary = {
     consentLabel: 'Acepto recibir este correo de bienvenida (puedes darte de baja cuando quieras)',
     submitButton: 'Enviarme la nota',
     submitting: 'Registrando…',
-    success: '¡Listo! Revisa tu bandeja de entrada para la nota de Dain.',
+    success: '¡Listo! La nota de bienvenida de Dain va en camino. Si ya te habías registrado antes, no tienes que hacer nada más.',
     limitedSlots: 'Solo para las primeras {capacity} personas',
     remainingSlots: '{issued} de {capacity} cupos reclamados — quedan {remaining}',
     soldOut: 'Esta oferta de cupón ya se agotó — ¡pero puedes registrarte igual para las notas!',
