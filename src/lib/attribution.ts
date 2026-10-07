@@ -20,6 +20,11 @@ export interface AttributionTouch {
   source: string;
   medium: string;
   campaign: string;
+  /**
+   * 들고 온 `utm_content`(2026-10-07 콘텐츠 게시 파이프라인) — 게시물마다 다른 추적 코드(`p`+8자, 관리자 패널 "게시 준비"가 만든다)라
+   * 설치까지 이어 붙이면 주간 보고서가 게시물별 설치를 센다. 없으면 생략(그 전 저장 값과 호환).
+   */
+  content?: string;
   storedAt: number;
 }
 
@@ -64,10 +69,12 @@ export function deriveTouch(href: string, referrer: string, now: number): Attrib
   }
   const source = sanitizeTag(url.searchParams.get('utm_source'));
   if (source) {
+    const content = sanitizeTag(url.searchParams.get('utm_content'));
     return {
       source,
       medium: sanitizeTag(url.searchParams.get('utm_medium')) || 'unknown',
       campaign: sanitizeTag(url.searchParams.get('utm_campaign')) || 'none',
+      ...(content ? { content } : {}),
       storedAt: now,
     };
   }
@@ -160,6 +167,8 @@ export function persistAttributionTouch(now: number = Date.now()): void {
 /**
  * Play 스토어 링크에 `referrer`(Install Referrer)를 붙인다. 유입 정보가 없으면 사이트 자체
  * 유입(`marketing_site / website / direct`)으로 기록해, 적어도 "사이트를 거쳐 설치"는 구분되게 한다.
+ * 유입에 `utm_content`(게시물 추적 코드)가 있으면 그것을 `utm_content`로 넘기고 어느 화면의 배지였는지는 `utm_term`으로
+ * 옮긴다(2026-10-07) — 게시물별 설치가 배지 위치보다 쓸모 있다. 없으면 예전처럼 배지 위치가 `utm_content`.
  */
 export function buildPlayStoreUrl(base: string, touch: AttributionTouch | null, context?: string): string {
   let url: URL;
@@ -173,8 +182,14 @@ export function buildPlayStoreUrl(base: string, touch: AttributionTouch | null, 
     utm_medium: touch?.medium ?? 'website',
     utm_campaign: touch?.campaign ?? 'direct',
   });
-  const content = sanitizeTag(context);
-  if (content) inner.set('utm_content', content);
+  const badge = sanitizeTag(context);
+  const postCode = sanitizeTag(touch?.content);
+  if (postCode) {
+    inner.set('utm_content', postCode);
+    if (badge) inner.set('utm_term', badge);
+  } else if (badge) {
+    inner.set('utm_content', badge);
+  }
   url.searchParams.set('referrer', inner.toString());
   return url.toString();
 }
