@@ -91,7 +91,9 @@ export function ReadingForm({
     setIsSubmitting(true);
     try {
       // 사주 계산 라이브러리(lunar-javascript, 수백 KB)는 제출할 때만 받는다 — 랜딩 첫 화면 JS에서 뺐다(DemoForm과 같은 방식).
-      const { calculateSaju } = await import('@/lib/saju');
+      const { assumedBirthTimeZone, calculateSaju } = await import('@/lib/saju');
+      // 출생 타임존은 묻지 않는다 — ko는 Asia/Seoul, 그 외는 브라우저 타임존으로 가정(13차 F2). 년주·월주는 출생 순간의
+      // 베이징 시각(절기 표 기준), 일주·시주는 서머타임을 뺀 현지 표준시로 계산한다.
       const chart = calculateSaju({
         calendarType: 'solar',
         year: yearNum,
@@ -99,6 +101,7 @@ export function ReadingForm({
         day: dayNum,
         hour: birthTime.hour,
         minute: birthTime.minute,
+        timeZone: assumedBirthTimeZone(language),
       });
 
       const result = await createReading({

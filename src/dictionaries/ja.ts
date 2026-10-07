@@ -96,7 +96,7 @@ export const dictionary: MarketingDictionary = {
     consentLabel: 'この紹介ノートメールの受信に同意します(いつでも配信停止できます)',
     submitButton: '紹介ノートを受け取る',
     submitting: '登録しています…',
-    success: '登録が完了しました。ダインからの紹介ノートをメールボックスでご確認ください。',
+    success: '登録を受け付けました。ダインからの紹介ノートをメールでお届けします。以前に登録済みの方は、このままで大丈夫です。',
     limitedSlots: '先着{capacity}名',
     remainingSlots: '先着{capacity}名中{issued}名が申込み済み — 残り{remaining}名',
     soldOut: '先着クーポンは終了しました — 紹介ノートの登録は引き続き受け付けています。',

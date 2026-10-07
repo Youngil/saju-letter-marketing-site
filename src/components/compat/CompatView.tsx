@@ -231,16 +231,24 @@ function PendingForm({
     return saju.getLunarLeapMonth(y) === m;
   }
 
-  // 일 목록은 고른 달의 날 수만큼(음력은 최대 30일). 고른 날이 그 달에 없으면(31일 → 2월) 비운다.
-  function maxDayFor(nextCalendarType: 'solar' | 'lunar', yearStr: string, monthStr: string): number {
-    if (nextCalendarType === 'lunar') return 30;
+  // 일 목록은 고른 달의 날 수만큼. 고른 날이 그 달에 없으면(31일 → 2월) 비운다. 음력은 사주 모듈을 받은 뒤엔 한국 음력 표의
+  // 그 달(윤달이면 윤달) 일수(29/30, 13차 F1), 받기 전엔 30일.
+  function maxDayFor(nextCalendarType: 'solar' | 'lunar', yearStr: string, monthStr: string, leap: boolean): number {
     const y = parseIntOrNull(yearStr);
     const m = parseIntOrNull(monthStr);
+    if (nextCalendarType === 'lunar') {
+      if (y === null || m === null || !saju) return 30;
+      try {
+        return saju.getLunarDaysInMonth(y, m, leap) ?? saju.getLunarDaysInMonth(y, m, false) ?? 30;
+      } catch {
+        return 30;
+      }
+    }
     return y !== null && m !== null ? new Date(y, m, 0).getDate() : 31;
   }
 
-  function clampDay(nextCalendarType: 'solar' | 'lunar', yearStr: string, monthStr: string) {
-    setDay((prev) => (prev && Number(prev) > maxDayFor(nextCalendarType, yearStr, monthStr) ? '' : prev));
+  function clampDay(nextCalendarType: 'solar' | 'lunar', yearStr: string, monthStr: string, leap: boolean) {
+    setDay((prev) => (prev && Number(prev) > maxDayFor(nextCalendarType, yearStr, monthStr, leap) ? '' : prev));
   }
 
   function handleCalendarTypeChange(next: 'solar' | 'lunar') {
@@ -262,21 +270,21 @@ function PendingForm({
     clearLeapHint();
     setCalendarType(next);
     setIsLeapMonth((prev) => (canBeLeapMonth(next, year, month) ? prev : false));
-    clampDay(next, year, month);
+    clampDay(next, year, month, isLeapMonth && canBeLeapMonth(next, year, month));
   }
 
   function handleYearChange(nextYear: string) {
     clearLeapHint();
     setYear(nextYear);
     setIsLeapMonth((prev) => (canBeLeapMonth(calendarType, nextYear, month) ? prev : false));
-    clampDay(calendarType, nextYear, month);
+    clampDay(calendarType, nextYear, month, isLeapMonth && canBeLeapMonth(calendarType, nextYear, month));
   }
 
   function handleMonthChange(nextMonth: string) {
     clearLeapHint();
     setMonth(nextMonth);
     setIsLeapMonth((prev) => (canBeLeapMonth(calendarType, year, nextMonth) ? prev : false));
-    clampDay(calendarType, year, nextMonth);
+    clampDay(calendarType, year, nextMonth, isLeapMonth && canBeLeapMonth(calendarType, year, nextMonth));
   }
 
   function handleDayChange(nextDay: string) {
@@ -284,10 +292,13 @@ function PendingForm({
     setDay(nextDay);
   }
 
-  const dayOptions = Array.from({ length: maxDayFor(calendarType, year, month) }, (_, i) => i + 1);
   // 윤달 체크박스는 그해 윤달인 달에만(2026-10-06 전체 점검 3차) — 예전엔 음력이면 늘 보여, 윤달이 없는 달에 체크하면
   // 사주 계산이 예외를 던져 일반 계산 오류만 떴다. 제출 값도 지금 해당될 때만 true로 보낸다.
   const leapMonthApplies = canBeLeapMonth(calendarType, year, month);
+  const dayOptions = Array.from(
+    { length: maxDayFor(calendarType, year, month, isLeapMonth && leapMonthApplies) },
+    (_, i) => i + 1,
+  );
 
   // "윤달인지 확인해 주세요" 안내가 뜨면 방금 나타난 윤달 체크박스로 초점을 옮긴다(접근성, 2026-10-06 전체 점검 3차 후속) —
   // 안내 문단만 읽히고 무엇을 확인해야 하는지 화면 낭독기 사용자가 찾아 헤매지 않게.
@@ -366,7 +377,15 @@ function PendingForm({
       let solar;
       try {
         // 모듈이 방금 도착했다면 leapMonthApplies·isLeapMonth 둘 다 false — 위에서 윤달인 달은 이미 멈췄으니 평달이 맞다.
-        const input = { calendarType, year: yearNum, month: monthNum, day: dayNum, isLeapMonth: isLeapMonth && leapMonthApplies };
+        // 출생 타임존은 묻지 않는다 — ko는 Asia/Seoul, 그 외는 브라우저 타임존으로 가정(13차 F2, assumedBirthTimeZone).
+        const input = {
+          calendarType,
+          year: yearNum,
+          month: monthNum,
+          day: dayNum,
+          isLeapMonth: isLeapMonth && leapMonthApplies,
+          timeZone: sajuModule.assumedBirthTimeZone(language),
+        };
         chart = sajuModule.calculateSaju(input);
         solar = sajuModule.resolveSolarBirthDate(input);
       } catch {
@@ -474,7 +493,10 @@ function PendingForm({
                 ref={leapCheckboxRef}
                 type="checkbox"
                 checked={isLeapMonth}
-                onChange={(e) => setIsLeapMonth(e.target.checked)}
+                onChange={(e) => {
+                  setIsLeapMonth(e.target.checked);
+                  clampDay(calendarType, year, month, e.target.checked);
+                }}
                 className="accent-accent-warm"
               />
               {content.leapMonthLabel}

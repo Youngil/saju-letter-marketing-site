@@ -25,6 +25,16 @@ const nextConfig: NextConfig = {
   async headers() {
     return [{ source: '/:path*', headers: SECURITY_HEADERS }];
   },
+  experimental: {
+    /**
+     * ISR 결과를 디스크에 쓰지 않는다(2026-10-07 전체 점검 13차, 리뷰어 6 #2). 기본값(true)은 `/{lang}/blog/<아무 값>`마다
+     * 404 결과까지 `.next/server/app/...`에 약 46KB씩 써서 상한이 없었다 — Cloud Run 컨테이너 파일시스템은 인스턴스 메모리라
+     * 무작위 주소 1만 번이면 512MiB 인스턴스가 죽는다. 끄면 다시 그린 결과는 메모리 LRU(`cacheMaxMemorySize` 기본 50MB)에만
+     * 두고, 빌드 때 만든 페이지는 그대로 디스크에서 읽는다(Next 16.4 `file-system-cache.js` 확인). 인스턴스마다 다시 그리면
+     * 되는 정적 사이트라 잃을 것이 거의 없다.
+     */
+    isrFlushToDisk: false,
+  },
 };
 
 export default createMDX({})(nextConfig);

@@ -95,7 +95,7 @@ export const dictionary: MarketingDictionary = {
     consentLabel: 'I consent to receiving this welcome email (you can unsubscribe anytime)',
     submitButton: 'Send me the note',
     submitting: 'Signing you up…',
-    success: "You're all set! Check your inbox for Dain's welcome note.",
+    success: "You're all set! Dain's welcome note is on its way — if you've signed up before, you don't need to do anything else.",
     limitedSlots: 'Limited to the first {capacity}',
     remainingSlots: '{issued} of {capacity} spots claimed — {remaining} left',
     soldOut: "This coupon offer is fully claimed — but you can still sign up for the notes!",

@@ -75,8 +75,15 @@ export function DemoForm({
     setIsSubmitting(true);
     try {
       // 사주 계산 라이브러리(lunar-javascript, 수백 KB)는 제출할 때만 받는다 — 홈 첫 화면 JS에서 뺐다(2026-10-06).
-      const { calculateSaju } = await import('@/lib/saju');
-      const chart = calculateSaju({ calendarType: 'solar', year: yearNum, month: monthNum, day: dayNum });
+      const { assumedBirthTimeZone, calculateSaju } = await import('@/lib/saju');
+      // 출생 타임존은 묻지 않는다 — ko는 Asia/Seoul, 그 외는 브라우저 타임존으로 가정(13차 F2, 절입일의 년·월주 경계).
+      const chart = calculateSaju({
+        calendarType: 'solar',
+        year: yearNum,
+        month: monthNum,
+        day: dayNum,
+        timeZone: assumedBirthTimeZone(language),
+      });
 
       const reading = await getDemoReading({
         language,
