@@ -1,8 +1,8 @@
 # PR·master 푸시마다 타입 검사·테스트·린트·빌드(2026-10-11 전체 점검 15차, 계약 C9). 배포는 하지 않는다 — 운영 배포는 사람이
 # `gcloud run deploy --source`로(../docs/setup-guide.md "## 7").
 # - 백엔드 없이 돈다: 테스트는 전부 순수 함수/모킹이고, `npm run build`도 빌드 중엔 백엔드 실패를 흡수한다(CLAUDE.md §12).
-# - 빌드의 prebuild(`scripts/vendor-cjk-fonts.mjs`)는 CI에서 운영 빌드로 판정돼(`CI=true`) Google Fonts 받기에 실패하면 빌드가
-#   실패한다 — 운영 배포에서 같은 실패를 미리 보는 셈.
+# - 빌드의 prebuild(`scripts/vendor-cjk-fonts.mjs`)는 기본이 엄격이라(16차 — 환경 변수로 운영 여부를 추측하지 않는다) Google Fonts
+#   받기에 실패하면 빌드가 실패한다 — 운영 배포에서 같은 실패를 미리 보는 셈.
 # - `src/lib/sajuCopyDrift.test.ts`는 형제 저장소(saju-letter-mobile)가 없으면 건너뛴다(여기선 이 저장소만 체크아웃).
 name: CI
 

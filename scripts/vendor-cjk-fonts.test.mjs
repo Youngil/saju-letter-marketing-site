@@ -37,16 +37,15 @@ describe('vendor-cjk-fonts', () => {
     expect(CJK_FONTS.map((f) => f.variable)).toEqual(['--font-noto-kr', '--font-noto-ja']);
   });
 
-  // 15차 — 운영 빌드에선 받기 실패가 빌드 실패, 빈 CSS는 --if-missing에서도 다시 받는다.
-  it('운영 빌드 판정: K_SERVICE·CI·NODE_ENV=production, CJK_FONTS_STRICT가 덮는다', () => {
-    expect(isStrictBuild({})).toBe(false);
-    expect(isStrictBuild({ NODE_ENV: 'development' })).toBe(false);
-    expect(isStrictBuild({ K_SERVICE: 'saju-letter-marketing-site' })).toBe(true);
-    expect(isStrictBuild({ CI: 'true' })).toBe(true);
-    expect(isStrictBuild({ CI: 'false' })).toBe(false);
-    expect(isStrictBuild({ NODE_ENV: 'production' })).toBe(true);
+  // 16차 — 빌드는 기본 엄격(운영 --source 빌드에 K_SERVICE·CI가 없어 환경 추측이 틀렸다). CJK_FONTS_STRICT=0만 비상 해제.
+  it('빌드 판정: 기본 엄격, CJK_FONTS_STRICT=0/false만 해제', () => {
+    expect(isStrictBuild({})).toBe(true);
+    expect(isStrictBuild({ NODE_ENV: 'development' })).toBe(true);
+    expect(isStrictBuild({ CJK_FONTS_STRICT: '1' })).toBe(true);
+    expect(isStrictBuild({ CJK_FONTS_STRICT: '' })).toBe(true);
+    expect(isStrictBuild({ CJK_FONTS_STRICT: '0' })).toBe(false);
+    expect(isStrictBuild({ CJK_FONTS_STRICT: ' False ' })).toBe(false);
     expect(isStrictBuild({ NODE_ENV: 'production', CJK_FONTS_STRICT: '0' })).toBe(false);
-    expect(isStrictBuild({ CJK_FONTS_STRICT: 'true' })).toBe(true);
   });
 
   it('받기 실패로 남긴 빈 CSS는 쓸 수 있는 CSS가 아니다', () => {
@@ -70,12 +69,12 @@ describe('vendor-cjk-fonts', () => {
       throw new Error('offline');
     };
 
-    it('로컬: 실패하면 빈 CSS를 쓰고 계속한다', async () => {
+    it('관대(predev·비상 해제): 실패하면 빈 CSS를 쓰고 계속한다', async () => {
       expect(await main(dir, { fetchFont: failing })).toEqual(['Noto Serif KR', 'Noto Serif JP']);
       expect(isUsableFontCss(await readFile(path.join(dir, 'noto-serif-kr.css'), 'utf8'))).toBe(false);
     });
 
-    it('운영 빌드: 실패하면 던진다', async () => {
+    it('엄격(빌드 기본): 실패하면 던진다', async () => {
       await expect(main(dir, { strict: true, fetchFont: failing })).rejects.toThrow(/CJK 세리프 받기 실패/);
     });
 
