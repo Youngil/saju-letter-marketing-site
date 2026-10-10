@@ -23,7 +23,13 @@ const nextConfig: NextConfig = {
   // `X-Powered-By: Next.js` 헤더를 내보내지 않는다.
   poweredByHeader: false,
   async headers() {
-    return [{ source: '/:path*', headers: SECURITY_HEADERS }];
+    return [
+      { source: '/:path*', headers: SECURITY_HEADERS },
+      // 빌드 때 받은 CJK 세리프(scripts/vendor-cjk-fonts.mjs, 2026-10-10 14차) — 파일 이름이 내용 해시라 1년 고정,
+      // 이름이 고정인 CSS는 하루(다음 배포에서 바뀐 파일 이름을 가리킨다).
+      { source: '/fonts/:font/:file.woff2', headers: [{ key: 'Cache-Control', value: 'public, max-age=31536000, immutable' }] },
+      { source: '/fonts/:file.css', headers: [{ key: 'Cache-Control', value: 'public, max-age=86400' }] },
+    ];
   },
   experimental: {
     /**

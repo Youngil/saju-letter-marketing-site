@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import type { Metadata } from 'next';
-import { Lora, Noto_Serif_JP, Noto_Serif_KR } from 'next/font/google';
+import { Lora } from 'next/font/google';
 import '../globals.css';
 import { getDictionary } from '@/dictionaries';
 import { isLaunchContentLanguage, isMarketingLanguage, MARKETING_LANGUAGES, type MarketingLanguage } from '@/lib/languages';
@@ -26,7 +26,7 @@ export const revalidate = 3600;
 
 /**
  * 앱 `use-serif-font-family`와 같은 언어별 디스플레이 세리프(Phase 3).
- * 세 폰트 모두 로드하되 CSS `html[lang]`로 실제로 쓰는 패밀리만 고른다.
+ * 라틴 Lora는 모든 페이지, CJK 세리프는 그 언어 페이지에서만 받는다(아래 `CJK_FONT_STYLESHEETS`).
  */
 // 라틴 디스플레이는 앱과 같은 Lora(2026-10-03, 디자인 감사 P2) — Playfair는 고대비라 작은 크기에서 가늘고,
 // 숫자가 올드스타일이라 앱에선 "0 days"가 "o days"로 보였다(앱은 개편 1단계에서 Lora로 교체).
@@ -36,22 +36,15 @@ const lora = Lora({
   variable: '--font-lora',
   display: 'swap',
 });
-// 두 Noto는 미리 받지 않는다(2026-10-07 전체 점검 7차) — 모든 페이지가 ko/ja용 라틴 서브셋까지 4개 파일(~126KB)을
-// preload해 en/es 페이지에선 통째로 낭비였다. 실제로 쓰는 ko/ja 페이지에선 CSS가 필요할 때 받는다(display: swap).
-const notoSerifKr = Noto_Serif_KR({
-  subsets: ['latin'],
-  weight: ['600', '700'],
-  variable: '--font-noto-kr',
-  display: 'swap',
-  preload: false,
-});
-const notoSerifJp = Noto_Serif_JP({
-  subsets: ['latin'],
-  weight: ['600', '700'],
-  variable: '--font-noto-ja',
-  display: 'swap',
-  preload: false,
-});
+// 두 Noto는 그 언어 페이지에서만 CSS까지 싣는다(2026-10-10 전체 점검 14차). 7차에서 폰트 파일 preload는 껐지만, 레이아웃이
+// next/font로 두 폰트를 불러 유니코드 구간별 `@font-face` CSS 두 벌(gzip 약 119KB)이 en/es를 포함한 모든 페이지의 렌더 차단
+// CSS로 실렸다(next/font CSS는 번들러가 레이아웃 진입점에 모아, `next/dynamic`으로 감싸도 모든 페이지에 붙는다 — 빌드로 확인).
+// 이제 같은 폰트를 빌드 때 `scripts/vendor-cjk-fonts.mjs`(prebuild)가 `public/fonts/`로 받아 두고, 그 언어 페이지만 `<link>`한다.
+// 방문자는 여전히 이 사이트 주소에서만 받는다(Google로 요청하지 않음). CSS가 `--font-noto-kr`/`--font-noto-ja`를 `:root`에 건다.
+const CJK_FONT_STYLESHEETS: Partial<Record<MarketingLanguage, string>> = {
+  ko: '/fonts/noto-serif-kr.css',
+  ja: '/fonts/noto-serif-jp.css',
+};
 
 /**
  * app/[lang]/layout.tsx가 이 사이트의 실질적인 루트 레이아웃이다 — Next.js App Router는
@@ -115,13 +108,16 @@ export default async function LangLayout({
   // 관리자가 켠 언어 원본(6개 축) 그대로 넘긴다 — 레이아웃은 하위 경로를 모르므로, 콘텐츠 축(블로그·compare가 있는
   // 언어)으로 좁힐지는 스위처가 경로를 보고 정한다(2026-10-06 전체 점검 3차, 신년운세 등 6개 언어 페이지에서 pt/vi 누락).
   const activeLanguages = (await fetchActiveServiceLanguages()).active;
+  const cjkFontStylesheet = CJK_FONT_STYLESHEETS[lang];
 
   return (
     <html
       lang={lang}
-      className={`h-full antialiased ${lora.variable} ${notoSerifKr.variable} ${notoSerifJp.variable}`}
+      className={`h-full antialiased ${lora.variable}`}
     >
       <body className="flex min-h-full flex-col bg-background text-foreground">
+        {/* React가 precedence 있는 스타일시트를 <head>로 올린다. */}
+        {cjkFontStylesheet && <link rel="stylesheet" href={cjkFontStylesheet} precedence="default" />}
         <GoogleAnalytics />
         <script
           type="application/ld+json"

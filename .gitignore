@@ -20,6 +20,9 @@
 # production
 /build
 
+# 빌드 때 받는 CJK 세리프(scripts/vendor-cjk-fonts.mjs, prebuild)
+/public/fonts/
+
 # misc
 .DS_Store
 *.pem

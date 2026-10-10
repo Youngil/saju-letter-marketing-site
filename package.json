@@ -6,7 +6,9 @@
     "node": "22.x"
   },
   "scripts": {
+    "predev": "node scripts/vendor-cjk-fonts.mjs --if-missing",
     "dev": "next dev -p 3200",
+    "prebuild": "node scripts/vendor-cjk-fonts.mjs",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
