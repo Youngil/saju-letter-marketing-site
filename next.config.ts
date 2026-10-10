@@ -40,6 +40,11 @@ const nextConfig: NextConfig = {
      * 되는 정적 사이트라 잃을 것이 거의 없다.
      */
     isrFlushToDisk: false,
+    /**
+     * 어느 라우트에도 맞지 않는 주소의 404를 `app/global-not-found.tsx`로(2026-10-10 전체 점검 14차). 루트 레이아웃이
+     * `[lang]/layout.tsx`(최상위 동적 세그먼트)라 그 위에 404를 조립할 레이아웃이 없어 Next 기본 영어 화면이 떴다.
+     */
+    globalNotFound: true,
   },
 };
 

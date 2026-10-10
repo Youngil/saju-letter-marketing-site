@@ -41,6 +41,11 @@ html[lang="ja"] {
   --font-sans: var(--font-sans-family);
 }
 
+/* 같은 페이지 앵커(#demo 등)가 sticky 헤더(약 61px) 밑에 가려지지 않게(2026-10-10 전체 점검 14차). */
+html {
+  scroll-padding-top: 5rem;
+}
+
 body {
   font-family: var(--font-sans-family);
   background:

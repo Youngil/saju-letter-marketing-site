@@ -3,7 +3,8 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
-import { isLaunchContentLanguage, type MarketingLanguage } from '@/lib/languages';
+import type { MarketingLanguage } from '@/lib/languages';
+import { demoHref } from '@/lib/homeLinks';
 import type { MarketingDictionary } from '@/dictionaries/types';
 import type { CompatViewCopy } from '@/content/compatContent';
 import { COMPAT_NAME_LINES, type CompatNameLines } from '@/content/compatNameLines';
@@ -115,14 +116,6 @@ export function CompatView({
       onViewUpdate={setView}
     />
   );
-}
-
-/**
- * 홈 데모 주소 — 홈은 콘텐츠 축(ko/en/ja/es)에만 있다. pt/vi는 언어 없는 `/`로 보내 proxy가 방문자 언어의 홈으로 넘긴다
- * (주소의 `#demo`는 리다이렉트 뒤에도 브라우저가 유지한다).
- */
-function demoHref(language: MarketingLanguage): string {
-  return isLaunchContentLanguage(language) ? `/${language}#demo` : '/#demo';
 }
 
 /**

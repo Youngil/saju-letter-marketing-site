@@ -2,6 +2,7 @@ import { NextResponse, type NextFetchEvent, type NextRequest } from 'next/server
 import {
   DEFAULT_LANGUAGE,
   MARKETING_LANGUAGES,
+  SITE_LANGUAGE_HEADER,
   detectPreferredLaunchLanguage,
   isLaunchContentLanguage,
   type LaunchContentLanguage,
@@ -56,8 +57,14 @@ export async function proxy(request: NextRequest, event: NextFetchEvent) {
     return NextResponse.redirect(url, 308);
   }
 
-  const hasLangPrefix = MARKETING_LANGUAGES.some((lang) => pathname === `/${lang}` || pathname.startsWith(`/${lang}/`));
-  if (hasLangPrefix) return NextResponse.next();
+  const prefixLang = MARKETING_LANGUAGES.find((lang) => pathname === `/${lang}` || pathname.startsWith(`/${lang}/`));
+  if (prefixLang) {
+    // 404 화면(global-not-found)이 주소의 언어를 알 수 있게 요청 헤더로 넘긴다(2026-10-10 전체 점검 14차). 방문자가 보낸
+    // 같은 이름의 헤더는 여기서 덮어쓴다.
+    const requestHeaders = new Headers(request.headers);
+    requestHeaders.set(SITE_LANGUAGE_HEADER, prefixLang);
+    return NextResponse.next({ request: { headers: requestHeaders } });
+  }
 
   // 자동 감지 후보는 LAUNCH_CONTENT_LANGUAGES(ko/en/ja/es)로 한정한다(2026-08-08) —
   // LanguageSwitcher와 같은 이유(pt/vi는 블로그/compare가 아직 없어 "숨겨둔" 상태). URL에 이미

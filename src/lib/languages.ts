@@ -11,6 +11,12 @@ export const MARKETING_LANGUAGES: MarketingLanguage[] = ['ko', 'en', 'es', 'pt',
 
 export const DEFAULT_LANGUAGE: MarketingLanguage = 'en';
 
+/**
+ * proxy가 언어 마디가 있는 요청에 붙여 넘기는 요청 헤더(2026-10-10 전체 점검 14차) — `app/global-not-found.tsx`는 레이아웃·
+ * params 없이 그려져 주소의 언어를 모르므로 이 값으로 404 문구 언어를 고른다. 방문자가 보낸 같은 이름의 헤더는 proxy가 덮어쓴다.
+ */
+export const SITE_LANGUAGE_HEADER = 'x-saju-site-lang';
+
 export function isMarketingLanguage(value: string): value is MarketingLanguage {
   return (MARKETING_LANGUAGES as string[]).includes(value);
 }

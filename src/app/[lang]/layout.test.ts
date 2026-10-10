@@ -8,11 +8,10 @@ vi.mock('next/navigation', () => ({
 }));
 
 // next/font/google은 빌드 타임 폰트 최적화용 매크로라 순수 vitest 환경에서 실행 불가 — 이
-// 레이아웃이 실제로 쓰는 형태(변수 CSS 클래스를 노출하는 객체)만 흉내낸다.
+// 레이아웃이 실제로 쓰는 형태(변수 CSS 클래스를 노출하는 객체)만 흉내낸다. CJK 세리프는 2026-10-10(14차)부터
+// next/font가 아니라 빌드 때 받은 `/fonts/*.css` 링크라 Lora만.
 vi.mock('next/font/google', () => ({
   Lora: () => ({ variable: '--font-lora' }),
-  Noto_Serif_KR: () => ({ variable: '--font-noto-kr' }),
-  Noto_Serif_JP: () => ({ variable: '--font-noto-ja' }),
 }));
 
 // 서비스 언어 통합 관리 API 호출 — 언어 게이트 자체와 무관하니 고정값으로 목킹한다.
