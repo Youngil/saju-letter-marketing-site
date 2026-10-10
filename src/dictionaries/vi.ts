@@ -9,9 +9,9 @@ export const dictionary: MarketingDictionary = {
   nav: { home: 'Trang chủ', blog: 'Blog', compare: 'Cung hoàng đạo vs. Bát Tự' },
   hero: {
     appPreviewAlt: 'Ứng dụng Saju Letter — lá thư buổi sáng còn niêm phong và lá thư đã mở',
-    title: 'Mỗi sáng, một lá thư ngắn từ Dain',
+    title: 'Mỗi sáng, một lá thư ngắn từ lá số tứ trụ Hàn Quốc của bạn',
     subtitle:
-      'Saju Letter gửi bạn một lá thư ấm áp, cá nhân dựa trên khoảnh khắc bạn chào đời — không phải bản luận giải dài. Gặp Dain, người viết thư cho bạn, và thử xem trước miễn phí bên dưới.',
+      'Cung hoàng đạo đến từ tháng sinh của bạn. Bát Tự bắt đầu từ ngày bạn sinh ra và đọc nó cùng với ngày hôm nay. Dain biến điều đó thành một lá thư ngắn mỗi sáng — không phải bản luận giải dài. Thử xem trước miễn phí bên dưới.',
     metaTitle: 'Saju Letter — Lá thư chiêm tinh Hàn Quốc mỗi ngày dựa trên lá số của bạn',
     metaDescription:
       'Mỗi sáng một lá thư ngắn dựa trên lá số ngày sinh của bạn theo Bát Tự (saju) — chiêm tinh tứ trụ của Hàn Quốc. Lời nhắn hằng ngày ấm áp từ Dain thay vì một bản luận giải dài. Xem trước miễn phí, không cần đăng ký.',
@@ -73,7 +73,7 @@ export const dictionary: MarketingDictionary = {
     ogTitle: 'Cung hoàng đạo vs. Bát Tự — Saju Letter',
     ogDescription: 'Xem 12 cung hoàng đạo phương Tây so với hệ thống luận giải Bát Tự của Hàn Quốc.',
     opening:
-      'Dain viết mỗi lá thư buổi sáng từ khoảnh khắc bạn sinh ra — không phải từ một cung mặt trời duy nhất. Trang này là phần giải thích dài hơn mà chúng tôi không đặt trên trang chủ: Bát Tự khác cung hoàng đạo thế nào, bằng lời đơn giản.',
+      'Dain viết mỗi lá thư buổi sáng từ ngày bạn sinh ra, đọc cùng với ngày hôm nay — không phải từ một cung mặt trời duy nhất. Trang này là phần giải thích dài hơn mà chúng tôi không đặt trên trang chủ: Bát Tự khác cung hoàng đạo thế nào, bằng lời đơn giản.',
     diagramCaption: 'Điểm khác, theo cách nhìn của Dain',
     diagramZodiacLabel: 'Cung hoàng đạo',
     diagramZodiacPoint: 'Một vị trí mặt trời (theo tháng sinh)',
@@ -203,7 +203,7 @@ export const dictionary: MarketingDictionary = {
       subscribed: 'Xong rồi! Hãy kiểm tra hộp thư của bạn vào ngày mai để nhận ngày đầu tiên.',
       appBridgeTitle: 'Bạn muốn một lá thư ngắn mỗi sáng?',
       appBridgeBody:
-        'Tách biệt với bài đọc năm mới này, Dain viết một ghi chú ngắn mỗi sáng trong ứng dụng Saju Letter — ấm áp, riêng tư, và không bao giờ là một báo cáo vận mệnh dài.',
+        'Tách biệt với bài đọc năm mới này, Dain viết một ghi chú ngắn mỗi sáng trong ứng dụng Saju Letter — ấm áp, dựa trên lá số của bạn, và không bao giờ là một báo cáo vận mệnh dài.',
       publicCtaTitle: 'Bạn tò mò về năm mới của chính mình?',
       publicCtaBody: 'Nhận một bài đọc năm mới ngắn dành riêng cho bạn, dựa trên lá số của bạn.',
       publicCtaButton: 'Xem bài đọc của tôi',

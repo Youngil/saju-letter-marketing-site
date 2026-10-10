@@ -7,9 +7,9 @@ export const dictionary: MarketingDictionary = {
   nav: { home: 'Home', blog: 'Blog', compare: 'Zodiac vs. Saju' },
   hero: {
     appPreviewAlt: 'Saju Letter app — a sealed morning letter and the opened letter',
-    title: 'Every morning, a short letter from Dain',
+    title: 'A short morning letter from your Korean birth chart',
     subtitle:
-      'Saju Letter sends a warm, personal letter based on the moment you were born — not a long fortune report. Meet Dain, your letter writer, and try a free preview below.',
+      'Your zodiac sign comes from your birth month. Saju starts from the day you were born and reads it against today. Dain turns that into a short letter every morning — not a long fortune report. Try a free preview below.',
     metaTitle: 'Saju Letter — A Daily Korean Astrology Letter Based on Your Birth Chart',
     metaDescription:
       'A short morning letter based on your birth chart, rooted in saju — Korean four-pillars astrology. A gentle daily horoscope from Dain instead of a long fortune report. Try a free preview, no sign-up needed.',
@@ -70,7 +70,7 @@ export const dictionary: MarketingDictionary = {
     ogTitle: 'Zodiac vs. Saju — Saju Letter',
     ogDescription: 'See how the 12 Western zodiac signs compare to the Korean saju reading system.',
     opening:
-      "Dain writes each morning letter from your birth moment — not from a single sun sign. This page is the longer explanation we don't put on the home page: how saju differs from a zodiac sign, in plain language.",
+      "Dain writes each morning letter from the day you were born, read against today — not from a single sun sign. This page is the longer explanation we don't put on the home page: how saju differs from a zodiac sign, in plain language.",
     diagramCaption: "Dain's quick look at the difference",
     diagramZodiacLabel: 'Zodiac sign',
     diagramZodiacPoint: 'One sun position (from your birth month)',
@@ -200,7 +200,7 @@ export const dictionary: MarketingDictionary = {
       subscribed: "You're all set! Check your inbox tomorrow for day one.",
       appBridgeTitle: 'Want a short letter every morning?',
       appBridgeBody:
-        'Separate from this New Year reading, Dain writes a brief morning note in the Saju Letter app — warm, personal, and never a long fortune report.',
+        'Separate from this New Year reading, Dain writes a brief morning note in the Saju Letter app — warm, based on your birth chart, and never a long fortune report.',
       publicCtaTitle: 'Curious about your own year?',
       publicCtaBody: 'Get a short New Year reading of your own, based on your birth chart.',
       publicCtaButton: 'Get my own reading',

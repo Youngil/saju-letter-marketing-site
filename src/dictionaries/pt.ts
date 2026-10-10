@@ -7,9 +7,9 @@ export const dictionary: MarketingDictionary = {
   nav: { home: 'Início', blog: 'Blog', compare: 'Zodíaco vs. Saju' },
   hero: {
     appPreviewAlt: 'App Saju Letter: uma carta da manhã selada e a carta aberta',
-    title: 'Toda manhã, uma carta breve da Dain',
+    title: 'Toda manhã, uma carta curta a partir do seu mapa natal coreano',
     subtitle:
-      'O Saju Letter envia uma carta calorosa e pessoal com base no momento em que você nasceu — não um relatório longo de fortuna. Conheça Dain, quem escreve suas cartas, e experimente uma prévia grátis abaixo.',
+      'Seu signo vem do mês em que você nasceu. O saju parte do dia em que você nasceu e o lê junto com o dia de hoje. Dain transforma isso em uma carta curta toda manhã — não em um longo relatório de sorte. Experimente uma prévia grátis abaixo.',
     metaTitle: 'Saju Letter — Sua carta diária de astrologia coreana com base no seu mapa natal',
     metaDescription:
       'Uma carta curta toda manhã com base no seu mapa natal e no saju, a astrologia coreana dos quatro pilares. Um horóscopo diário e acolhedor da Dain, em vez de um longo relatório de sorte. Experimente uma prévia grátis, sem cadastro.',
@@ -71,7 +71,7 @@ export const dictionary: MarketingDictionary = {
     ogTitle: 'Zodíaco vs. Saju — Saju Letter',
     ogDescription: 'Veja como os 12 signos do zodíaco ocidental se comparam ao sistema coreano de leitura saju.',
     opening:
-      'Dain escreve cada carta matinal a partir do momento em que você nasceu — não de um único signo solar. Esta página é a explicação mais longa que não colocamos na home: como o saju difere de um signo do zodíaco, em linguagem simples.',
+      'Dain escreve cada carta matinal a partir do dia em que você nasceu, lido junto com o dia de hoje — não de um único signo solar. Esta página é a explicação mais longa que não colocamos na home: como o saju difere de um signo do zodíaco, em linguagem simples.',
     diagramCaption: 'A diferença, no olhar de Dain',
     diagramZodiacLabel: 'Signo do zodíaco',
     diagramZodiacPoint: 'Uma posição do sol (pelo mês de nascimento)',
@@ -201,7 +201,7 @@ export const dictionary: MarketingDictionary = {
       subscribed: 'Tudo pronto! Confira sua caixa de entrada amanhã para o primeiro dia.',
       appBridgeTitle: 'Quer uma carta curta todas as manhãs?',
       appBridgeBody:
-        'Separado desta leitura de Ano Novo, Dain escreve uma nota breve todas as manhãs no app do Saju Letter — acolhedora, pessoal, e nunca um relatório longo de fortuna.',
+        'Separado desta leitura de Ano Novo, Dain escreve uma nota breve todas as manhãs no app do Saju Letter — acolhedora, baseada no seu mapa natal, e nunca um relatório longo de fortuna.',
       publicCtaTitle: 'Curiosidade sobre o seu próprio ano?',
       publicCtaBody: 'Receba sua própria leitura curta de Ano Novo, baseada no seu mapa de nascimento.',
       publicCtaButton: 'Quero minha leitura',
