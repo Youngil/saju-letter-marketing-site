@@ -61,6 +61,10 @@ export interface CompatContent {
   fromRole: string;
   signature: string;
   ctaTitle: string;
+  /**
+   * 앱 안내 — 매일 편지는 일간·일진·언어·문체·강약 조합별 공용이라 "나만을 위한/written just for you"처럼 한 사람에게만 따로
+   * 쓴다고 말하지 않는다(2026-10-10 전체 점검 14차). "내 사주를 바탕으로"까지만.
+   */
   ctaBody: string;
   /**
    * 만료·없는 초대 화면(2026-10-10 전체 점검 14차) — 예전엔 빨간 한 줄뿐이라 링크를 받은 친구가 그대로 떠났다. 이제 편지 셸 안에
@@ -105,7 +109,7 @@ export const COMPAT_CONTENT: Record<MarketingLanguage, CompatContent> = {
     leapMonthCheckHint: '그해에는 고른 달에 윤달이 있어요. 윤달에 태어났다면 아래에 체크하고, 아니면 그대로 다시 눌러주세요.',
     loadError: '화면 일부를 불러오지 못했어요. 페이지를 새로고침한 뒤 다시 시도해주세요.',
     pairLine: COMPAT_NAME_LINES.ko.pairLine,
-    cta: '사주편지에서 나만의 편지도 받아보기',
+    cta: '사주편지에서 매일 아침 편지도 받아보기',
     pendingTitleFor: COMPAT_NAME_LINES.ko.pendingTitleFor,
     pendingIntroLetter: '생년월일을 알려주면, 다인이 두 사람의 결을 읽고 짧은 편지로 답해 드려요. 가입하지 않아도 바로 볼 수 있어요.',
     aboutLine: '사주편지 · 다인이 매일 아침 보내는 사주 편지',
@@ -113,7 +117,7 @@ export const COMPAT_CONTENT: Record<MarketingLanguage, CompatContent> = {
     fromRole: '편지 쓰는 사람',
     signature: '— 다인',
     ctaTitle: '나도 매일 아침, 다인의 편지 받아보기',
-    ctaBody: '앱에서는 매일 아침 나만을 위한 편지가 오고, 궁금한 누구에게나 이렇게 궁합 편지를 보낼 수 있어요.',
+    ctaBody: '앱에서는 매일 아침 내 사주를 바탕으로 한 편지가 오고, 궁금한 누구에게나 이렇게 궁합 편지를 보낼 수 있어요.',
     unavailableTitle: '이 궁합 편지는 지금 열 수 없어요',
     unavailableBody: '대신 내 생년월일로 다인의 오늘 편지를 먼저 읽어 보세요. 가입 없이 무료예요.',
     demoLink: '오늘의 편지 미리 받아보기',
@@ -164,7 +168,7 @@ export const COMPAT_CONTENT: Record<MarketingLanguage, CompatContent> = {
     fromRole: 'The one who writes your letters',
     signature: '— Dain',
     ctaTitle: 'Get a letter from Dain every morning',
-    ctaBody: 'In the app, a letter written just for you arrives each morning — and you can send a compatibility letter like this to anyone you are curious about.',
+    ctaBody: 'In the app, a letter based on your own birth chart arrives each morning — and you can send a compatibility letter like this to anyone you are curious about.',
     unavailableTitle: "This compatibility letter can't be opened right now",
     unavailableBody: "In the meantime, read today's letter from Dain with your own birth date — free, no sign-up needed.",
     demoLink: "Preview today's letter",
@@ -215,7 +219,7 @@ export const COMPAT_CONTENT: Record<MarketingLanguage, CompatContent> = {
     fromRole: '手紙を書く人',
     signature: '— ダイン',
     ctaTitle: '毎朝、ダインの手紙を受け取る',
-    ctaBody: 'アプリでは毎朝あなただけの手紙が届き、気になる人にこんな相性の手紙を送ることもできます。',
+    ctaBody: 'アプリでは毎朝あなたの生年月日をもとにした手紙が届き、気になる人にこんな相性の手紙を送ることもできます。',
     unavailableTitle: 'この相性の手紙は、いまは開けません',
     unavailableBody: 'そのかわりに、ご自身の生年月日でダインの今日の手紙を読んでみてください。登録不要・無料です。',
     demoLink: '今日の手紙をプレビュー',
@@ -266,7 +270,7 @@ export const COMPAT_CONTENT: Record<MarketingLanguage, CompatContent> = {
     fromRole: 'Quien escribe tus cartas',
     signature: '— Dain',
     ctaTitle: 'Recibe una carta de Dain cada mañana',
-    ctaBody: 'En la app, cada mañana llega una carta escrita solo para ti, y puedes enviar una carta de compatibilidad como esta a quien quieras.',
+    ctaBody: 'En la app, cada mañana llega una carta basada en tu propia carta natal, y puedes enviar una carta de compatibilidad como esta a quien quieras.',
     unavailableTitle: 'Esta carta de compatibilidad no se puede abrir ahora',
     unavailableBody: 'Mientras tanto, lee la carta de hoy de Dain con tu propia fecha de nacimiento: gratis y sin registrarte.',
     demoLink: 'Ver la carta de hoy',
@@ -317,7 +321,7 @@ export const COMPAT_CONTENT: Record<MarketingLanguage, CompatContent> = {
     fromRole: 'Quem escreve suas cartas',
     signature: '— Dain',
     ctaTitle: 'Receba uma carta de Dain toda manhã',
-    ctaBody: 'No app, toda manhã chega uma carta escrita só para você — e você pode mandar uma carta de compatibilidade como esta para quem quiser.',
+    ctaBody: 'No app, toda manhã chega uma carta com base no seu próprio mapa natal — e você pode mandar uma carta de compatibilidade como esta para quem quiser.',
     unavailableTitle: 'Esta carta de compatibilidade não pode ser aberta agora',
     unavailableBody: 'Enquanto isso, leia a carta de hoje da Dain com a sua própria data de nascimento — grátis e sem cadastro.',
     demoLink: 'Ver a carta de hoje',
@@ -360,7 +364,7 @@ export const COMPAT_CONTENT: Record<MarketingLanguage, CompatContent> = {
     leapMonthCheckHint: 'Năm đó, tháng bạn chọn có tháng nhuận. Nếu bạn sinh vào tháng nhuận, hãy đánh dấu ô bên dưới; nếu không, chỉ cần bấm nút lần nữa.',
     loadError: 'Không tải được một phần trang. Vui lòng tải lại trang rồi thử lại.',
     pairLine: COMPAT_NAME_LINES.vi.pairLine,
-    cta: 'Nhận lá thư hằng ngày của riêng bạn từ Saju Letter',
+    cta: 'Nhận lá thư mỗi sáng từ Saju Letter',
     pendingTitleFor: COMPAT_NAME_LINES.vi.pendingTitleFor,
     pendingIntroLetter: 'Cho biết ngày sinh của bạn, Dain sẽ đọc xem hai người hợp nhau thế nào và trả lời bằng một lá thư ngắn. Không cần đăng ký.',
     aboutLine: 'Saju Letter · lá thư saju Hàn Quốc từ Dain mỗi sáng',
@@ -368,7 +372,7 @@ export const COMPAT_CONTENT: Record<MarketingLanguage, CompatContent> = {
     fromRole: 'Người viết thư cho bạn',
     signature: '— Dain',
     ctaTitle: 'Nhận thư của Dain mỗi sáng',
-    ctaBody: 'Trong ứng dụng, mỗi sáng sẽ có một lá thư viết riêng cho bạn, và bạn có thể gửi lá thư hợp nhau như thế này cho bất kỳ ai.',
+    ctaBody: 'Trong ứng dụng, mỗi sáng sẽ có một lá thư dựa trên lá số của chính bạn, và bạn có thể gửi lá thư hợp nhau như thế này cho bất kỳ ai.',
     unavailableTitle: 'Hiện chưa thể mở lá thư hợp nhau này',
     unavailableBody: 'Trong lúc chờ, hãy đọc lá thư hôm nay của Dain bằng ngày sinh của chính bạn — miễn phí, không cần đăng ký.',
     demoLink: 'Xem trước lá thư hôm nay',
