@@ -12,6 +12,9 @@ export const dictionary: MarketingDictionary = {
     title: 'Mỗi sáng, một lá thư ngắn từ Dain',
     subtitle:
       'Saju Letter gửi bạn một lá thư ấm áp, cá nhân dựa trên khoảnh khắc bạn chào đời — không phải bản luận giải dài. Gặp Dain, người viết thư cho bạn, và thử xem trước miễn phí bên dưới.',
+    metaTitle: 'Saju Letter — Lá thư chiêm tinh Hàn Quốc mỗi ngày dựa trên lá số của bạn',
+    metaDescription:
+      'Mỗi sáng một lá thư ngắn dựa trên lá số ngày sinh của bạn theo Bát Tự (saju) — chiêm tinh tứ trụ của Hàn Quốc. Lời nhắn hằng ngày ấm áp từ Dain thay vì một bản luận giải dài. Xem trước miễn phí, không cần đăng ký.',
     ctaDemo: 'Xem trước lá thư miễn phí',
     dainName: 'Dain',
     dainRole: 'Người viết thư của bạn',

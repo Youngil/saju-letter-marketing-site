@@ -13,6 +13,13 @@ export interface MarketingDictionary {
     appPreviewAlt: string;
     title: string;
     subtitle: string;
+    /**
+     * 홈 `<title>`·메타 설명(2026-10-10 전체 점검 14차) — 화면의 H1·부제와 따로 둔다. 검색어가 될 분류 낱말(사주·四柱推命·
+     * Korean astrology·horoscope·birth chart 등)을 자연스럽게 넣되, 편지가 한 사람만을 위해 따로 쓰인다고 말하지 않는다
+     * (매일 편지는 일간·일진 등 조합별 공용 — "내 사주를 바탕으로"까지만).
+     */
+    metaTitle: string;
+    metaDescription: string;
     ctaDemo: string;
     /** 히어로에 보이는 다인 이름(예: "Dain" / "다인"). */
     dainName: string;

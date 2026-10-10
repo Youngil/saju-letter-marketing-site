@@ -94,6 +94,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ lang:
               datePublished: meta.date,
               url: `${WEB_BASE_URL}/${lang}/blog/${slug}`,
               brand: dict.brand,
+              image: `${WEB_BASE_URL}/${lang}/opengraph-image`,
             }),
           ),
         }}

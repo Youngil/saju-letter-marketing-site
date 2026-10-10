@@ -5,7 +5,7 @@ import { getDictionary } from '@/dictionaries';
 import { getCompatInvite, type InviteView } from '@/lib/compatApi';
 import { COMPAT_CONTENT, pickCompatViewCopy, resolveCompatOg } from '@/content/compatContent';
 import { CompatView } from '@/components/compat/CompatView';
-import { WEB_BASE_URL, languageAlternates, NOINDEX_ROBOTS } from '@/lib/seo';
+import { WEB_BASE_URL, buildSocialMetadata, languageAlternates, NOINDEX_ROBOTS } from '@/lib/seo';
 import { isValidCompatToken } from '@/lib/routeParams';
 import { getRequestVisitorIp } from '@/lib/requestVisitorIp';
 
@@ -46,7 +46,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const path = (lang: MarketingLanguage) => `/${lang}/compat/${token}`;
 
   return {
-    title: og.title,
+    // 궁합 OG 제목엔 이미 브랜드가 있어 레이아웃 템플릿을 건너뛴다(2026-10-10 14차).
+    title: { absolute: og.title },
     description: og.description,
     // 유저 개인 궁합 결과 페이지라 검색결과에 노출될 이유가 없다 — 카카오톡/트위터 등 크롤러가
     // OG 태그를 읽어 미리보기 카드를 만드는 목적(og 항목들)과는 무관하게 색인만 막는다.
@@ -55,8 +56,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       canonical: `${WEB_BASE_URL}${path(rawLang)}`,
       languages: languageAlternates(MARKETING_LANGUAGES, path, DEFAULT_LANGUAGE),
     },
-    openGraph: { title: og.title, description: og.description, url: `${WEB_BASE_URL}${path(rawLang)}` },
-    twitter: { card: 'summary', title: og.title, description: og.description },
+    // OG 이미지는 같은 세그먼트의 opengraph-image.tsx가 붙인다(1200×630) — X 카드도 큰 이미지로(2026-10-10 14차).
+    ...buildSocialMetadata({ title: og.title, description: og.description, url: `${WEB_BASE_URL}${path(rawLang)}` }),
   };
 }
 

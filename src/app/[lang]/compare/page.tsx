@@ -46,7 +46,8 @@ export async function generateMetadata({ params }: { params: Promise<{ lang: str
   // (2026-10-06 전체 점검 5차).
   const isActive = contentLanguages.includes(rawLang);
   return {
-    title: dict.compare.ogTitle,
+    // ogTitle에 이미 브랜드가 있어 레이아웃 템플릿(`%s — 브랜드`)을 건너뛴다(2026-10-10 14차).
+    title: { absolute: dict.compare.ogTitle },
     description: dict.compare.ogDescription,
     alternates: {
       canonical: `${WEB_BASE_URL}${path(rawLang)}`,

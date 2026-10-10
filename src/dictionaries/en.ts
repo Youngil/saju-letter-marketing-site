@@ -10,6 +10,9 @@ export const dictionary: MarketingDictionary = {
     title: 'Every morning, a short letter from Dain',
     subtitle:
       'Saju Letter sends a warm, personal letter based on the moment you were born — not a long fortune report. Meet Dain, your letter writer, and try a free preview below.',
+    metaTitle: 'Saju Letter — A Daily Korean Astrology Letter Based on Your Birth Chart',
+    metaDescription:
+      'A short morning letter based on your birth chart, rooted in saju — Korean four-pillars astrology. A gentle daily horoscope from Dain instead of a long fortune report. Try a free preview, no sign-up needed.',
     ctaDemo: 'Try a free letter preview',
     dainName: 'Dain',
     dainRole: 'Your letter writer',

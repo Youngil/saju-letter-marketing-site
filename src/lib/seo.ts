@@ -51,6 +51,10 @@ export const NOINDEX_ROBOTS: Metadata['robots'] = { index: false, follow: true }
  * openGraph/twitter를 항상 같은 값으로 나란히 채우는 헬퍼 — Next.js는 `twitter` 필드를 아예
  * 생략하면 twitter:* 메타 태그 자체를 렌더링하지 않으므로, openGraph를 쓰는 모든 페이지에서
  * 매번 같은 title/description/images를 두 번 타이핑하는 대신 이 헬퍼로 통일한다.
+ *
+ * X 카드는 항상 `summary_large_image`(2026-10-10 전체 점검 14차) — 모든 페이지에 1200×630 OG 이미지가 있다(`images`를
+ * 넘기지 않는 페이지는 같은 세그먼트의 `opengraph-image` 파일 규약이 붙인다 — 홈·궁합·신년운세 결과). 예전엔 `images`가
+ * 없으면 `summary`라 그 큰 이미지가 작은 정사각 썸네일로 잘려 보였다. X는 `twitter:image`가 없으면 `og:image`를 쓴다.
  */
 export function buildSocialMetadata(params: {
   title: string;
@@ -67,7 +71,7 @@ export function buildSocialMetadata(params: {
       ...(images ? { images } : {}),
     },
     twitter: {
-      card: images ? 'summary_large_image' : 'summary',
+      card: 'summary_large_image',
       title,
       description,
       ...(images ? { images } : {}),

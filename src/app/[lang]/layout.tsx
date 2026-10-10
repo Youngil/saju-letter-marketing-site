@@ -87,7 +87,9 @@ export async function generateMetadata({ params }: { params: Promise<{ lang: str
     // 페이지별 generateMetadata가 없는 세그먼트를 위한 폴백 기본값 — 실제로 이 값이 그대로
     // 쓰이는 페이지가 남지 않도록 각 page.tsx에 고유 title/description을 채워가는 중이다.
     // 홈(page.tsx)과 같은 이유로 브랜드명을 붙인다(2026-09-16, 한국어 "사주" 키워드 누락 수정).
-    title: `${dict.brand} — ${dict.hero.title}`,
+    // 하위 페이지 제목엔 브랜드를 뒤에 붙인다(2026-10-10 전체 점검 14차 — 블로그·compare·신년운세·처리방침 탭 제목·검색 결과에
+    // 브랜드가 없었다). 이미 브랜드가 든 제목(홈·궁합·compare)은 그 페이지가 `absolute`로 건다.
+    title: { template: `%s — ${dict.brand}`, default: `${dict.brand} — ${dict.hero.title}` },
     description: dict.hero.subtitle,
   };
 }
@@ -134,12 +136,12 @@ export default async function LangLayout({
                 링크만 제거한 텍스트로 대체한다. */}
             {isLaunchContentLanguage(lang) ? (
               <Link href={`/${lang}`} className="font-display flex shrink-0 items-center gap-2 text-base font-semibold sm:text-lg">
-                <Image src="/logo-icon.png" alt="" width={28} height={28} className="h-7 w-7 shrink-0 rounded-md" />
+                <Image src="/logo-512.png" alt="" width={28} height={28} className="h-7 w-7 shrink-0 rounded-md" />
                 <span className="truncate">{dict.brand}</span>
               </Link>
             ) : (
               <span className="font-display flex shrink-0 items-center gap-2 text-base font-semibold sm:text-lg">
-                <Image src="/logo-icon.png" alt="" width={28} height={28} className="h-7 w-7 shrink-0 rounded-md" />
+                <Image src="/logo-512.png" alt="" width={28} height={28} className="h-7 w-7 shrink-0 rounded-md" />
                 <span className="truncate">{dict.brand}</span>
               </span>
             )}

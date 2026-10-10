@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { activeLanguageAlternates, languageAlternates, pickAlternateDefault, WEB_BASE_URL } from './seo';
+import { activeLanguageAlternates, buildSocialMetadata, languageAlternates, pickAlternateDefault, WEB_BASE_URL } from './seo';
 
 describe('languageAlternates', () => {
   it('각 언어를 pathFor로 만든 절대 URL에 매핑하고, x-default를 defaultLang 경로로 채운다', () => {
@@ -47,5 +47,14 @@ describe('activeLanguageAlternates — 켠 언어만으로 hreflang', () => {
 
   it('켠 언어가 하나도 없으면 hreflang을 아예 걸지 않는다(undefined)', () => {
     expect(activeLanguageAlternates([], (lang: string) => `/${lang}`, 'en')).toBeUndefined();
+  });
+});
+
+describe('buildSocialMetadata', () => {
+  // 2026-10-10 전체 점검 14차 — 모든 페이지에 1200×630 OG 이미지가 있어(파일 규약 포함) X 카드는 항상 큰 이미지.
+  it('images가 없어도 X 카드는 summary_large_image', () => {
+    const meta = buildSocialMetadata({ title: 't', description: 'd' });
+    expect(meta.twitter).toMatchObject({ card: 'summary_large_image', title: 't', description: 'd' });
+    expect(buildSocialMetadata({ title: 't', description: 'd', images: ['x'] }).twitter).toMatchObject({ card: 'summary_large_image', images: ['x'] });
   });
 });

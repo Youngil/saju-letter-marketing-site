@@ -37,8 +37,11 @@ export async function generateMetadata({ params }: { params: Promise<{ lang: str
 
   // <title> 태그에는 브랜드명(예: "사주편지")을 붙인다 — hero.title 단독으로는 한국어 "사주"
   // 키워드가 빠져 있어 그 검색어로 색인/검색될 여지를 스스로 줄이고 있었다(2026-09-16 발견).
-  // 화면에 보이는 H1(hero.title 자체)은 브랜드 보이스 그대로 두고, 메타데이터에서만 합성한다.
-  const pageTitle = `${dict.brand} — ${dict.hero.title}`;
+  // 화면에 보이는 H1(hero.title 자체)은 브랜드 보이스 그대로 두고, 메타데이터는 사전의 전용 문구(`hero.metaTitle`·
+  // `metaDescription`, 2026-10-10 전체 점검 14차 — en/es에 "Korean astrology"·"birth chart" 같은 분류 낱말이 없었다)를 쓴다.
+  // 이미 브랜드가 들어 있어 레이아웃 템플릿(`%s — 브랜드`)은 건너뛴다.
+  const pageTitle = dict.hero.metaTitle;
+  const pageDescription = dict.hero.metaDescription;
 
   // hreflang은 지금 켠 콘텐츠 언어끼리만(sitemap.ts와 같은 계산, 2026-10-06 전체 점검 3차 후속). 관리자가 이 언어를 껐으면
   // 데모·소개 링크를 숨긴 껍데기 페이지라(아래 showContentLinks) 검색 결과에서 빼 달라고 noindex를 건다.
@@ -47,8 +50,8 @@ export async function generateMetadata({ params }: { params: Promise<{ lang: str
   const isActive = contentLanguages.includes(rawLang);
 
   return {
-    title: pageTitle,
-    description: dict.hero.subtitle,
+    title: { absolute: pageTitle },
+    description: pageDescription,
     alternates: {
       canonical: `${WEB_BASE_URL}${path(rawLang)}`,
       languages: activeLanguageAlternates(contentLanguages, path, serviceLanguages.default),
@@ -56,7 +59,7 @@ export async function generateMetadata({ params }: { params: Promise<{ lang: str
     ...(isActive ? {} : { robots: NOINDEX_ROBOTS }),
     ...buildSocialMetadata({
       title: pageTitle,
-      description: dict.hero.subtitle,
+      description: pageDescription,
       url: `${WEB_BASE_URL}${path(rawLang)}`,
     }),
   };

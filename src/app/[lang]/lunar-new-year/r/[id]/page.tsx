@@ -9,7 +9,7 @@ import { DISCLAIMER_CONTENT } from '@/content/disclaimer';
 import { EmailSignupForm } from '@/components/lunar-new-year/EmailSignupForm';
 import { ShareButton } from '@/components/lunar-new-year/ShareButton';
 import { AppDownloadLinks } from '@/components/AppDownloadLinks';
-import { WEB_BASE_URL, NOINDEX_ROBOTS } from '@/lib/seo';
+import { WEB_BASE_URL, buildSocialMetadata, NOINDEX_ROBOTS } from '@/lib/seo';
 import { readOwnerToken } from '@/lib/readingOwner';
 import { isValidReadingId } from '@/lib/routeParams';
 import { getRequestVisitorIp } from '@/lib/requestVisitorIp';
@@ -44,17 +44,18 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   if (!reading) return {};
 
   return {
-    title: `${reading.content.title} — Saju Letter`,
+    // 브랜드는 레이아웃 템플릿(`%s — 브랜드`)이 그 언어 이름으로 붙인다(2026-10-10 14차 — 예전엔 모든 언어에 영어 "Saju Letter").
+    title: reading.content.title,
     description: reading.content.greeting,
     // 방문자 개인의 신년운세 결과라 검색결과 색인 대상이 아니다 — 카카오톡/트위터 공유 미리보기용
     // OG 태그는 그대로 유지한다.
     robots: NOINDEX_ROBOTS,
-    openGraph: {
+    // OG 이미지는 같은 세그먼트의 opengraph-image.tsx(1200×630) — X 카드도 큰 이미지로(2026-10-10 14차).
+    ...buildSocialMetadata({
       title: reading.content.title,
       description: reading.content.greeting,
       url: `${WEB_BASE_URL}/${rawLang}/lunar-new-year/r/${id}`,
-    },
-    twitter: { card: 'summary', title: reading.content.title, description: reading.content.greeting },
+    }),
   };
 }
 

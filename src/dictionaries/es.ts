@@ -10,6 +10,9 @@ export const dictionary: MarketingDictionary = {
     title: 'Cada mañana, una carta breve de Dain',
     subtitle:
       'Saju Letter te envía una carta cálida y personal basada en el momento en que naciste — no un informe largo de fortuna. Conoce a Dain, quien escribe tus cartas, y prueba una vista previa gratis abajo.',
+    metaTitle: 'Saju Letter — Tu carta diaria de astrología coreana según tu carta natal',
+    metaDescription:
+      'Una carta breve cada mañana basada en tu carta natal y en el saju, la astrología coreana de los cuatro pilares. Un horóscopo diario y cálido de Dain en lugar de un largo informe de fortuna. Prueba una vista previa gratis, sin registrarte.',
     ctaDemo: 'Prueba una carta gratis',
     dainName: 'Dain',
     dainRole: 'Quien escribe tus cartas',
