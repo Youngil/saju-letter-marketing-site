@@ -11,7 +11,7 @@ export const dictionary: MarketingDictionary = {
     appPreviewAlt: 'Ứng dụng Saju Letter — lá thư buổi sáng còn niêm phong và lá thư đã mở',
     title: 'Mỗi sáng, một lá thư ngắn từ lá số tứ trụ Hàn Quốc của bạn',
     subtitle:
-      'Cung hoàng đạo đến từ tháng sinh của bạn. Bát Tự bắt đầu từ ngày bạn sinh ra và đọc nó cùng với ngày hôm nay. Dain biến điều đó thành một lá thư ngắn mỗi sáng — không phải bản luận giải dài. Thử xem trước miễn phí bên dưới.',
+      'Cung hoàng đạo của bạn giữ nguyên suốt cả năm. Bát Tự bắt đầu từ ngày bạn sinh ra và đọc nó trong tương quan với hôm nay — vì vậy mỗi sáng lá thư lại mới. Dain viết thật ngắn: một lá thư, không phải bản luận giải dài. Thử xem trước miễn phí bên dưới.',
     metaTitle: 'Saju Letter — Lá thư chiêm tinh Hàn Quốc mỗi ngày dựa trên lá số của bạn',
     metaDescription:
       'Mỗi sáng một lá thư ngắn dựa trên lá số ngày sinh của bạn theo Bát Tự (saju) — chiêm tinh tứ trụ của Hàn Quốc. Lời nhắn hằng ngày ấm áp từ Dain thay vì một bản luận giải dài. Xem trước miễn phí, không cần đăng ký.',
@@ -69,24 +69,24 @@ export const dictionary: MarketingDictionary = {
   compare: {
     title: 'Cung hoàng đạo và Bát Tự, đặt cạnh nhau',
     subtitle:
-      'Nếu bạn đã biết cung hoàng đạo của mình, đây là cách Bát Tự tiếp cận khác đi — và vì sao một lá thư buổi sáng có thể cảm thấy cá nhân hơn.',
+      'Nếu bạn đã biết cung hoàng đạo của mình, đây là cách Bát Tự tiếp cận khác đi — và vì sao nó hợp với một lá thư ngắn mỗi sáng.',
     ogTitle: 'Cung hoàng đạo vs. Bát Tự — Saju Letter',
     ogDescription: 'Xem 12 cung hoàng đạo phương Tây so với hệ thống luận giải Bát Tự của Hàn Quốc.',
     opening:
       'Dain viết mỗi lá thư buổi sáng từ ngày bạn sinh ra, đọc cùng với ngày hôm nay — không phải từ một cung mặt trời duy nhất. Trang này là phần giải thích dài hơn mà chúng tôi không đặt trên trang chủ: Bát Tự khác cung hoàng đạo thế nào, bằng lời đơn giản.',
     diagramCaption: 'Điểm khác, theo cách nhìn của Dain',
     diagramZodiacLabel: 'Cung hoàng đạo',
-    diagramZodiacPoint: 'Một vị trí mặt trời (theo tháng sinh)',
+    diagramZodiacPoint: 'Một vị trí mặt trời (theo ngày sinh)',
     diagramSajuLabel: 'Bát Tự',
     diagramClosing: 'Bốn trụ tạo nhịp khác mỗi ngày — nên một lá thư buổi sáng ngắn là có thể.',
     zodiacColumnLabel: 'Cung hoàng đạo',
     sajuColumnLabel: 'Nhật chủ (Bát Tự)',
     dayMasterSectionTitle: '10 nhật chủ trong Bát Tự',
     dayMasterIntro:
-      'Cung hoàng đạo được xác định theo tháng sinh nên có 12 cung. Nhật chủ trong Bát Tự lại được xác định theo đúng ngày sinh của bạn, xoay vòng qua 10 giá trị mỗi 10 ngày — vì vậy nó không khớp từng hàng với bảng cung hoàng đạo bên dưới. Hãy thử bản xem trước trên trang chủ để cảm nhận giọng điệu lá thư buổi sáng.',
+      'Cung hoàng đạo chia một năm thành 12 khoảng ngày nên có 12 cung. Nhật chủ trong Bát Tự lại được xác định theo đúng ngày sinh của bạn, xoay vòng qua 10 giá trị mỗi 10 ngày — vì vậy nó không khớp từng hàng với bảng cung hoàng đạo bên dưới. Hãy thử bản xem trước trên trang chủ để cảm nhận giọng điệu lá thư buổi sáng.',
     infoAmountTitle: 'Mỗi hệ thống sử dụng bao nhiêu thông tin?',
     infoAmountBody:
-      'Cung hoàng đạo phương Tây của bạn được xác định chỉ bằng một thông tin duy nhất — tháng sinh. Sinh vào tháng 3? Bạn là Song Ngư (hoặc Bạch Dương) suốt đời, một giá trị cố định trong số 12. Bát Tự xây dựng bốn "trụ" riêng biệt từ năm, tháng, ngày và giờ sinh của bạn. Điều đó có nghĩa là hai người sinh cùng ngày — thậm chí cùng tháng — vẫn có thể có điểm khởi đầu khá khác nhau nếu sinh vào giờ khác nhau. Đây là một sự kết hợp cá nhân hơn nhiều so với chỉ một cung hoàng đạo.',
+      'Cung hoàng đạo phương Tây của bạn được xác định chỉ bằng một thông tin duy nhất — ngày sinh của bạn rơi vào khoảng nào trong 12 khoảng ngày. Sinh ngày 10 tháng 3? Bạn là Song Ngư suốt đời, một giá trị cố định trong số 12. Bát Tự xây dựng bốn "trụ" riêng biệt từ năm, tháng, ngày và giờ sinh của bạn. Điều đó có nghĩa là hai người sinh cùng ngày — thậm chí cùng tháng — vẫn có thể có điểm khởi đầu khá khác nhau nếu sinh vào giờ khác nhau. Đây là một sự kết hợp cá nhân hơn nhiều so với chỉ một cung hoàng đạo.',
     hourTitle: 'Tôi có cần biết chính xác giờ sinh không?',
     hourBody:
       'Trụ cuối cùng trong bốn trụ — trụ giờ — được xác định theo giờ sinh của bạn. Không sao nếu bạn không biết chính xác: Saju Letter được thiết kế để hoạt động chỉ với ba trụ năm, tháng, ngày, và bạn luôn có thể bổ sung giờ sinh sau này nếu biết được.',

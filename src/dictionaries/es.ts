@@ -7,9 +7,9 @@ export const dictionary: MarketingDictionary = {
   nav: { home: 'Inicio', blog: 'Blog', compare: 'Zodiaco vs. Saju' },
   hero: {
     appPreviewAlt: 'App de Saju Letter: una carta de la mañana sellada y la carta abierta',
-    title: 'Cada mañana, una carta breve desde tu carta natal coreana',
+    title: 'Tu astrología coreana, en una carta breve cada mañana',
     subtitle:
-      'Tu signo zodiacal sale de tu mes de nacimiento. El saju parte del día en que naciste y lo lee junto al día de hoy. Dain lo convierte en una carta breve cada mañana — no en un largo informe de fortuna. Prueba una vista previa gratis abajo.',
+      'Tu signo no cambia en todo el año. El saju parte del día en que naciste y lo lee frente a hoy: por eso la carta es nueva cada mañana. Dain la escribe breve — una carta, no un largo informe de fortuna. Prueba una vista previa gratis abajo.',
     metaTitle: 'Saju Letter — Tu carta diaria de astrología coreana según tu carta natal',
     metaDescription:
       'Una carta breve cada mañana basada en tu carta natal y en el saju, la astrología coreana de los cuatro pilares. Un horóscopo diario y cálido de Dain en lugar de un largo informe de fortuna. Prueba una vista previa gratis, sin registrarte.',
@@ -67,24 +67,24 @@ export const dictionary: MarketingDictionary = {
   compare: {
     title: 'Signo zodiacal vs. saju, lado a lado',
     subtitle:
-      'Si ya conoces tu signo zodiacal occidental, así es como el enfoque del saju es diferente — y por qué una carta matutina puede sentirse más personal.',
+      'Si ya conoces tu signo zodiacal occidental, así es como el enfoque del saju es diferente — y por qué encaja con una carta breve cada mañana.',
     ogTitle: 'Zodiaco vs. Saju — Saju Letter',
     ogDescription: 'Descubre cómo se comparan los 12 signos zodiacales occidentales con el sistema coreano de lectura saju.',
     opening:
       'Dain escribe cada carta matutina desde el día en que naciste, leído junto al día de hoy — no desde un solo signo solar. Esta página es la explicación más larga que no ponemos en la portada: cómo el saju difiere de un signo zodiacal, en palabras sencillas.',
     diagramCaption: 'La diferencia, a ojos de Dain',
     diagramZodiacLabel: 'Signo zodiacal',
-    diagramZodiacPoint: 'Una posición del sol (por tu mes de nacimiento)',
+    diagramZodiacPoint: 'Una posición del sol (por tu fecha de nacimiento)',
     diagramSajuLabel: 'Saju',
     diagramClosing: 'Cuatro pilares crean un ritmo distinto cada día — por eso es posible una carta matutina breve.',
     zodiacColumnLabel: 'Signo zodiacal',
     sajuColumnLabel: 'Maestro del día (saju)',
     dayMasterSectionTitle: 'Los 10 maestros del día del saju',
     dayMasterIntro:
-      'Los signos zodiacales se definen por tu mes de nacimiento, por eso hay 12. El maestro del día del saju se define por tu día exacto de nacimiento y rota entre 10 valores cada 10 días — por eso no coincide fila por fila con la tabla del zodiaco de abajo. Prueba la demo de la portada para sentir el tono de tu carta matutina.',
+      'Los signos zodiacales dividen el año en 12 tramos de fechas, por eso hay 12. El maestro del día del saju se define por tu día exacto de nacimiento y rota entre 10 valores cada 10 días — por eso no coincide fila por fila con la tabla del zodiaco de abajo. Prueba la demo de la portada para sentir el tono de tu carta matutina.',
     infoAmountTitle: '¿Cuánta información usa cada sistema?',
     infoAmountBody:
-      'Tu signo zodiacal occidental se define por un solo dato — tu mes de nacimiento. ¿Naciste en marzo? Eres Piscis (o Aries) de por vida, un valor fijo entre 12. El saju construye cuatro "pilares" separados a partir de tu año, mes, día y hora de nacimiento. Eso significa que dos personas nacidas el mismo día — incluso el mismo mes — pueden terminar con puntos de partida bastante distintos si nacieron a horas diferentes. Es una combinación mucho más personal que un signo zodiacal solo.',
+      'Tu signo zodiacal occidental se define por un solo dato — en cuál de los 12 tramos de fechas cae tu cumpleaños. ¿Naciste el 10 de marzo? Eres Piscis de por vida, un valor fijo entre 12. El saju construye cuatro "pilares" separados a partir de tu año, mes, día y hora de nacimiento. Eso significa que dos personas nacidas el mismo día — incluso el mismo mes — pueden terminar con puntos de partida bastante distintos si nacieron a horas diferentes. Es una combinación mucho más personal que un signo zodiacal solo.',
     hourTitle: '¿Necesito saber mi hora exacta de nacimiento?',
     hourBody:
       'El último de los cuatro pilares — el pilar de la hora — se define por tu hora de nacimiento. No pasa nada si no la sabes con exactitud: Saju Letter está diseñado para funcionar solo con los pilares de año, mes y día, y siempre puedes añadir tu hora de nacimiento más adelante si la descubres.',

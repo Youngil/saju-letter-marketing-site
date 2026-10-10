@@ -9,7 +9,7 @@ export const dictionary: MarketingDictionary = {
     appPreviewAlt: 'Saju Letter app — a sealed morning letter and the opened letter',
     title: 'A short morning letter from your Korean birth chart',
     subtitle:
-      'Your zodiac sign comes from your birth month. Saju starts from the day you were born and reads it against today. Dain turns that into a short letter every morning — not a long fortune report. Try a free preview below.',
+      'Your zodiac sign stays the same all year. Saju starts from the day you were born and reads it against today — so the letter is new every morning. Dain keeps it short: a letter, not a long fortune report. Try a free preview below.',
     metaTitle: 'Saju Letter — A Daily Korean Astrology Letter Based on Your Birth Chart',
     metaDescription:
       'A short morning letter based on your birth chart, rooted in saju — Korean four-pillars astrology. A gentle daily horoscope from Dain instead of a long fortune report. Try a free preview, no sign-up needed.',
@@ -66,24 +66,24 @@ export const dictionary: MarketingDictionary = {
   },
   compare: {
     title: 'Zodiac sign vs. saju, side by side',
-    subtitle: "If you already know your Western zodiac sign, here's how saju's approach differs — and why a morning letter can feel personal.",
+    subtitle: "If you already know your Western zodiac sign, here's how saju's approach differs — and why it suits a short letter every morning.",
     ogTitle: 'Zodiac vs. Saju — Saju Letter',
     ogDescription: 'See how the 12 Western zodiac signs compare to the Korean saju reading system.',
     opening:
       "Dain writes each morning letter from the day you were born, read against today — not from a single sun sign. This page is the longer explanation we don't put on the home page: how saju differs from a zodiac sign, in plain language.",
     diagramCaption: "Dain's quick look at the difference",
     diagramZodiacLabel: 'Zodiac sign',
-    diagramZodiacPoint: 'One sun position (from your birth month)',
+    diagramZodiacPoint: 'One sun position (from your birthday)',
     diagramSajuLabel: 'Saju',
     diagramClosing: 'Four pillars mean a new rhythm each day — so a short morning letter is possible.',
     zodiacColumnLabel: 'Zodiac sign',
     sajuColumnLabel: 'Saju day master',
     dayMasterSectionTitle: 'The 10 saju day masters',
     dayMasterIntro:
-      "Zodiac signs are set by your birth month, so there are 12 of them. Saju's day master is set by your exact birth day instead, cycling through 10 values every 10 days — so it doesn't line up row-for-row with the zodiac table below. Try the home demo to see a taste of your morning letter.",
+      "Zodiac signs split the year into 12 date ranges, so there are 12 of them. Saju's day master is set by your exact birth day instead, cycling through 10 values every 10 days — so it doesn't line up row-for-row with the zodiac table below. Try the home demo to see a taste of your morning letter.",
     infoAmountTitle: 'How much information does each one use?',
     infoAmountBody:
-      "Your Western zodiac sign is set by a single piece of information — your birth month. Born in March? You're a Pisces (or Aries) for life, one fixed value out of 12. Saju builds four separate \"pillars\" from your birth year, month, day, and hour. That means two people born on the same day — even the same month — can end up with quite different starting points if they were born at different times. It's a much more personal combination than a zodiac sign alone.",
+      "Your Western zodiac sign is set by a single piece of information — which of 12 date ranges your birthday falls in. Born on March 10? You're a Pisces for life, one fixed value out of 12. Saju builds four separate \"pillars\" from your birth year, month, day, and hour. That means two people born on the same day — even the same month — can end up with quite different starting points if they were born at different times. It's a much more personal combination than a zodiac sign alone.",
     hourTitle: 'Do I need to know my exact birth time?',
     hourBody:
       "The last of the four pillars — the hour pillar — is set by your birth time. It's fine if you don't know it exactly: Saju Letter is built to work with just the year, month, and day pillars, and you can always add your birth time later if you find it out.",
