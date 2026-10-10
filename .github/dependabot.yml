@@ -1,0 +1,26 @@
+# 의존성 업데이트 PR(2026-10-10 전체 점검 14차). 보안 패치가 조용히 밀리지 않게 매주 확인한다.
+# - next·@next/mdx·eslint-config-next는 같은 정확한 버전으로 함께 올린다(CLAUDE.md §12) — 한 PR로 묶는다.
+# - 메이저 업데이트는 사람이 따로 판단한다(React·Next·Tailwind 메이저는 코드 변경이 따른다).
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      timezone: Asia/Seoul
+    open-pull-requests-limit: 5
+    groups:
+      nextjs:
+        patterns:
+          - next
+          - "@next/*"
+          - eslint-config-next
+      minor-and-patch:
+        update-types:
+          - minor
+          - patch
+    ignore:
+      - dependency-name: "*"
+        update-types:
+          - version-update:semver-major
