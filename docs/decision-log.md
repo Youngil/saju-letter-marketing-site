@@ -648,3 +648,14 @@ npm run build   # 프로덕션 빌드 — App Router 라우트/타입 검증 + M
 - **카피 정확성(14-11)** — 매일 편지는 조합별 공용이라 "나만을 위한/written just for you/あなただけ/solo para ti/só para você/viết riêng" 앱 안내를 "내 사주를 바탕으로"로. "다른 사람과 같은 문단을 쓰지 않는다"는 식의 문구는 이 저장소(사전·content·MDX)엔 없었다 — DB 블로그 글·백엔드 드립 메일은 확인 범위 밖.
 - **데모 결과 리드(14-12)** — 앱이 안드로이드뿐이라 아이폰·데스크톱 방문자가 결과 뒤 갈 곳이 없었다 → 같은 리드 폼(`demo_result`, 새 백엔드 엔드포인트 없음) + "iOS 출시 알림도 이 메일로". **iOS 출시 때 리드에게 실제로 알림을 보내야 이 약속이 지켜진다.**
 - **사주 사본 어긋남 테스트(14-13)**, **Node 22 고정·Dependabot(14-14)** — `npm audit --omit=dev` 0건. 개발 의존성(eslint-config-next 체인·js-yaml 등)은 `npm audit fix`가 npm 내부 오류(`edgesOut`)로 실패해 손대지 않았다.
+
+## 2026-10-11 — 전체 점검 15차(브랜치 `fix/full-review-15`)
+
+- **폰트 대체값(15-6)** — globals.css의 `var(--font-lora)`·`var(--font-noto-kr)`·`var(--font-noto-ja)`에 대체값이 없어, 변수가 정의되지 않은 화면(레이아웃을 거치지 않는 `global-not-found`, 폰트 CSS 받기 실패)에선 선언 전체가 무효가 돼 제목이 산세리프로 떨어졌다 → 각 `var()`에 대체값. `global-not-found`도 ko/ja면 CJK CSS를 건다(주소 목록을 `lib/cjkFonts.ts`로 옮김).
+- **폰트 받기 실패 = 운영 빌드 실패(15-7)** — 예전엔 경고 + 빈 CSS로 빌드가 성공해 ko/ja 제목이 조용히 시스템 세리프로 배포될 수 있었다. `K_SERVICE`·`CI`·`NODE_ENV=production`이면 exit 1(`CJK_FONTS_STRICT`로 덮기). CSS 캐시 하루 → 10분: CSS 이름은 레이아웃이 고정 주소로 걸어 해시를 못 넣는데, 하루 캐시면 Google이 폰트를 바꾼 뒤의 배포에서 옛 CSS가 새 컨테이너에 없는 woff2를 가리켰다(내용 해시 CSS 이름은 레이아웃이 빌드 산출물 목록을 읽어야 해서 짧은 캐시로 대신함). `--if-missing`은 빈 CSS면 다시 받는다.
+- **카피 사실 맞춤(15-8, D5)** — 히어로 "personal letter based on the moment you were born"/"생년월일시를 바탕으로"/"生まれた瞬間"은 틀렸다(매일 편지는 일간×일진 공용, 출생 시각은 유료 시지 보너스 한 문장). H1을 범주가 드러나게("A short morning letter from your Korean birth chart"), 부제를 사주 한 줄 설명("별자리는 태어난 달, 사주는 태어난 날에서 출발해 오늘과 견주어 읽는다")으로 6개 언어 교체. ko·ja 메타 설명의 "생년월일시/生まれた時間", compare 첫 문단의 "태어난 순간", 신년운세 결과의 앱 안내 "warm, personal"도 같은 기준으로. "thousands of combinations"는 이 저장소엔 없었다(로드맵 영상 대본 E2 쪽). 블로그 MDX의 "태어난 순간"은 사주 일반 설명이라 그대로.
+- **리드 폼 위치(15-9, 계약 C1)** — `context`가 GA에만 실려 백엔드에선 iOS 대기자(데모 결과 아래 폼)를 구분할 수 없었다 → `subscribeLead`가 `source`로 함께 보낸다(백엔드가 새 등록 때만 `signup_source`에 저장, 구버전 백엔드는 무시).
+- **꺼진 언어의 #demo(15-10)** — 관리자가 언어를 끄면 그 언어 홈은 데모를 숨기는데 블로그 글 끝·compare·궁합 만료 안내가 `/{lang}#demo`를 가리켰다 → `demoHref(lang, active)`가 `/#demo`(proxy가 켠 언어로)로. 404 화면은 켠 언어 목록이 없어 그대로(언어만 봄).
+- **AI 언급 기준(D6)** — "마케팅 카피에서 AI 언급 금지" → "앞세우지 않되, FAQ·처리방침·면책·직접 질문 답변에서는 밝힌다". 사이트에 FAQ·소개 문구 중 AI를 숨기거나 앞세우는 곳은 없었다(처리방침 §4가 AI 제공업체를 밝힘).
+- **처리방침 C7** — 앱이 가입·온보딩 퍼널 이벤트(`auth_view` 등)를 새로 보내므로 6개 언어 §1 앱 분석 괄호에 "화면·버튼 단위 이용 단계 + 식별 정보 미포함" 한 문장, 시행일 2026-10-11. 고지가 수집보다 먼저 나가는 쪽이라 모바일 배포보다 앞서도 된다.
+- **CI(C9)** — `.github/workflows/ci.yml`(tsc·test·lint·build, 배포 없음), dependabot에 github-actions 추가·npm 시각을 backend 형식으로.
