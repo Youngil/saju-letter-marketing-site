@@ -1,13 +1,14 @@
 'use client';
 
 import Image from 'next/image';
-import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
-import type { MarketingLanguage } from '@/lib/languages';
+import Link from 'next/link';
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { isLaunchContentLanguage, type MarketingLanguage } from '@/lib/languages';
 import type { MarketingDictionary } from '@/dictionaries/types';
 import type { CompatViewCopy } from '@/content/compatContent';
 import { COMPAT_NAME_LINES, type CompatNameLines } from '@/content/compatNameLines';
 import type { InviteView } from '@/lib/compatApi';
-import { logCompatEvent, submitGuestInvite } from '@/lib/compatApi';
+import { COMPAT_READING_RETRY_DELAYS_MS, logCompatEvent, refetchCompatInvite, submitGuestInvite } from '@/lib/compatApi';
 import { isOldEnough } from '@/lib/age';
 import { Turnstile, TURNSTILE_ENABLED, type TurnstileHandle } from '../Turnstile';
 import { AppDownloadLinks } from '../AppDownloadLinks';
@@ -80,11 +81,15 @@ export function CompatView({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [view.status]);
 
-  if (view.status === 'not_found') {
-    return <p className="text-red-600">{content.notFound}</p>;
-  }
-  if (view.status === 'expired') {
-    return <p className="text-red-600">{content.expired}</p>;
+  if (view.status === 'not_found' || view.status === 'expired') {
+    return (
+      <UnavailableInvite
+        content={content}
+        reason={view.status === 'expired' ? content.expired : content.notFound}
+        language={language}
+        appLinksDict={appLinksDict}
+      />
+    );
   }
   if (view.status === 'pending') {
     return (
@@ -107,7 +112,49 @@ export function CompatView({
       token={token}
       language={language}
       appLinksDict={appLinksDict}
+      onViewUpdate={setView}
     />
+  );
+}
+
+/**
+ * 홈 데모 주소 — 홈은 콘텐츠 축(ko/en/ja/es)에만 있다. pt/vi는 언어 없는 `/`로 보내 proxy가 방문자 언어의 홈으로 넘긴다
+ * (주소의 `#demo`는 리다이렉트 뒤에도 브라우저가 유지한다).
+ */
+function demoHref(language: MarketingLanguage): string {
+  return isLaunchContentLanguage(language) ? `/${language}#demo` : '/#demo';
+}
+
+/**
+ * 만료·없는 초대(2026-10-10 전체 점검 14차) — 예전엔 빨간 한 줄뿐이라 링크를 받은 친구가 이 서비스가 뭔지도 모른 채 떠났다.
+ * 같은 편지 셸 안에 중립 색 안내(잘못한 사람이 없으니 오류 빨강을 쓰지 않는다) + 홈 데모 + 앱 배지.
+ */
+function UnavailableInvite({
+  content,
+  reason,
+  language,
+  appLinksDict,
+}: {
+  content: CompatViewContent;
+  reason: string;
+  language: MarketingLanguage;
+  appLinksDict: MarketingDictionary['appLinks'];
+}) {
+  return (
+    <div className={SHEET_CLASS}>
+      <LetterSheet content={content}>
+        <h1 className="font-display text-2xl leading-snug text-balance">{content.unavailableTitle}</h1>
+        <p className="leading-relaxed text-foreground/80">{reason}</p>
+        <p className="text-sm leading-relaxed text-foreground/70">{content.unavailableBody}</p>
+        <Link
+          href={demoHref(language)}
+          className="self-start rounded-full bg-accent-warm px-6 py-3 font-medium text-white transition hover:bg-accent-warm/90"
+        >
+          {content.demoLink}
+        </Link>
+        <AppDownloadLinks dict={appLinksDict} language={language} context="compat_expired" />
+      </LetterSheet>
+    </div>
   );
 }
 
@@ -142,6 +189,7 @@ function CompletedResult({
   token,
   language,
   appLinksDict,
+  onViewUpdate,
 }: {
   content: CompatViewContent;
   requesterName: string | null;
@@ -149,8 +197,10 @@ function CompletedResult({
   token: string;
   language: MarketingLanguage;
   appLinksDict: MarketingDictionary['appLinks'];
+  onViewUpdate: (view: InviteView) => void;
 }) {
   const logInstallClick = () => logCompatEvent(token, 'install_cta_clicked', 'guest');
+  const readingWait = useReadingWait(reading === null, token, language, onViewUpdate);
 
   return (
     <div className="flex flex-col gap-6">
@@ -166,8 +216,24 @@ function CompletedResult({
               <p className="self-end font-display text-lg">{content.signature}</p>
               <p className="text-xs text-foreground/65">{content.disclaimerShort}</p>
             </>
+          ) : readingWait.gaveUp ? (
+            // 몇 번 다시 물어봐도 없으면(2026-10-10 전체 점검 14차) — 예전엔 "불러오는 중…"이 영원히 남았다.
+            <div role="status" className="flex flex-col gap-3">
+              <h1 className="font-display text-2xl leading-snug text-balance">{content.readingPendingTitle}</h1>
+              <p className="leading-relaxed text-foreground/75">{content.readingPendingBody}</p>
+              <button
+                type="button"
+                onClick={readingWait.retry}
+                className="self-start rounded-full border border-foreground/20 px-5 py-2 text-sm transition hover:border-accent-warm hover:text-accent-warm"
+              >
+                {content.refresh}
+              </button>
+              <p className="text-xs text-foreground/65">{content.disclaimerShort}</p>
+            </div>
           ) : (
-            <p className="text-foreground/60">{content.loading}</p>
+            <p role="status" className="text-foreground/60">
+              {content.loading}
+            </p>
           )}
         </LetterSheet>
       </div>
@@ -187,6 +253,61 @@ function CompletedResult({
       </section>
     </div>
   );
+}
+
+/**
+ * 결과는 완료인데 궁합 글이 아직 없을 때(`reading: null`) 점점 늘린 간격으로 몇 번 다시 묻는다(2026-10-10 전체 점검 14차).
+ * 글이 생기면(또는 상태가 바뀌면) 부모 view를 바꾸고, 다 써도 없으면 `gaveUp` — 버튼(`retry`)이 한 번 바로 묻고 다시 센다.
+ */
+function useReadingWait(
+  waiting: boolean,
+  token: string,
+  language: MarketingLanguage,
+  onViewUpdate: (view: InviteView) => void,
+): { gaveUp: boolean; retry: () => void } {
+  const [round, setRound] = useState(0);
+  const [gaveUp, setGaveUp] = useState(false);
+
+  useEffect(() => {
+    if (!waiting) return;
+    let cancelled = false;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    // 버튼으로 다시 시작한 회차는 첫 확인을 기다리지 않는다.
+    const delays = round === 0 ? [...COMPAT_READING_RETRY_DELAYS_MS] : [0, ...COMPAT_READING_RETRY_DELAYS_MS];
+
+    function attempt(index: number) {
+      if (index >= delays.length) {
+        setGaveUp(true);
+        return;
+      }
+      timer = setTimeout(async () => {
+        try {
+          const next = await refetchCompatInvite(token, language);
+          if (cancelled) return;
+          if (next.status !== 'completed' || next.reading !== null) {
+            onViewUpdate(next);
+            return;
+          }
+        } catch {
+          // 일시 오류는 다음 시도로 넘긴다.
+          if (cancelled) return;
+        }
+        attempt(index + 1);
+      }, delays[index]);
+    }
+    attempt(0);
+    return () => {
+      cancelled = true;
+      if (timer !== undefined) clearTimeout(timer);
+    };
+  }, [waiting, round, token, language, onViewUpdate]);
+
+  const retry = useCallback(() => {
+    setGaveUp(false);
+    setRound((r) => r + 1);
+  }, []);
+
+  return { gaveUp, retry };
 }
 
 function PendingForm({

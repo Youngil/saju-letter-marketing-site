@@ -51,6 +51,21 @@ export const getCompatInvite = cache(async (token: string, language: MarketingLa
   }
 });
 
+/**
+ * 브라우저에서 같은 초대를 다시 묻는다(2026-10-10 전체 점검 14차) — 결과는 완료인데 궁합 글(배치 캐시)이 아직 없을 때
+ * (`reading: null`) `CompatView`가 몇 번 다시 확인한다. 서버 전용 `cache()`·방문자 IP 없이 그냥 부른다(브라우저 요청은 방문자
+ * 자신의 IP로 백엔드 한도를 쓴다). 실패는 그대로 던진다 — 호출부가 다음 시도로 넘긴다.
+ */
+export function refetchCompatInvite(token: string, language: MarketingLanguage): Promise<InviteView> {
+  return request<InviteView>(`/compatibility-invites/${encodeURIComponent(token)}?language=${encodeURIComponent(language)}`);
+}
+
+/**
+ * `reading: null`일 때 다시 물어보는 간격(밀리초) — 점점 늘려 네 번(약 45초). 그 뒤엔 "곧 도착해요" 안내와 새로고침 버튼.
+ * 궁합 글은 백엔드가 미리 만든 공용 캐시에서 고르므로 보통 첫 응답에 있고, 없는 건 캐시가 막 비었을 때뿐이다.
+ */
+export const COMPAT_READING_RETRY_DELAYS_MS = [3_000, 6_000, 12_000, 24_000] as const;
+
 export interface SubmitGuestInviteInput {
   name: string;
   dayMaster: HeavenlyStem;

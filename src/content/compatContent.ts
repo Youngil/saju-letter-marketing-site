@@ -62,6 +62,17 @@ export interface CompatContent {
   signature: string;
   ctaTitle: string;
   ctaBody: string;
+  /**
+   * 만료·없는 초대 화면(2026-10-10 전체 점검 14차) — 예전엔 빨간 한 줄뿐이라 링크를 받은 친구가 그대로 떠났다. 이제 편지 셸 안에
+   * 중립 제목 + 이유(`expired`/`notFound`) + 홈 데모로 가는 링크(`demoLink`) + 앱 배지.
+   */
+  unavailableTitle: string;
+  unavailableBody: string;
+  demoLink: string;
+  /** 결과는 완료인데 궁합 글(배치 캐시)이 아직 없을 때 — 몇 번 다시 물어본 뒤 보여 주는 안내와 버튼(14차). */
+  readingPendingTitle: string;
+  readingPendingBody: string;
+  refresh: string;
   og: {
     not_found: CompatOgCopy;
     expired: CompatOgCopy;
@@ -103,6 +114,12 @@ export const COMPAT_CONTENT: Record<MarketingLanguage, CompatContent> = {
     signature: '— 다인',
     ctaTitle: '나도 매일 아침, 다인의 편지 받아보기',
     ctaBody: '앱에서는 매일 아침 나만을 위한 편지가 오고, 궁금한 누구에게나 이렇게 궁합 편지를 보낼 수 있어요.',
+    unavailableTitle: '이 궁합 편지는 지금 열 수 없어요',
+    unavailableBody: '대신 내 생년월일로 다인의 오늘 편지를 먼저 읽어 보세요. 가입 없이 무료예요.',
+    demoLink: '오늘의 편지 미리 받아보기',
+    readingPendingTitle: '편지가 곧 도착해요',
+    readingPendingBody: '다인이 두 사람의 궁합 편지를 마무리하고 있어요. 잠시 뒤 새로고침하면 볼 수 있어요.',
+    refresh: '새로고침',
     og: {
       not_found: { title: '사주편지 — 궁합 보기', description: '이 링크를 찾을 수 없어요. 보낸 사람에게 다시 확인해주세요.' },
       expired: { title: '사주편지 — 궁합 보기', description: '이 초대 링크는 만료됐어요. 초대를 보낸 사람에게 새 링크를 요청해주세요.' },
@@ -148,6 +165,12 @@ export const COMPAT_CONTENT: Record<MarketingLanguage, CompatContent> = {
     signature: '— Dain',
     ctaTitle: 'Get a letter from Dain every morning',
     ctaBody: 'In the app, a letter written just for you arrives each morning — and you can send a compatibility letter like this to anyone you are curious about.',
+    unavailableTitle: "This compatibility letter can't be opened right now",
+    unavailableBody: "In the meantime, read today's letter from Dain with your own birth date — free, no sign-up needed.",
+    demoLink: "Preview today's letter",
+    readingPendingTitle: 'Your letter is almost here',
+    readingPendingBody: 'Dain is still finishing the compatibility letter for the two of you. Refresh in a moment to read it.',
+    refresh: 'Refresh',
     og: {
       not_found: { title: 'Saju Letter — Compatibility Check', description: "This link isn't valid. Please double-check it with whoever sent it to you." },
       expired: { title: 'Saju Letter — Compatibility Check', description: 'This invite link has expired — ask your friend to send a new one.' },
@@ -193,6 +216,12 @@ export const COMPAT_CONTENT: Record<MarketingLanguage, CompatContent> = {
     signature: '— ダイン',
     ctaTitle: '毎朝、ダインの手紙を受け取る',
     ctaBody: 'アプリでは毎朝あなただけの手紙が届き、気になる人にこんな相性の手紙を送ることもできます。',
+    unavailableTitle: 'この相性の手紙は、いまは開けません',
+    unavailableBody: 'そのかわりに、ご自身の生年月日でダインの今日の手紙を読んでみてください。登録不要・無料です。',
+    demoLink: '今日の手紙をプレビュー',
+    readingPendingTitle: 'まもなく手紙が届きます',
+    readingPendingBody: 'ダインがおふたりの相性の手紙を仕上げているところです。少したってから再読み込みしてください。',
+    refresh: '再読み込み',
     og: {
       not_found: { title: 'サジュレター — 相性チェック', description: 'このリンクが見つかりませんでした。送ってくれた相手にご確認ください。' },
       expired: { title: 'サジュレター — 相性チェック', description: 'この招待リンクは期限切れです。招待した相手に新しいリンクをお願いしてください。' },
@@ -238,6 +267,12 @@ export const COMPAT_CONTENT: Record<MarketingLanguage, CompatContent> = {
     signature: '— Dain',
     ctaTitle: 'Recibe una carta de Dain cada mañana',
     ctaBody: 'En la app, cada mañana llega una carta escrita solo para ti, y puedes enviar una carta de compatibilidad como esta a quien quieras.',
+    unavailableTitle: 'Esta carta de compatibilidad no se puede abrir ahora',
+    unavailableBody: 'Mientras tanto, lee la carta de hoy de Dain con tu propia fecha de nacimiento: gratis y sin registrarte.',
+    demoLink: 'Ver la carta de hoy',
+    readingPendingTitle: 'Tu carta está por llegar',
+    readingPendingBody: 'Dain está terminando la carta de compatibilidad para ustedes dos. Vuelve a cargar la página en un momento para leerla.',
+    refresh: 'Volver a cargar',
     og: {
       not_found: { title: 'Saju Letter — Prueba de compatibilidad', description: 'Este enlace no es válido. Verifícalo con quien te lo envió.' },
       expired: { title: 'Saju Letter — Prueba de compatibilidad', description: 'Este enlace de invitación ha caducado — pide a tu amigo que te envíe uno nuevo.' },
@@ -283,6 +318,12 @@ export const COMPAT_CONTENT: Record<MarketingLanguage, CompatContent> = {
     signature: '— Dain',
     ctaTitle: 'Receba uma carta de Dain toda manhã',
     ctaBody: 'No app, toda manhã chega uma carta escrita só para você — e você pode mandar uma carta de compatibilidade como esta para quem quiser.',
+    unavailableTitle: 'Esta carta de compatibilidade não pode ser aberta agora',
+    unavailableBody: 'Enquanto isso, leia a carta de hoje da Dain com a sua própria data de nascimento — grátis e sem cadastro.',
+    demoLink: 'Ver a carta de hoje',
+    readingPendingTitle: 'Sua carta está quase chegando',
+    readingPendingBody: 'A Dain está terminando a carta de compatibilidade de vocês dois. Recarregue a página daqui a pouco para ler.',
+    refresh: 'Recarregar',
     og: {
       not_found: { title: 'Saju Letter — Verificação de compatibilidade', description: 'Este link não é válido. Verifique com quem te enviou.' },
       expired: { title: 'Saju Letter — Verificação de compatibilidade', description: 'Este link de convite expirou — peça ao seu amigo para enviar um novo.' },
@@ -328,6 +369,12 @@ export const COMPAT_CONTENT: Record<MarketingLanguage, CompatContent> = {
     signature: '— Dain',
     ctaTitle: 'Nhận thư của Dain mỗi sáng',
     ctaBody: 'Trong ứng dụng, mỗi sáng sẽ có một lá thư viết riêng cho bạn, và bạn có thể gửi lá thư hợp nhau như thế này cho bất kỳ ai.',
+    unavailableTitle: 'Hiện chưa thể mở lá thư hợp nhau này',
+    unavailableBody: 'Trong lúc chờ, hãy đọc lá thư hôm nay của Dain bằng ngày sinh của chính bạn — miễn phí, không cần đăng ký.',
+    demoLink: 'Xem trước lá thư hôm nay',
+    readingPendingTitle: 'Lá thư sắp đến rồi',
+    readingPendingBody: 'Dain đang hoàn thiện lá thư hợp nhau cho hai bạn. Hãy tải lại trang sau ít phút để đọc.',
+    refresh: 'Tải lại',
     og: {
       not_found: { title: 'Saju Letter — Kiểm tra mức độ hợp nhau', description: 'Liên kết này không hợp lệ. Vui lòng kiểm tra lại với người đã gửi cho bạn.' },
       expired: { title: 'Saju Letter — Kiểm tra mức độ hợp nhau', description: 'Liên kết mời này đã hết hạn — hãy nhờ bạn của bạn gửi liên kết mới.' },

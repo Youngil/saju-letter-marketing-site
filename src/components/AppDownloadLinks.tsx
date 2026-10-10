@@ -146,7 +146,7 @@ export function AppDownloadLinks({
   emphasized?: boolean;
   className?: string;
   /**
-   * GA4 `install_cta_click` 이벤트에 함께 실리는 화면 식별자(예: 'home_hero' / 'demo_result' /
+   * GA4 `install_cta_click` 이벤트에 함께 실리는 화면 식별자(예: 'home_hero' / 'demo_result' / 'compat_expired' / 'blog_post' /
    * 'compat_result' / 'newyear_result' / 'newyear_offseason') — 그로스 문서 채널별 UTM 유입이
    * 최종적으로 어느 전환 지점의 CTA까지 이어지는지 구분하기 위함. 생략하면 GA 이벤트 자체를
    * 보내지 않는다(호출부가 이 배지의 용도를 아직 분류하지 않은 경우 무리하게 태깅하지 않음).

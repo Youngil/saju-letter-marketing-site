@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { ApiError, isRetryableApiError } from './apiClient';
-import { getCompatInvite } from './compatApi';
+import { COMPAT_READING_RETRY_DELAYS_MS, getCompatInvite } from './compatApi';
 import { getReading } from './lunarNewYearApi';
 
 function jsonResponse(status: number, body: unknown): Response {
@@ -54,5 +54,15 @@ describe('getReading — 404만 null, 일시 오류는 던진다', () => {
   it('429는 던진다', async () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue(jsonResponse(429, { error: 'Too many requests' })));
     await expect(getReading('r1')).rejects.toMatchObject({ status: 429 });
+  });
+});
+
+describe('COMPAT_READING_RETRY_DELAYS_MS', () => {
+  // 2026-10-10 전체 점검 14차 — reading: null이면 점점 늘린 간격으로 몇 번만 다시 묻고 "곧 도착해요"로 넘어간다(무한 대기 금지).
+  it('점점 늘어나고 합이 1분을 넘지 않는다', () => {
+    const delays = [...COMPAT_READING_RETRY_DELAYS_MS];
+    expect(delays.length).toBeGreaterThanOrEqual(3);
+    delays.slice(1).forEach((delay, i) => expect(delay).toBeGreaterThan(delays[i]!));
+    expect(delays.reduce((a, b) => a + b, 0)).toBeLessThanOrEqual(60_000);
   });
 });
