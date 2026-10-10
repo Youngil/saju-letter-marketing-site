@@ -53,6 +53,10 @@ export const dictionary: MarketingDictionary = {
     byLabel: 'Written by Dain',
     latestNoteLabel: "The latest note from Dain",
     thisWeekCta: 'Read the column',
+    postCtaTitle: 'Read a letter from Dain yourself',
+    postCtaBody:
+      "Enter your birth date to preview this morning's letter — no sign-up needed. To get one every morning, continue in the app.",
+    postCtaDemo: "Preview today's letter for free",
     categories: {
       observation: 'Observation',
       explainer: 'In plain words',

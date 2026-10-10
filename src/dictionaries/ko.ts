@@ -58,6 +58,10 @@ export const dictionary: MarketingDictionary = {
     byLabel: '다인',
     latestNoteLabel: '다인의 최근 글',
     thisWeekCta: '블로그 읽기',
+    postCtaTitle: '다인의 편지, 직접 받아 보세요',
+    postCtaBody:
+      '생년월일만 넣으면 오늘 아침 편지를 가입 없이 바로 미리 읽을 수 있어요. 매일 받아 보려면 앱으로 이어 가세요.',
+    postCtaDemo: '오늘의 편지 무료로 미리 보기',
     categories: {
       observation: '관찰',
       explainer: '풀어쓰기',

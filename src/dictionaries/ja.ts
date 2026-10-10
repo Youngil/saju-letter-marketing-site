@@ -53,6 +53,10 @@ export const dictionary: MarketingDictionary = {
     byLabel: '文: ダイン',
     latestNoteLabel: 'ダインの最近の文章',
     thisWeekCta: 'コラムを読む',
+    postCtaTitle: 'ダインの手紙を、ご自身で',
+    postCtaBody:
+      '生年月日を入れるだけで、今朝の手紙を登録なしですぐにプレビューできます。毎朝受け取るならアプリへどうぞ。',
+    postCtaDemo: '今日の手紙を無料でプレビュー',
     categories: {
       observation: '観察',
       explainer: 'やさしく読む',

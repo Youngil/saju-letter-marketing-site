@@ -55,6 +55,10 @@ export const dictionary: MarketingDictionary = {
     byLabel: 'Viết bởi Dain',
     latestNoteLabel: 'Ghi chép mới nhất của Dain',
     thisWeekCta: 'Đọc chuyên mục',
+    postCtaTitle: 'Tự đọc một lá thư của Dain',
+    postCtaBody:
+      'Nhập ngày sinh để xem trước lá thư sáng nay, không cần đăng ký. Muốn nhận mỗi sáng, hãy tiếp tục trong ứng dụng.',
+    postCtaDemo: 'Xem trước lá thư hôm nay miễn phí',
     categories: {
       observation: 'Quan sát',
       explainer: 'Nói dễ hiểu',

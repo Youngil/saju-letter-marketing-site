@@ -68,6 +68,10 @@ export interface MarketingDictionary {
     latestNoteLabel: string;
     /** 홈 티저 CTA. */
     thisWeekCta: string;
+    /** 글 끝 고정 안내(2026-10-10 전체 점검 14차) — 글이 막다른 길이 되지 않게 홈 데모 링크 + 앱 배지. 파일·DB 글 공통. */
+    postCtaTitle: string;
+    postCtaBody: string;
+    postCtaDemo: string;
     categories: {
       observation: string;
       explainer: string;

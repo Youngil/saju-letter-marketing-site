@@ -53,6 +53,10 @@ export const dictionary: MarketingDictionary = {
     byLabel: 'Escrito por Dain',
     latestNoteLabel: 'Lo último que escribió Dain',
     thisWeekCta: 'Leer la columna',
+    postCtaTitle: 'Lee tú mismo una carta de Dain',
+    postCtaBody:
+      'Ingresa tu fecha de nacimiento y lee una vista previa de la carta de esta mañana, sin registrarte. Para recibir una cada mañana, sigue en la app.',
+    postCtaDemo: 'Ver gratis la carta de hoy',
     categories: {
       observation: 'Observación',
       explainer: 'En palabras sencillas',

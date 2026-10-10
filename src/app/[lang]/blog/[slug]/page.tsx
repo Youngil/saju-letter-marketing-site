@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { AppDownloadLinks } from '@/components/AppDownloadLinks';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { getDictionary } from '@/dictionaries';
@@ -117,6 +118,19 @@ export default async function BlogPostPage({ params }: { params: Promise<{ lang:
           )}
         </div>
       </div>
+      {/* 글 끝 고정 안내(2026-10-10 전체 점검 14차) — 예전엔 글을 다 읽으면 목록으로 돌아가는 링크뿐이라 막다른 길이었다.
+          MDX 본문과 따로 두어 파일 글·DB 글 모두 같은 자리에 붙는다. */}
+      <section className="mt-8 flex flex-col items-center gap-4 rounded-sm border border-accent-warm/30 bg-accent-warm-soft/60 px-6 py-8 text-center">
+        <h2 className="font-display text-xl font-semibold text-balance">{dict.blog.postCtaTitle}</h2>
+        <p className="max-w-[46ch] text-sm leading-relaxed text-foreground/75">{dict.blog.postCtaBody}</p>
+        <Link
+          href={`/${lang}#demo`}
+          className="rounded-full bg-accent-warm px-6 py-3 font-medium text-white transition hover:bg-accent-warm/90"
+        >
+          {dict.blog.postCtaDemo}
+        </Link>
+        <AppDownloadLinks dict={dict.appLinks} language={lang} context="blog_post" />
+      </section>
       <Link href={`/${lang}/blog`} className="mt-8 inline-block text-accent-warm underline-offset-2 hover:underline">
         ← {dict.blog.title}
       </Link>
