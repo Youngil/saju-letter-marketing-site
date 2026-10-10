@@ -44,11 +44,21 @@ export function getDemoReading(input: DemoReadingInput): Promise<DemoReadingResp
   });
 }
 
+/**
+ * 리드 폼이 놓인 곳(2026-10-11 전체 점검 15차, 계약 C1) — 백엔드가 새 등록 때만 `marketing_site_email_leads.signup_source`에
+ * 저장한다(재등록·이미 등록은 기존 값 유지). 데모 결과 아래 폼(아이폰·데스크톱 방문자, iOS 출시 알림 약속)과 홈 하단 폼을
+ * 나눠 보려고. 백엔드 규칙은 `^[a-z_]{1,32}$`이고 그 밖의 값은 무시하므로 새 위치를 만들면 그 모양으로 이름을 짓는다.
+ */
+export const LEAD_SIGNUP_SOURCES = ['home', 'demo_result'] as const;
+export type LeadSignupSource = (typeof LEAD_SIGNUP_SOURCES)[number];
+
 export interface SubscribeLeadInput {
   email: string;
   language: LaunchContentLanguage;
   consent: boolean;
   turnstileToken?: string;
+  /** 폼 위치 — GA `lead_submit`의 `context`와 같은 값(식별 값 아님). */
+  source?: LeadSignupSource;
 }
 
 export function subscribeLead(input: SubscribeLeadInput): Promise<{ leadId: string }> {

@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import type { MarketingDictionary } from '@/dictionaries/types';
 import type { LaunchContentLanguage } from '@/lib/languages';
-import { fetchFreshCouponAvailability, subscribeLead, type CouponAvailability } from '@/lib/api';
+import { fetchFreshCouponAvailability, subscribeLead, type CouponAvailability, type LeadSignupSource } from '@/lib/api';
 import { Turnstile, TURNSTILE_ENABLED, type TurnstileHandle } from './Turnstile';
 import { trackEvent } from '@/lib/analytics';
 import { EMAIL_REGEX, mapPublicFormError } from '@/lib/publicForm';
@@ -38,9 +38,10 @@ export function LeadCaptureForm({
   initialAvailability: CouponAvailability | null;
   /**
    * 어디에 놓인 폼인가(2026-10-10 전체 점검 14차) — GA `lead_submit`의 `context`로 실린다(식별 값 아님). 홈 아래 `home`(기본),
-   * 데모 결과 아래 `demo_result`. 백엔드로는 보내지 않는다(같은 리드 등록).
+   * 데모 결과 아래 `demo_result`. 15차부터 리드 등록에도 `source`로 함께 보낸다(백엔드가 새 등록 때 `signup_source`에 저장 —
+   * iOS 출시 알림을 기다리는 데모 결과 쪽 리드를 구분하려고).
    */
-  context?: 'home' | 'demo_result';
+  context?: LeadSignupSource;
   /** 제목·부제를 바꿀 때(데모 결과 아래 — iOS 출시 알림 안내). 없으면 `dict.title`/`dict.subtitle`. */
   heading?: { title: string; subtitle: string };
 }) {
@@ -83,7 +84,7 @@ export function LeadCaptureForm({
 
     setIsSubmitting(true);
     try {
-      await subscribeLead({ email, language, consent, turnstileToken });
+      await subscribeLead({ email, language, consent, turnstileToken, source: context });
       trackEvent('lead_submit', { language, context });
       setSuccess(true);
     } catch (err) {
