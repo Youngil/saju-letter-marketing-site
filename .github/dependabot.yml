@@ -1,6 +1,7 @@
 # 의존성 업데이트 PR(2026-10-10 전체 점검 14차). 보안 패치가 조용히 밀리지 않게 매주 확인한다.
 # - next·@next/mdx·eslint-config-next는 같은 정확한 버전으로 함께 올린다(CLAUDE.md §12) — 한 PR로 묶는다.
 # - 메이저 업데이트는 사람이 따로 판단한다(React·Next·Tailwind 메이저는 코드 변경이 따른다).
+# - 15차(계약 C9): backend와 같은 형식 — npm 주간(월 09:00 KST) + github-actions(CI 워크플로의 actions/*). Dockerfile이 없어 docker는 없음.
 version: 2
 updates:
   - package-ecosystem: npm
@@ -8,6 +9,7 @@ updates:
     schedule:
       interval: weekly
       day: monday
+      time: "09:00"
       timezone: Asia/Seoul
     open-pull-requests-limit: 5
     groups:
@@ -24,3 +26,9 @@ updates:
       - dependency-name: "*"
         update-types:
           - version-update:semver-major
+  # CI 워크플로(.github/workflows/ci.yml)가 쓰는 actions/checkout·actions/setup-node.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 2
