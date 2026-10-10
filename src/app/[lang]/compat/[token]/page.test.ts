@@ -14,6 +14,11 @@ vi.mock('@/lib/compatApi', () => ({
   getCompatInvite: vi.fn().mockResolvedValue({ status: 'pending' }),
 }));
 
+// 만료 안내 데모 링크용 켠 언어 목록(15차) — 네트워크 없이.
+vi.mock('@/lib/serviceLanguagesApi', () => ({
+  fetchActiveServiceLanguages: vi.fn().mockResolvedValue({ active: ['ko', 'en', 'ja', 'es'], default: 'en' }),
+}));
+
 // 방문자 IP — X-Forwarded-For의 맨 오른쪽(Cloud Run 앞단이 덧붙인 값)을 백엔드 조회에 함께 넘긴다(2026-10-07 전체 점검 12차).
 vi.mock('next/headers', () => ({
   headers: async () => new Headers({ 'x-forwarded-for': '203.0.113.9, 198.51.100.7' }),

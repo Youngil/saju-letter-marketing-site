@@ -9,7 +9,13 @@ export function homeHref(lang: string | null | undefined): string {
   return lang && isMarketingLanguage(lang) && isLaunchContentLanguage(lang) ? `/${lang}` : '/';
 }
 
-export function demoHref(lang: string | null | undefined): string {
+/**
+ * 홈 데모(`#demo`) 주소. `activeLanguages`(관리자가 켠 서비스 언어)를 넘기면, 그 언어가 꺼져 있을 때도 `/#demo`로 보낸다
+ * (2026-10-11 전체 점검 15차) — 꺼진 언어의 홈은 데모 섹션을 숨기므로(`showContentLinks`) `/{lang}#demo`는 데모 없는 화면에
+ * 닿았다. proxy는 `/`를 켜진 콘텐츠 언어 중 방문자 언어의 홈으로 보낸다. 모르면(넘기지 않으면) 예전처럼 언어만 본다.
+ */
+export function demoHref(lang: string | null | undefined, activeLanguages?: readonly string[]): string {
   const home = homeHref(lang);
-  return home === '/' ? '/#demo' : `${home}#demo`;
+  if (home === '/' || (activeLanguages && !activeLanguages.includes(lang as string))) return '/#demo';
+  return `${home}#demo`;
 }

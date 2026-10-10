@@ -8,6 +8,8 @@ import { CompatView } from '@/components/compat/CompatView';
 import { WEB_BASE_URL, buildSocialMetadata, languageAlternates, NOINDEX_ROBOTS } from '@/lib/seo';
 import { isValidCompatToken } from '@/lib/routeParams';
 import { getRequestVisitorIp } from '@/lib/requestVisitorIp';
+import { demoHref } from '@/lib/homeLinks';
+import { fetchActiveServiceLanguages } from '@/lib/serviceLanguagesApi';
 
 interface PageProps {
   params: Promise<{ lang: string; token: string }>;
@@ -72,6 +74,12 @@ export default async function CompatPage({ params }: PageProps) {
   // 방문자 IP를 함께 넘겨 백엔드가 방문자별로 센다(2026-10-07 전체 점검 12차) — 메타데이터와 같은 인자라 `cache()`가 한 번으로 묶는다.
   const view = await getCompatInvite(token, lang, await getRequestVisitorIp());
   const dict = await getDictionary(lang);
+  // 만료 안내의 데모 링크 — 꺼진 언어의 홈엔 데모가 없어 `/#demo`로(15차). 레이아웃이 이미 받아 둔 값이라 보통 추가 요청 없음.
+  // 이미 발급된 공유 링크 화면이라 이 조회 실패로 페이지를 깨뜨리지 않는다 — 실패하면 언어만 보고 고른다.
+  const activeLanguages = await fetchActiveServiceLanguages().then(
+    (languages) => languages.active,
+    () => undefined,
+  );
 
   return (
     <div className="mx-auto max-w-lg px-4 py-12">
@@ -83,6 +91,7 @@ export default async function CompatPage({ params }: PageProps) {
         initialView={view}
         appLinksDict={dict.appLinks}
         currentYear={new Date().getFullYear()}
+        demoLinkHref={demoHref(lang, activeLanguages)}
       />
     </div>
   );

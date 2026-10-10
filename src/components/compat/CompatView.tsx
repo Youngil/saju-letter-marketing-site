@@ -4,7 +4,6 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import type { MarketingLanguage } from '@/lib/languages';
-import { demoHref } from '@/lib/homeLinks';
 import type { MarketingDictionary } from '@/dictionaries/types';
 import type { CompatViewCopy } from '@/content/compatContent';
 import { COMPAT_NAME_LINES, type CompatNameLines } from '@/content/compatNameLines';
@@ -60,6 +59,7 @@ export function CompatView({
   initialView,
   appLinksDict,
   currentYear,
+  demoLinkHref,
 }: {
   token: string;
   language: MarketingLanguage;
@@ -69,6 +69,8 @@ export function CompatView({
   appLinksDict: MarketingDictionary['appLinks'];
   /** 연도 목록 기준 — 서버 페이지가 정해 넘긴다(모듈에서 계산하면 서버·브라우저 값이 갈려 하이드레이션이 어긋났다). */
   currentYear: number;
+  /** 만료 안내의 데모 링크 — 서버가 켠 언어를 보고 `demoHref(lang, active)`로 정해 넘긴다(15차). */
+  demoLinkHref: string;
 }) {
   const content = useMemo<CompatViewContent>(() => ({ ...copy, ...COMPAT_NAME_LINES[language] }), [copy, language]);
   const [view, setView] = useState<InviteView>(initialView);
@@ -89,6 +91,7 @@ export function CompatView({
         reason={view.status === 'expired' ? content.expired : content.notFound}
         language={language}
         appLinksDict={appLinksDict}
+        demoLinkHref={demoLinkHref}
       />
     );
   }
@@ -127,11 +130,13 @@ function UnavailableInvite({
   reason,
   language,
   appLinksDict,
+  demoLinkHref,
 }: {
   content: CompatViewContent;
   reason: string;
   language: MarketingLanguage;
   appLinksDict: MarketingDictionary['appLinks'];
+  demoLinkHref: string;
 }) {
   return (
     <div className={SHEET_CLASS}>
@@ -140,7 +145,7 @@ function UnavailableInvite({
         <p className="leading-relaxed text-foreground/80">{reason}</p>
         <p className="text-sm leading-relaxed text-foreground/70">{content.unavailableBody}</p>
         <Link
-          href={demoHref(language)}
+          href={demoLinkHref}
           className="self-start rounded-full bg-accent-warm px-6 py-3 font-medium text-white transition hover:bg-accent-warm/90"
         >
           {content.demoLink}

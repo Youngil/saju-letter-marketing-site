@@ -7,6 +7,12 @@ describe('homeLinks', () => {
     expect(demoHref(lang)).toBe(`/${lang}#demo`);
   });
 
+  it('관리자가 끈 언어는 데모가 없는 홈 대신 /#demo로(15차)', () => {
+    expect(demoHref('ja', ['ko', 'en'])).toBe('/#demo');
+    expect(demoHref('en', ['ko', 'en'])).toBe('/en#demo');
+    expect(demoHref('pt', ['pt', 'en'])).toBe('/#demo');
+  });
+
   it.each(['pt', 'vi', 'xx', '', null, undefined])('홈이 없는 언어(%s)는 언어 없는 /로(proxy가 방문자 언어로 보낸다)', (lang) => {
     expect(homeHref(lang)).toBe('/');
     expect(demoHref(lang)).toBe('/#demo');

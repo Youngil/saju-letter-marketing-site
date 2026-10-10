@@ -17,6 +17,7 @@ import { WEB_BASE_URL, activeLanguageAlternates, buildSocialMetadata, NOINDEX_RO
 import { articleJsonLd } from '@/lib/structuredData';
 import { BlogByline, categoryLabelFor } from '@/components/BlogByline';
 import { SwitcherLanguageLimit } from '@/components/SwitcherLanguageLimit';
+import { demoHref } from '@/lib/homeLinks';
 
 // 정적 파일 글(POST_SLUGS)만 빌드 시점에 미리 만든다 — DB 저장 글(2026-09-06)은 이 목록에 없어도
 // Next.js의 기본 `dynamicParams: true`가 최초 요청 시점에 렌더해준다(코드 배포 없이 발행하는
@@ -76,7 +77,8 @@ export default async function BlogPostPage({ params }: { params: Promise<{ lang:
   const dict = await getDictionary(lang);
   const { meta } = content;
   // 언어 스위처가 이 글이 없는 언어로 보내 404가 나지 않게(2026-10-06 전체 점검 3차) — 그런 언어는 블로그 목록으로.
-  const available = await getLanguagesForSlug(slug);
+  // 데모 링크는 이 언어가 켜져 있을 때만 그 언어 홈으로(꺼진 언어의 홈엔 데모가 없다 — `demoHref`, 15차).
+  const [available, serviceLanguages] = await Promise.all([getLanguagesForSlug(slug), fetchActiveServiceLanguages()]);
 
   return (
     <article className="mx-auto max-w-2xl px-4 py-12">
@@ -124,7 +126,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ lang:
         <h2 className="font-display text-xl font-semibold text-balance">{dict.blog.postCtaTitle}</h2>
         <p className="max-w-[46ch] text-sm leading-relaxed text-foreground/75">{dict.blog.postCtaBody}</p>
         <Link
-          href={`/${lang}#demo`}
+          href={demoHref(lang, serviceLanguages.active)}
           className="rounded-full bg-accent-warm px-6 py-3 font-medium text-white transition hover:bg-accent-warm/90"
         >
           {dict.blog.postCtaDemo}

@@ -13,6 +13,7 @@ import { DAY_MASTER_ROMANIZATIONS, ZODIAC_ROWS } from '@/content/compareZodiac';
 import { HEAVENLY_STEMS } from '@/lib/sajuVocabulary';
 import { WEB_BASE_URL, activeLanguageAlternates, NOINDEX_ROBOTS } from '@/lib/seo';
 import { CompareInfographic } from '@/components/CompareInfographic';
+import { demoHref } from '@/lib/homeLinks';
 
 /** 한국어/일본어는 로마자 표기(Gap 등)만으로는 어색해서 한자를 함께 보여준다(2026-08-08,
  * 사용자 요청) — 두 언어 모두 한자 자체는 읽을 수 있는 독자층이라 발음 표기 없이도 통한다.
@@ -69,6 +70,8 @@ export default async function ComparePage({ params }: { params: Promise<{ lang: 
   if (!isMarketingLanguage(rawLang) || !isLaunchContentLanguage(rawLang)) notFound();
   const lang: LaunchContentLanguage = rawLang;
   const dict = await getDictionary(lang);
+  // 데모 링크는 이 언어가 켜져 있을 때만 그 언어 홈으로(꺼진 언어의 홈엔 데모가 없다 — `demoHref`, 15차).
+  const serviceLanguages = await fetchActiveServiceLanguages();
   const rows = ZODIAC_ROWS[rawLang];
   const pillars: [string, string, string, string] = [
     dict.demo.yearLabel,
@@ -143,7 +146,7 @@ export default async function ComparePage({ params }: { params: Promise<{ lang: 
       </div>
 
       <Link
-        href={`/${lang}#demo`}
+        href={demoHref(lang, serviceLanguages.active)}
         className="mx-auto rounded-full bg-accent-warm px-8 py-3 text-center font-medium text-white transition hover:bg-accent-warm/90"
       >
         {dict.compare.ctaText}
