@@ -3,6 +3,7 @@ import { headers } from 'next/headers';
 import './globals.css';
 import { NotFoundView } from '@/components/NotFoundView';
 import { notFoundCopyFor } from '@/content/notFoundCopy';
+import { cjkFontStylesheetFor } from '@/lib/cjkFonts';
 import { SITE_LANGUAGE_HEADER } from '@/lib/languages';
 
 /**
@@ -22,9 +23,12 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function GlobalNotFound() {
   const { lang, copy } = await pickCopy();
+  const cjkFontStylesheet = cjkFontStylesheetFor(lang);
   return (
     <html lang={lang} className="h-full antialiased">
       <body className="flex min-h-full flex-col bg-background text-foreground">
+        {/* ko/ja 제목 세리프(15차) — 레이아웃을 거치지 않아 직접 건다. Lora는 없으므로 globals.css의 var() 대체값(ui-serif)으로. */}
+        {cjkFontStylesheet && <link rel="stylesheet" href={cjkFontStylesheet} precedence="default" />}
         <main className="flex flex-1 flex-col">
           <NotFoundView lang={lang} copy={copy} />
         </main>
