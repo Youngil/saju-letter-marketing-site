@@ -98,6 +98,9 @@ export const dictionary: MarketingDictionary = {
     title: 'Recibe una nota de Dain — y una prueba de 30 días',
     subtitle:
       'Déjanos tu correo y Dain te enviará ahora mismo una breve nota de bienvenida — incluida una carta matutina de ejemplo y un código para una prueba gratuita de 30 días (en vez de los 7 habituales).',
+    demoResultTitle: '¿Quieres recibir las cartas de Dain por correo?',
+    demoResultSubtitle:
+      '¿Estás en un iPhone o en la computadora? Deja tu correo y Dain te enviará una nota de bienvenida con un código de prueba de 30 días; también te avisaremos aquí cuando salga la app para iOS.',
     emailPlaceholder: 'tu@ejemplo.com',
     emailLabel: 'Correo electrónico',
     consentLabel: 'Acepto recibir este correo de bienvenida (puedes darte de baja cuando quieras)',

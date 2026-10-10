@@ -8,6 +8,8 @@ import { isOldEnough } from '@/lib/age';
 import { getDemoReading, type DemoReadingResponse } from '@/lib/api';
 import { Turnstile, TURNSTILE_ENABLED, type TurnstileHandle } from './Turnstile';
 import { AppDownloadLinks } from './AppDownloadLinks';
+import { LeadCaptureForm } from './LeadCaptureForm';
+import type { CouponAvailability } from '@/lib/api';
 import { Postmark } from './Postmark';
 import { trackEvent } from '@/lib/analytics';
 import { isValidBirthDate } from '@/lib/birthDate';
@@ -27,10 +29,16 @@ export function DemoForm({
   dict,
   appLinksDict,
   disclaimerShort,
+  leadDict,
+  couponAvailability,
 }: {
   language: LaunchContentLanguage;
   dict: MarketingDictionary['demo'];
   appLinksDict: MarketingDictionary['appLinks'];
+  /** 결과 아래 리드 폼 문구(2026-10-10 전체 점검 14차 — 아이폰·데스크톱 방문자가 결과 뒤 이어 갈 곳). */
+  leadDict: MarketingDictionary['leadCapture'];
+  /** 홈이 받아 둔 쿠폰 현황 초기값 — 홈 아래 리드 폼과 같은 값. */
+  couponAvailability: CouponAvailability | null;
   /** 결과 옆 오락 목적 고지(`DISCLAIMER_CONTENT[lang].short`) — 서버 페이지가 현재 언어 문자열만 넘긴다(2026-10-06 전체
    *  점검 9차, 예전엔 6개 언어 전문을 직접 import해 홈 번들에 실렸다). */
   disclaimerShort: string;
@@ -45,6 +53,8 @@ export function DemoForm({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<DemoReadingResponse | null>(null);
+
+  const wakeTurnstile = () => turnstileRef.current?.execute();
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -150,6 +160,15 @@ export function DemoForm({
           <p className="text-center text-sm font-medium text-foreground/70">{dict.resultCta}</p>
           <AppDownloadLinks dict={appLinksDict} language={language} emphasized context="demo_result" />
         </div>
+        {/* 앱이 아직 안드로이드뿐이라(iOS는 "출시 준비 중") 아이폰·데스크톱 방문자는 결과를 보고 갈 곳이 없었다(2026-10-10 전체
+            점검 14차). 홈 아래와 같은 리드 등록(백엔드 엔드포인트 동일)을 결과 바로 아래에 — iOS 출시 알림도 이 메일로 간다고 말한다. */}
+        <LeadCaptureForm
+          language={language}
+          dict={leadDict}
+          initialAvailability={couponAvailability}
+          context="demo_result"
+          heading={{ title: leadDict.demoResultTitle, subtitle: leadDict.demoResultSubtitle }}
+        />
         <button
           type="button"
           onClick={() => {
@@ -167,7 +186,15 @@ export function DemoForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="letter-surface flex flex-col gap-5 rounded-sm p-6 sm:p-7">
+    <form
+      onSubmit={handleSubmit}
+      // 보안 확인은 폼을 처음 건드릴 때 시작한다(2026-10-10 전체 점검 14차, Turnstile `lazy`) — 홈의 두 폼이 그려지자마자 각각
+      // 확인을 돌리고 5분마다 다시 돌리던 것을 멈췄다.
+      onFocusCapture={wakeTurnstile}
+      onPointerDownCapture={wakeTurnstile}
+      onKeyDownCapture={wakeTurnstile}
+      className="letter-surface flex flex-col gap-5 rounded-sm p-6 sm:p-7"
+    >
       <div>
         {/* 세 칸은 자리표시자로만 이름이 붙어 있었다(2026-10-07) — 묶음 이름은 위 라벨, 칸마다 연/월/일 aria-label. */}
         <span id={dateLabelId} className="mb-1.5 block text-sm font-medium">
@@ -211,7 +238,7 @@ export function DemoForm({
         </div>
       </div>
 
-      <Turnstile ref={turnstileRef} onVerify={setTurnstileToken} />
+      <Turnstile ref={turnstileRef} onVerify={setTurnstileToken} lazy />
 
       {error && (
         <p role="alert" className="text-sm text-red-600">

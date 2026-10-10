@@ -97,6 +97,9 @@ export const dictionary: MarketingDictionary = {
     title: 'Get a note from Dain — and a 30-day trial',
     subtitle:
       "Leave your email and Dain will send you a short welcome note right away — including a sample morning letter and a code for a 30-day free trial (instead of the usual 7).",
+    demoResultTitle: "Want Dain's letters by email?",
+    demoResultSubtitle:
+      "On an iPhone or a computer? Leave your email and Dain will send a welcome note with a 30-day trial code — and we'll let you know at this address when the iOS app launches.",
     emailPlaceholder: 'you@example.com',
     emailLabel: 'Email address',
     consentLabel: 'I consent to receiving this welcome email (you can unsubscribe anytime)',

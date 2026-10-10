@@ -114,6 +114,12 @@ export interface MarketingDictionary {
   leadCapture: {
     title: string;
     subtitle: string;
+    /**
+     * 데모 결과 아래 리드 폼의 제목·부제(2026-10-10 전체 점검 14차) — 앱이 아직 안드로이드뿐이라 아이폰·데스크톱 방문자는 결과를
+     * 보고 갈 곳이 없었다. 같은 리드 등록(백엔드 엔드포인트 동일)에 "iOS 출시 알림도 이 메일로"를 덧붙인다.
+     */
+    demoResultTitle: string;
+    demoResultSubtitle: string;
     emailPlaceholder: string;
     /** 이메일 입력칸의 접근성 이름(aria-label) — 자리표시자(you@example.com)는 이름이 아니다(2026-10-07). */
     emailLabel: string;

@@ -103,6 +103,9 @@ export const dictionary: MarketingDictionary = {
     title: '다인의 소개 편지 받기 — 30일 체험 포함',
     subtitle:
       '이메일을 남겨주시면 다인이 짧은 소개 편지를 바로 보내드려요. 실제 아침 편지 예시도 들어 있고, 앱에서 쓸 수 있는 30일 무료체험 쿠폰(원래 7일 대신)도 함께 드려요.',
+    demoResultTitle: '이 편지, 메일로도 받아 보실래요?',
+    demoResultSubtitle:
+      '아이폰이나 컴퓨터로 보고 계신다면 이메일을 남겨 주세요. 다인의 소개 편지와 30일 체험 쿠폰을 보내 드리고, iOS 출시 알림도 이 메일로 보내 드려요.',
     emailPlaceholder: 'you@example.com',
     emailLabel: '이메일 주소',
     consentLabel: '이 소개 편지 이메일 수신에 동의해요 (언제든 수신거부 가능)',

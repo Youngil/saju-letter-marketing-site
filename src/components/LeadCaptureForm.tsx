@@ -23,6 +23,8 @@ export function LeadCaptureForm({
   language,
   dict,
   initialAvailability,
+  context = 'home',
+  heading,
 }: {
   language: LaunchContentLanguage;
   dict: MarketingDictionary['leadCapture'];
@@ -34,6 +36,13 @@ export function LeadCaptureForm({
    * 백엔드 IP 한도를 쓰지 않게). 다시 받기가 실패하면 초기값을 그대로 두고, 초기값도 null이면 문구를 숨긴다.
    */
   initialAvailability: CouponAvailability | null;
+  /**
+   * 어디에 놓인 폼인가(2026-10-10 전체 점검 14차) — GA `lead_submit`의 `context`로 실린다(식별 값 아님). 홈 아래 `home`(기본),
+   * 데모 결과 아래 `demo_result`. 백엔드로는 보내지 않는다(같은 리드 등록).
+   */
+  context?: 'home' | 'demo_result';
+  /** 제목·부제를 바꿀 때(데모 결과 아래 — iOS 출시 알림 안내). 없으면 `dict.title`/`dict.subtitle`. */
+  heading?: { title: string; subtitle: string };
 }) {
   const [availability, setAvailability] = useState(initialAvailability);
   useEffect(() => {
@@ -56,6 +65,8 @@ export function LeadCaptureForm({
     if (success) successRef.current?.focus();
   }, [success]);
 
+  const wakeTurnstile = () => turnstileRef.current?.execute();
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
@@ -73,7 +84,7 @@ export function LeadCaptureForm({
     setIsSubmitting(true);
     try {
       await subscribeLead({ email, language, consent, turnstileToken });
-      trackEvent('lead_submit', { language });
+      trackEvent('lead_submit', { language, context });
       setSuccess(true);
     } catch (err) {
       // 리드 폼엔 나이·생년월일 입력이 없어 underage/date도 일반 문구로 둔다.
@@ -111,9 +122,16 @@ export function LeadCaptureForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="letter-surface flex flex-col gap-3 rounded-sm p-6 sm:p-7">
-      <h3 className="font-display text-lg font-semibold">{dict.title}</h3>
-      <p className="text-sm text-foreground/70">{dict.subtitle}</p>
+    <form
+      onSubmit={handleSubmit}
+      // 보안 확인은 폼을 처음 건드릴 때 시작한다(2026-10-10 전체 점검 14차, Turnstile `lazy`).
+      onFocusCapture={wakeTurnstile}
+      onPointerDownCapture={wakeTurnstile}
+      onKeyDownCapture={wakeTurnstile}
+      className="letter-surface flex flex-col gap-3 rounded-sm p-6 sm:p-7"
+    >
+      <h3 className="font-display text-lg font-semibold">{heading?.title ?? dict.title}</h3>
+      <p className="text-sm text-foreground/70">{heading?.subtitle ?? dict.subtitle}</p>
       {availability !== null &&
         availability.capacity !== null &&
         availability.remaining !== null &&
@@ -143,7 +161,7 @@ export function LeadCaptureForm({
         <input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} className="mt-1 accent-accent-warm" />
         <span>{dict.consentLabel}</span>
       </label>
-      <Turnstile ref={turnstileRef} onVerify={setTurnstileToken} />
+      <Turnstile ref={turnstileRef} onVerify={setTurnstileToken} lazy />
       {error && (
         <p role="alert" className="text-sm text-red-600">
           {error}

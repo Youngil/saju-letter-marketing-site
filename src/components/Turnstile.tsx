@@ -23,8 +23,10 @@ declare global {
           'expired-callback'?: () => void;
           'timeout-callback'?: () => void;
           appearance?: 'always' | 'execute' | 'interaction-only';
+          execution?: 'render' | 'execute';
         },
       ) => string;
+      execute: (widgetId: string) => void;
       reset: (widgetId?: string) => void;
       remove: (widgetId: string) => void;
     };
@@ -51,6 +53,11 @@ export interface TurnstileHandle {
    * 언마운트되지 않고 그대로 남아 재시도를 받는 경우(대부분의 폼) 이 호출 없이는 죽은
    * 토큰이 그대로 남는다. */
   reset: () => void;
+  /**
+   * `lazy` 위젯의 확인을 시작한다(2026-10-10 전체 점검 14차) — 폼이 첫 상호작용(focus·pointerdown·keydown)마다 불러도 된다.
+   * 이미 시작했거나 토큰이 살아 있으면 아무것도 안 한다. 스크립트가 아직 안 왔으면 위젯을 그린 직후에 시작한다.
+   */
+  execute: () => void;
 }
 
 /**
@@ -70,13 +77,36 @@ export interface TurnstileHandle {
  * `forwardRef` + `useImperativeHandle`로 `reset()`을 노출해, 폼이 언마운트 없이 그대로 남는
  * 실패 경로(나머지 4개 폼)에서도 호출부가 명시적으로 새 토큰을 받을 수 있게 했다.
  */
-export const Turnstile = forwardRef<TurnstileHandle, { onVerify: (token: string) => void }>(function Turnstile(
-  { onVerify },
+/**
+ * **`lazy`(2026-10-10 전체 점검 14차)** — 홈에는 데모·리드 두 폼이 있어, 위젯이 그려지자마자 확인을 두 번 돌리고 토큰이
+ * 만료될 때마다(약 5분) 다시 돌렸다 — 폼을 건드리지도 않은 방문자 모두에게. `lazy`면 `execution: 'execute'`로 그려 두기만 하고,
+ * 폼의 첫 상호작용에서 호출부가 `execute()`를 부를 때 확인한다. 만료되면 토큰만 비우고 다음 상호작용에서 다시 확인한다
+ * (실패한 제출 뒤 `reset()`은 이미 상호작용한 사람이라 바로 다시 확인). 서버 검증은 그대로다.
+ */
+export const Turnstile = forwardRef<TurnstileHandle, { onVerify: (token: string) => void; lazy?: boolean }>(function Turnstile(
+  { onVerify, lazy = false },
   ref,
 ) {
   const containerId = useId().replace(/:/g, '');
   const [scriptLoaded, setScriptLoaded] = useState(false);
   const widgetIdRef = useRef<string | undefined>(undefined);
+  // lazy 전용 — 지금 확인을 돌렸거나 살아 있는 토큰이 있는가 / 위젯이 그려지기 전에 execute()가 불렸는가 / 이 방문자가 폼을 건드렸는가.
+  const executedRef = useRef(false);
+  const pendingExecuteRef = useRef(false);
+  const interactedRef = useRef(false);
+
+  function runExecute() {
+    const widgetId = widgetIdRef.current;
+    if (widgetId === undefined || executedRef.current) return;
+    executedRef.current = true;
+    try {
+      window.turnstile?.execute(widgetId);
+    } catch (error) {
+      // 이미 확인 중인 위젯 등 — 다음 상호작용에서 다시 시도한다.
+      executedRef.current = false;
+      console.warn('turnstile execute failed', error);
+    }
+  }
   // 스크립트가 막히거나(광고 차단기·네트워크) 확인이 실패하면 폼 버튼이 이유 없이 회색으로 남았다(2026-10-06) —
   // 위젯 자리에 안내를 띄운다. 위젯이 평소엔 보이지 않아(interaction-only) 이 안내가 유일한 단서다.
   const [failed, setFailed] = useState(false);
@@ -95,19 +125,33 @@ export const Turnstile = forwardRef<TurnstileHandle, { onVerify: (token: string)
         setFailed(false);
         onVerify(token);
       },
-      'error-callback': () => setFailed(true),
-      'timeout-callback': () => setFailed(true),
-      // 토큰은 몇 분 뒤 만료된다 — 폼이 죽은 토큰으로 제출해 403을 받지 않게 비우고 새로 받는다.
+      'error-callback': () => {
+        executedRef.current = false;
+        setFailed(true);
+      },
+      'timeout-callback': () => {
+        executedRef.current = false;
+        setFailed(true);
+      },
+      // 토큰은 몇 분 뒤 만료된다 — 폼이 죽은 토큰으로 제출해 403을 받지 않게 비운다. 보통 위젯은 리셋하면 바로 새로 받고,
+      // lazy 위젯은 리셋만 해 두고 다음 상호작용(execute())에서 받는다 — 폼을 떠난 방문자에게 5분마다 다시 돌리지 않게.
       'expired-callback': () => {
         onVerify('');
+        executedRef.current = false;
         if (widgetIdRef.current !== undefined) window.turnstile?.reset(widgetIdRef.current);
       },
       // 사람 확인이 실제로 필요할 때만 위젯이 보인다 — 평소엔 입력칸과 버튼 사이에 빈 자리만 남았다(2026-10-03).
       appearance: 'interaction-only',
+      execution: lazy ? 'execute' : 'render',
     });
+    if (lazy && pendingExecuteRef.current) {
+      pendingExecuteRef.current = false;
+      runExecute();
+    }
     return () => {
       if (widgetIdRef.current !== undefined) window.turnstile?.remove(widgetIdRef.current);
       widgetIdRef.current = undefined;
+      executedRef.current = false;
     };
     // onVerify는 각 폼에서 setState 함수를 그대로 넘겨 참조가 안정적이다; containerId는 useId 기반이라 이 컴포넌트
     // 생애 동안 불변. (예전엔 이 설명 위에 disable 지시문이 있어 실제로는 아무것도 끄지 못했다 — 바로 위 줄이어야 한다.)
@@ -116,7 +160,20 @@ export const Turnstile = forwardRef<TurnstileHandle, { onVerify: (token: string)
 
   useImperativeHandle(ref, () => ({
     reset: () => {
-      if (widgetIdRef.current !== undefined) window.turnstile?.reset(widgetIdRef.current);
+      if (widgetIdRef.current === undefined) return;
+      window.turnstile?.reset(widgetIdRef.current);
+      executedRef.current = false;
+      // 실패한 제출 뒤 — 이미 폼을 쓰고 있는 사람이니 lazy여도 바로 새 토큰을 받는다.
+      if (lazy && interactedRef.current) runExecute();
+    },
+    execute: () => {
+      if (!lazy || !SITE_KEY) return;
+      interactedRef.current = true;
+      if (widgetIdRef.current === undefined) {
+        pendingExecuteRef.current = true;
+        return;
+      }
+      runExecute();
     },
   }));
 

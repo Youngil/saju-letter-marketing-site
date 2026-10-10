@@ -100,6 +100,9 @@ export const dictionary: MarketingDictionary = {
     title: 'Nhận một ghi chú từ Dain — kèm dùng thử 30 ngày',
     subtitle:
       'Để lại email và Dain sẽ gửi ngay một ghi chú chào mừng ngắn — kèm một lá thư buổi sáng mẫu và mã dùng thử miễn phí 30 ngày (thay vì 7 ngày như thường lệ).',
+    demoResultTitle: 'Muốn nhận thư của Dain qua email?',
+    demoResultSubtitle:
+      'Bạn đang dùng iPhone hoặc máy tính? Hãy để lại email, Dain sẽ gửi thư chào mừng kèm mã dùng thử 30 ngày — và chúng tôi sẽ báo qua email này khi ứng dụng iOS ra mắt.',
     emailPlaceholder: 'ban@example.com',
     emailLabel: 'Địa chỉ email',
     consentLabel: 'Tôi đồng ý nhận email chào mừng này (có thể hủy bất cứ lúc nào)',
