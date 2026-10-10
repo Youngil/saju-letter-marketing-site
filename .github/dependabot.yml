@@ -1,14 +1,15 @@
-# 의존성 업데이트 PR(2026-10-10 전체 점검 14차). 보안 패치가 조용히 밀리지 않게 매주 확인한다.
+# 의존성 업데이트 PR(2026-10-10 전체 점검 14차).
+# - 16차(계약 C10, 사용자 결정 E4): 버전 업데이트는 npm·github-actions 모두 월 1회(Dependabot monthly = 매달 1일, npm은 09:00 KST). 보안 패치는
+#   GitHub의 Dependabot 보안 업데이트(저장소 설정)가 주기와 무관하게 바로 PR을 연다 — 이 파일의 주기는 거기에 영향이 없다.
 # - next·@next/mdx·eslint-config-next는 같은 정확한 버전으로 함께 올린다(CLAUDE.md §12) — 한 PR로 묶는다.
 # - 메이저 업데이트는 사람이 따로 판단한다(React·Next·Tailwind 메이저는 코드 변경이 따른다).
-# - 15차(계약 C9): backend와 같은 형식 — npm 주간(월 09:00 KST) + github-actions(CI 워크플로의 actions/*). Dockerfile이 없어 docker는 없음.
+# - 15차(계약 C9): backend와 같은 형식 — npm + github-actions(CI 워크플로의 actions/*). Dockerfile이 없어 docker는 없음.
 version: 2
 updates:
   - package-ecosystem: npm
     directory: /
     schedule:
-      interval: weekly
-      day: monday
+      interval: monthly
       time: "09:00"
       timezone: Asia/Seoul
     open-pull-requests-limit: 5
@@ -30,5 +31,5 @@ updates:
   - package-ecosystem: github-actions
     directory: /
     schedule:
-      interval: weekly
+      interval: monthly
     open-pull-requests-limit: 2
