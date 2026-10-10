@@ -8,15 +8,19 @@
  *
  * - 방문자 브라우저는 Google에 요청하지 않는다(제3자 전송 없음 — 처리방침 변경 불필요). 빌드 서버만 Google Fonts에서 받는다
  *   (next/font도 빌드 때 같은 곳에서 받았다).
- * - 폰트 파일 이름은 내용 해시라 `next.config.ts`가 1년 immutable 캐시를 건다. CSS 이름은 고정이라 하루.
- * - 받기에 실패하면 경고만 남기고 빈 CSS를 쓴다 — 제목이 시스템 세리프로 보일 뿐 빌드는 계속된다.
+ * - 폰트 파일 이름은 내용 해시라 `next.config.ts`가 1년 immutable 캐시를 건다. CSS 이름은 레이아웃이 고정 주소로 걸어야 해서
+ *   고정이고, 대신 캐시를 10분으로 짧게 둔다(15차 — 하루였을 땐 Google이 폰트 파일을 바꾼 뒤 배포하면 브라우저에 남은 옛 CSS가
+ *   새 컨테이너엔 없는 옛 woff2 이름을 하루 동안 가리켜 404가 났다).
+ * - **운영 빌드(`isStrictBuild` — `K_SERVICE`·`CI`·`NODE_ENV=production`, 15차)에선 받기 실패면 빌드를 멈춘다**(exit 1). 예전엔
+ *   경고만 남기고 빈 CSS로 빌드가 성공해 ko/ja 제목이 조용히 시스템 세리프로 배포됐다. 로컬(`npm run dev`의 predev, 위 변수가
+ *   없는 로컬 build)은 지금처럼 경고 + 빈 CSS로 계속한다. `CJK_FONTS_STRICT=0|1`로 판단을 직접 덮을 수 있다.
  * - 결과물(`public/fonts/`)은 git에 넣지 않는다(.gitignore) — `npm run build`의 `prebuild`가 매번 만든다.
  *
- * 실행: `node scripts/vendor-cjk-fonts.mjs`(prebuild가 자동으로 부른다). `--if-missing`(predev)은 이미 받아 둔 CSS가 있으면 건너뛴다.
+ * 실행: `node scripts/vendor-cjk-fonts.mjs`(prebuild가 자동으로 부른다). `--if-missing`(predev)은 이미 제대로 받아 둔 CSS가 있으면
+ * 건너뛴다 — 받기 실패로 남은 빈 CSS(`@font-face` 없음)는 "없음"으로 보고 다시 받는다(15차).
  */
 import { createHash } from 'node:crypto';
-import { existsSync } from 'node:fs';
-import { mkdir, rm, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
@@ -92,22 +96,72 @@ async function vendorFont(font, outDir) {
   return urls.length;
 }
 
-export async function main(outDir, { ifMissing = false } = {}) {
+/**
+ * 받기 실패를 빌드 실패로 볼지(15차). 운영 빌드 — Cloud Run(`K_SERVICE`), CI(`CI`), `NODE_ENV=production` — 에선 그렇다.
+ * `CJK_FONTS_STRICT`가 `1`/`true`면 항상, `0`/`false`면 절대(급할 때 폰트 없이라도 배포해야 하면 이 값으로 끈다).
+ */
+export function isStrictBuild(env = process.env) {
+  const override = env.CJK_FONTS_STRICT?.trim().toLowerCase();
+  if (override === '1' || override === 'true') return true;
+  if (override === '0' || override === 'false') return false;
+  return Boolean(env.K_SERVICE) || Boolean(env.CI && env.CI !== 'false') || env.NODE_ENV === 'production';
+}
+
+/** 이미 제대로 받아 둔 CSS인지 — 받기 실패로 남긴 빈 CSS(주석만)는 아니다. */
+export function isUsableFontCss(css) {
+  return typeof css === 'string' && css.includes('@font-face');
+}
+
+async function hasUsableCss(cssPath) {
+  try {
+    return isUsableFontCss(await readFile(cssPath, 'utf8'));
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * 반환: 받기에 실패한 폰트 이름 목록. `strict`면 실패가 하나라도 있을 때 던진다(빈 CSS는 쓰지 않는다).
+ * `fetchFont`는 테스트용 주입점(기본은 Google Fonts에서 받는 `vendorFont`).
+ */
+export async function main(outDir, { ifMissing = false, strict = false, fetchFont = vendorFont } = {}) {
   await mkdir(outDir, { recursive: true });
+  const failed = [];
   for (const font of CJK_FONTS) {
-    if (ifMissing && existsSync(path.join(outDir, `${font.id}.css`))) continue;
+    const cssPath = path.join(outDir, `${font.id}.css`);
+    if (ifMissing && (await hasUsableCss(cssPath))) continue;
     try {
-      const count = await vendorFont(font, outDir);
+      const count = await fetchFont(font, outDir);
       console.log(`[vendor-cjk-fonts] ${font.family}: 파일 ${count}개`);
     } catch (error) {
-      // 빌드를 멈추지 않는다 — 제목만 시스템 세리프로 보인다. 빈 CSS를 써서 <link>가 404를 내지 않게.
-      console.warn(`[vendor-cjk-fonts] ${font.family} 받기 실패, 시스템 세리프로 대체:`, error instanceof Error ? error.message : error);
-      await writeFile(path.join(outDir, `${font.id}.css`), `/* ${font.family}: 빌드 때 받기 실패 — 시스템 세리프 사용 */\n`);
+      const message = error instanceof Error ? error.message : String(error);
+      failed.push(font.family);
+      if (strict) {
+        console.error(`[vendor-cjk-fonts] ${font.family} 받기 실패(운영 빌드라 중단):`, message);
+        continue;
+      }
+      // 로컬에선 멈추지 않는다 — 제목만 시스템 세리프로 보인다. 빈 CSS를 써서 <link>가 404를 내지 않게.
+      console.warn(`[vendor-cjk-fonts] ${font.family} 받기 실패, 시스템 세리프로 대체:`, message);
+      await writeFile(cssPath, `/* ${font.family}: 빌드 때 받기 실패 — 시스템 세리프 사용 */\n`);
     }
   }
+  if (strict && failed.length > 0) {
+    throw new Error(
+      `CJK 세리프 받기 실패: ${failed.join(', ')} — 빌드 서버의 fonts.googleapis.com·fonts.gstatic.com 접근을 확인하세요` +
+        '(폰트 없이라도 배포해야 하면 CJK_FONTS_STRICT=0).',
+    );
+  }
+  return failed;
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-  await main(path.join(root, 'public', 'fonts'), { ifMissing: process.argv.includes('--if-missing') });
+  const ifMissing = process.argv.includes('--if-missing');
+  try {
+    // predev(--if-missing)는 개발 서버 시작이라 운영 빌드 판정과 무관하게 멈추지 않는다.
+    await main(path.join(root, 'public', 'fonts'), { ifMissing, strict: !ifMissing && isStrictBuild() });
+  } catch (error) {
+    console.error(`[vendor-cjk-fonts] ${error instanceof Error ? error.message : error}`);
+    process.exit(1);
+  }
 }

@@ -26,9 +26,10 @@ const nextConfig: NextConfig = {
     return [
       { source: '/:path*', headers: SECURITY_HEADERS },
       // 빌드 때 받은 CJK 세리프(scripts/vendor-cjk-fonts.mjs, 2026-10-10 14차) — 파일 이름이 내용 해시라 1년 고정,
-      // 이름이 고정인 CSS는 하루(다음 배포에서 바뀐 파일 이름을 가리킨다).
+      // 이름이 고정인 CSS는 10분(15차 — 하루였을 땐 Google이 폰트를 바꾼 뒤 배포하면 브라우저에 남은 옛 CSS가 새 컨테이너엔 없는
+      // 옛 woff2 이름을 하루 동안 가리켜 404가 났다. 레이아웃이 고정 주소로 걸어야 해서 이름 대신 캐시를 줄였다).
       { source: '/fonts/:font/:file.woff2', headers: [{ key: 'Cache-Control', value: 'public, max-age=31536000, immutable' }] },
-      { source: '/fonts/:file.css', headers: [{ key: 'Cache-Control', value: 'public, max-age=86400' }] },
+      { source: '/fonts/:file.css', headers: [{ key: 'Cache-Control', value: 'public, max-age=600' }] },
     ];
   },
   experimental: {

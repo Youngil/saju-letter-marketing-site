@@ -1,5 +1,8 @@
-import { describe, expect, it } from 'vitest';
-import { CJK_FONTS, extractFontUrls, rewriteFontCss } from './vendor-cjk-fonts.mjs';
+import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import path from 'node:path';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { CJK_FONTS, extractFontUrls, isStrictBuild, isUsableFontCss, main, rewriteFontCss } from './vendor-cjk-fonts.mjs';
 
 /** 2026-10-10 전체 점검 14차 — 빌드 때 받은 CJK 세리프 CSS가 이 사이트 주소만 가리키는지(방문자가 Google로 요청하지 않게). */
 const SAMPLE = `/* [0] */
@@ -32,5 +35,62 @@ describe('vendor-cjk-fonts', () => {
 
   it('globals.css가 쓰는 변수 이름과 같다', () => {
     expect(CJK_FONTS.map((f) => f.variable)).toEqual(['--font-noto-kr', '--font-noto-ja']);
+  });
+
+  // 15차 — 운영 빌드에선 받기 실패가 빌드 실패, 빈 CSS는 --if-missing에서도 다시 받는다.
+  it('운영 빌드 판정: K_SERVICE·CI·NODE_ENV=production, CJK_FONTS_STRICT가 덮는다', () => {
+    expect(isStrictBuild({})).toBe(false);
+    expect(isStrictBuild({ NODE_ENV: 'development' })).toBe(false);
+    expect(isStrictBuild({ K_SERVICE: 'saju-letter-marketing-site' })).toBe(true);
+    expect(isStrictBuild({ CI: 'true' })).toBe(true);
+    expect(isStrictBuild({ CI: 'false' })).toBe(false);
+    expect(isStrictBuild({ NODE_ENV: 'production' })).toBe(true);
+    expect(isStrictBuild({ NODE_ENV: 'production', CJK_FONTS_STRICT: '0' })).toBe(false);
+    expect(isStrictBuild({ CJK_FONTS_STRICT: 'true' })).toBe(true);
+  });
+
+  it('받기 실패로 남긴 빈 CSS는 쓸 수 있는 CSS가 아니다', () => {
+    expect(isUsableFontCss('/* Noto Serif KR: 빌드 때 받기 실패 — 시스템 세리프 사용 */\n')).toBe(false);
+    expect(isUsableFontCss(rewriteFontCss(SAMPLE, CJK_FONTS[0], () => 'a.woff2'))).toBe(true);
+  });
+
+  describe('main', () => {
+    let dir;
+    beforeEach(async () => {
+      dir = await mkdtemp(path.join(tmpdir(), 'cjk-fonts-'));
+      vi.spyOn(console, 'log').mockImplementation(() => {});
+      vi.spyOn(console, 'warn').mockImplementation(() => {});
+      vi.spyOn(console, 'error').mockImplementation(() => {});
+    });
+    afterEach(async () => {
+      vi.restoreAllMocks();
+      await rm(dir, { recursive: true, force: true });
+    });
+    const failing = async () => {
+      throw new Error('offline');
+    };
+
+    it('로컬: 실패하면 빈 CSS를 쓰고 계속한다', async () => {
+      expect(await main(dir, { fetchFont: failing })).toEqual(['Noto Serif KR', 'Noto Serif JP']);
+      expect(isUsableFontCss(await readFile(path.join(dir, 'noto-serif-kr.css'), 'utf8'))).toBe(false);
+    });
+
+    it('운영 빌드: 실패하면 던진다', async () => {
+      await expect(main(dir, { strict: true, fetchFont: failing })).rejects.toThrow(/CJK 세리프 받기 실패/);
+    });
+
+    it('--if-missing: 제대로 된 CSS는 건너뛰고 빈 CSS는 다시 받는다', async () => {
+      await writeFile(path.join(dir, 'noto-serif-kr.css'), rewriteFontCss(SAMPLE, CJK_FONTS[0], () => 'a.woff2'));
+      await writeFile(path.join(dir, 'noto-serif-jp.css'), '/* 받기 실패 */\n');
+      const fetched = [];
+      await main(dir, {
+        ifMissing: true,
+        fetchFont: async (font) => {
+          fetched.push(font.id);
+          return 1;
+        },
+      });
+      expect(fetched).toEqual(['noto-serif-jp']);
+    });
   });
 });
