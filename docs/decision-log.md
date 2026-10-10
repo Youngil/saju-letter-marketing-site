@@ -659,3 +659,11 @@ npm run build   # 프로덕션 빌드 — App Router 라우트/타입 검증 + M
 - **AI 언급 기준(D6)** — "마케팅 카피에서 AI 언급 금지" → "앞세우지 않되, FAQ·처리방침·면책·직접 질문 답변에서는 밝힌다". 사이트에 FAQ·소개 문구 중 AI를 숨기거나 앞세우는 곳은 없었다(처리방침 §4가 AI 제공업체를 밝힘).
 - **처리방침 C7** — 앱이 가입·온보딩 퍼널 이벤트(`auth_view` 등)를 새로 보내므로 6개 언어 §1 앱 분석 괄호에 "화면·버튼 단위 이용 단계 + 식별 정보 미포함" 한 문장, 시행일 2026-10-11. 고지가 수집보다 먼저 나가는 쪽이라 모바일 배포보다 앞서도 된다.
 - **CI(C9)** — `.github/workflows/ci.yml`(tsc·test·lint·build, 배포 없음), dependabot에 github-actions 추가·npm 시각을 backend 형식으로.
+
+## 2026-10-11 — 전체 점검 16차(브랜치 `fix/full-review-16`)
+
+- **폰트 받기 = 빌드 기본 엄격(16-1)** — 15차의 `isStrictBuild`는 `K_SERVICE`·`CI`·`NODE_ENV=production`으로 운영 빌드를 알아보려 했지만, 운영 배포(`gcloud run deploy --source` → Cloud Build의 buildpack/Docker 빌드)에는 `K_SERVICE`·`CI`가 없다(`K_SERVICE`는 실행 중인 Cloud Run 컨테이너에만 있다). 운영 빌드 변수는 `NEXT_PUBLIC_*`뿐이고 prebuild 시점의 `NODE_ENV`도 보장되지 않아, 받기에 실패하면 운영에서 15차 이전처럼 조용히 시스템 세리프로 배포될 수 있었다. → 환경을 추측하지 않는다: `prebuild`(인자 없음)는 항상 엄격, `predev`(`--if-missing`)만 관대. `CJK_FONTS_STRICT=0`은 명시적 비상 해제로만(빌드 변수에 넣었다면 배포 뒤 지울 것 — 남아 있으면 이후 배포가 계속 관대해진다). `CJK_FONTS_STRICT=1`은 이제 기본과 같아 아무 효과가 없다(meta `deploy-prod.sh`가 넣어도 무해). 로컬 `npm run build`도 오프라인이면 실패한다 — 의도된 변화.
+- **사주 한 문장 사실 수정(16-6, 계약 "사주 한 문장")** — "별자리는 태어난 달로 정해진다"는 틀렸다(서양 별자리는 생일이 드는 12개 날짜 구간, 3월 10일생 = 물고기자리). 히어로 부제 6개 언어를 계약 문장("별자리는 1년 내내 그대로 / 사주는 태어난 날을 오늘과 견주어 읽는다 — 그래서 편지가 매일 아침 새로")으로, 같은 주장을 하던 compare(`diagramZodiacPoint`·`dayMasterIntro`·`infoAmountBody`, 6개 언어)·블로그 `saju-vs-western-astrology`(6개 언어)·`what-is-saju`(en/es/ja)도 "12개 날짜 구간"으로. compare 부제의 "왜 아침 편지가 더 개인적으로 느껴지는지"는 14차 규칙(편지를 personal로 꾸미지 않음) 위반이라 "왜 매일 아침 짧은 편지와 잘 맞는지"로. 블로그의 "사주는 정확한 태어난 순간에 더 가깝게 맞춰진 느낌"(en "exact birth moment" 등 6개 언어)은 "더 촘촘하게/finely grained"로 — 사주 일반 사실("네 기둥은 태어난 순간 고정")은 15차 판단대로 그대로 뒀다. ja·pt·vi 문장은 원어민 검토 대상.
+- **es H1(16-마케팅 전략 2)** — "Cada mañana, una carta breve desde tu carta natal coreana"는 carta가 두 번(편지·출생 차트) → "Tu astrología coreana, en una carta breve cada mañana". 기본 OG 카드도 같은 문자열을 쓴다.
+- **가격 원칙** — 사용자에게 보이는 문구에 가격을 글자로 박지 않는다(지역 가격을 모름). 점검 결과 사이트 사전·콘텐츠·블로그·처리방침·면책에 가격 표기는 없었다.
+- **Dependabot(C10, E4)** — npm·github-actions 버전 업데이트를 월 1회로. 보안 업데이트는 저장소 설정의 Dependabot 보안 업데이트가 주기와 무관하게 연다.
