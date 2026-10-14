@@ -97,10 +97,10 @@ export const dictionary: MarketingDictionary = {
   leadCapture: {
     title: 'Receba uma nota de Dain — e um teste de 30 dias',
     subtitle:
-      'Deixe seu e-mail e Dain enviará agora mesmo uma breve nota de boas-vindas — incluindo uma carta matinal de exemplo e um código para um teste grátis de 30 dias (em vez dos 7 de costume).',
+      'Deixe seu e-mail e Dain enviará agora mesmo uma breve nota de boas-vindas — incluindo uma carta matinal de exemplo e um código para um teste grátis de 30 dias no app para Android (em vez dos 7 de costume).',
     demoResultTitle: 'Quer receber as cartas da Dain por e-mail?',
     demoResultSubtitle:
-      'Está num iPhone ou no computador? Deixe seu e-mail e a Dain envia uma nota de boas-vindas com um código de teste de 30 dias — e avisamos por aqui quando o app para iOS for lançado.',
+      'Está num iPhone ou no computador? Deixe seu e-mail e a Dain envia uma nota de boas-vindas — e avisamos por aqui quando o app para iOS for lançado. (O código de teste de 30 dias da nota é para o app para Android.)',
     emailPlaceholder: 'voce@exemplo.com',
     emailLabel: 'Endereço de e-mail',
     consentLabel: 'Aceito receber este e-mail de boas-vindas (você pode cancelar quando quiser)',
