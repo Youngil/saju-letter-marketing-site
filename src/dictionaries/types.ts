@@ -49,6 +49,8 @@ export interface MarketingDictionary {
     resultFromName: string;
     resultFromRole: string;
     resultCta: string;
+    /** 데모 결과 위 날 유형 한 줄(2026-10-15) — `{name}`에 그 언어 별명(content/dayTypeNicknames.ts). */
+    resultDayType: string;
     tryAgain: string;
     errors: {
       date: string;

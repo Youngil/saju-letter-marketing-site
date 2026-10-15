@@ -1,6 +1,8 @@
 'use client';
 
 import { useId, useRef, useState } from 'react';
+import type { HeavenlyStem } from '@/lib/sajuVocabulary';
+import { dayTypeLine } from '@/content/dayTypeNicknames';
 import Image from 'next/image';
 import type { MarketingDictionary } from '@/dictionaries/types';
 import type { LaunchContentLanguage } from '@/lib/languages';
@@ -53,6 +55,8 @@ export function DemoForm({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<DemoReadingResponse | null>(null);
+  // 날 유형(일간) — 결과 위에 '당신은 ○○ 날에 태어났어요' 한 줄(2026-10-15, 인스타 '오늘의 편지 한 줄'이 여기로 보낸다).
+  const [dayMaster, setDayMaster] = useState<HeavenlyStem | null>(null);
 
   const wakeTurnstile = () => turnstileRef.current?.execute();
 
@@ -95,6 +99,7 @@ export function DemoForm({
         timeZone: assumedBirthTimeZone(language),
       });
 
+      setDayMaster(chart.dayPillar.stem);
       const reading = await getDemoReading({
         language,
         dayPillar: chart.dayPillar,
@@ -148,6 +153,7 @@ export function DemoForm({
             <Postmark language={language} className="ml-auto" />
           </div>
           <hr className="border-foreground/10" />
+          {dayMaster && <p className="text-sm text-foreground/70">{dayTypeLine(dict.resultDayType, dayMaster, language)}</p>}
           <p className="font-display text-xl leading-snug font-semibold">{result.hook}</p>
           <div className="flex flex-col gap-3 text-base leading-relaxed sm:text-lg">
             <p>{result.interpretation}</p>
@@ -176,6 +182,7 @@ export function DemoForm({
             // 받아야 한다(위 catch 블록과 같은 이유, 2026-09-03).
             setTurnstileToken(undefined);
             setResult(null);
+            setDayMaster(null);
           }}
           className="text-sm text-foreground/60 underline underline-offset-2 hover:text-foreground"
         >

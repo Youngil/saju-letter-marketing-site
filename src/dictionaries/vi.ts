@@ -38,7 +38,8 @@ export const dictionary: MarketingDictionary = {
     resultTitle: 'Một chút từ lá thư buổi sáng của bạn',
     resultFromName: 'Dain',
     resultFromRole: 'Người viết thư của bạn',
-    resultCta: 'Nhận lá thư như thế này mỗi sáng — miễn phí để bắt đầu',
+    resultCta: 'Nhận lá thư như thế này mỗi sáng — miễn phí để bắt đầu',
+    resultDayType: 'Bạn sinh vào ngày {name} — trong saju, ngày sinh của bạn được ví với một trong mười hình ảnh thiên nhiên.',
     tryAgain: 'Thử ngày khác',
     errors: {
       date: 'Vui lòng nhập ngày sinh hợp lệ.',
