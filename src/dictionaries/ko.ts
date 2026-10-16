@@ -42,7 +42,7 @@ export const dictionary: MarketingDictionary = {
     resultFromName: '다인',
     resultFromRole: '편지 쓰는 사람',
     resultCta: '이런 편지를 매일 아침 받아보세요 — 무료로 시작',
-    resultDayType: "당신은 '{name}' 날에 태어났어요 — 사주는 태어난 날을 열 가지 자연에 빗대요.",
+    resultDayType: "당신은 '{name}' 날에 태어났어요 — 사주에서는 태어난 날을 열 가지 자연 중 하나로 봐요.",
     tryAgain: '다른 날짜로 다시 보기',
     errors: {
       date: '올바른 생년월일을 입력해주세요.',
