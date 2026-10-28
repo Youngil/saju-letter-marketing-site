@@ -123,7 +123,7 @@ npx tsc --noEmit
 npm run build     # 라우트/타입 검증 + MDX 컴파일, 백엔드 없이도 성공해야 함
 ```
 
-- Node 22(`.nvmrc` 22.22, `engines.node` "22.x" — Cloud Run 빌드팩이 따른다). `.github/dependabot.yml` 주간(npm: next 묶음·메이저 제외 + github-actions, 15차 backend 형식).
+- Node 22(`.nvmrc` 22.23, `engines.node` "22.x" — Cloud Run 빌드팩이 따른다). `.github/dependabot.yml` 주간(npm: next 묶음·메이저 제외 + github-actions, 15차 backend 형식).
 - **CI `.github/workflows/ci.yml`**(15차, 계약 C9): PR·master 푸시마다 `npm ci` → tsc → `npm test` → lint → build(백엔드 없이). 배포는 하지 않는다. `CI=true`라 폰트 받기 실패가 빌드 실패.
 - `src/lib/sajuCopyDrift.test.ts`: `birthClock.ts`·`koreanLunar.ts`가 형제 저장소 `saju-letter-mobile/src/domain/saju/`와 머리 주석 빼고 같은지 비교(없으면 건너뜀, `SAJU_MOBILE_REPO`로 경로 지정).
 - Next는 16.4.0(13차, GHSA-vcvr-r3jv-pc5j 대응 — 16.2.0–16.3.5 금지). `next`·`@next/mdx`·`eslint-config-next`는 같은 정확한 버전으로 함께 올린다.
