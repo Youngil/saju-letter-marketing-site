@@ -12,7 +12,7 @@ export const DAY_TYPE_NICKNAMES: Record<HeavenlyStem, Record<string, string>> = 
   丙: { ko: '태양', en: 'sun', es: 'sol', ja: '太陽', pt: 'sol', vi: 'mặt trời' },
   丁: { ko: '불꽃', en: 'flame', es: 'llama', ja: '炎', pt: 'chama', vi: 'ngọn lửa' },
   戊: { ko: '산', en: 'mountain', es: 'montaña', ja: '山', pt: 'montanha', vi: 'núi' },
-  己: { ko: '대지', en: 'land', es: 'campo', ja: '大地', pt: 'campo', vi: 'cánh đồng' },
+  己: { ko: '대지', en: 'land', es: 'raíces', ja: '大地', pt: 'campo', vi: 'cánh đồng' },
   庚: { ko: '바위', en: 'rock', es: 'roca', ja: '岩', pt: 'rocha', vi: 'đá' },
   辛: { ko: '보석', en: 'jewel', es: 'joya', ja: '宝石', pt: 'joia', vi: 'ngọc' },
   壬: { ko: '바다', en: 'sea', es: 'mar', ja: '海', pt: 'mar', vi: 'biển' },
