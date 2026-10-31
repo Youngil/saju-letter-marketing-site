@@ -37,7 +37,6 @@ export const dictionary: MarketingDictionary = {
     resultFromName: 'Dain',
     resultFromRole: 'Quem escreve suas cartas',
     resultCta: 'Receba uma carta como essa toda manhã — grátis para começar',
-    resultDayType: 'Você nasceu em um dia de {name} — no saju, o dia do seu nascimento é comparado a uma de dez coisas da natureza.',
     tryAgain: 'Tentar outra data',
     errors: {
       date: 'Por favor, insira uma data de nascimento válida.',

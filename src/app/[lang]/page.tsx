@@ -13,6 +13,7 @@ import {
 // 자체가 이미 LAUNCH_CONTENT_LANGUAGES라는 뜻) 방어적으로 그대로 남겨뒀다.
 import { activeContentLanguages, fetchActiveServiceLanguages } from '@/lib/serviceLanguagesApi';
 import { DemoForm } from '@/components/DemoForm';
+import { pickDayTypeResultCopy } from '@/content/dayTypeCopy';
 import { LeadCaptureForm } from '@/components/LeadCaptureForm';
 import { AppDownloadLinks } from '@/components/AppDownloadLinks';
 import { DainHomeMark } from '@/components/DainHomeMark';
@@ -148,6 +149,7 @@ export default async function HomePage({ params }: { params: Promise<{ lang: str
               disclaimerShort={DISCLAIMER_CONTENT[lang].short}
               leadDict={dict.leadCapture}
               couponAvailability={couponAvailability}
+              dayTypeCopy={pickDayTypeResultCopy(lang)}
             />
           </div>
         </section>

@@ -37,7 +37,6 @@ export const dictionary: MarketingDictionary = {
     resultFromName: 'Dain',
     resultFromRole: 'Your letter writer',
     resultCta: 'Get a letter like this every morning — free to start',
-    resultDayType: 'You were born on a {name} day — in saju, your birth day is likened to one of ten things in nature.',
     tryAgain: 'Try another date',
     errors: {
       date: 'Please enter a valid date of birth.',

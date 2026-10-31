@@ -2,7 +2,8 @@
 
 import { useId, useRef, useState } from 'react';
 import type { HeavenlyStem } from '@/lib/sajuVocabulary';
-import { dayTypeLine } from '@/content/dayTypeNicknames';
+import type { DayTypeResultCopy } from '@/content/dayTypeCopy';
+import { DayTypeResultCard } from './day-type/DayTypeResultCard';
 import Image from 'next/image';
 import type { MarketingDictionary } from '@/dictionaries/types';
 import type { LaunchContentLanguage } from '@/lib/languages';
@@ -33,6 +34,7 @@ export function DemoForm({
   disclaimerShort,
   leadDict,
   couponAvailability,
+  dayTypeCopy,
 }: {
   language: LaunchContentLanguage;
   dict: MarketingDictionary['demo'];
@@ -44,6 +46,8 @@ export function DemoForm({
   /** 결과 옆 오락 목적 고지(`DISCLAIMER_CONTENT[lang].short`) — 서버 페이지가 현재 언어 문자열만 넘긴다(2026-10-06 전체
    *  점검 9차, 예전엔 6개 언어 전문을 직접 import해 홈 번들에 실렸다). */
   disclaimerShort: string;
+  /** 결과 맨 위 날 유형 카드 문구(현재 언어만 — `pickDayTypeResultCopy`, 2026-10-31). */
+  dayTypeCopy: DayTypeResultCopy;
 }) {
   const dateLabelId = useId();
   const [year, setYear] = useState('');
@@ -136,6 +140,8 @@ export function DemoForm({
     // "— 다인" 서명. 면책·앱 안내 같은 시스템 문구는 종이 밖에 둔다(앱 원칙: 종이 안에 시스템 문구 없음).
     return (
       <div className="flex flex-col gap-5">
+        {/* 날 유형 카드가 먼저(2026-10-31) — 영상·앱 공유 카드를 보고 온 사람이 찾던 것. 편지는 그 아래 "오늘 아침 편지의 맛보기". */}
+        {dayMaster && <DayTypeResultCard stem={dayMaster} language={language} copy={dayTypeCopy} />}
         <p className="text-center text-xs font-semibold tracking-wide text-accent-warm uppercase">{dict.resultTitle}</p>
         <article className="letter-surface flex flex-col gap-4 rounded-sm p-6 sm:p-7">
           <div className="flex items-center gap-3">
@@ -153,7 +159,6 @@ export function DemoForm({
             <Postmark language={language} className="ml-auto" />
           </div>
           <hr className="border-foreground/10" />
-          {dayMaster && <p className="text-sm text-foreground/70">{dayTypeLine(dict.resultDayType, dayMaster, language)}</p>}
           <p className="font-display text-xl leading-snug font-semibold">{result.hook}</p>
           <div className="flex flex-col gap-3 text-base leading-relaxed sm:text-lg">
             <p>{result.interpretation}</p>

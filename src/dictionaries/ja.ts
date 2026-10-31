@@ -37,7 +37,6 @@ export const dictionary: MarketingDictionary = {
     resultFromName: 'ダイン',
     resultFromRole: 'サジュレターの手紙書き',
     resultCta: 'こんな手紙を毎朝届けます — まずは無料で',
-    resultDayType: 'あなたは「{name}」の日に生まれました — サジュでは、生まれた日を十の自然にたとえます。',
     tryAgain: '別の生年月日で試す',
     errors: {
       date: '正しい生年月日を入力してください。',

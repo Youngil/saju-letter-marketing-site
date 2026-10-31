@@ -3,6 +3,8 @@ import { MARKETING_LANGUAGES, DEFAULT_LANGUAGE, type MarketingLanguage } from '@
 import { BLOG_LANGUAGES, getSlugLanguageMap } from '@/lib/posts';
 import { WEB_BASE_URL, activeLanguageAlternates, languageAlternates } from '@/lib/seo';
 import { activeContentLanguages, fetchActiveServiceLanguages } from '@/lib/serviceLanguagesApi';
+import { dayTypePath } from '@/lib/dayType';
+import { HEAVENLY_STEMS } from '@/lib/sajuVocabulary';
 
 // 2026-09-08 3차 종합 버그 점검(항목 1) — `[lang]/page.tsx`/`blog/page.tsx`/`blog/[slug]/page.tsx`가
 // 2026-09-06 블로그 DB 하이브리드 전환 때 "이게 없으면 DB에 새로 발행한 글이 다음 배포 전까지
@@ -55,6 +57,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     url: `${WEB_BASE_URL}${comparePath(lang)}`,
     alternates: { languages: activeLanguageAlternates(contentLanguages, comparePath, activeDefault) },
   }));
+  // 날 유형 페이지 10개(2026-10-31) — compare와 같은 축(콘텐츠 축 ∩ 켠 언어), 페이지의 hreflang과 같은 계산.
+  const dayTypeEntries = HEAVENLY_STEMS.flatMap((stem) => {
+    const path = (lang: (typeof BLOG_LANGUAGES)[number]) => dayTypePath(lang, stem);
+    return contentLanguages.map((lang) => ({
+      url: `${WEB_BASE_URL}${path(lang)}`,
+      alternates: { languages: activeLanguageAlternates(contentLanguages, path, activeDefault) },
+    }));
+  });
 
   // 신년운세 캠페인(2026-08-07 이관) — 2026-09-08 3차 종합 버그 점검(항목 1)으로
   // `MARKETING_LANGUAGES`(6)로 되돌렸다. 2026-09-07 커밋이 ko를 포함시키며 `LAUNCH_CONTENT_
@@ -94,6 +104,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...blogIndexEntries,
     ...blogPostEntries,
     ...compareEntries,
+    ...dayTypeEntries,
     ...lunarNewYearEntries,
     ...privacyEntries,
     ...disclaimerEntries,
