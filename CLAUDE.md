@@ -126,7 +126,7 @@ npm run build     # 라우트/타입 검증 + MDX 컴파일, 백엔드 없이도
 - Node 22(`.nvmrc` 22.23, `engines.node` "22.x" — Cloud Run 빌드팩이 따른다). `.github/dependabot.yml` 주간(npm: next 묶음·메이저 제외 + github-actions, 15차 backend 형식).
 - **CI `.github/workflows/ci.yml`**(15차, 계약 C9): PR·master 푸시마다 `npm ci` → tsc → `npm test` → lint → build(백엔드 없이). 배포는 하지 않는다. `CI=true`라 폰트 받기 실패가 빌드 실패.
 - `src/lib/sajuCopyDrift.test.ts`: `birthClock.ts`·`koreanLunar.ts`가 형제 저장소 `saju-letter-mobile/src/domain/saju/`와 머리 주석 빼고 같은지 비교(없으면 건너뜀, `SAJU_MOBILE_REPO`로 경로 지정).
-- Next는 16.4.0(13차, GHSA-vcvr-r3jv-pc5j 대응 — 16.2.0–16.3.5 금지). `next`·`@next/mdx`·`eslint-config-next`는 같은 정확한 버전으로 함께 올린다.
+- Next는 16.4.3(2026-10-31 — 16.4.0 이하는 GHSA-2464-fhr4-w9xw·GHSA-673q-mjm6-r5xr(원격 코드 실행)·GHSA-p3m5-59mp-jv5r에 해당하고 `next build`가 멈춘다. 13차의 16.2.0–16.3.5 금지도 그대로). `sharp`는 0.35.5 이상(이미지 처리 RCE 우회 조건). `next`·`@next/mdx`·`eslint-config-next`는 같은 정확한 버전으로 함께 올린다.
 
 - jsdom/컴포넌트 렌더링 테스트 인프라 없음 — 로직은 `src/lib/*` 순수 함수로 뽑아 단위 테스트(전역은 `vi.stubGlobal`). 페이지 게이트는 `page.test.ts` 패턴("지원 언어 전부 notFound 없이 통과 + 미지원 404").
 - vitest엔 `@next/mdx` 로더가 없어 파일 글(`{source:'file'}`) 경로는 단위 테스트 불가(알려진 갭).
