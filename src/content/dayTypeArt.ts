@@ -86,11 +86,16 @@ export const DAY_TYPE_ART: Record<HeavenlyStem, ArtShape[]> = {
     { kind: 'path', d: 'M54 50L62 34L70 50L66 47L62 52L58 47Z', fill: 'shine', opacity: 0.85 },
     { kind: 'path', d: 'M14 92H106', stroke: 'deep', strokeWidth: 3 },
   ],
-  // 대지 — 넓게 펼쳐진 땅(두 겹 흙)과 그 위에서 자라는 작은 싹.
+  // 대지 — 넓게 펼쳐진 땅(두 겹 흙), 흙 속으로 뻗은 뿌리, 그 위에서 자라는 작은 싹.
   己: [
     BACKDROP,
     { kind: 'path', d: 'M6 74C30 62 50 60 66 66C80 71 94 70 114 63V116H6Z', fill: 'main' },
     { kind: 'path', d: 'M6 85C34 76 56 76 76 81C88 84 98 83 114 78V116H6Z', fill: 'deep' },
+    { kind: 'path', d: 'M60 66V97', stroke: 'shine', strokeWidth: 2.2, opacity: 0.6 },
+    { kind: 'path', d: 'M60 75C56 79 52 83 49 89', stroke: 'shine', strokeWidth: 1.8, opacity: 0.55 },
+    { kind: 'path', d: 'M60 79C64 83 68 87 71 94', stroke: 'shine', strokeWidth: 1.8, opacity: 0.55 },
+    { kind: 'path', d: 'M60 87C57 91 55 94 53 99', stroke: 'shine', strokeWidth: 1.5, opacity: 0.5 },
+    { kind: 'path', d: 'M60 89C63 93 65 96 67 100', stroke: 'shine', strokeWidth: 1.5, opacity: 0.5 },
     { kind: 'path', d: 'M60 66V50', stroke: 'deep', strokeWidth: 3 },
     { kind: 'path', d: 'M60 56C54 56 49 52 48 46C54 46 59 50 60 56Z', fill: 'deep' },
     { kind: 'path', d: 'M60 52C66 52 71 48 72 42C66 42 61 46 60 52Z', fill: 'deep' },
