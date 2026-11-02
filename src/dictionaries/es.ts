@@ -95,21 +95,18 @@ export const dictionary: MarketingDictionary = {
     ctaText: 'Recibe gratis una vista previa de tu carta matutina',
   },
   leadCapture: {
-    title: 'Recibe una nota de Dain — y una prueba de 30 días',
+    title: 'Recibe una nota de Dain',
     subtitle:
-      'Déjanos tu correo y Dain te enviará ahora mismo una breve nota de bienvenida — incluida una carta matutina de ejemplo y un código para una prueba gratuita de 30 días en la app de Android (en vez de los 7 habituales).',
+      'Déjanos tu correo y Dain te enviará ahora mismo una breve nota de bienvenida, con una carta matutina de ejemplo. También te avisaremos cuando abra la fortuna de Año Nuevo coreano (a mediados de diciembre, cada año) y cuando salga la app para iPhone.',
     demoResultTitle: '¿Quieres recibir las cartas de Dain por correo?',
     demoResultSubtitle:
-      '¿Estás en un iPhone o en la computadora? Deja tu correo y Dain te enviará una nota de bienvenida; también te avisaremos aquí cuando salga la app para iOS. (El código de prueba de 30 días de la nota es para la app de Android).',
+      '¿Estás en un iPhone o en la computadora? Deja tu correo y Dain te enviará una nota de bienvenida. Te avisaremos aquí cuando salga la app para iPhone y cuando abra la fortuna de Año Nuevo coreano, a mediados de diciembre.',
     emailPlaceholder: 'tu@ejemplo.com',
     emailLabel: 'Correo electrónico',
-    consentLabel: 'Acepto recibir este correo de bienvenida (puedes darte de baja cuando quieras)',
+    consentLabel: 'Acepto recibir la nota de bienvenida y correos con novedades (fortuna de Año Nuevo coreano, lanzamiento de la app para iPhone). Puedes darte de baja cuando quieras.',
     submitButton: 'Enviarme la nota',
     submitting: 'Registrando…',
     success: '¡Listo! La nota de bienvenida de Dain va en camino. Si ya te habías registrado antes, no tienes que hacer nada más.',
-    limitedSlots: 'Solo para las primeras {capacity} personas',
-    remainingSlots: '{issued} de {capacity} cupos reclamados — quedan {remaining}',
-    soldOut: 'Esta oferta de cupón ya se agotó — ¡pero puedes registrarte igual para las notas!',
     errors: {
       email: 'Por favor ingresa un correo electrónico válido.',
       consent: 'Por favor marca la casilla para recibir los correos.',

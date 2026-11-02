@@ -19,15 +19,12 @@ import { AppDownloadLinks } from '@/components/AppDownloadLinks';
 import { DainHomeMark } from '@/components/DainHomeMark';
 import { BlogByline, categoryLabelFor } from '@/components/BlogByline';
 import { getLatestPostSummary } from '@/lib/posts';
-import { loadCouponAvailability } from '@/lib/api';
 import { DISCLAIMER_CONTENT } from '@/content/disclaimer';
 import { WEB_BASE_URL, activeLanguageAlternates, buildSocialMetadata, NOINDEX_ROBOTS } from '@/lib/seo';
 import { notFound } from 'next/navigation';
 
 // "이번 주 다인의 글"이 DB 저장 글(2026-09-06)일 수도 있어, blog/page.tsx와 같은 주기로
-// 재검증한다 — 없으면 새로 발행된 글이 코드 배포 없이는 여기 절대 안 나타난다. 쿠폰 현황 초기값 fetch
-// (`loadCouponAvailability`)도 같은 3600초라 이 값을 더 짧게 내리지 않는다(2026-10-06 전체 점검 10차 — 9차엔 120초라 홈 전체가
-// 2분마다 다시 그려졌다). 숫자의 신선도는 리드 폼이 마운트 때 `/api/coupon-availability`로 맞춘다.
+// 재검증한다 — 없으면 새로 발행된 글이 코드 배포 없이는 여기 절대 안 나타난다.
 export const revalidate = 3600;
 
 export async function generateMetadata({ params }: { params: Promise<{ lang: string }> }): Promise<Metadata> {
@@ -77,12 +74,7 @@ export default async function HomePage({ params }: { params: Promise<{ lang: str
   // 관리자가 한 언어를 일시 중지하면 그 언어의 데모/블로그 CTA도 함께 조용히 숨는다.
   const { active: activeLanguages } = await fetchActiveServiceLanguages();
   const showContentLinks = isLaunchContentLanguage(lang) && activeLanguages.includes(lang);
-  // 쿠폰 현황 초기값 — 홈 ISR과 같은 주기(`COUPON_AVAILABILITY_REVALIDATE_SECONDS`, 3600초)라 라우트 재검증을 내리지 않는다.
-  // JS 전·다시 받기 실패 때 보이는 값이고, 리드 폼이 마운트 때 같은 사이트 라우트(60초 캐시)로 최신 값을 받는다
-  // (2026-10-06 전체 점검 10차).
-  const [latestPost, couponAvailability] = showContentLinks
-    ? await Promise.all([getLatestPostSummary(lang), loadCouponAvailability()])
-    : [null, null];
+  const latestPost = showContentLinks ? await getLatestPostSummary(lang) : null;
 
   return (
     <div className="mx-auto flex max-w-5xl flex-col gap-16 px-4 py-14 sm:gap-20 sm:py-20">
@@ -148,7 +140,6 @@ export default async function HomePage({ params }: { params: Promise<{ lang: str
               appLinksDict={dict.appLinks}
               disclaimerShort={DISCLAIMER_CONTENT[lang].short}
               leadDict={dict.leadCapture}
-              couponAvailability={couponAvailability}
               dayTypeCopy={pickDayTypeResultCopy(lang)}
             />
           </div>
@@ -190,7 +181,7 @@ export default async function HomePage({ params }: { params: Promise<{ lang: str
           콘텐츠 서비스 대상이 아님)로 이 폼도 4개 언어로 제한한다. */}
       {showContentLinks ? (
         <section className="mx-auto w-full max-w-md">
-          <LeadCaptureForm language={lang} dict={dict.leadCapture} initialAvailability={couponAvailability} />
+          <LeadCaptureForm language={lang} dict={dict.leadCapture} />
         </section>
       ) : null}
     </div>

@@ -95,21 +95,18 @@ export const dictionary: MarketingDictionary = {
     ctaText: 'Receba grátis uma prévia da sua carta matinal',
   },
   leadCapture: {
-    title: 'Receba uma nota de Dain — e um teste de 30 dias',
+    title: 'Receba uma nota de Dain',
     subtitle:
-      'Deixe seu e-mail e Dain enviará agora mesmo uma breve nota de boas-vindas — incluindo uma carta matinal de exemplo e um código para um teste grátis de 30 dias no app para Android (em vez dos 7 de costume).',
+      'Deixe seu e-mail e Dain enviará agora mesmo uma breve nota de boas-vindas, com uma carta matinal de exemplo. Também avisamos quando a leitura de Ano Novo coreano abrir (em meados de dezembro, todo ano) e quando o app para iPhone sair.',
     demoResultTitle: 'Quer receber as cartas da Dain por e-mail?',
     demoResultSubtitle:
-      'Está num iPhone ou no computador? Deixe seu e-mail e a Dain envia uma nota de boas-vindas — e avisamos por aqui quando o app para iOS for lançado. (O código de teste de 30 dias da nota é para o app para Android.)',
+      'Está num iPhone ou no computador? Deixe seu e-mail e a Dain envia uma nota de boas-vindas. Avisamos por aqui quando o app para iPhone sair e quando a leitura de Ano Novo coreano abrir, em meados de dezembro.',
     emailPlaceholder: 'voce@exemplo.com',
     emailLabel: 'Endereço de e-mail',
-    consentLabel: 'Aceito receber este e-mail de boas-vindas (você pode cancelar quando quiser)',
+    consentLabel: 'Aceito receber a nota de boas-vindas e e-mails de novidades (leitura de Ano Novo coreano, lançamento do app para iPhone). Você pode cancelar quando quiser.',
     submitButton: 'Enviar a nota',
     submitting: 'Cadastrando…',
     success: 'Pronto! A nota de boas-vindas de Dain já está a caminho. Se você já tinha se inscrito antes, não precisa fazer mais nada.',
-    limitedSlots: 'Só para as primeiras {capacity} pessoas',
-    remainingSlots: '{issued} de {capacity} vagas preenchidas — restam {remaining}',
-    soldOut: 'Esta oferta de cupom já se esgotou — mas você ainda pode se cadastrar para as notas!',
     errors: {
       email: 'Por favor, insira um e-mail válido.',
       consent: 'Marque a caixa para receber os e-mails.',

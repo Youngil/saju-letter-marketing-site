@@ -277,6 +277,10 @@ import type { MarketingLanguage } from '@/lib/languages';
  * 결제 경로에 App Store, Apple 항목(로그인·App Store 결제·APNs, 탈퇴 시 Apple 로그인 연결 해제 — backend `appleSignInRevocation.ts`).
  * §6: App Store 구독은 회사가 끌 수 없어 이용자가 직접 해지(backend `otherActiveStore`/`subscriptionStore`). iOS 앱 출시 전에 배포해도
  * 사실과 어긋나지 않는다(아이폰 앱 사용자에게만 해당하는 문장). effectiveDate/§10 날짜는 6개 언어 모두 2026년 10월 14일(배포일)로 갱신.
+ *
+ * ⚠️ 2026-11-02 개정 — AI 초안, 법률 검토 대상. 홈 이메일 구독의 30일 체험 쿠폰을 없애고(출시 뒤 발급 0장) 소식 메일(신년운세 오픈·
+ * 아이폰 출시)로 바꿨다(backend `marketingSite/leadNoticeCopy.ts`). §1 이메일 용도의 "마케팅 쿠폰 발급"을 "소식 메일 발송"으로 — §2 "마케팅
+ * 이메일 발송(명시적으로 동의한 이용자에 한함)"이 이미 포괄한다. effectiveDate/§10 날짜는 6개 언어 모두 2026년 11월 11일(배포 예정일)로 갱신.
  */
 
 export const PRIVACY_CONTACT_EMAIL = 'contact@mikomaru.com';
@@ -297,7 +301,7 @@ export interface PrivacyPolicyContent {
 export const PRIVACY_POLICY_CONTENT: Record<MarketingLanguage, PrivacyPolicyContent> = {
   ko: {
     title: '개인정보처리방침',
-    effectiveDate: '시행일자: 2026년 7월 29일 (최종 수정: 2026년 10월 14일)',
+    effectiveDate: '시행일자: 2026년 7월 29일 (최종 수정: 2026년 11월 11일)',
     intro:
       '사주편지(이하 "회사" 또는 "서비스")는 이용자의 개인정보를 중요하게 생각하며, 관련 법령을 준수합니다. ' +
       '본 방침은 사주편지 앱과 saju-letter.com(마케팅 사이트, 궁합 공유·신년운세 공개 페이지, 이메일 구독 신청 ' +
@@ -308,7 +312,7 @@ export const PRIVACY_POLICY_CONTENT: Record<MarketingLanguage, PrivacyPolicyCont
         html:
           '<ul>' +
           '<li>이용자가 직접 입력하는 정보: 이름(또는 별칭), 생년월일, 성별(선택), 기기 시간대</li>' +
-          '<li>선택 입력 정보: 출생 시간("모름" 선택 가능), 이메일 주소(이메일로 가입할 때는 필수이며, Google 계정으로 로그인하면 그 계정의 이메일 주소를 받습니다. 아이폰에서 Apple로 로그인하면 Apple이 알려 주는 이메일 주소(이메일 가리기를 선택하면 Apple이 만든 전달용 주소)와, 온보딩의 이름 칸을 미리 채우기 위해 Apple이 알려 주는 이름을 받습니다. 로그인과 계정 관리, 계정 복구와 본인 확인, 친구 초대 혜택 자격 확인, 이메일 소식 구독을 신청한 경우 마케팅 쿠폰 발급, 무료체험 남용 방지, 고객 문의 응대에 사용), 궁합 공유·즉석 궁합 이용 시 상대를 구분하기 위해 입력하는 메모(상대방에게는 노출되지 않음)</li>' +
+          '<li>선택 입력 정보: 출생 시간("모름" 선택 가능), 이메일 주소(이메일로 가입할 때는 필수이며, Google 계정으로 로그인하면 그 계정의 이메일 주소를 받습니다. 아이폰에서 Apple로 로그인하면 Apple이 알려 주는 이메일 주소(이메일 가리기를 선택하면 Apple이 만든 전달용 주소)와, 온보딩의 이름 칸을 미리 채우기 위해 Apple이 알려 주는 이름을 받습니다. 로그인과 계정 관리, 계정 복구와 본인 확인, 친구 초대 혜택 자격 확인, 이메일 소식 구독을 신청한 경우 소식 메일 발송, 무료체험 남용 방지, 고객 문의 응대에 사용), 궁합 공유·즉석 궁합 이용 시 상대를 구분하기 위해 입력하는 메모(상대방에게는 노출되지 않음)</li>' +
           '<li>친구 초대(리퍼럴) 기능 이용 시 수집되는 정보: 본인에게 자동으로 부여되는 추천 코드, 그리고 가입 시 다른 회원의 추천 코드를 입력한 경우 그 회원과의 연결 정보(추천인 식별자)</li>' +
           '<li>즉석 궁합 이용 시 입력하는 정보: 궁합을 볼 두 사람의 이름과 계산된 사주 정보(상대방의 정보 포함 — 결과를 보여 주기 위해 저장하며, 이름은 암호화해 보관하고 AI 제공업체로 보내지 않음. 회원 탈퇴 시 함께 삭제)</li>' +
           '<li>자동으로 수집되는 정보: Firebase 인증 식별자(UID), 기기 푸시 토큰(FCM), 프로덕션 빌드에서만 수집되는 앱 이용 분석 이벤트(Google Analytics for Firebase — 가입 완료 시 로그인 수단 포함. 로그인 화면 보기·로그인 수단 선택·온보딩 제출·첫 편지 열기·구독 안내 화면 보기·알림 허용 여부처럼 화면·버튼 단위의 이용 단계도 집계하며, 이메일·이름·생년월일·편지나 저널 내용 등 식별 가능한 정보는 이벤트에 넣지 않음. 광고 ID는 광고 목적으로 사용하지 않음), 이 마케팅 사이트 방문 시 수집되는 웹 이용 분석 이벤트(Google Analytics — 앱 다운로드 버튼 클릭, 리드 등록 제출, 궁합 결과 열람, 무료 미리보기 이용 등. 이메일·이름·생년월일·궁합 링크 토큰 등 식별 가능한 개인정보는 이벤트에 포함하지 않음. 앱 다운로드 버튼을 누르면 이 사이트에 들어온 경로(예: "tiktok")만 Google Play에 함께 전달되며, 이 경로 정보는 분석 쿠키에 동의한 경우에만 브라우저에 최대 30일 보관됨. 분석 쿠키는 동의한 경우에만 쓰며, 동의는 모든 페이지 맨 아래 "쿠키 설정"에서 언제든 바꾸거나 철회할 수 있음), 신년운세 결과를 만든 브라우저에만 저장되는 기능용 쿠키(결과를 만든 본인만 이메일 시리즈를 신청할 수 있게 하는 무작위 값으로, 최대 90일 보관하며 광고·분석에 쓰지 않고 브라우저 설정에서 언제든 지울 수 있음), 구독/결제 상태(RevenueCat 경유), 무료체험 남용 방지를 위한 Google Play Integrity 기기 무결성 신호, 오류·크래시 진단 정보, 공개(비로그인) 페이지 등 서비스 접속 시의 IP 주소(악용 방지를 위한 요청 빈도 제한에만 사용하며, 데이터베이스에는 IP 주소 원문을 저장하지 않고 원래 주소로 되돌릴 수 없는 키 기반 단방향 해시값만 최대 1일 보관), 서비스 이용 시 웹 서버가 남기는 요청 기록(IP 주소, 접속 시각, 요청한 주소 등 — 최대 30일 보관), 마케팅 사이트의 공개 제출 폼(홈 미니 데모·궁합 공유·리드 등록·신년운세)에서 봇 방지를 위해 구동되는 Cloudflare Turnstile을 통해 Cloudflare로 전달되는 브라우저 정보와 IP 주소</li>' +
@@ -412,13 +416,13 @@ export const PRIVACY_POLICY_CONTENT: Record<MarketingLanguage, PrivacyPolicyCont
         heading: '10. 고지의 의무',
         html:
           '<p>본 방침은 2026년 7월 29일부터 적용되며, 법령·정책 또는 서비스 변경에 따라 내용이 추가·삭제·수정될 ' +
-          '수 있습니다(가장 최근 수정: 2026년 10월 14일). 변경 시 앱 공지 또는 본 페이지를 통해 고지합니다.</p>',
+          '수 있습니다(가장 최근 수정: 2026년 11월 11일). 변경 시 앱 공지 또는 본 페이지를 통해 고지합니다.</p>',
       },
     ],
   },
   en: {
     title: 'Privacy Policy',
-    effectiveDate: 'Effective date: July 29, 2026 (last updated: October 14, 2026)',
+    effectiveDate: 'Effective date: July 29, 2026 (last updated: November 11, 2026)',
     intro:
       'Saju Letter ("we", "us", or "the Service") respects your privacy and is committed to protecting your ' +
       'personal information. This Privacy Policy explains what information we collect and how we use it when ' +
@@ -430,7 +434,7 @@ export const PRIVACY_POLICY_CONTENT: Record<MarketingLanguage, PrivacyPolicyCont
         html:
           '<ul>' +
           '<li>Provided by you: name (or nickname), birth date, gender (optional), device timezone</li>' +
-          '<li>Optional: birth time (you may choose "unknown"), email address (required if you sign up with email; if you sign in with a Google account, we receive that account\'s email address. If you sign in with Apple on iPhone, we receive the email address Apple shares with us (a relay address created by Apple if you choose Hide My Email) and the name Apple shares, which we use only to pre-fill the name field during onboarding. Used for sign-in and account management, account recovery and verification, checking eligibility for referral rewards, issuing marketing coupons if you sign up for our emails, preventing free-trial abuse, and responding to support requests), a note you enter in compatibility-sharing or deep compatibility to help you tell people apart (never shown to the other person)</li>' +
+          '<li>Optional: birth time (you may choose "unknown"), email address (required if you sign up with email; if you sign in with a Google account, we receive that account\'s email address. If you sign in with Apple on iPhone, we receive the email address Apple shares with us (a relay address created by Apple if you choose Hide My Email) and the name Apple shares, which we use only to pre-fill the name field during onboarding. Used for sign-in and account management, account recovery and verification, checking eligibility for referral rewards, sending news emails if you sign up for our emails, preventing free-trial abuse, and responding to support requests), a note you enter in compatibility-sharing or deep compatibility to help you tell people apart (never shown to the other person)</li>' +
           '<li>Referral program: a referral code automatically assigned to your account, and — if you entered another member\'s referral code when signing up — a record linking your account to that referrer</li>' +
           '<li>Deep compatibility: the names of the two people you enter and their calculated saju information (including the other person\'s), stored so we can show you the result. The names are stored encrypted, are never sent to the AI provider, and are deleted when you delete your account</li>' +
           '<li>Collected automatically: Firebase authentication identifier (UID), device push token (FCM), app-usage analytics events collected only in production builds (Google Analytics for Firebase — including the sign-in method on the sign-up event, and screen- and button-level usage steps such as viewing the sign-in screen, choosing a sign-in method, submitting onboarding, opening your first letter, viewing the subscription screen, and whether you allowed notifications; these events never include identifying data such as your email, name, birth date, or the content of your letters or journal; we do not use the advertising ID for advertising), web-usage analytics events collected when you visit this marketing site (Google Analytics — app-download button clicks, lead sign-up submissions, viewing a compatibility result, using the free preview; we do not include identifying data such as email, name, birth date, or compatibility-link tokens in these events. When you tap the app-download button, only the channel that brought you to this site (for example "tiktok") is passed along to Google Play; that channel tag is kept in your browser for up to 30 days only if you accept analytics cookies. Analytics cookies are used only with your consent, which you can change or withdraw at any time via "Cookie settings" at the bottom of every page), a functional cookie stored only in the browser that created a Lunar New Year reading (a random value that lets only the reading\'s creator sign up for its email series; kept for up to 90 days, never used for ads or analytics, and you can delete it in your browser settings at any time), subscription/purchase status (via RevenueCat), Google Play Integrity device-integrity signals used to prevent free-trial abuse, crash/error diagnostic data, your IP address when you use public pages and other parts of the service (used only for abuse-prevention rate limiting; we never store the IP address itself in our database — only a keyed, one-way hash that cannot be turned back into the address, kept for up to 1 day), request logs that our web servers keep when you use the service (including IP address, time, and the address requested; kept for up to 30 days), and browser information and your IP address sent to Cloudflare while the Cloudflare Turnstile bot-protection widget is active on our marketing site\'s public submission forms (home demo, compatibility-sharing, lead sign-up, and Lunar New Year)</li>' +
@@ -541,14 +545,14 @@ export const PRIVACY_POLICY_CONTENT: Record<MarketingLanguage, PrivacyPolicyCont
         heading: '10. Changes to This Policy',
         html:
           '<p>This policy is effective as of July 29, 2026, and may be updated as our practices, applicable ' +
-          'laws, or the service itself change (most recently updated: October 14, 2026). We will notify you of ' +
+          'laws, or the service itself change (most recently updated: November 11, 2026). We will notify you of ' +
           'material changes through the app or this page.</p>',
       },
     ],
   },
   ja: {
     title: 'プライバシーポリシー',
-    effectiveDate: '施行日: 2026年7月29日(最終更新: 2026年10月14日)',
+    effectiveDate: '施行日: 2026年7月29日(最終更新: 2026年11月11日)',
     intro:
       'サジュレター(以下「当社」または「本サービス」)は、利用者のプライバシーを尊重し、個人情報の保護に努めて' +
       'います。本ポリシーは、サジュレターアプリおよびsaju-letter.com(マーケティングサイト、相性シェア・旧正月' +
@@ -559,7 +563,7 @@ export const PRIVACY_POLICY_CONTENT: Record<MarketingLanguage, PrivacyPolicyCont
         html:
           '<ul>' +
           '<li>ご入力いただく情報: お名前(またはニックネーム)、生年月日、性別(任意)、端末のタイムゾーン</li>' +
-          '<li>任意項目: 出生時刻(「わからない」を選択可能)、メールアドレス(メールアドレスで登録する場合は必須。Googleアカウントでログインした場合はそのアカウントのメールアドレスを受け取ります。iPhoneで「Appleでサインイン」を使った場合は、Appleから共有されるメールアドレス(「メールを非公開」を選んだ場合はAppleが作成する転送用アドレス)と、オンボーディングのお名前欄をあらかじめ入力するためにAppleから共有されるお名前を受け取ります。ログインとアカウント管理、アカウントの復旧と本人確認、友達招待特典の対象確認、メール配信に登録した場合のマーケティング用クーポンの発行、無料体験の不正利用防止、お問い合わせへの対応に使用)、相性シェア・その場でわかる相性のご利用時に相手を区別するために入力するメモ(相手には表示されません)</li>' +
+          '<li>任意項目: 出生時刻(「わからない」を選択可能)、メールアドレス(メールアドレスで登録する場合は必須。Googleアカウントでログインした場合はそのアカウントのメールアドレスを受け取ります。iPhoneで「Appleでサインイン」を使った場合は、Appleから共有されるメールアドレス(「メールを非公開」を選んだ場合はAppleが作成する転送用アドレス)と、オンボーディングのお名前欄をあらかじめ入力するためにAppleから共有されるお名前を受け取ります。ログインとアカウント管理、アカウントの復旧と本人確認、友達招待特典の対象確認、メール配信に登録した場合のお知らせメールの送信、無料体験の不正利用防止、お問い合わせへの対応に使用)、相性シェア・その場でわかる相性のご利用時に相手を区別するために入力するメモ(相手には表示されません)</li>' +
           '<li>友達招待(リファラル)機能: ご自身のアカウントに自動的に付与される紹介コード、および登録時に他の会員の紹介コードを入力した場合、その会員との連携情報(紹介者の識別子)</li>' +
           '<li>その場でわかる相性のご利用時に入力される情報: 相性を見るお二人のお名前と計算済みの四柱情報(相手の方の情報を含みます。結果を表示するために保存し、お名前は暗号化して保管し、AIプロバイダーには送信しません。退会時に併せて削除します)</li>' +
           '<li>自動的に収集される情報: Firebase認証ID(UID)、端末のプッシュ通知トークン(FCM)、プロダクションビルドでのみ収集されるアプリ利用分析イベント(Google Analytics for Firebase — 会員登録完了イベントにログイン手段を含む。ログイン画面の表示・ログイン手段の選択・オンボーディングの送信・最初の手紙の開封・購読案内画面の表示・通知の許可の有無など、画面・ボタン単位の利用ステップも集計します。メールアドレス・氏名・生年月日・手紙や日記の内容など識別可能な情報はイベントに含めません。広告IDを広告目的で使用することはありません)、本マーケティングサイトご利用時に収集されるウェブ利用分析イベント(Google Analytics — アプリダウンロードボタンのクリック、リード登録の送信、相性診断結果の閲覧、無料プレビューの利用など。メールアドレス・氏名・生年月日・相性共有リンクのトークンなど識別可能な個人情報はイベントに含めません。アプリダウンロードボタンを押すと、本サイトへの流入経路(例: 「tiktok」)のみがGoogle Playに渡され、この経路情報は分析Cookieに同意した場合に限りブラウザに最長30日間保存されます。分析Cookieは同意いただいた場合にのみ使用し、同意は各ページ下部の「Cookie設定」からいつでも変更・撤回できます)、旧正月占いの結果を作成したブラウザにのみ保存される機能用Cookie(結果を作成したご本人だけがメールシリーズに登録できるようにするためのランダムな値。最長90日間保存し、広告・分析には使用せず、ブラウザの設定からいつでも削除できます)、サブスクリプション・購入状況(RevenueCat経由)、無料体験の不正利用防止のためのGoogle Play Integrity端末信頼性シグナル、エラー・クラッシュ診断情報、公開ページ(非会員向け)など本サービスご利用時のIPアドレス(不正利用防止のためのリクエスト制限のみに使用します。データベースにはIPアドレスそのものは保存せず、元のアドレスに戻せない鍵を用いた一方向ハッシュ値のみを最長1日間保管します)、サービスご利用時にウェブサーバーが残すリクエスト記録(IPアドレス、アクセス日時、リクエスト先のアドレスなど。最長30日間保存)、マーケティングサイトの公開フォーム(ホームのミニデモ・相性シェア・リード登録・旧正月占い)でボット対策として動作するCloudflare Turnstileを通じてCloudflareに送信されるブラウザ情報とIPアドレス</li>' +
@@ -664,7 +668,7 @@ export const PRIVACY_POLICY_CONTENT: Record<MarketingLanguage, PrivacyPolicyCont
       {
         heading: '10. 本ポリシーの変更',
         html:
-          '<p>本ポリシーは2026年7月29日より施行します(最終更新: 2026年10月14日)。法令、方針、またはサービス内容' +
+          '<p>本ポリシーは2026年7月29日より施行します(最終更新: 2026年11月11日)。法令、方針、またはサービス内容' +
           'の変更に応じて内容を追加・削除・修正する場合があります。重要な変更がある場合は、アプリ内または本ページ' +
           'にてお知らせします。</p>',
       },
@@ -672,7 +676,7 @@ export const PRIVACY_POLICY_CONTENT: Record<MarketingLanguage, PrivacyPolicyCont
   },
   es: {
     title: 'Política de Privacidad',
-    effectiveDate: 'Fecha de vigencia: 29 de julio de 2026 (última actualización: 14 de octubre de 2026)',
+    effectiveDate: 'Fecha de vigencia: 29 de julio de 2026 (última actualización: 11 de noviembre de 2026)',
     intro:
       'Saju Letter ("nosotros" o "el Servicio") respeta tu privacidad y se compromete a proteger tu información ' +
       'personal. Esta Política de Privacidad explica qué información recopilamos y cómo la usamos cuando ' +
@@ -684,7 +688,7 @@ export const PRIVACY_POLICY_CONTENT: Record<MarketingLanguage, PrivacyPolicyCont
         html:
           '<ul>' +
           '<li>Proporcionada por ti: nombre (o apodo), fecha de nacimiento, género (opcional), zona horaria del dispositivo</li>' +
-          '<li>Opcional: hora de nacimiento (puedes elegir "desconocida"), dirección de correo electrónico (obligatoria si te registras con correo electrónico; si inicias sesión con una cuenta de Google, recibimos el correo de esa cuenta. Si inicias sesión con Apple en iPhone, recibimos el correo que Apple comparte con nosotros (una dirección de reenvío creada por Apple si eliges Ocultar mi correo) y el nombre que Apple comparte, que solo usamos para rellenar de antemano el campo de nombre en el registro inicial. La usamos para el inicio de sesión y la gestión de tu cuenta, la recuperación de la cuenta y la verificación, comprobar si cumples los requisitos de las recompensas por referidos, emitir cupones de marketing si te suscribes a nuestros correos, prevenir el abuso de la prueba gratuita y responder a tus consultas de soporte), una nota que ingresas en la compatibilidad compartida o la compatibilidad detallada para distinguir a las personas (nunca se muestra a la otra persona)</li>' +
+          '<li>Opcional: hora de nacimiento (puedes elegir "desconocida"), dirección de correo electrónico (obligatoria si te registras con correo electrónico; si inicias sesión con una cuenta de Google, recibimos el correo de esa cuenta. Si inicias sesión con Apple en iPhone, recibimos el correo que Apple comparte con nosotros (una dirección de reenvío creada por Apple si eliges Ocultar mi correo) y el nombre que Apple comparte, que solo usamos para rellenar de antemano el campo de nombre en el registro inicial. La usamos para el inicio de sesión y la gestión de tu cuenta, la recuperación de la cuenta y la verificación, comprobar si cumples los requisitos de las recompensas por referidos, enviar correos con novedades si te suscribes a nuestros correos, prevenir el abuso de la prueba gratuita y responder a tus consultas de soporte), una nota que ingresas en la compatibilidad compartida o la compatibilidad detallada para distinguir a las personas (nunca se muestra a la otra persona)</li>' +
           '<li>Programa de referidos: un código de referido asignado automáticamente a tu cuenta y, si ingresaste el código de referido de otro miembro al registrarte, un registro que vincula tu cuenta con ese miembro</li>' +
           '<li>Compatibilidad detallada: los nombres de las dos personas que ingresas y su información de saju calculada (incluida la de la otra persona), que guardamos para mostrarte el resultado. Los nombres se almacenan cifrados, nunca se envían al proveedor de IA y se eliminan cuando eliminas tu cuenta</li>' +
           '<li>Recopilada automáticamente: identificador de autenticación de Firebase (UID), token de notificaciones push del dispositivo (FCM), eventos de análisis de uso de la app recopilados solo en compilaciones de producción (Google Analytics for Firebase — incluye el método de inicio de sesión en el evento de registro y pasos de uso a nivel de pantalla y botón, como ver la pantalla de inicio de sesión, elegir un método de inicio de sesión, enviar el registro inicial, abrir tu primera carta, ver la pantalla de suscripción y si permitiste las notificaciones; estos eventos nunca incluyen datos identificables como tu correo, nombre, fecha de nacimiento o el contenido de tus cartas o de tu diario; no usamos el ID de publicidad con fines publicitarios), eventos de análisis de uso web recopilados al visitar este sitio de marketing (Google Analytics — clics en el botón de descarga de la app, envíos del formulario de contacto, visualización de un resultado de compatibilidad, uso de la vista previa gratuita; no incluimos datos identificables como el correo, nombre, fecha de nacimiento o el token del enlace de compatibilidad en estos eventos. Al tocar el botón de descarga, solo se envía a Google Play el canal por el que llegaste a este sitio (por ejemplo, "tiktok"); esa etiqueta se guarda en tu navegador hasta 30 días solo si aceptas las cookies de análisis. Las cookies de análisis solo se usan con tu consentimiento, que puedes cambiar o retirar en cualquier momento desde "Configuración de cookies", al final de cada página), una cookie funcional guardada solo en el navegador con el que se creó una lectura de Año Nuevo Lunar (un valor aleatorio que permite que solo quien creó la lectura se suscriba a su serie de correos; se conserva hasta 90 días, nunca se usa para publicidad ni análisis y puedes borrarla en cualquier momento desde la configuración del navegador), estado de suscripción/compra (a través de RevenueCat), señales de integridad del dispositivo de Google Play Integrity usadas para prevenir el abuso de la prueba gratuita, datos de diagnóstico de errores/fallos, tu dirección IP al usar las páginas públicas y otras partes del servicio (usada solo para limitar la frecuencia de solicitudes y prevenir abusos; nunca guardamos la dirección IP en sí en nuestra base de datos, solo un hash unidireccional con clave que no permite recuperarla, durante un máximo de 1 día), los registros de solicitudes que guardan nuestros servidores web cuando usas el servicio (incluyen la dirección IP, la hora y la dirección solicitada; se conservan hasta 30 días), e información del navegador y tu dirección IP enviadas a Cloudflare mientras el widget de protección contra bots Cloudflare Turnstile está activo en los formularios públicos de nuestro sitio de marketing (demo de inicio, compatibilidad compartida, registro de contacto y Año Nuevo Lunar)</li>' +
@@ -797,14 +801,14 @@ export const PRIVACY_POLICY_CONTENT: Record<MarketingLanguage, PrivacyPolicyCont
         heading: '10. Cambios en esta política',
         html:
           '<p>Esta política entra en vigencia el 29 de julio de 2026 y puede actualizarse a medida que cambien ' +
-          'nuestras prácticas, las leyes aplicables o el propio servicio (última actualización: 14 de octubre ' +
+          'nuestras prácticas, las leyes aplicables o el propio servicio (última actualización: 11 de noviembre ' +
           'de 2026). Te notificaremos sobre cambios importantes a través de la app o esta página.</p>',
       },
     ],
   },
   pt: {
     title: 'Política de Privacidade',
-    effectiveDate: 'Data de vigência: 29 de julho de 2026 (última atualização: 14 de outubro de 2026)',
+    effectiveDate: 'Data de vigência: 29 de julho de 2026 (última atualização: 11 de novembro de 2026)',
     intro:
       'O Saju Letter ("nós" ou "o Serviço") respeita sua privacidade e se compromete a proteger suas ' +
       'informações pessoais. Esta Política de Privacidade explica quais informações coletamos e como as usamos ' +
@@ -816,7 +820,7 @@ export const PRIVACY_POLICY_CONTENT: Record<MarketingLanguage, PrivacyPolicyCont
         html:
           '<ul>' +
           '<li>Fornecidas por você: nome (ou apelido), data de nascimento, gênero (opcional), fuso horário do dispositivo</li>' +
-          '<li>Opcional: horário de nascimento (você pode escolher "desconhecido"), endereço de e-mail (obrigatório se você se cadastrar com e-mail; se você entrar com uma conta Google, recebemos o e-mail dessa conta. Se você entrar com a Apple no iPhone, recebemos o e-mail que a Apple compartilha conosco (um endereço de retransmissão criado pela Apple se você escolher Ocultar Meu E-mail) e o nome que a Apple compartilha, que usamos apenas para preencher previamente o campo de nome no cadastro inicial. Usado para login e gerenciamento da conta, recuperação da conta e verificação, conferir a elegibilidade para recompensas de indicação, emitir cupons de marketing se você se inscrever nos nossos e-mails, prevenir abuso do teste gratuito e responder a solicitações de suporte), uma nota que você insere na compatibilidade compartilhada ou na compatibilidade detalhada para diferenciar as pessoas (nunca é exibida para a outra pessoa)</li>' +
+          '<li>Opcional: horário de nascimento (você pode escolher "desconhecido"), endereço de e-mail (obrigatório se você se cadastrar com e-mail; se você entrar com uma conta Google, recebemos o e-mail dessa conta. Se você entrar com a Apple no iPhone, recebemos o e-mail que a Apple compartilha conosco (um endereço de retransmissão criado pela Apple se você escolher Ocultar Meu E-mail) e o nome que a Apple compartilha, que usamos apenas para preencher previamente o campo de nome no cadastro inicial. Usado para login e gerenciamento da conta, recuperação da conta e verificação, conferir a elegibilidade para recompensas de indicação, enviar e-mails de novidades se você se inscrever nos nossos e-mails, prevenir abuso do teste gratuito e responder a solicitações de suporte), uma nota que você insere na compatibilidade compartilhada ou na compatibilidade detalhada para diferenciar as pessoas (nunca é exibida para a outra pessoa)</li>' +
           '<li>Programa de indicação: um código de indicação atribuído automaticamente à sua conta e, se você inseriu o código de indicação de outro membro ao se cadastrar, um registro vinculando sua conta a esse membro</li>' +
           '<li>Compatibilidade detalhada: os nomes das duas pessoas que você insere e as informações de saju calculadas delas (incluindo as da outra pessoa), que guardamos para mostrar o resultado. Os nomes são armazenados com criptografia, nunca são enviados ao provedor de IA e são excluídos quando você exclui sua conta</li>' +
           '<li>Coletadas automaticamente: identificador de autenticação do Firebase (UID), token de notificações push do dispositivo (FCM), eventos de análise de uso do app coletados apenas em builds de produção (Google Analytics for Firebase — inclui o método de login no evento de cadastro e etapas de uso por tela e botão, como ver a tela de login, escolher um método de login, enviar o cadastro inicial, abrir sua primeira carta, ver a tela de assinatura e se você permitiu as notificações; esses eventos nunca incluem dados identificáveis como seu e-mail, nome, data de nascimento ou o conteúdo das suas cartas ou do seu diário; não usamos o ID de publicidade para fins de publicidade), eventos de análise de uso da web coletados ao visitar este site de marketing (Google Analytics — cliques no botão de download do app, envios do formulário de cadastro, visualização de um resultado de compatibilidade, uso da prévia gratuita; não incluímos dados identificáveis como e-mail, nome, data de nascimento ou o token do link de compatibilidade nesses eventos. Ao tocar no botão de download, apenas o canal pelo qual você chegou a este site (por exemplo, "tiktok") é repassado ao Google Play; essa etiqueta fica guardada no seu navegador por até 30 dias somente se você aceitar os cookies de análise. Os cookies de análise só são usados com o seu consentimento, que você pode alterar ou retirar a qualquer momento em "Configurações de cookies", no fim de cada página), um cookie funcional guardado apenas no navegador em que uma leitura de Ano Novo Lunar foi criada (um valor aleatório que permite que só quem criou a leitura se inscreva na série de e-mails; guardado por até 90 dias, nunca usado para publicidade ou análise, e você pode apagá-lo a qualquer momento nas configurações do navegador), status de assinatura/compra (via RevenueCat), sinais de integridade do dispositivo do Google Play Integrity usados para prevenir abuso do teste gratuito, dados de diagnóstico de erros/falhas, seu endereço IP ao usar as páginas públicas e outras partes do serviço (usado apenas para limitar a frequência de solicitações e prevenir abusos; nunca guardamos o endereço IP em si no nosso banco de dados, apenas um hash unidirecional com chave que não permite recuperá-lo, por no máximo 1 dia), os registros de solicitações que nossos servidores web mantêm quando você usa o serviço (incluem o endereço IP, o horário e o endereço solicitado; guardados por até 30 dias), e informações do navegador e seu endereço IP enviados ao Cloudflare enquanto o widget de proteção contra bots Cloudflare Turnstile está ativo nos formulários públicos do nosso site de marketing (demo da home, compatibilidade compartilhada, cadastro de contato e Ano Novo Lunar)</li>' +
@@ -929,14 +933,14 @@ export const PRIVACY_POLICY_CONTENT: Record<MarketingLanguage, PrivacyPolicyCont
         heading: '10. Alterações nesta política',
         html:
           '<p>Esta política entra em vigor em 29 de julho de 2026 e pode ser atualizada conforme nossas ' +
-          'práticas, as leis aplicáveis ou o próprio serviço mudarem (última atualização: 14 de outubro de ' +
+          'práticas, as leis aplicáveis ou o próprio serviço mudarem (última atualização: 11 de novembro de ' +
           '2026). Notificaremos você sobre alterações relevantes por meio do aplicativo ou desta página.</p>',
       },
     ],
   },
   vi: {
     title: 'Chính sách Quyền riêng tư',
-    effectiveDate: 'Ngày hiệu lực: 29 tháng 7 năm 2026 (cập nhật lần cuối: 14 tháng 10 năm 2026)',
+    effectiveDate: 'Ngày hiệu lực: 29 tháng 7 năm 2026 (cập nhật lần cuối: 11 tháng 11 năm 2026)',
     intro:
       'Saju Letter ("chúng tôi" hoặc "Dịch vụ") tôn trọng quyền riêng tư của bạn và cam kết bảo vệ thông tin cá ' +
       'nhân của bạn. Chính sách Quyền riêng tư này giải thích thông tin nào chúng tôi thu thập và cách chúng ' +
@@ -948,7 +952,7 @@ export const PRIVACY_POLICY_CONTENT: Record<MarketingLanguage, PrivacyPolicyCont
         html:
           '<ul>' +
           '<li>Do bạn cung cấp: tên (hoặc biệt danh), ngày sinh, giới tính (không bắt buộc), múi giờ thiết bị</li>' +
-          '<li>Tùy chọn: giờ sinh (bạn có thể chọn "không rõ"), địa chỉ email (bắt buộc nếu bạn đăng ký bằng email; nếu bạn đăng nhập bằng tài khoản Google, chúng tôi nhận địa chỉ email của tài khoản đó. Nếu bạn đăng nhập bằng Apple trên iPhone, chúng tôi nhận địa chỉ email mà Apple chia sẻ (một địa chỉ chuyển tiếp do Apple tạo nếu bạn chọn Ẩn địa chỉ email) và tên mà Apple chia sẻ, chỉ dùng để điền sẵn ô tên trong phần thiết lập ban đầu. Dùng để đăng nhập và quản lý tài khoản, khôi phục tài khoản và xác minh, kiểm tra điều kiện nhận ưu đãi giới thiệu bạn bè, cấp mã ưu đãi tiếp thị nếu bạn đăng ký nhận email, ngăn chặn lạm dụng bản dùng thử miễn phí và phản hồi yêu cầu hỗ trợ), ghi chú bạn nhập trong tính năng chia sẻ mức độ hợp nhau hoặc xem mức độ hợp nhau chi tiết để phân biệt mọi người (không bao giờ hiển thị cho người kia)</li>' +
+          '<li>Tùy chọn: giờ sinh (bạn có thể chọn "không rõ"), địa chỉ email (bắt buộc nếu bạn đăng ký bằng email; nếu bạn đăng nhập bằng tài khoản Google, chúng tôi nhận địa chỉ email của tài khoản đó. Nếu bạn đăng nhập bằng Apple trên iPhone, chúng tôi nhận địa chỉ email mà Apple chia sẻ (một địa chỉ chuyển tiếp do Apple tạo nếu bạn chọn Ẩn địa chỉ email) và tên mà Apple chia sẻ, chỉ dùng để điền sẵn ô tên trong phần thiết lập ban đầu. Dùng để đăng nhập và quản lý tài khoản, khôi phục tài khoản và xác minh, kiểm tra điều kiện nhận ưu đãi giới thiệu bạn bè, gửi email tin tức nếu bạn đăng ký nhận email, ngăn chặn lạm dụng bản dùng thử miễn phí và phản hồi yêu cầu hỗ trợ), ghi chú bạn nhập trong tính năng chia sẻ mức độ hợp nhau hoặc xem mức độ hợp nhau chi tiết để phân biệt mọi người (không bao giờ hiển thị cho người kia)</li>' +
           '<li>Tính năng giới thiệu bạn bè: mã giới thiệu được tự động gán cho tài khoản của bạn, và nếu bạn nhập mã giới thiệu của thành viên khác khi đăng ký, thông tin liên kết tài khoản của bạn với thành viên đó</li>' +
           '<li>Xem mức độ hợp nhau chi tiết: tên của hai người bạn nhập và thông tin saju đã tính toán của họ (bao gồm cả của người kia), được lưu để hiển thị kết quả cho bạn. Tên được lưu ở dạng mã hóa, không bao giờ được gửi đến nhà cung cấp AI và sẽ bị xóa khi bạn xóa tài khoản</li>' +
           '<li>Thu thập tự động: mã định danh xác thực Firebase (UID), token thông báo đẩy của thiết bị (FCM), sự kiện phân tích sử dụng ứng dụng chỉ thu thập trên bản dựng production (Google Analytics for Firebase — bao gồm phương thức đăng nhập trong sự kiện đăng ký và các bước sử dụng theo màn hình và nút bấm, như xem màn hình đăng nhập, chọn phương thức đăng nhập, gửi phần thiết lập ban đầu, mở lá thư đầu tiên, xem màn hình đăng ký gói và việc bạn có cho phép thông báo hay không; các sự kiện này không bao giờ chứa dữ liệu định danh như email, tên, ngày sinh hay nội dung thư hoặc nhật ký của bạn; chúng tôi không dùng mã nhận dạng quảng cáo cho mục đích quảng cáo), sự kiện phân tích sử dụng web thu thập khi bạn truy cập trang tiếp thị này (Google Analytics — nhấp vào nút tải ứng dụng, gửi biểu mẫu đăng ký nhận tin, xem kết quả mức độ hợp nhau, dùng bản xem trước miễn phí; chúng tôi không đưa dữ liệu định danh như email, tên, ngày sinh hay token liên kết mức độ hợp nhau vào các sự kiện này. Khi bạn nhấn nút tải ứng dụng, chỉ kênh đã đưa bạn đến trang này (ví dụ "tiktok") được chuyển cho Google Play; nhãn kênh đó chỉ được lưu trong trình duyệt tối đa 30 ngày nếu bạn đồng ý cookie phân tích. Cookie phân tích chỉ được dùng khi bạn đồng ý, và bạn có thể thay đổi hoặc rút lại sự đồng ý bất cứ lúc nào tại "Cài đặt cookie" ở cuối mỗi trang), một cookie chức năng chỉ được lưu trên trình duyệt đã tạo bài đọc Tết Nguyên Đán (một giá trị ngẫu nhiên giúp chỉ người tạo bài đọc mới đăng ký được chuỗi email; lưu tối đa 90 ngày, không dùng cho quảng cáo hay phân tích, và bạn có thể xóa bất cứ lúc nào trong cài đặt trình duyệt), trạng thái đăng ký/mua hàng (qua RevenueCat), tín hiệu toàn vẹn thiết bị từ Google Play Integrity dùng để ngăn chặn lạm dụng bản dùng thử miễn phí, dữ liệu chẩn đoán lỗi/sự cố, địa chỉ IP của bạn khi dùng các trang công khai và các phần khác của dịch vụ (chỉ dùng để giới hạn tần suất yêu cầu nhằm ngăn lạm dụng; chúng tôi không lưu chính địa chỉ IP vào cơ sở dữ liệu, mà chỉ lưu giá trị băm một chiều có khóa không thể khôi phục lại địa chỉ, tối đa 1 ngày), nhật ký yêu cầu mà máy chủ web lưu lại khi bạn dùng dịch vụ (gồm địa chỉ IP, thời gian và địa chỉ được yêu cầu; lưu tối đa 30 ngày), cùng với thông tin trình duyệt và địa chỉ IP của bạn được gửi đến Cloudflare khi tiện ích chống bot Cloudflare Turnstile đang hoạt động trên các biểu mẫu công khai của trang web tiếp thị (bản demo trang chủ, chia sẻ mức độ hợp nhau, đăng ký nhận tin và Tết Nguyên Đán)</li>' +
@@ -1058,7 +1062,7 @@ export const PRIVACY_POLICY_CONTENT: Record<MarketingLanguage, PrivacyPolicyCont
         heading: '10. Thay đổi đối với chính sách này',
         html:
           '<p>Chính sách này có hiệu lực từ ngày 29 tháng 7 năm 2026 và có thể được cập nhật khi các hoạt động ' +
-          'của chúng tôi, luật hiện hành hoặc bản thân dịch vụ thay đổi (cập nhật lần cuối: 14 tháng 10 năm ' +
+          'của chúng tôi, luật hiện hành hoặc bản thân dịch vụ thay đổi (cập nhật lần cuối: 11 tháng 11 năm ' +
           '2026). Chúng tôi sẽ thông báo cho bạn về những thay đổi quan trọng thông qua ứng dụng hoặc trang này.</p>',
       },
     ],

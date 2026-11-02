@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import type { MarketingDictionary } from '@/dictionaries/types';
 import type { LaunchContentLanguage } from '@/lib/languages';
-import { fetchFreshCouponAvailability, subscribeLead, type CouponAvailability, type LeadSignupSource } from '@/lib/api';
+import { subscribeLead, type LeadSignupSource } from '@/lib/api';
 import { Turnstile, TURNSTILE_ENABLED, type TurnstileHandle } from './Turnstile';
 import { trackEvent } from '@/lib/analytics';
 import { EMAIL_REGEX, mapPublicFormError } from '@/lib/publicForm';
@@ -22,20 +22,11 @@ import { EMAIL_REGEX, mapPublicFormError } from '@/lib/publicForm';
 export function LeadCaptureForm({
   language,
   dict,
-  initialAvailability,
   context = 'home',
   heading,
 }: {
   language: LaunchContentLanguage;
   dict: MarketingDictionary['leadCapture'];
-  /**
-   * 선착순 현황(전체 캡/현재 발급 수/잔여 인원) — 관리자 패널에서 캡을 조정할 수 있어 하드코딩하지 않는다. 2026-08-26부터
-   * capacity/issued도 함께 보여 준다. **초기값은 홈 서버 컴포넌트가 넘기고**(ISR과 같은 주기, 2026-10-06 전체 점검 9차 →
-   * 10차), 마운트되면 같은 사이트 `/api/coupon-availability`(60초 캐시)로 한 번 다시 받아 바꾼다 — ISR HTML이나 콜드
-   * 스타트 인스턴스의 빌드 때 값이 오래돼 있어도 바로잡힌다. 브라우저는 백엔드를 직접 부르지 않는다(리드 제출과 같은
-   * 백엔드 IP 한도를 쓰지 않게). 다시 받기가 실패하면 초기값을 그대로 두고, 초기값도 null이면 문구를 숨긴다.
-   */
-  initialAvailability: CouponAvailability | null;
   /**
    * 어디에 놓인 폼인가(2026-10-10 전체 점검 14차) — GA `lead_submit`의 `context`로 실린다(식별 값 아님). 홈 아래 `home`(기본),
    * 데모 결과 아래 `demo_result`. 15차부터 리드 등록에도 `source`로 함께 보낸다(백엔드가 새 등록 때 `signup_source`에 저장 —
@@ -45,14 +36,6 @@ export function LeadCaptureForm({
   /** 제목·부제를 바꿀 때(데모 결과 아래 — iOS 출시 알림 안내). 없으면 `dict.title`/`dict.subtitle`. */
   heading?: { title: string; subtitle: string };
 }) {
-  const [availability, setAvailability] = useState(initialAvailability);
-  useEffect(() => {
-    const controller = new AbortController();
-    void fetchFreshCouponAvailability(controller.signal).then((fresh) => {
-      if (fresh) setAvailability(fresh);
-    });
-    return () => controller.abort();
-  }, []);
   const [email, setEmail] = useState('');
   const [consent, setConsent] = useState(false);
   const [turnstileToken, setTurnstileToken] = useState<string | undefined>(undefined);
@@ -133,23 +116,6 @@ export function LeadCaptureForm({
     >
       <h3 className="font-display text-lg font-semibold">{heading?.title ?? dict.title}</h3>
       <p className="text-sm text-foreground/70">{heading?.subtitle ?? dict.subtitle}</p>
-      {availability !== null &&
-        availability.capacity !== null &&
-        availability.remaining !== null &&
-        (availability.remaining > 0 ? (
-          <p className="text-sm font-medium text-accent-warm">
-            {/* 신청 수가 적을 때 "100명 중 2명"은 희소성이 아니라 "아무도 안 쓴다"로 읽힌다(2026-10-03, 디자인 감사 P1) —
-                절반이 찰 때까지는 정원만 보여 준다. */}
-            {(availability.issued ?? 0) * 2 >= availability.capacity
-              ? dict.remainingSlots
-                  .replace('{capacity}', String(availability.capacity))
-                  .replace('{issued}', String(availability.issued))
-                  .replace('{remaining}', String(availability.remaining))
-              : dict.limitedSlots.replace('{capacity}', String(availability.capacity))}
-          </p>
-        ) : (
-          <p className="text-sm text-foreground/60">{dict.soldOut}</p>
-        ))}
       <input
         type="email"
         value={email}

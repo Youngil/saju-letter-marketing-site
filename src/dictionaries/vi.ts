@@ -97,21 +97,18 @@ export const dictionary: MarketingDictionary = {
     ctaText: 'Nhận miễn phí bản xem trước lá thư buổi sáng',
   },
   leadCapture: {
-    title: 'Nhận một ghi chú từ Dain — kèm dùng thử 30 ngày',
+    title: 'Nhận một ghi chú từ Dain',
     subtitle:
-      'Để lại email và Dain sẽ gửi ngay một ghi chú chào mừng ngắn — kèm một lá thư buổi sáng mẫu và mã dùng thử miễn phí 30 ngày trên ứng dụng Android (thay vì 7 ngày như thường lệ).',
+      'Để lại email và Dain sẽ gửi ngay một ghi chú chào mừng ngắn, kèm một lá thư buổi sáng mẫu. Chúng tôi cũng sẽ báo khi quẻ năm mới kiểu Hàn mở (giữa tháng 12 hằng năm) và khi ứng dụng iPhone ra mắt.',
     demoResultTitle: 'Muốn nhận thư của Dain qua email?',
     demoResultSubtitle:
-      'Bạn đang dùng iPhone hoặc máy tính? Hãy để lại email, Dain sẽ gửi thư chào mừng — và chúng tôi sẽ báo qua email này khi ứng dụng iOS ra mắt. (Mã dùng thử 30 ngày trong thư dành cho ứng dụng Android.)',
+      'Bạn đang dùng iPhone hoặc máy tính? Hãy để lại email, Dain sẽ gửi thư chào mừng. Chúng tôi sẽ báo qua email này khi ứng dụng iPhone ra mắt và khi quẻ năm mới kiểu Hàn mở vào giữa tháng 12.',
     emailPlaceholder: 'ban@example.com',
     emailLabel: 'Địa chỉ email',
-    consentLabel: 'Tôi đồng ý nhận email chào mừng này (có thể hủy bất cứ lúc nào)',
+    consentLabel: 'Tôi đồng ý nhận ghi chú chào mừng và email tin tức (quẻ năm mới kiểu Hàn, ứng dụng iPhone ra mắt). Có thể hủy bất cứ lúc nào.',
     submitButton: 'Gửi ghi chú cho tôi',
     submitting: 'Đang đăng ký…',
     success: 'Xong rồi! Ghi chú chào mừng của Dain đang được gửi đến bạn. Nếu bạn đã đăng ký trước đó, bạn không cần làm gì thêm.',
-    limitedSlots: 'Chỉ dành cho {capacity} người đầu tiên',
-    remainingSlots: 'Đã có {issued}/{capacity} người đăng ký — còn {remaining} suất',
-    soldOut: 'Ưu đãi mã dùng thử đã hết suất — bạn vẫn có thể đăng ký nhận ghi chú!',
     errors: {
       email: 'Vui lòng nhập một địa chỉ email hợp lệ.',
       consent: 'Vui lòng đánh dấu vào ô để nhận email.',

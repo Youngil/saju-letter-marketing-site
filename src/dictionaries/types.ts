@@ -111,6 +111,10 @@ export interface MarketingDictionary {
     referenceTitle: string;
     ctaText: string;
   };
+  /**
+   * 홈 이메일 구독 — 소개 편지 + 소식 메일(신년운세 오픈·아이폰 출시). 2026-11-02 30일 체험 쿠폰(선착순 현황 문구 포함)을 없앴다
+   * (출시 뒤 발급 0장). 동의 문구는 소식 메일까지 포함해야 한다(백엔드 marketingSite/leadNoticeCopy.ts).
+   */
   leadCapture: {
     title: string;
     subtitle: string;
@@ -127,14 +131,6 @@ export interface MarketingDictionary {
     submitButton: string;
     submitting: string;
     success: string;
-    /** 선착순 쿠폰 현황 문구 — "{capacity}"(전체 캡)/"{issued}"(현재까지 발급 수)/"{remaining}"(잔여
-     * 인원) 3개 자리표시자를 실제 숫자로 치환해서 쓴다(2026-08-26, 잔여 인원만 보여주던 것에서
-     * 확장 — 총 인원/현재 신청 수도 함께 보여달라는 사용자 요청). */
-    /** 신청이 절반 찰 때까지 remainingSlots 대신 — 정원만(2026-10-03). */
-    limitedSlots: string;
-    remainingSlots: string;
-    /** 잔여 인원이 0이 됐을 때 위 remainingSlots 대신 보여준다. */
-    soldOut: string;
     errors: {
       email: string;
       consent: string;

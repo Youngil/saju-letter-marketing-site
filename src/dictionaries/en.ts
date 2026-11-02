@@ -94,21 +94,18 @@ export const dictionary: MarketingDictionary = {
     ctaText: 'Try a free preview of your morning letter',
   },
   leadCapture: {
-    title: 'Get a note from Dain — and a 30-day trial',
+    title: 'Get a note from Dain',
     subtitle:
-      "Leave your email and Dain will send you a short welcome note right away — including a sample morning letter and a code for a 30-day free trial in the Android app (instead of the usual 7).",
+      "Leave your email and Dain will send you a short welcome note right away, with a sample morning letter inside. We'll also email you when the Korean New Year fortune opens (mid-December each year) and when the iPhone app comes out.",
     demoResultTitle: "Want Dain's letters by email?",
     demoResultSubtitle:
-      "On an iPhone or a computer? Leave your email and Dain will send a welcome note — and we'll let you know at this address when the iOS app launches. (The 30-day trial code in the note is for the Android app.)",
+      "On an iPhone or a computer? Leave your email and Dain will send a welcome note. We'll let you know at this address when the iPhone app comes out, and when the Korean New Year fortune opens in mid-December.",
     emailPlaceholder: 'you@example.com',
     emailLabel: 'Email address',
-    consentLabel: 'I consent to receiving this welcome email (you can unsubscribe anytime)',
+    consentLabel: 'I agree to receive the welcome note and news emails (Korean New Year fortune, iPhone app launch). You can unsubscribe anytime.',
     submitButton: 'Send me the note',
     submitting: 'Signing you up…',
     success: "You're all set! Dain's welcome note is on its way — if you've signed up before, you don't need to do anything else.",
-    limitedSlots: 'Limited to the first {capacity}',
-    remainingSlots: '{issued} of {capacity} spots claimed — {remaining} left',
-    soldOut: "This coupon offer is fully claimed — but you can still sign up for the notes!",
     errors: {
       email: 'Please enter a valid email address.',
       consent: 'Please check the box to receive the emails.',

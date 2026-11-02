@@ -12,7 +12,6 @@ import { getDemoReading, type DemoReadingResponse } from '@/lib/api';
 import { Turnstile, TURNSTILE_ENABLED, type TurnstileHandle } from './Turnstile';
 import { AppDownloadLinks } from './AppDownloadLinks';
 import { LeadCaptureForm } from './LeadCaptureForm';
-import type { CouponAvailability } from '@/lib/api';
 import { Postmark } from './Postmark';
 import { trackEvent } from '@/lib/analytics';
 import { isValidBirthDate } from '@/lib/birthDate';
@@ -33,7 +32,6 @@ export function DemoForm({
   appLinksDict,
   disclaimerShort,
   leadDict,
-  couponAvailability,
   dayTypeCopy,
 }: {
   language: LaunchContentLanguage;
@@ -41,8 +39,6 @@ export function DemoForm({
   appLinksDict: MarketingDictionary['appLinks'];
   /** 결과 아래 리드 폼 문구(2026-10-10 전체 점검 14차 — 아이폰·데스크톱 방문자가 결과 뒤 이어 갈 곳). */
   leadDict: MarketingDictionary['leadCapture'];
-  /** 홈이 받아 둔 쿠폰 현황 초기값 — 홈 아래 리드 폼과 같은 값. */
-  couponAvailability: CouponAvailability | null;
   /** 결과 옆 오락 목적 고지(`DISCLAIMER_CONTENT[lang].short`) — 서버 페이지가 현재 언어 문자열만 넘긴다(2026-10-06 전체
    *  점검 9차, 예전엔 6개 언어 전문을 직접 import해 홈 번들에 실렸다). */
   disclaimerShort: string;
@@ -176,7 +172,6 @@ export function DemoForm({
         <LeadCaptureForm
           language={language}
           dict={leadDict}
-          initialAvailability={couponAvailability}
           context="demo_result"
           heading={{ title: leadDict.demoResultTitle, subtitle: leadDict.demoResultSubtitle }}
         />

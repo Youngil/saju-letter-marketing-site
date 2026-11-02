@@ -47,7 +47,7 @@
 
 ## 4. 페이지별 현재 동작
 
-- **홈 `/[lang]`**(4개 언어, ISR 3600 — 쿠폰 현황 초기값 fetch도 3600이라 더 짧게 내리지 않는다): 히어로 + `DainHomeMark` + `AppDownloadLinks` + `DemoForm` + 최신 글 배너(`getLatestPostSummary`) + **`<LeadCaptureForm>`(노출 중, 30일 체험 쿠폰 안내 포함 — 의도된 상태)**. 데모·리드 폼 모두 `showContentLinks` 게이트 안. `<title>`·설명은 `dict.hero.metaTitle`/`metaDescription`(분류 낱말 포함, 화면 H1과 별개). **데모 결과 아래에도 같은 `LeadCaptureForm`**(`context="demo_result"`, 제목·부제 `leadCapture.demoResult*` — 아이폰·데스크톱 방문자용, "iOS 출시 알림도 이 메일로" 약속 → **iOS 출시 때 리드에게 알림 메일을 실제로 보낼 것** — 대상은 `signup_source = demo_result` 리드부터).
+- **홈 `/[lang]`**(4개 언어, ISR 3600): 히어로 + `DainHomeMark` + `AppDownloadLinks` + `DemoForm` + 최신 글 배너(`getLatestPostSummary`) + **`<LeadCaptureForm>`(노출 중, 30일 체험 쿠폰 안내 포함 — 의도된 상태)**. 데모·리드 폼 모두 `showContentLinks` 게이트 안. `<title>`·설명은 `dict.hero.metaTitle`/`metaDescription`(분류 낱말 포함, 화면 H1과 별개). **데모 결과 아래에도 같은 `LeadCaptureForm`**(`context="demo_result"`, 제목·부제 `leadCapture.demoResult*` — 아이폰·데스크톱 방문자용, "iOS 출시 알림도 이 메일로" 약속 → **iOS 출시 때 리드에게 알림 메일을 실제로 보낼 것** — 대상은 `signup_source = demo_result` 리드부터).
 - **미니 데모**: `src/lib/saju.ts`가 **브라우저에서 사주 계산**(13차부터 음력→양력·일수·윤달은 한국 음력 표 `koreanLunar.ts`(korean-lunar-calendar), 기둥은 그 양력 날짜로 `lunar-javascript`, 년주·월주는 출생 순간의 베이징 시각·일주·시주는 서머타임 뺀 현지 표준시 `birthClock.ts`(luxon) — 모바일 `src/domain/saju/`의 사본이라 함께 바꾼다. 출생 타임존 입력이 없어 `assumedBirthTimeZone`: ko → Asia/Seoul, 그 외 → 브라우저 타임존)(백엔드는 계산 안 함 — 데모·궁합·신년운세 폼 모두 `await import('@/lib/saju')`로 지연 로드, 정적 import 금지)해 천간/지지를 `POST /marketing-site/demo-readings`로. 만 16세 확인용 양력 년/월/일은 서버가 검증만 하고 저장 안 함. 결과(`teaser`)는 DB 미저장. 백엔드는 요청 때 AI를 부르지 않고 미리 만든 공용 매일 편지(없으면 정적 폴백)에서 고른다(`marketingSite/service.ts::generateDemoReading`).
 - **블로그**(4개 언어, ISR 3600) — 하이브리드:
   - 파일 글: `content-posts/{slug}.{lang}.mdx` + `POST_SLUGS`(`@next/mdx`, `export const meta = {...}`, `meta.category` = `observation`/`explainer`/`behind`/`season`).
@@ -67,10 +67,10 @@
 - **`/.well-known/assetlinks.json`**: Android App Links(지문 일치 확인, 실기기 검증 미확인).
 - 아이콘: `src/app/icon.png`/`apple-icon.png`, 헤더 로고 `public/logo-512.png`(14차, 원본 `logo-icon.png`는 1024² 1.45MB). `public/icon.png` 이름 금지(라우트 충돌).
 
-## 5. 리드·드립·쿠폰 (홈에 노출 중)
+## 5. 리드·드립·소식 메일 (홈에 노출 중)
 
 - 리드는 이메일만(나이 게이트·개인화 없음). **폼 위치 `source`**(15차, 계약 C1): `subscribeLead`가 `LeadCaptureForm`의 `context`(`LEAD_SIGNUP_SOURCES` = `home`/`demo_result`)를 함께 보내고, 백엔드가 새 등록 때만 `signup_source`에 저장(규칙 `^[a-z_]{1,32}$`, 그 밖 값은 무시 — 새 폼 위치는 그 모양으로). 드립은 백엔드가 `(language × dayNumber)` 단위로 공유 캐시(`dripService.ts`), 다인 페르소나 프롬프트 — 프롬프트 변경은 기존 캐시에 소급 안 됨. 드립 기준일 = max(가입일, 관리자 지정 앱 출시일).
-- 쿠폰 모델은 백엔드에서 이벤트→쿠폰→코드(`PromotionEvent`/`PromotionCoupon`/`PromotionCode`)로 통합됨. 이 사이트의 계약은 유지: `GET /marketing-site/coupon-availability`의 `capacity`/`issued`/`remaining`을 `remainingSlots`로 표시, 소진 시 `soldOut`, 조회 실패는 무시(문구 숨김). **초기값은 홈 서버 컴포넌트가 `api.ts::loadCouponAvailability`(fetch `revalidate` 3600 = 홈 ISR — 더 짧으면 홈 라우트 전체 재검증이 그 값으로 내려간다)로 조회해 `LeadCaptureForm`의 `initialAvailability`로 넘기고, 폼이 마운트 때 같은 사이트 `GET /api/coupon-availability`(`fetchFreshCouponAvailability`)로 최신 값을 받아 바꾼다** — ISR HTML·콜드 스타트 인스턴스의 빌드 때 값 교정. 라우트는 서버에서 내부 키로 백엔드를 부르고 인스턴스 메모리 캐시 60초(`couponAvailabilityCache.ts` — 만료 값은 내주지 않음, 실패는 15초 기억)·`Cache-Control: public, s-maxage=60`, 실패면 503(`no-store`) → 폼은 초기값 유지. 브라우저가 백엔드를 직접 부르면 리드 제출과 같은 백엔드 IP 한도를 쓰므로 금지. 리드 제출 오류는 `mapPublicFormError`(429 → `errors.rateLimited`, `already_subscribed` → `errors.already`). 캡·오퍼링 관리는 백엔드/관리자 패널/모바일 소관.
+- **30일 체험 쿠폰은 2026-11-02에 없앴다**(출시 뒤 발급 0장·최근 30일 등록 0건, 사용자 결정) — 선착순 문구·`/api/coupon-availability`·`couponAvailabilityCache.ts`·`loadCouponAvailability` 모두 삭제(백엔드 `GET /marketing-site/coupon-availability`는 옛 사이트 대비로 남아 있지만 부르지 않는다). 대신 **소식 메일**: 웰컴 메일 끝 "앞으로 보내 드릴 소식" + 신년운세 오픈 알림 + 아이폰 출시 알림(백엔드 `marketingSite/leadNoticeCopy.ts`·`leadNotices.ts`). 폼 부제·`consentLabel`은 이 두 소식을 밝혀야 한다(동의 범위). 아이폰 출시 뒤엔 `subtitle`·`demoResultSubtitle`의 "아이폰 앱이 나오면" 문장을 바꾼다(meta `deploy/ios-launch.md`). 리드 제출 오류는 `mapPublicFormError`(429 → `errors.rateLimited`, `already_subscribed` → `errors.already`).
 
 ## 6. Turnstile (`src/components/Turnstile.tsx`)
 
@@ -104,7 +104,7 @@
 
 ## 10. 백엔드 연동
 
-- 클라이언트: `apiClient.ts`, `api.ts`(데모/leads/unsubscribe/쿠폰), `compatApi.ts`, `lunarNewYearApi.ts`, `blogApi.ts`, `serviceLanguagesApi.ts`.
+- 클라이언트: `apiClient.ts`, `api.ts`(데모/leads/unsubscribe), `compatApi.ts`, `lunarNewYearApi.ts`, `blogApi.ts`, `serviceLanguagesApi.ts`.
 - `compat/[token]`·`r/[id]`는 **Next 서버에서** 백엔드를 호출(단일 IP로 보임 — 백엔드가 별도 한도, 서버 요청엔 `MARKETING_INTERNAL_KEY`가 있으면 내부 키 헤더, §11). **방문자 IP 계약(12차)**: 내부 키를 보낼 때 `request(path, { visitorIp })`로 받은 값을 `X-Visitor-Ip`로 함께 보낸다(키 없으면·IP 모양 아니면 안 보냄, `apiClient.ts::internalKeyHeaders`). 값은 `requestVisitorIp.ts::getRequestVisitorIp()` — `X-Forwarded-For`의 **맨 오른쪽**(Cloud Run 앞단이 덧붙인 값, 백엔드 trust proxy 1홉과 같은 규칙. 맨 앞은 방문자가 위조 가능), `visitorIp.ts`가 IP 모양 검사. `headers()`를 읽으므로 **요청마다 그리는 동적 라우트에서만**(지금은 두 페이지의 본문·메타데이터·OG — 같은 값을 넘겨 `cache()` 묶음 유지). ISR·공용 캐시 조회(레이아웃·홈·블로그·쿠폰 라우트·proxy)는 방문자 없이 내부 키 버킷 그대로. Cloud Run 앞에 부하 분산기를 두면 맨 오른쪽이 그 IP가 되므로 다시 볼 것. `getCompatInvite`/`getReading`은 **영구 실패(404 등)만 not_found/null**, 429·5xx·시간 초과는 던져 `[lang]/error.tsx`(`unstable_retry`)가 다시 시도를 보여 준다(메타데이터·OG는 잡아서 일반 문구).
 - `apiClient.request()`의 시간 제한 `signal` 때문에 **Next fetch 중복 제거가 꺼진다** — 한 렌더에서 여러 번 부르는 서버 조회 함수(`getCompatInvite`/`getReading`/`getPostContent`/`getAllPostSummaries` 등)는 React `cache()`로 감싼다.
 
