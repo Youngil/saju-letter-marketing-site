@@ -32,7 +32,8 @@ import { ATTRIBUTION_STORAGE_KEY, readStoredConsent } from './analytics';
 
 export { ATTRIBUTION_STORAGE_KEY };
 const ATTRIBUTION_TTL_MS = 30 * 24 * 60 * 60 * 1000;
-const OWN_HOSTS = ['saju-letter.com', 'www.saju-letter.com'];
+// 2026-11-02: 두 번째 주소(SNS 표기 주소)도 같은 사이트 — 그 주소 안 이동을 외부 유입으로 세지 않는다.
+const OWN_HOSTS = ['saju-letter.com', 'www.saju-letter.com', 'saju-letter.mikomaru.com'];
 
 /** 꼬리표 값은 짧은 안전 문자만 남긴다(임의 문자열이 스토어 링크로 흘러가지 않게). */
 export function sanitizeTag(value: string | null | undefined): string {
