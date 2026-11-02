@@ -70,7 +70,7 @@
 ## 5. 리드·드립·소식 메일 (홈에 노출 중)
 
 - 리드는 이메일만(나이 게이트·개인화 없음). **폼 위치 `source`**(15차, 계약 C1): `subscribeLead`가 `LeadCaptureForm`의 `context`(`LEAD_SIGNUP_SOURCES` = `home`/`demo_result`)를 함께 보내고, 백엔드가 새 등록 때만 `signup_source`에 저장(규칙 `^[a-z_]{1,32}$`, 그 밖 값은 무시 — 새 폼 위치는 그 모양으로). 드립은 백엔드가 `(language × dayNumber)` 단위로 공유 캐시(`dripService.ts`), 다인 페르소나 프롬프트 — 프롬프트 변경은 기존 캐시에 소급 안 됨. 드립 기준일 = max(가입일, 관리자 지정 앱 출시일).
-- **30일 체험 쿠폰은 2026-11-02에 없앴다**(출시 뒤 발급 0장·최근 30일 등록 0건, 사용자 결정) — 선착순 문구·`/api/coupon-availability`·`couponAvailabilityCache.ts`·`loadCouponAvailability` 모두 삭제(백엔드 `GET /marketing-site/coupon-availability`는 옛 사이트 대비로 남아 있지만 부르지 않는다). 대신 **소식 메일**: 웰컴 메일 끝 "앞으로 보내 드릴 소식" + 신년운세 오픈 알림 + 아이폰 출시 알림(백엔드 `marketingSite/leadNoticeCopy.ts`·`leadNotices.ts`). 폼 부제·`consentLabel`은 이 두 소식을 밝혀야 한다(동의 범위). 아이폰 출시 뒤엔 `subtitle`·`demoResultSubtitle`의 "아이폰 앱이 나오면" 문장을 바꾼다(meta `deploy/ios-launch.md`). 리드 제출 오류는 `mapPublicFormError`(429 → `errors.rateLimited`, `already_subscribed` → `errors.already`).
+- **30일 체험 쿠폰은 2026-11-02에 없앴다**(출시 뒤 발급 0장·최근 30일 등록 0건, 사용자 결정) — 선착순 문구·`/api/coupon-availability`·`couponAvailabilityCache.ts`·`loadCouponAvailability` 모두 삭제(백엔드 `GET /marketing-site/coupon-availability`는 옛 사이트 대비로 남아 있지만 부르지 않는다). 대신 **소식 메일**: 웰컴 메일 끝 "앞으로 보내 드릴 소식" + 신년운세 오픈 알림 + 아이폰 출시 알림(백엔드 `marketingSite/leadNoticeCopy.ts`·`leadNotices.ts`). 폼 부제·`consentLabel`은 이 두 소식을 밝혀야 한다(동의 범위). 아이폰 출시 뒤엔 `subtitle`·`demoResultSubtitle`의 "아이폰 앱이 나오면" 문장을 바꾼다(meta 런북 §7 "아이폰 출시 날" 줄). 리드 제출 오류는 `mapPublicFormError`(429 → `errors.rateLimited`, `already_subscribed` → `errors.already`).
 
 ## 6. Turnstile (`src/components/Turnstile.tsx`)
 
