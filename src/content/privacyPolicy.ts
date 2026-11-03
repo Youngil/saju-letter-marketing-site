@@ -287,7 +287,8 @@ import type { MarketingLanguage } from '@/lib/languages';
  * 이벤트를 씀 · 앱 안 광고 없음 · 맞춤 광고 아님 · 광고 ID는 1.1.3부터 수집 안 함"(mobile app.config.js blockedPermissions +
  * firebase.json google_analytics_adid_collection_enabled=false)으로 바꿨다. 6개 언어 §1 앱 분석 괄호 · §2 목적 한 줄 · §4 위탁
  * 업체(Google Ads · Apple Search Ads)를 고쳤다. 사이트 쿠키 배너는 웹에 광고 태그를 붙이지 않으므로 그대로. Play 데이터 보안의
- * "광고 또는 마케팅" 목적도 함께 신고한다. effectiveDate · §10 날짜는 배포일로 바꾼다(광고를 켜기 전 배포). AI 초안 — 변호사 검토 대상.
+ * "광고 또는 마케팅" 목적도 함께 신고했다(11-03, 앱 상호작용 · 기기 또는 기타 ID에 분석도 더함). effectiveDate · §10 날짜는 6개 언어
+ * 모두 2026년 11월 3일(배포일 — 사용자 요청으로 당일 배포). AI 초안 — 변호사 검토 대상.
  */
 
 export const PRIVACY_CONTACT_EMAIL = 'contact@mikomaru.com';
@@ -308,7 +309,7 @@ export interface PrivacyPolicyContent {
 export const PRIVACY_POLICY_CONTENT: Record<MarketingLanguage, PrivacyPolicyContent> = {
   ko: {
     title: '개인정보처리방침',
-    effectiveDate: '시행일자: 2026년 7월 29일 (최종 수정: 2026년 11월 2일)',
+    effectiveDate: '시행일자: 2026년 7월 29일 (최종 수정: 2026년 11월 3일)',
     intro:
       '사주편지(이하 "회사" 또는 "서비스")는 이용자의 개인정보를 중요하게 생각하며, 관련 법령을 준수합니다. ' +
       '본 방침은 사주편지 앱과 saju-letter.com(마케팅 사이트, 궁합 공유·신년운세 공개 페이지, 이메일 구독 신청 ' +
@@ -425,13 +426,13 @@ export const PRIVACY_POLICY_CONTENT: Record<MarketingLanguage, PrivacyPolicyCont
         heading: '10. 고지의 의무',
         html:
           '<p>본 방침은 2026년 7월 29일부터 적용되며, 법령·정책 또는 서비스 변경에 따라 내용이 추가·삭제·수정될 ' +
-          '수 있습니다(가장 최근 수정: 2026년 11월 2일). 변경 시 앱 공지 또는 본 페이지를 통해 고지합니다.</p>',
+          '수 있습니다(가장 최근 수정: 2026년 11월 3일). 변경 시 앱 공지 또는 본 페이지를 통해 고지합니다.</p>',
       },
     ],
   },
   en: {
     title: 'Privacy Policy',
-    effectiveDate: 'Effective date: July 29, 2026 (last updated: November 2, 2026)',
+    effectiveDate: 'Effective date: July 29, 2026 (last updated: November 3, 2026)',
     intro:
       'Saju Letter ("we", "us", or "the Service") respects your privacy and is committed to protecting your ' +
       'personal information. This Privacy Policy explains what information we collect and how we use it when ' +
@@ -556,14 +557,14 @@ export const PRIVACY_POLICY_CONTENT: Record<MarketingLanguage, PrivacyPolicyCont
         heading: '10. Changes to This Policy',
         html:
           '<p>This policy is effective as of July 29, 2026, and may be updated as our practices, applicable ' +
-          'laws, or the service itself change (most recently updated: November 2, 2026). We will notify you of ' +
+          'laws, or the service itself change (most recently updated: November 3, 2026). We will notify you of ' +
           'material changes through the app or this page.</p>',
       },
     ],
   },
   ja: {
     title: 'プライバシーポリシー',
-    effectiveDate: '施行日: 2026年7月29日(最終更新: 2026年11月2日)',
+    effectiveDate: '施行日: 2026年7月29日(最終更新: 2026年11月3日)',
     intro:
       'サジュレター(以下「当社」または「本サービス」)は、利用者のプライバシーを尊重し、個人情報の保護に努めて' +
       'います。本ポリシーは、サジュレターアプリおよびsaju-letter.com(マーケティングサイト、相性シェア・旧正月' +
@@ -681,7 +682,7 @@ export const PRIVACY_POLICY_CONTENT: Record<MarketingLanguage, PrivacyPolicyCont
       {
         heading: '10. 本ポリシーの変更',
         html:
-          '<p>本ポリシーは2026年7月29日より施行します(最終更新: 2026年11月2日)。法令、方針、またはサービス内容' +
+          '<p>本ポリシーは2026年7月29日より施行します(最終更新: 2026年11月3日)。法令、方針、またはサービス内容' +
           'の変更に応じて内容を追加・削除・修正する場合があります。重要な変更がある場合は、アプリ内または本ページ' +
           'にてお知らせします。</p>',
       },
@@ -689,7 +690,7 @@ export const PRIVACY_POLICY_CONTENT: Record<MarketingLanguage, PrivacyPolicyCont
   },
   es: {
     title: 'Política de Privacidad',
-    effectiveDate: 'Fecha de vigencia: 29 de julio de 2026 (última actualización: 2 de noviembre de 2026)',
+    effectiveDate: 'Fecha de vigencia: 29 de julio de 2026 (última actualización: 3 de noviembre de 2026)',
     intro:
       'Saju Letter ("nosotros" o "el Servicio") respeta tu privacidad y se compromete a proteger tu información ' +
       'personal. Esta Política de Privacidad explica qué información recopilamos y cómo la usamos cuando ' +
@@ -816,14 +817,14 @@ export const PRIVACY_POLICY_CONTENT: Record<MarketingLanguage, PrivacyPolicyCont
         heading: '10. Cambios en esta política',
         html:
           '<p>Esta política entra en vigencia el 29 de julio de 2026 y puede actualizarse a medida que cambien ' +
-          'nuestras prácticas, las leyes aplicables o el propio servicio (última actualización: 2 de noviembre ' +
+          'nuestras prácticas, las leyes aplicables o el propio servicio (última actualización: 3 de noviembre ' +
           'de 2026). Te notificaremos sobre cambios importantes a través de la app o esta página.</p>',
       },
     ],
   },
   pt: {
     title: 'Política de Privacidade',
-    effectiveDate: 'Data de vigência: 29 de julho de 2026 (última atualização: 2 de novembro de 2026)',
+    effectiveDate: 'Data de vigência: 29 de julho de 2026 (última atualização: 3 de novembro de 2026)',
     intro:
       'O Saju Letter ("nós" ou "o Serviço") respeita sua privacidade e se compromete a proteger suas ' +
       'informações pessoais. Esta Política de Privacidade explica quais informações coletamos e como as usamos ' +
@@ -950,14 +951,14 @@ export const PRIVACY_POLICY_CONTENT: Record<MarketingLanguage, PrivacyPolicyCont
         heading: '10. Alterações nesta política',
         html:
           '<p>Esta política entra em vigor em 29 de julho de 2026 e pode ser atualizada conforme nossas ' +
-          'práticas, as leis aplicáveis ou o próprio serviço mudarem (última atualização: 2 de novembro de ' +
+          'práticas, as leis aplicáveis ou o próprio serviço mudarem (última atualização: 3 de novembro de ' +
           '2026). Notificaremos você sobre alterações relevantes por meio do aplicativo ou desta página.</p>',
       },
     ],
   },
   vi: {
     title: 'Chính sách Quyền riêng tư',
-    effectiveDate: 'Ngày hiệu lực: 29 tháng 7 năm 2026 (cập nhật lần cuối: 2 tháng 11 năm 2026)',
+    effectiveDate: 'Ngày hiệu lực: 29 tháng 7 năm 2026 (cập nhật lần cuối: 3 tháng 11 năm 2026)',
     intro:
       'Saju Letter ("chúng tôi" hoặc "Dịch vụ") tôn trọng quyền riêng tư của bạn và cam kết bảo vệ thông tin cá ' +
       'nhân của bạn. Chính sách Quyền riêng tư này giải thích thông tin nào chúng tôi thu thập và cách chúng ' +
@@ -1081,7 +1082,7 @@ export const PRIVACY_POLICY_CONTENT: Record<MarketingLanguage, PrivacyPolicyCont
         heading: '10. Thay đổi đối với chính sách này',
         html:
           '<p>Chính sách này có hiệu lực từ ngày 29 tháng 7 năm 2026 và có thể được cập nhật khi các hoạt động ' +
-          'của chúng tôi, luật hiện hành hoặc bản thân dịch vụ thay đổi (cập nhật lần cuối: 2 tháng 11 năm ' +
+          'của chúng tôi, luật hiện hành hoặc bản thân dịch vụ thay đổi (cập nhật lần cuối: 3 tháng 11 năm ' +
           '2026). Chúng tôi sẽ thông báo cho bạn về những thay đổi quan trọng thông qua ứng dụng hoặc trang này.</p>',
       },
     ],
