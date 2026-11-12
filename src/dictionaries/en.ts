@@ -36,7 +36,8 @@ export const dictionary: MarketingDictionary = {
     resultTitle: 'A taste of your morning letter',
     resultFromName: 'Dain',
     resultFromRole: 'Your letter writer',
-    resultCta: 'Get a letter like this every morning — free to start',
+    resultCta: 'Get a letter like this every morning — free to start',
+
     tryAgain: 'Try another date',
     errors: {
       date: 'Please enter a valid date of birth.',
@@ -96,13 +97,13 @@ export const dictionary: MarketingDictionary = {
   leadCapture: {
     title: 'Get a note from Dain',
     subtitle:
-      "Leave your email and Dain will send you a short welcome note right away, with a sample morning letter inside. We'll also email you when the Korean New Year fortune opens (mid-December each year) and when the iPhone app comes out.",
+      "Leave your email and Dain will send you a short welcome note right away, with a sample morning letter inside. We'll also email you when the Korean New Year fortune opens (mid-December each year) and when you can get your letters on iPhone or a computer, too.",
     demoResultTitle: "Want Dain's letters by email?",
     demoResultSubtitle:
-      "On an iPhone or a computer? Leave your email and Dain will send a welcome note. We'll let you know at this address when the iPhone app comes out, and when the Korean New Year fortune opens in mid-December.",
+      "On an iPhone or a computer? Leave your email and Dain will send a welcome note. We'll let you know at this address when letters open on the web, and when the Korean New Year fortune opens in mid-December.",
     emailPlaceholder: 'you@example.com',
     emailLabel: 'Email address',
-    consentLabel: 'I agree to receive the welcome note and news emails (Korean New Year fortune, iPhone app launch). You can unsubscribe anytime.',
+    consentLabel: 'I agree to receive the welcome note and news emails (Korean New Year fortune, web version launch). You can unsubscribe anytime.',
     submitButton: 'Send me the note',
     submitting: 'Signing you up…',
     success: "You're all set! Dain's welcome note is on its way — if you've signed up before, you don't need to do anything else.",

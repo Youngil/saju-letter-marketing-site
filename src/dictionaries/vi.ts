@@ -38,7 +38,8 @@ export const dictionary: MarketingDictionary = {
     resultTitle: 'Một chút từ lá thư buổi sáng của bạn',
     resultFromName: 'Dain',
     resultFromRole: 'Người viết thư của bạn',
-    resultCta: 'Nhận lá thư như thế này mỗi sáng — miễn phí để bắt đầu',
+    resultCta: 'Nhận lá thư như thế này mỗi sáng — miễn phí để bắt đầu',
+
     tryAgain: 'Thử ngày khác',
     errors: {
       date: 'Vui lòng nhập ngày sinh hợp lệ.',
@@ -99,13 +100,13 @@ export const dictionary: MarketingDictionary = {
   leadCapture: {
     title: 'Nhận một ghi chú từ Dain',
     subtitle:
-      'Để lại email và Dain sẽ gửi ngay một ghi chú chào mừng ngắn, kèm một lá thư buổi sáng mẫu. Chúng tôi cũng sẽ báo khi quẻ năm mới kiểu Hàn mở (giữa tháng 12 hằng năm) và khi ứng dụng iPhone ra mắt.',
+      'Để lại email và Dain sẽ gửi ngay một ghi chú chào mừng ngắn, kèm một lá thư buổi sáng mẫu. Chúng tôi cũng sẽ báo khi quẻ năm mới kiểu Hàn mở (giữa tháng 12 hằng năm) và khi bạn có thể nhận thư cả trên iPhone hoặc máy tính.',
     demoResultTitle: 'Muốn nhận thư của Dain qua email?',
     demoResultSubtitle:
-      'Bạn đang dùng iPhone hoặc máy tính? Hãy để lại email, Dain sẽ gửi thư chào mừng. Chúng tôi sẽ báo qua email này khi ứng dụng iPhone ra mắt và khi quẻ năm mới kiểu Hàn mở vào giữa tháng 12.',
+      'Bạn đang dùng iPhone hoặc máy tính? Hãy để lại email, Dain sẽ gửi thư chào mừng. Chúng tôi sẽ báo qua email này khi thư có thể nhận trên web và khi quẻ năm mới kiểu Hàn mở vào giữa tháng 12.',
     emailPlaceholder: 'ban@example.com',
     emailLabel: 'Địa chỉ email',
-    consentLabel: 'Tôi đồng ý nhận ghi chú chào mừng và email tin tức (quẻ năm mới kiểu Hàn, ứng dụng iPhone ra mắt). Có thể hủy bất cứ lúc nào.',
+    consentLabel: 'Tôi đồng ý nhận ghi chú chào mừng và email tin tức (quẻ năm mới kiểu Hàn, ra mắt phiên bản web). Có thể hủy bất cứ lúc nào.',
     submitButton: 'Gửi ghi chú cho tôi',
     submitting: 'Đang đăng ký…',
     success: 'Xong rồi! Ghi chú chào mừng của Dain đang được gửi đến bạn. Nếu bạn đã đăng ký trước đó, bạn không cần làm gì thêm.',
