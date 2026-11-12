@@ -36,7 +36,8 @@ export const dictionary: MarketingDictionary = {
     resultTitle: 'Uma prévia da sua carta matinal',
     resultFromName: 'Dain',
     resultFromRole: 'Quem escreve suas cartas',
-    resultCta: 'Receba uma carta como essa toda manhã — grátis para começar',
+    resultCta: 'Receba uma carta como essa toda manhã — grátis para começar',
+
     tryAgain: 'Tentar outra data',
     errors: {
       date: 'Por favor, insira uma data de nascimento válida.',
@@ -97,13 +98,13 @@ export const dictionary: MarketingDictionary = {
   leadCapture: {
     title: 'Receba uma nota de Dain',
     subtitle:
-      'Deixe seu e-mail e Dain enviará agora mesmo uma breve nota de boas-vindas, com uma carta matinal de exemplo. Também avisamos quando a leitura de Ano Novo coreano abrir (em meados de dezembro, todo ano) e quando o app para iPhone sair.',
+      'Deixe seu e-mail e Dain enviará agora mesmo uma breve nota de boas-vindas, com uma carta matinal de exemplo. Também avisamos quando a leitura de Ano Novo coreano abrir (em meados de dezembro, todo ano) e quando você puder receber as cartas também no iPhone ou no computador.',
     demoResultTitle: 'Quer receber as cartas da Dain por e-mail?',
     demoResultSubtitle:
-      'Está num iPhone ou no computador? Deixe seu e-mail e a Dain envia uma nota de boas-vindas. Avisamos por aqui quando o app para iPhone sair e quando a leitura de Ano Novo coreano abrir, em meados de dezembro.',
+      'Está num iPhone ou no computador? Deixe seu e-mail e a Dain envia uma nota de boas-vindas. Avisamos por aqui quando as cartas abrirem na web e quando a leitura de Ano Novo coreano abrir, em meados de dezembro.',
     emailPlaceholder: 'voce@exemplo.com',
     emailLabel: 'Endereço de e-mail',
-    consentLabel: 'Aceito receber a nota de boas-vindas e e-mails de novidades (leitura de Ano Novo coreano, lançamento do app para iPhone). Você pode cancelar quando quiser.',
+    consentLabel: 'Aceito receber a nota de boas-vindas e e-mails de novidades (leitura de Ano Novo coreano, lançamento da versão web). Você pode cancelar quando quiser.',
     submitButton: 'Enviar a nota',
     submitting: 'Cadastrando…',
     success: 'Pronto! A nota de boas-vindas de Dain já está a caminho. Se você já tinha se inscrito antes, não precisa fazer mais nada.',

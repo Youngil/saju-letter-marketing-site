@@ -36,7 +36,8 @@ export const dictionary: MarketingDictionary = {
     resultTitle: 'Un adelanto de tu carta matutina',
     resultFromName: 'Dain',
     resultFromRole: 'Quien escribe tus cartas',
-    resultCta: 'Recibe una carta como esta cada mañana — gratis para empezar',
+    resultCta: 'Recibe una carta como esta cada mañana — gratis para empezar',
+
     tryAgain: 'Probar otra fecha',
     errors: {
       date: 'Por favor ingresa una fecha de nacimiento válida.',
@@ -97,13 +98,13 @@ export const dictionary: MarketingDictionary = {
   leadCapture: {
     title: 'Recibe una nota de Dain',
     subtitle:
-      'Déjanos tu correo y Dain te enviará ahora mismo una breve nota de bienvenida, con una carta matutina de ejemplo. También te avisaremos cuando abra la fortuna de Año Nuevo coreano (a mediados de diciembre, cada año) y cuando salga la app para iPhone.',
+      'Déjanos tu correo y Dain te enviará ahora mismo una breve nota de bienvenida, con una carta matutina de ejemplo. También te avisaremos cuando abra la fortuna de Año Nuevo coreano (a mediados de diciembre, cada año) y cuando puedas recibir tus cartas también en iPhone o en la computadora.',
     demoResultTitle: '¿Quieres recibir las cartas de Dain por correo?',
     demoResultSubtitle:
-      '¿Estás en un iPhone o en la computadora? Deja tu correo y Dain te enviará una nota de bienvenida. Te avisaremos aquí cuando salga la app para iPhone y cuando abra la fortuna de Año Nuevo coreano, a mediados de diciembre.',
+      '¿Estás en un iPhone o en la computadora? Deja tu correo y Dain te enviará una nota de bienvenida. Te avisaremos aquí cuando puedas recibir las cartas en la web y cuando abra la fortuna de Año Nuevo coreano, a mediados de diciembre.',
     emailPlaceholder: 'tu@ejemplo.com',
     emailLabel: 'Correo electrónico',
-    consentLabel: 'Acepto recibir la nota de bienvenida y correos con novedades (fortuna de Año Nuevo coreano, lanzamiento de la app para iPhone). Puedes darte de baja cuando quieras.',
+    consentLabel: 'Acepto recibir la nota de bienvenida y correos con novedades (fortuna de Año Nuevo coreano, lanzamiento de la versión web). Puedes darte de baja cuando quieras.',
     submitButton: 'Enviarme la nota',
     submitting: 'Registrando…',
     success: '¡Listo! La nota de bienvenida de Dain va en camino. Si ya te habías registrado antes, no tienes que hacer nada más.',
