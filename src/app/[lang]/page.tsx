@@ -15,6 +15,7 @@ import { activeContentLanguages, fetchActiveServiceLanguages } from '@/lib/servi
 import { DemoForm } from '@/components/DemoForm';
 import { pickDayTypeResultCopy } from '@/content/dayTypeCopy';
 import { LeadCaptureForm } from '@/components/LeadCaptureForm';
+import { SERVICE_ENDING } from '@/content/serviceEnding';
 import { AppDownloadLinks } from '@/components/AppDownloadLinks';
 import { DainHomeMark } from '@/components/DainHomeMark';
 import { BlogByline, categoryLabelFor } from '@/components/BlogByline';
@@ -101,10 +102,12 @@ export default async function HomePage({ params }: { params: Promise<{ lang: str
               {dict.hero.ctaDemo}
             </a>
           ) : null}
-          <div className="flex flex-col items-center gap-2">
-            <span className="text-xs font-medium uppercase tracking-wide text-foreground/65">{dict.appLinks.sectionLabel}</span>
-            <AppDownloadLinks dict={dict.appLinks} language={lang} context="home_hero" />
-          </div>
+          {SERVICE_ENDING ? null : (
+            <div className="flex flex-col items-center gap-2">
+              <span className="text-xs font-medium uppercase tracking-wide text-foreground/65">{dict.appLinks.sectionLabel}</span>
+              <AppDownloadLinks dict={dict.appLinks} language={lang} context="home_hero" />
+            </div>
+          )}
           {showContentLinks ? (
             <p className="max-w-md text-sm text-foreground/55">
               {dict.hero.compareHint}{' '}
@@ -179,7 +182,7 @@ export default async function HomePage({ params }: { params: Promise<{ lang: str
           코드 3단 리팩터링)가 끝나고 실제 서비스 출시 주간에 들어서면서 다시 켰다.
           showContentLinks 게이트 안에서만 렌더한다 — 데모 폼과 같은 이유(pt/vi는 개인화
           콘텐츠 서비스 대상이 아님)로 이 폼도 4개 언어로 제한한다. */}
-      {showContentLinks ? (
+      {showContentLinks && !SERVICE_ENDING ? (
         <section className="mx-auto w-full max-w-md">
           <LeadCaptureForm language={lang} dict={dict.leadCapture} />
         </section>

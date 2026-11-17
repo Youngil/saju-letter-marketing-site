@@ -9,8 +9,10 @@ import {
   type MarketingLanguage,
 } from '@/lib/languages';
 import { LunarNewYearHome } from '@/components/lunar-new-year/LunarNewYearHome';
-import { WEB_BASE_URL, languageAlternates, buildSocialMetadata } from '@/lib/seo';
+import { WEB_BASE_URL, languageAlternates, buildSocialMetadata, NOINDEX_ROBOTS } from '@/lib/seo';
 import { isBuildPhase } from '@/lib/buildPhase';
+import { SERVICE_ENDING } from '@/content/serviceEnding';
+import { ServiceEndedNotice } from '@/components/lunar-new-year/ServiceEndedNotice';
 
 /**
  * **2026-09-08 3차 종합 버그 점검(항목 1)으로 `MARKETING_LANGUAGES`(6)로 되돌렸다** — 2026-09-07
@@ -36,6 +38,8 @@ export async function generateMetadata({ params }: { params: Promise<{ lang: str
   const { active, default: activeDefault } = await fetchActiveServiceLanguages();
 
   return {
+    // 서비스 종료 안내 기간엔 캠페인을 열지 않으므로 검색에 남기지 않는다(content/serviceEnding.ts).
+    ...(SERVICE_ENDING ? { robots: NOINDEX_ROBOTS } : {}),
     title: dict.lunarNewYear.landing.title,
     description: dict.lunarNewYear.landing.subtitle,
     alternates: {
@@ -69,6 +73,10 @@ export default async function LunarNewYearPage({ params }: { params: Promise<{ l
   // 새 결과를 만드는 랜딩은 지금 서비스 중인 언어만 연다(2026-10-06) — 백엔드는 활성 언어로만 결과를 만들어,
   // 비활성 언어(pt/vi) 방문자는 폼을 끝까지 채운 뒤 400을 받았다. 기존 결과·수신거부 링크(r/[id], unsubscribe)는
   // 6개 언어 그대로 둔다. `active`는 6개 축 원본이라 관리자가 pt/vi를 켜면 바로 열린다(2026-10-06 전체 점검 3차).
+  // 서비스 종료 확정(2026-11-17, 종료일 2026-12-18) — 백엔드 기간 계산으로는 12-15에 열리지만, 기간과 상관없이 폼 대신 종료 안내만.
+  // 활성 언어 확인보다 먼저 — 어느 언어로 와도 그 언어로 안내한다. 이미 만든 결과(r/[id])·수신거부는 그대로.
+  if (SERVICE_ENDING) return <ServiceEndedNotice language={language} brand={dict.brand} />;
+
   const { active, default: defaultLanguage } = await fetchActiveServiceLanguages();
   if (!active.includes(language)) redirect(`/${defaultLanguage}/lunar-new-year`);
 

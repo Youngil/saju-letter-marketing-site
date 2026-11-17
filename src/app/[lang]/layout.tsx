@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { ServiceEndingBanner } from '@/components/ServiceEndingBanner';
 import Image from 'next/image';
 import type { Metadata } from 'next';
 import { Lora } from 'next/font/google';
@@ -123,6 +124,7 @@ export default async function LangLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd(dict.brand)) }}
         />
+        <ServiceEndingBanner language={lang} brand={dict.brand} />
         <header className="sticky top-0 z-10 border-b border-foreground/10 bg-background/85 backdrop-blur-md">
           <div className="mx-auto flex max-w-5xl items-center justify-between gap-2 px-4 py-4">
             {/* 로고는 홈(`[lang]/page.tsx`)으로 링크하는데, 홈은 콘텐츠 축(LAUNCH_CONTENT_LANGUAGES,

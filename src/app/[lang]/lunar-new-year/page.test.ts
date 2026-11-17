@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { isValidElement, type ReactElement, type ReactNode } from 'react';
 
 class NotFoundSentinel extends Error {}
@@ -15,6 +15,18 @@ vi.mock('next/navigation', () => ({
 vi.mock('@/lib/serviceLanguagesApi', () => ({
   fetchActiveServiceLanguages: vi.fn(async () => ({ active: ['ko', 'en', 'ja', 'es'], default: 'en' })),
 }));
+// 서비스 종료 안내(2026-11-17, content/serviceEnding.ts) — 기존 캠페인 테스트는 표시를 끈 상태(false)로 그대로 검사하고,
+// 맨 아래 describe만 켠다(SERVICE_ENDING을 다시 false로 돌리면 예전 동작이 그대로 살아 있어야 한다).
+const serviceEnding = vi.hoisted(() => ({ on: false }));
+vi.mock('@/content/serviceEnding', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/content/serviceEnding')>();
+  return {
+    ...actual,
+    get SERVICE_ENDING() {
+      return serviceEnding.on;
+    },
+  };
+});
 vi.mock('@/lib/lunarNewYearApi', () => ({
   getCampaignWindow: vi.fn(async () => ({ active: true })),
 }));
@@ -115,3 +127,48 @@ function findElements(node: ReactNode, type: unknown): ReactElement[] {
   const children = (node.props as { children?: ReactNode }).children;
   return [...own, ...findElements(children, type)];
 }
+
+describe('/[lang]/lunar-new-year 서비스 종료 안내(2026-11-17 — 종료일 2026-12-18)', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+  afterEach(() => {
+    serviceEnding.on = false;
+  });
+
+  it.each(['ko', 'en', 'ja', 'es', 'pt', 'vi'] as const)(
+    '%s 랜딩은 기간 조회·언어 확인 없이 종료 안내만 그린다(12-15 자동 오픈 막기)',
+    async (lang) => {
+      serviceEnding.on = true;
+      const { getCampaignWindow } = await import('@/lib/lunarNewYearApi');
+      const { fetchActiveServiceLanguages } = await import('@/lib/serviceLanguagesApi');
+      const { ServiceEndedNotice } = await import('@/components/lunar-new-year/ServiceEndedNotice');
+      const { default: LunarNewYearPage } = await import('./page');
+      const tree = (await LunarNewYearPage({ params: Promise.resolve({ lang }) })) as ReactElement<{ language: string }>;
+      expect(isValidElement(tree)).toBe(true);
+      expect(tree.type).toBe(ServiceEndedNotice);
+      expect(tree.props.language).toBe(lang);
+      expect(getCampaignWindow).not.toHaveBeenCalled();
+      expect(fetchActiveServiceLanguages).not.toHaveBeenCalled();
+    },
+  );
+
+  it('종료 안내 기간엔 검색에 남기지 않는다(noindex)', async () => {
+    serviceEnding.on = true;
+    const { NOINDEX_ROBOTS } = await import('@/lib/seo');
+    const { generateMetadata } = await import('./page');
+    const metadata = await generateMetadata({ params: Promise.resolve({ lang: 'ko' }) });
+    expect(metadata.robots).toEqual(NOINDEX_ROBOTS);
+  });
+
+  it('종료 안내 문구는 6개 언어 모두 있고 문의 메일을 채운다', async () => {
+    const { SERVICE_ENDING_COPY, serviceEndingText, SERVICE_END_CONTACT } = await import('@/content/serviceEnding');
+    for (const lang of ['ko', 'en', 'ja', 'es', 'pt', 'vi'] as const) {
+      const copy = SERVICE_ENDING_COPY[lang];
+      expect(copy.banner).toContain('{brand}');
+      const body = serviceEndingText(copy.newYearBody, 'B');
+      expect(body).toContain(SERVICE_END_CONTACT);
+      expect(body).not.toMatch(/\{(brand|contact)\}/);
+    }
+  });
+});

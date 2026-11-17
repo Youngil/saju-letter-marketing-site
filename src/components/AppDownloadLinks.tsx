@@ -5,6 +5,7 @@ import { ANDROID_APP_LIVE, IOS_APP_LIVE, GOOGLE_PLAY_URL, APP_STORE_URL } from '
 import { trackEvent } from '@/lib/analytics';
 import { buildPlayStoreUrl, readStoredTouch } from '@/lib/attribution';
 import type { MarketingLanguage } from '@/lib/languages';
+import { SERVICE_ENDING } from '@/content/serviceEnding';
 
 export interface AppDownloadLinksDict {
   androidCta: string;
@@ -153,6 +154,9 @@ export function AppDownloadLinks({
    */
   context?: string;
 }) {
+  // 서비스 종료 안내 기간(2026-11-17~) — Play 앱은 게시 중단, 구독은 비활성이라 설치로 보내지 않는다(content/serviceEnding.ts).
+  if (SERVICE_ENDING) return null;
+
   function handleClick(platform: 'android' | 'ios', existing?: () => void) {
     return () => {
       if (context) trackEvent('install_cta_click', { context, platform });

@@ -12,6 +12,7 @@ import { getDemoReading, type DemoReadingResponse } from '@/lib/api';
 import { Turnstile, TURNSTILE_ENABLED, type TurnstileHandle } from './Turnstile';
 import { AppDownloadLinks } from './AppDownloadLinks';
 import { LeadCaptureForm } from './LeadCaptureForm';
+import { SERVICE_ENDING } from '@/content/serviceEnding';
 import { Postmark } from './Postmark';
 import { trackEvent } from '@/lib/analytics';
 import { isValidBirthDate } from '@/lib/birthDate';
@@ -164,17 +165,20 @@ export function DemoForm({
         </article>
         <p className="text-center text-xs text-foreground/65">{disclaimerShort}</p>
         <div className="flex flex-col items-center gap-3">
-          <p className="text-center text-sm font-medium text-foreground/70">{dict.resultCta}</p>
+          {SERVICE_ENDING ? null : <p className="text-center text-sm font-medium text-foreground/70">{dict.resultCta}</p>}
           <AppDownloadLinks dict={appLinksDict} language={language} emphasized context="demo_result" />
         </div>
         {/* 앱이 아직 안드로이드뿐이라(iOS는 "출시 준비 중") 아이폰·데스크톱 방문자는 결과를 보고 갈 곳이 없었다(2026-10-10 전체
             점검 14차). 홈 아래와 같은 리드 등록(백엔드 엔드포인트 동일)을 결과 바로 아래에 — iOS 출시 알림도 이 메일로 간다고 말한다. */}
-        <LeadCaptureForm
-          language={language}
-          dict={leadDict}
-          context="demo_result"
-          heading={{ title: leadDict.demoResultTitle, subtitle: leadDict.demoResultSubtitle }}
-        />
+        {/* 서비스 종료 안내 기간엔 보낼 소식이 없어 등록 폼을 그리지 않는다(content/serviceEnding.ts). */}
+        {SERVICE_ENDING ? null : (
+          <LeadCaptureForm
+            language={language}
+            dict={leadDict}
+            context="demo_result"
+            heading={{ title: leadDict.demoResultTitle, subtitle: leadDict.demoResultSubtitle }}
+          />
+        )}
         <button
           type="button"
           onClick={() => {
